@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SnoahAI</title>
+    <!-- PWA -->
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlNub2FoQUkiLAogICJzaG9ydF9uYW1lIjogIlNub2FoQUkiLAogICJkZXNjcmlwdGlvbiI6ICJBSSBjaGF0IGFzc2lzdGFudCBieSBPZ05vdmFoIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRkFGOUY2IiwKICAidGhlbWVfY29sb3IiOiAiI0QyNUQzOCIsCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0LXByaW1hcnkiLAogICJpY29ucyI6IFsKICAgIHsic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0ExTVRJZ05URXlJaUIzYVdSMGFEMGlOVEV5SWlCb1pXbG5hSFE5SWpVeE1pSStDaUFnUEhKbFkzUWdkMmxrZEdnOUlqVXhNaUlnYUdWcFoyaDBQU0kxTVRJaUlISjRQU0l4TVRBaUlHWnBiR3c5SWlORU1qVkVNemdpTHo0S0lDQThjR0YwYUNCa1BTSk5NalUySURFeU1DQkRNVFUySURFeU1DQTNOaUF4T0RnZ056WWdNamN5SUVNM05pQXpNVFlnTVRBd0lETTFOaUF4TXpnZ016Z3lJRXd4TWpRZ05ETXlJRXd4T0RJZ05EQTBJRU15TURZZ05ERXlJREl6TUNBME1UWWdNalUySURReE5pQkRNelUySURReE5pQTBNellnTXpRNElEUXpOaUF5TmpRZ1F6UXpOaUF4T0RBZ016VTJJREV5TUNBeU5UWWdNVEl3V2lJZ1ptbHNiRDBpZDJocGRHVWlJRzl3WVdOcGRIazlJakF1T1RVaUx6NEtJQ0E4WTJseVkyeGxJR040UFNJeE56WWlJR041UFNJeU5qZ2lJSEk5SWpJeUlpQm1hV3hzUFNJalJESTFSRE00SWk4K0NpQWdQR05wY21Oc1pTQmplRDBpTWpVMklpQmplVDBpTWpZNElpQnlQU0l5TWlJZ1ptbHNiRDBpSTBReU5VUXpPQ0l2UGdvZ0lEeGphWEpqYkdVZ1kzZzlJak16TmlJZ1kzazlJakkyT0NJZ2NqMGlNaklpSUdacGJHdzlJaU5FTWpWRU16Z2lMejRLUEM5emRtYysiLCAic2l6ZXMiOiAiNTEyeDUxMiIsICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLCAicHVycG9zZSI6ICJhbnkgbWFza2FibGUifQogIF0KfQ==">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SnoahAI">
+    <meta name="theme-color" content="#D25D38">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiI+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTAiIGZpbGw9IiNEMjVEMzgiLz4KICA8cGF0aCBkPSJNMjU2IDEyMCBDMTU2IDEyMCA3NiAxODggNzYgMjcyIEM3NiAzMTYgMTAwIDM1NiAxMzggMzgyIEwxMjQgNDMyIEwxODIgNDA0IEMyMDYgNDEyIDIzMCA0MTYgMjU2IDQxNiBDMzU2IDQxNiA0MzYgMzQ4IDQzNiAyNjQgQzQzNiAxODAgMzU2IDEyMCAyNTYgMTIwWiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOTUiLz4KICA8Y2lyY2xlIGN4PSIxNzYiIGN5PSIyNjgiIHI9IjIyIiBmaWxsPSIjRDI1RDM4Ii8+CiAgPGNpcmNsZSBjeD0iMjU2IiBjeT0iMjY4IiByPSIyMiIgZmlsbD0iI0QyNUQzOCIvPgogIDxjaXJjbGUgY3g9IjMzNiIgY3k9IjI2OCIgcj0iMjIiIGZpbGw9IiNEMjVEMzgiLz4KPC9zdmc+">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons (pinned version for reliable loading) -->
@@ -289,6 +297,19 @@
         .theme-rose   { --accent:#C4396B; --accent-light:#FDE8F0; --bg:#FBF4F6; --surface:#FFFFFF; --border:#F0C8D8; }
     </style>
 </head>
+<div id="pwa-banner" class="hidden fixed top-0 left-0 right-0 z-[9999] bg-[#D25D38] text-white px-4 py-2.5 flex items-center justify-between shadow-lg">
+        <div class="flex items-center gap-2.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="white" opacity="0.2"/><path d="M256 120 C156 120 76 188 76 272 C76 316 100 356 138 382 L124 432 L182 404 C206 412 230 416 256 416 C356 416 436 348 436 264 C436 180 356 120 256 120Z" fill="white" opacity="0.95"/></svg>
+            <div>
+                <div class="text-[13px] font-bold leading-tight">Install SnoahAI</div>
+                <div class="text-[11px] opacity-80">Add to home screen for best experience</div>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="installPWA()" class="bg-white text-[#D25D38] text-[12px] font-bold px-3 py-1.5 rounded-lg">Install</button>
+            <button onclick="dismissPWA()" class="text-white opacity-70 text-[20px] leading-none px-1">&times;</button>
+        </div>
+    </div>
 <body class="bg-[#EAE8E0] min-h-screen flex items-center justify-center font-sans sm:p-4 selection:bg-[#D25D38] selection:text-white relative overflow-hidden text-[#2C2B29]">
 
     <!-- App Container -->
@@ -328,16 +349,17 @@
                     <!-- Platform Switcher -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Platform</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button id="plat-gemini" onclick="selectPlatform('gemini')" class="py-2.5 rounded-xl border-2 text-[12px] font-semibold transition-all border-[#D25D38] bg-[#FDF4F2] text-[#D25D38]">
-                                 Gemini
-                            </button>
-                            <button id="plat-openrouter" onclick="selectPlatform('openrouter')" class="py-2.5 rounded-xl border-2 text-[12px] font-semibold transition-all border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">
-                                 OpenRouter
-                            </button>
-                            <button id="plat-groq" onclick="selectPlatform('groq')" class="py-2.5 rounded-xl border-2 text-[12px] font-semibold transition-all border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">
-                                 Groq
-                            </button>
+                        <div class="relative">
+                            <select id="platform-select" onchange="selectPlatform(this.value)" class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
+                                <option value="gemini">Gemini</option>
+                                <option value="openrouter">OpenRouter</option>
+                                <option value="groq">Groq</option>
+                                <option value="together">Together AI</option>
+                                <option value="mistral">Mistral AI</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                            </div>
                         </div>
                     </div>
 
@@ -704,11 +726,11 @@
         // --- State ---
         let platform = localStorage.getItem('snoah_platform') || 'gemini';
         // Key pools — auto-rotate on rate limit
-        let geminiKeys = JSON.parse(localStorage.getItem('snoah_gemini_keys') || '["AIzaSyBzTYgjLXnqNMIvY4fT3HHn9No4GipbTIY"]');
+        let geminiKeys = JSON.parse(localStorage.getItem('snoah_gemini_keys') || '[]');
         let geminiKeyIdx = 0;
         let apiKey = geminiKeys[0]; // kept for compat
         let modelId = localStorage.getItem('snoah_model') || 'gemini-2.5-flash';
-        let orKeys = JSON.parse(localStorage.getItem('snoah_or_keys') || '["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"]');
+        let orKeys = JSON.parse(localStorage.getItem('snoah_or_keys') || '[]');
         let orKeyIdx = 0;
         let orApiKey = orKeys[0];
         let orModelId = localStorage.getItem('snoah_or_model') || 'z-ai/glm-4.5-air:free';
@@ -716,6 +738,14 @@
         let groqKeyIdx = 0;
         let groqApiKey = groqKeys[0] || '';
         let groqModelId = localStorage.getItem('snoah_groq_model') || 'llama-3.3-70b-versatile';
+        let togetherKeys = JSON.parse(localStorage.getItem('snoah_together_keys') || '[]');
+        let togetherKeyIdx = 0;
+        let togetherApiKey = togetherKeys[0] || '';
+        let togetherModelId = localStorage.getItem('snoah_together_model') || 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free';
+        let mistralKeys = JSON.parse(localStorage.getItem('snoah_mistral_keys') || '[]');
+        let mistralKeyIdx = 0;
+        let mistralApiKey = mistralKeys[0] || '';
+        let mistralModelId = localStorage.getItem('snoah_mistral_model') || 'mistral-small-latest';
         let customInstructions = localStorage.getItem('snoah_instructions') || '';
         let uploadedImage = null; // { data, mimeType, previewUrl }
         let messages = [];
@@ -886,6 +916,10 @@
                     ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FDF4F2] text-[#D25D38] border border-[#F8E3DE]"
                     : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
             } else if (feature === 'agent') {
+                if (platform === 'groq' || platform === 'together' || platform === 'mistral') {
+                    showToast('⚠️ Web search is Gemini only. Switch to Gemini to use it.');
+                    return;
+                }
                 useAgent = !useAgent;
                 btnAgent.className = useAgent
                     ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#E8F0FE] text-[#1967D2] border border-[#D2E3FC]"
@@ -1036,8 +1070,8 @@
         function updateModelLabels() {
             const badge = document.getElementById('header-model-badge');
             const sidebarLabel = document.getElementById('sidebar-model-label');
-            const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : 'Gemini';
-            const activeModel = platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : modelId;
+            const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : platform === 'together' ? 'Together AI' : platform === 'mistral' ? 'Mistral AI' : 'Gemini';
+            const activeModel = platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : modelId;
             if (badge) badge.textContent = 'NOVAH GEM';
             if (sidebarLabel) sidebarLabel.textContent = platLabel + ' · ' + activeModel;
         }
@@ -1045,10 +1079,16 @@
         // --- Settings ---
 
         function openSettings() {
+            const pSel = document.getElementById('platform-select');
+            if (pSel) pSel.value = platform;
             if (platform === 'openrouter') {
                 document.getElementById('settings-model').value = orModelId;
             } else if (platform === 'groq') {
                 document.getElementById('settings-model').value = groqModelId;
+            } else if (platform === 'together') {
+                document.getElementById('settings-model').value = togetherModelId;
+            } else if (platform === 'mistral') {
+                document.getElementById('settings-model').value = mistralModelId;
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
@@ -1080,6 +1120,14 @@
                 if (newModel) groqModelId = newModel;
                 localStorage.setItem('snoah_groq_model', groqModelId);
                 localStorage.setItem('snoah_groq_keys', JSON.stringify(groqKeys));
+            } else if (platform === 'together') {
+                if (newModel) togetherModelId = newModel;
+                localStorage.setItem('snoah_together_model', togetherModelId);
+                localStorage.setItem('snoah_together_keys', JSON.stringify(togetherKeys));
+            } else if (platform === 'mistral') {
+                if (newModel) mistralModelId = newModel;
+                localStorage.setItem('snoah_mistral_model', mistralModelId);
+                localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys));
             } else {
                 if (newModel) modelId = newModel;
                 localStorage.setItem('snoah_model', modelId);
@@ -1104,6 +1152,10 @@
                 document.getElementById('settings-model').value = orModelId;
             } else if (p === 'groq') {
                 document.getElementById('settings-model').value = groqModelId;
+            } else if (p === 'together') {
+                document.getElementById('settings-model').value = togetherModelId;
+            } else if (p === 'mistral') {
+                document.getElementById('settings-model').value = mistralModelId;
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
@@ -1114,35 +1166,51 @@
         function updatePlatformUI() {
             const isOR = platform === 'openrouter';
             const isGQ = platform === 'groq';
-            const isGM = platform === 'gemini';
-            const gBtn = document.getElementById('plat-gemini');
-            const oBtn = document.getElementById('plat-openrouter');
-            const qBtn = document.getElementById('plat-groq');
+            const isTG = platform === 'together';
+            const isMT = platform === 'mistral';
+            const noWeb = isGQ || isTG || isMT;
             const hint = document.getElementById('apikey-hint');
             const mhint = document.getElementById('model-hint');
             const lbl = document.getElementById('apikey-label');
-            const BASE = 'py-2.5 rounded-xl border-2 text-[12px] font-semibold transition-all';
-            if (gBtn) gBtn.className = BASE + (isGM ? ' border-[#D25D38] bg-[#FDF4F2] text-[#D25D38]' : ' border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]');
-            if (oBtn) oBtn.className = BASE + (isOR ? ' border-[#7C3AED] bg-[#F5F3FF] text-[#7C3AED]' : ' border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]');
-            if (qBtn) qBtn.className = BASE + (isGQ ? ' border-[#F97316] bg-[#FFF7ED] text-[#F97316]' : ' border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]');
-            if (lbl) lbl.textContent = isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : 'Gemini API Key';
+            const pSel = document.getElementById('platform-select');
+            if (pSel) pSel.value = platform;
+            // Disable Web button on non-Gemini/OpenRouter platforms
+            if (btnAgent) {
+                if (noWeb) {
+                    if (useAgent) { useAgent = false; btnAgent.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]'; }
+                    btnAgent.style.opacity = '0.4';
+                    btnAgent.style.pointerEvents = 'none';
+                } else {
+                    btnAgent.style.opacity = '';
+                    btnAgent.style.pointerEvents = '';
+                }
+            }
+            if (lbl) lbl.textContent = isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : isTG ? 'Together AI API Key' : isMT ? 'Mistral AI API Key' : 'Gemini API Key';
             if (hint) hint.innerHTML = isOR
-                ? 'Get your key at <span class="text-[#7C3AED]">openrouter.ai/keys</span>'
+                ? 'Get your key at <a href="https://openrouter.ai/keys" target="_blank" class="underline">openrouter.ai/keys</a>'
                 : isGQ
-                ? 'Get your key at <span class="text-[#F97316]">console.groq.com</span>'
-                : 'Get your key at <span class="text-[#D25D38]">aistudio.google.com</span>';
+                ? 'Get your key at <a href="https://console.groq.com" target="_blank" class="underline">console.groq.com</a>'
+                : isTG
+                ? 'Get your key at <a href="https://api.together.ai" target="_blank" class="underline">api.together.ai</a>'
+                : isMT
+                ? 'Get your key at <a href="https://console.mistral.ai" target="_blank" class="underline">console.mistral.ai</a> (free, phone verify only)'
+                : 'Get your key at <a href="https://aistudio.google.com" target="_blank" class="underline">aistudio.google.com</a>';
             if (mhint) mhint.innerHTML = isOR
                 ? 'Default: <span class="font-mono text-[#5B5951]">z-ai/glm-4.5-air:free</span>'
                 : isGQ
-                ? 'Default: <span class="font-mono text-[#5B5951]">llama-3.3-70b-versatile</span> · <span class="font-mono text-[#5B5951]">llama-3.1-8b-instant</span>'
+                ? 'Default: <span class="font-mono text-[#5B5951]">llama-3.3-70b-versatile</span>'
+                : isTG
+                ? 'Default: <span class="font-mono text-[#5B5951]">meta-llama/Llama-3.3-70B-Instruct-Turbo-Free</span>'
+                : isMT
+                ? 'Default: <span class="font-mono text-[#5B5951]">mistral-small-latest</span> · also: <span class="font-mono text-[#5B5951]">open-mistral-7b</span>'
                 : 'Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> · <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span>';
         }
 
         function renderKeysList() {
             const list = document.getElementById('keys-list');
             if (!list) return;
-            const keys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : geminiKeys;
-            const activeIdx = platform === 'openrouter' ? orKeyIdx : platform === 'groq' ? groqKeyIdx : geminiKeyIdx;
+            const keys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : geminiKeys;
+            const activeIdx = platform === 'openrouter' ? orKeyIdx : platform === 'groq' ? groqKeyIdx : platform === 'together' ? togetherKeyIdx : platform === 'mistral' ? mistralKeyIdx : geminiKeyIdx;
             if (!keys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
             list.innerHTML = keys.map((k, i) =>
                 '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
@@ -1164,13 +1232,19 @@
             } else if (platform === 'groq') {
                 if (groqKeys.includes(key)) { showToast('Key already added'); return; }
                 groqKeys.push(key); localStorage.setItem('snoah_groq_keys', JSON.stringify(groqKeys)); groqApiKey = groqKeys[groqKeyIdx];
+            } else if (platform === 'together') {
+                if (togetherKeys.includes(key)) { showToast('Key already added'); return; }
+                togetherKeys.push(key); localStorage.setItem('snoah_together_keys', JSON.stringify(togetherKeys)); togetherApiKey = togetherKeys[togetherKeyIdx];
+            } else if (platform === 'mistral') {
+                if (mistralKeys.includes(key)) { showToast('Key already added'); return; }
+                mistralKeys.push(key); localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys)); mistralApiKey = mistralKeys[mistralKeyIdx];
             } else {
                 if (geminiKeys.includes(key)) { showToast('Key already added'); return; }
                 geminiKeys.push(key); localStorage.setItem('snoah_gemini_keys', JSON.stringify(geminiKeys)); apiKey = geminiKeys[geminiKeyIdx];
             }
             input.value = '';
             renderKeysList();
-            const kCount = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : geminiKeys.length;
+            const kCount = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : geminiKeys.length;
             showToast('Key added ✓ (' + kCount + ' total)');
         }
 
@@ -1183,6 +1257,14 @@
                 if (groqKeys.length <= 1) { showToast('Need at least 1 key'); return; }
                 groqKeys.splice(idx, 1); groqKeyIdx = Math.min(groqKeyIdx, groqKeys.length-1); groqApiKey = groqKeys[groqKeyIdx];
                 localStorage.setItem('snoah_groq_keys', JSON.stringify(groqKeys));
+            } else if (platform === 'together') {
+                if (togetherKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                togetherKeys.splice(idx, 1); togetherKeyIdx = Math.min(togetherKeyIdx, togetherKeys.length-1); togetherApiKey = togetherKeys[togetherKeyIdx];
+                localStorage.setItem('snoah_together_keys', JSON.stringify(togetherKeys));
+            } else if (platform === 'mistral') {
+                if (mistralKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                mistralKeys.splice(idx, 1); mistralKeyIdx = Math.min(mistralKeyIdx, mistralKeys.length-1); mistralApiKey = mistralKeys[mistralKeyIdx];
+                localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys));
             } else {
                 if (geminiKeys.length <= 1) { showToast('Need at least 1 key'); return; }
                 geminiKeys.splice(idx, 1); geminiKeyIdx = Math.min(geminiKeyIdx, geminiKeys.length-1); apiKey = geminiKeys[geminiKeyIdx];
@@ -1198,6 +1280,12 @@
             } else if (platform === 'groq') {
                 if (groqKeys.length <= 1) return false;
                 groqKeyIdx = (groqKeyIdx + 1) % groqKeys.length; groqApiKey = groqKeys[groqKeyIdx]; return true;
+            } else if (platform === 'together') {
+                if (togetherKeys.length <= 1) return false;
+                togetherKeyIdx = (togetherKeyIdx + 1) % togetherKeys.length; togetherApiKey = togetherKeys[togetherKeyIdx]; return true;
+            } else if (platform === 'mistral') {
+                if (mistralKeys.length <= 1) return false;
+                mistralKeyIdx = (mistralKeyIdx + 1) % mistralKeys.length; mistralApiKey = mistralKeys[mistralKeyIdx]; return true;
             } else {
                 if (geminiKeys.length <= 1) return false;
                 geminiKeyIdx = (geminiKeyIdx + 1) % geminiKeys.length; apiKey = geminiKeys[geminiKeyIdx]; return true;
@@ -2127,7 +2215,9 @@ APP OVERVIEW:
 
 PLATFORMS & MODELS:
 - Google Gemini (via Google AI Studio): default platform, supports gemini-2.5-flash, gemini-2.5-pro, gemini-1.5-pro etc.
-- OpenRouter: alternative platform supporting models like z-ai/glm-4.5-air:free and hundreds more
+- OpenRouter: alternative platform supporting hundreds of models, many free ones
+- Groq: ultra-fast inference, free LLaMA and Gemma models
+- Together AI: open-source models, free -Free suffix models available
 - Switch between platforms in Settings → Platform buttons (🔵 Gemini / 🟣 OpenRouter)
 - Multiple API keys can be added per platform; app auto-rotates keys silently when rate limit is hit
 
@@ -2169,8 +2259,14 @@ Always answer questions about the app based on the above. If asked "what can you
 
 FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ display: $$...$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. ` + lengthDirective;
                 if (useThinking) systemInstruction += "The user has enabled THINKING MODE. Wrap your detailed step-by-step internal reasoning inside <think> and </think> tags at the very beginning of your response, then give the final answer. ";
+                if (platform === 'mistral') {
+                    systemInstruction += 'You are running on Mistral AI. You do NOT have tools or web search. Answer from training knowledge only. ';
+                }
+                if (platform === 'together') {
+                    systemInstruction += 'You are running on Together AI (fast open-source model inference). You do NOT have any tools, plugins, or web search capability. Do NOT attempt to call any functions or tools. Answer entirely from your training knowledge. ';
+                }
                 if (platform === 'groq') {
-                    systemInstruction += 'You are running on Groq (ultra-fast LLM inference). Web search is not available on this platform. ';
+                    systemInstruction += 'You are running on Groq (ultra-fast LLM inference). You do NOT have any tools, plugins, or web search capability. Do NOT attempt to call any functions or tools. Do NOT output tool call syntax. Answer entirely from your training knowledge. If you cannot answer something without real-time data, say so clearly and suggest the user switch to Gemini with Web search enabled. ';
                 }
                 if (useAgent) {
                     const now = new Date();
@@ -2278,7 +2374,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 }
                 rafId = requestAnimationFrame(rafRender);
 
-                const totalKeys = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : geminiKeys.length;
+                const totalKeys = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : geminiKeys.length;
                 let attempts = 0;
                 while (attempts <= totalKeys) {
                     try {
@@ -2319,14 +2415,16 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             }
                         }
 
-                        if (platform === 'openrouter' || platform === 'groq') {
+                        if (platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral') {
                             const isGroq = platform === 'groq';
+                            const isTogether = platform === 'together';
+                            const isMistral = platform === 'mistral';
                             const chatMessages = [{ role: 'system', content: systemInstruction }];
                             for (const msg of messages) {
                                 if (msg.isError) continue;
                                 const role = msg.role === 'user' ? 'user' : 'assistant';
                                 const content = msg.originalText || msg.text || '';
-                                if (msg.images && msg.images.length > 0 && msg === messages[messages.length - 1] && !isGroq) {
+                                if (msg.images && msg.images.length > 0 && msg === messages[messages.length - 1] && !isGroq && !isTogether && !isMistral) {
                                     const imgParts = msg.images.map(img => ({ type: 'image_url', image_url: { url: 'data:' + img.mimeType + ';base64,' + img.data } }));
                                     if (content) imgParts.push({ type: 'text', text: content });
                                     chatMessages.push({ role, content: imgParts });
@@ -2336,10 +2434,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             }
                             const chatUrl = isGroq
                                 ? 'https://api.groq.com/openai/v1/chat/completions'
+                                : isTogether
+                                ? 'https://api.together.xyz/v1/chat/completions'
+                                : isMistral
+                                ? 'https://api.mistral.ai/v1/chat/completions'
                                 : 'https://openrouter.ai/api/v1/chat/completions';
-                            const chatKey = isGroq ? groqApiKey : orApiKey;
-                            const chatModel = isGroq ? groqModelId : orModelId;
-                            const chatHeaders = isGroq
+                            const chatKey = isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : orApiKey;
+                            const chatModel = isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : orModelId;
+                            const chatHeaders = (isGroq || isTogether || isMistral)
                                 ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey }
                                 : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey, 'HTTP-Referer': 'https://snoah.ai', 'X-Title': 'SnoahAI' };
                             abortController = new AbortController();
@@ -2375,8 +2477,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                 throw new Error('HTTP ' + res.status + ': ' + await res.text());
                             }
                             if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
-                            if (platform === 'groq') {
-                    systemInstruction += 'You are running on Groq (ultra-fast LLM inference). Web search is not available on this platform. ';
+                            if (platform === 'mistral') {
+                    systemInstruction += 'You are running on Mistral AI. You do NOT have tools or web search. Answer from training knowledge only. ';
+                }
+                if (platform === 'together') {
+                    systemInstruction += 'You are running on Together AI (fast open-source model inference). You do NOT have any tools, plugins, or web search capability. Do NOT attempt to call any functions or tools. Answer entirely from your training knowledge. ';
+                }
+                if (platform === 'groq') {
+                    systemInstruction += 'You are running on Groq (ultra-fast LLM inference). You do NOT have any tools, plugins, or web search capability. Do NOT attempt to call any functions or tools. Do NOT output tool call syntax. Answer entirely from your training knowledge. If you cannot answer something without real-time data, say so clearly and suggest the user switch to Gemini with Web search enabled. ';
                 }
                 if (useAgent) {
                                 // Web search: fetch non-streaming (grounding requires it)
@@ -2536,12 +2644,25 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 }
                 console.error("API Error:", error);
                 let errText = error.message || 'Unknown error';
+                let httpStatus = 0;
                 try {
-                    const m = errText.match(/HTTP \d+: (.*)/);
-                    if (m) { const body = JSON.parse(m[1]); errText = body?.error?.message || errText; }
+                    const m = errText.match(/HTTP (\d+): (.*)/);
+                    if (m) {
+                        httpStatus = parseInt(m[1]);
+                        const body = JSON.parse(m[2]);
+                        errText = body?.error?.message || body?.message || errText;
+                    }
                 } catch(e) {}
-                const isRateLimit = /quota|rate.?limit|429/i.test(errText);
-                const displayErr = isRateLimit ? '⚠️ Rate limit reached. Wait a moment then try again.' : 'Error: ' + errText.substring(0, 120);
+                const isRateLimit = /quota|rate.?limit|429/i.test(errText) || httpStatus === 429;
+                const isCredit = /credit|billing|payment|insufficient|balance/i.test(errText) || httpStatus === 402;
+                const isAuth = /api.?key|unauthorized|invalid.?key|authentication/i.test(errText) || httpStatus === 401;
+                const displayErr = isRateLimit
+                    ? '⚠️ Rate limit reached. Wait a moment or add more API keys in Settings.'
+                    : isCredit
+                    ? '⚠️ Credit limit exceeded. Use a -Free model (e.g. Llama-3.3-70B-Instruct-Turbo-Free). Check your account at api.together.ai'
+                    : isAuth
+                    ? '⚠️ Invalid API key. Go to Settings and check your key for ' + (platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : 'Gemini (aistudio.google.com)') + '.'
+                    : '⚠️ ' + errText.substring(0, 140);
                 const errDiv = document.createElement('div');
                 errDiv.className = "flex w-full justify-start animate-slide-up";
                 errDiv.innerHTML = '<div class="text-[#D25D38] bg-[#FDF4F2] px-4 py-3 rounded-xl border border-[#F8E3DE] text-[15px] max-w-[95%]">' + escapeHTML(displayErr) + '</div>';
@@ -2827,6 +2948,55 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
             chatInput.focus();
         }
 
+    </script>
+
+    <script>
+    // PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', e => {
+    if (e.request.url.startsWith('chrome-extension')) return;
+    e.respondWith(
+        caches.open('snoah-v1').then(cache =>
+            cache.match(e.request).then(cached => {
+                const net = fetch(e.request).then(res => {
+                    if (e.request.url.startsWith(location.origin) && res.ok) cache.put(e.request, res.clone());
+                    return res;
+                }).catch(() => cached);
+                return cached || net;
+            })
+        )
+    );
+});`;
+        const blob = new Blob([swCode], {type: 'application/javascript'});
+        navigator.serviceWorker.register(URL.createObjectURL(blob));
+    }
+
+    // PWA Install banner
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const banner = document.getElementById('pwa-banner');
+        if (banner) banner.classList.remove('hidden');
+    });
+    window.addEventListener('appinstalled', () => {
+        const banner = document.getElementById('pwa-banner');
+        if (banner) banner.classList.add('hidden');
+        deferredPrompt = null;
+    });
+    function installPWA() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+        }
+    }
+    function dismissPWA() {
+        const banner = document.getElementById('pwa-banner');
+        if (banner) banner.classList.add('hidden');
+    }
     </script>
 </body>
 </html>
