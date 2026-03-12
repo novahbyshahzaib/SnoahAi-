@@ -570,6 +570,11 @@
         <input type="file" id="image-input" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event)">
 
         <!-- ===== BOTTOM INPUT AREA ===== -->
+        <!-- Scroll jump button -->
+        <button id="scroll-jump-btn" onclick="scrollJump()" class="hidden absolute right-3 z-30 w-9 h-9 rounded-full bg-white border border-[#E5E3DB] shadow-md flex items-center justify-center text-[#5B5951] hover:bg-[#F2F0E9] transition-all" style="bottom: 230px;">
+            <svg id="scroll-jump-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+
         <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent pt-12 pb-5 sm:pb-8 px-4 shrink-0 z-20">
             <div class="bg-white input-bg rounded-[24px] shadow-[0_2px_20px_-3px_rgba(0,0,0,0.08),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-[#E5E3DB] overflow-hidden flex flex-col">
                 
@@ -601,7 +606,7 @@
 
                 <!-- Input Box -->
                 <div class="flex items-end gap-2 px-3 pb-3 pt-2 bg-white">
-                    <button class="p-2 mb-0.5 text-[#8C897D] hover:text-[#2C2B29] transition-colors rounded-full hover:bg-[#F2F0E9]">
+                    <button onclick="triggerImageUpload()" title="Attach image" class="p-2 mb-0.5 text-[#8C897D] hover:text-[#D25D38] transition-colors rounded-full hover:bg-[#F2F0E9]">
                         <i data-lucide="plus" class="w-[22px] h-[22px]"></i>
                     </button>
                     
@@ -916,10 +921,7 @@
                     ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FDF4F2] text-[#D25D38] border border-[#F8E3DE]"
                     : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
             } else if (feature === 'agent') {
-                if (platform === 'groq' || platform === 'together' || platform === 'mistral') {
-                    showToast('⚠️ Web search is Gemini only. Switch to Gemini to use it.');
-                    return;
-                }
+
                 useAgent = !useAgent;
                 btnAgent.className = useAgent
                     ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#E8F0FE] text-[#1967D2] border border-[#D2E3FC]"
@@ -953,6 +955,44 @@
                 scrollAnchor.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         }
+
+        // ── SCROLL JUMP BUTTON ─────────────────────────────────────────
+        const scrollJumpBtn = document.getElementById('scroll-jump-btn');
+        const scrollJumpIcon = document.getElementById('scroll-jump-icon');
+        let scrollJumpState = 'down'; // 'up' or 'down'
+
+        function updateScrollJumpBtn() {
+            const container = document.getElementById('chat-container');
+            if (!container || !scrollJumpBtn) return;
+            const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+            const distFromTop = container.scrollTop;
+            if (distFromBottom > 180) {
+                // Show down arrow — user can jump to bottom
+                scrollJumpBtn.classList.remove('hidden');
+                scrollJumpState = 'down';
+                scrollJumpIcon.innerHTML = '<path d="m6 9 6 6 6-6"/>';
+            } else if (distFromTop > 300) {
+                // Near bottom — show up arrow to jump to top
+                scrollJumpBtn.classList.remove('hidden');
+                scrollJumpState = 'up';
+                scrollJumpIcon.innerHTML = '<path d="m18 15-6-6-6 6"/>';
+            } else {
+                scrollJumpBtn.classList.add('hidden');
+            }
+        }
+
+        function scrollJump() {
+            const container = document.getElementById('chat-container');
+            if (!container) return;
+            if (scrollJumpState === 'down') {
+                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+            } else {
+                container.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Listen to scroll events on chat container
+        document.getElementById('chat-container').addEventListener('scroll', updateScrollJumpBtn, { passive: true });
 
         // ── CHAT HISTORY ENGINE ─────────────────────────────────────────
         let allChats = JSON.parse(localStorage.getItem('snoah_all_chats') || '[]');
@@ -1168,7 +1208,7 @@
             const isGQ = platform === 'groq';
             const isTG = platform === 'together';
             const isMT = platform === 'mistral';
-            const noWeb = isGQ || isTG || isMT;
+            const noWeb = false; // Web uses Gemini when on non-Gemini platform
             const hint = document.getElementById('apikey-hint');
             const mhint = document.getElementById('model-hint');
             const lbl = document.getElementById('apikey-label');
@@ -1380,6 +1420,7 @@
 
             // Stop if already listening
             if (isListening) {
+                isListening = false; // mark stopped before onend fires
                 if (speechRecognition) { try { speechRecognition.stop(); } catch(e){} }
                 resetMicBtn();
                 return;
@@ -1397,57 +1438,58 @@
             const micBtn = document.getElementById('mic-btn');
             const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
             speechRecognition = new SR();
-            speechRecognition.continuous = false;
+            // continuous=true keeps mic open on Android; we stop manually on second tap
+            speechRecognition.continuous = true;
             speechRecognition.interimResults = true;
-            speechRecognition.maxAlternatives = 1;
-            speechRecognition.lang = navigator.language || 'en-US';
+            speechRecognition.maxAlternatives = 3;
+            speechRecognition.lang = 'en-US';
 
             speechRecognition.onstart = () => {
                 isListening = true;
-                if (micBtn) {
-                    micBtn.className = 'p-2 mb-0.5 rounded-full transition-all text-[#D25D38] bg-[#FDF4F2] mic-active';
-                    const svg = micBtn.querySelector('svg');
-                    if (svg) svg.innerHTML = lucide._svgs['mic'];
-                }
-                showToast('🎤 Listening...');
+                if (micBtn) micBtn.className = 'p-2 mb-0.5 rounded-full transition-all text-[#D25D38] bg-[#FDF4F2] mic-active';
+                showToast('🎤 Listening… tap mic to stop');
             };
-            let lastTranscript = '';
+            let accumulated = '';
             speechRecognition.onresult = (e) => {
-                let interim = '', final = '';
+                let finalChunk = '', interimChunk = '';
                 for (let i = e.resultIndex; i < e.results.length; i++) {
                     const t = e.results[i][0].transcript;
-                    if (e.results[i].isFinal) final += t;
-                    else interim += t;
+                    if (e.results[i].isFinal) finalChunk += t;
+                    else interimChunk += t;
                 }
-                lastTranscript = final || interim;
-                chatInput.value = lastTranscript;
+                if (finalChunk) accumulated += finalChunk;
+                // Show accumulated + current interim in input
+                chatInput.value = (accumulated + interimChunk).trim();
                 chatInput.style.height = 'auto';
                 chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
                 updateSendButton();
             };
             speechRecognition.onend = () => {
-                resetMicBtn();
-                // Android often ends without isFinal — ensure text is committed
-                if (lastTranscript && !chatInput.value.trim()) {
-                    chatInput.value = lastTranscript;
-                    updateSendButton();
+                // If still marked listening it ended unexpectedly — commit what we have
+                if (isListening) {
+                    resetMicBtn();
+                    if (accumulated.trim()) {
+                        chatInput.value = accumulated.trim();
+                        updateSendButton();
+                        showToast('✓ Voice captured');
+                    }
                 }
             };
             speechRecognition.onerror = (e) => {
                 resetMicBtn();
+                accumulated = '';
                 const msgs = {
-                    'not-allowed':  'Mic blocked — allow microphone access',
+                    'not-allowed':  '🎤 Mic blocked — allow microphone in browser settings',
                     'no-speech':    'No speech detected, try again',
                     'network':      'Network error during voice input',
-                    'audio-capture':'No microphone found on device',
+                    'audio-capture':'No microphone found',
                     'aborted':      ''
                 };
-                const msg = msgs[e.error] ?? `Voice error: ${e.error}`;
+                const msg = msgs[e.error] ?? 'Voice error: ' + e.error;
                 if (msg) showToast(msg);
             };
-
             try { speechRecognition.start(); }
-            catch(e) { resetMicBtn(); showToast('Could not start mic, try again'); }
+            catch(e) { resetMicBtn(); showToast('Could not start mic — try again'); }
         }
 
         // ── STOP GENERATION ───────────────────────────────────────────
@@ -1643,12 +1685,17 @@
             ).join('');
         }
         function useTemplate(text) {
-            chatInput.value = text;
-            chatInput.style.height = 'auto';
-            chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
-            updateSendButton();
             closeTemplatesModal();
-            chatInput.focus();
+            setTimeout(() => {
+                chatInput.value = text;
+                // Fire input event so all resize/validation listeners catch it
+                chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+                chatInput.style.height = 'auto';
+                chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+                updateSendButton();
+                chatInput.focus();
+                chatInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 180);
         }
         function saveTemplate() {
             const nameEl = document.getElementById('tpl-name-input');
@@ -1780,6 +1827,75 @@
                 const d = await r.json();
                 return d.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
             }
+        }
+
+
+        // ── GEMINI WEB SEARCH HELPER ───────────────────────────────────
+        // Used by non-Gemini platforms to get web search results via Gemini
+        async function geminiWebSearch(userMessages) {
+            // Try all available keys: in-memory array + compat single var + legacy storage
+            const candidateKeys = [
+                ...geminiKeys.filter(k => k && k.trim()),
+                apiKey,
+                localStorage.getItem('snoah_api_key') || ''
+            ].filter((k, i, a) => k && k.trim() && a.indexOf(k) === i); // unique, non-empty
+
+            if (!candidateKeys.length) {
+                showToast('No Gemini key found — add one in Settings (switch to Gemini platform)');
+                return null;
+            }
+
+            const lastUserMsg = [...userMessages].reverse().find(m => m.role === 'user' && !m.isError);
+            if (!lastUserMsg) return null;
+            const question = (lastUserMsg.text || '').substring(0, 1000);
+
+            const payload = {
+                contents: [{ role: 'user', parts: [{ text: question }] }],
+                tools: [{ google_search: {} }]
+            };
+
+            // Try models in order — flash is more reliable for grounding
+            const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+
+            for (const key of candidateKeys) {
+                for (const model of models) {
+                    try {
+                        const controller = new AbortController();
+                        const timeout = setTimeout(() => controller.abort(), 20000);
+                        const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key;
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload),
+                            signal: controller.signal
+                        });
+                        clearTimeout(timeout);
+                        if (!res.ok) {
+                            const errText = await res.text().catch(() => '');
+                            console.warn('geminiWebSearch ' + model + ' HTTP ' + res.status + ':', errText.substring(0, 200));
+                            if (res.status === 401 || res.status === 400) break; // bad key — skip other models
+                            continue; // try next model
+                        }
+                        const data = await res.json();
+                        const parts = data.candidates?.[0]?.content?.parts || [];
+                        const text = parts.map(p => p.text || '').join('').trim();
+                        if (!text) continue;
+                        const meta = data.candidates?.[0]?.groundingMetadata || {};
+                        const srcMap = new Map();
+                        (meta.groundingChunks || []).forEach(ch => {
+                            if (ch.web?.uri) srcMap.set(ch.web.uri, { uri: ch.web.uri, title: ch.web.title || ch.web.uri });
+                        });
+                        (meta.groundingAttributions || []).forEach(a => {
+                            if (a.web?.uri) srcMap.set(a.web.uri, { uri: a.web.uri, title: a.web.title || a.web.uri });
+                        });
+                        return { text, sources: Array.from(srcMap.values()), queries: meta.webSearchQueries || [] };
+                    } catch(e) {
+                        console.warn('geminiWebSearch ' + model + ' error:', e.message);
+                        continue;
+                    }
+                }
+            }
+            return null; // all attempts failed
         }
 
         // ── AUTO-TITLE ─────────────────────────────────────────────────
@@ -2255,7 +2371,7 @@
                     : `You are SnoahAI, an advanced AI assistant built into a mobile-first web app called SnoahAI. Here is everything you must know about the app you are running inside:
 
 APP OVERVIEW:
-- Name: SnoahAI | Developer: Shahzaib Muzaffar | Single-file HTML app designed for Android browsers and installable as a PWA
+- Name: SnoahAI | Developer: Shahzaib Muzaffar | Full stack web app designed for Android browsers and installable as a PWA
 - The app can be installed on Android home screen (Add to Home Screen / PWA install banner) for a fullscreen native-like experience
 
 PLATFORMS & MODELS (all configurable in Settings):
@@ -2270,7 +2386,7 @@ MULTI-KEY POOL: Add multiple API keys per platform. On rate limit (429), app sil
 
 FEATURES:
 1. THINKING MODE (🧠 Thinking button): AI reasons step-by-step. A live collapsible "💭 Thinking…" block streams in real-time. Best for complex problems, math, logic. Available on all platforms.
-2. WEB SEARCH (🔍 Web button): Google Search grounding — Gemini only. AI searches web before answering. Shows collapsible sources dropdown with website links. Disabled/greyed out on Groq, Together AI, Mistral.
+2. WEB SEARCH (🔍 Web button): When enabled, the app ALWAYS uses Gemini to handle the request — regardless of which platform is selected. Gemini uses Google Search grounding to fetch real-time results. When Web is OFF, the selected platform (Groq, Mistral, etc.) handles the request normally. This means Web Search always requires a valid Gemini API key in Settings.
 3. IMAGE UPLOAD (📷 Image button): Upload images for AI to analyze. Supported on Gemini and OpenRouter. Tap Image button or the + button.
 4. RESPONSE LENGTH (≡ Normal button): Cycles Normal → Short (2-4 sentences) → Detailed. Tap to cycle.
 5. TEMPLATES (🔖 Templates button): Pre-saved prompt starters. Built-in: Explain Simply, Clinical Summary, Compare & Contrast, Step by Step. Add custom templates with a name and text. Saved to device storage.
@@ -2294,7 +2410,7 @@ FEATURES:
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
-- For today's date, current news, live data: enable Web Search (🔍) — Gemini platform only
+- For today's date, current news, live data: enable Web Search (🔍) — Gemini platform only, Now when enabled web search in any platform the gemini will be used for that response 
 - Groq, Together AI, Mistral: no web search available on these platforms
 
 DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mobile-first web apps.
@@ -2304,19 +2420,23 @@ Always answer questions about the app based on the above. If asked "what can you
 FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ display: $$...$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. ` + lengthDirective;
                 if (useThinking) systemInstruction += "The user has enabled THINKING MODE. Wrap your detailed step-by-step internal reasoning inside <think> and </think> tags at the very beginning of your response, then give the final answer. ";
                 if (platform === 'mistral') {
-                    systemInstruction += 'You are running on Mistral AI. You do NOT have tools or web search. Answer from training knowledge only. ';
+                    systemInstruction += 'You are running on Mistral AI. ';
                 }
                 if (platform === 'together') {
-                    systemInstruction += 'You are running on Together AI (fast open-source model inference). You do NOT have any tools, plugins, or web search capability. Do NOT attempt to call any functions or tools. Answer entirely from your training knowledge. ';
+                    systemInstruction += 'You are running on Together AI. Do NOT output tool call syntax. ';
                 }
                 if (platform === 'groq') {
-                    systemInstruction += 'You are running on Groq (ultra-fast LLM inference). You do NOT have any tools, plugins, or web search capability. Do NOT attempt to call any functions or tools. Do NOT output tool call syntax. Answer entirely from your training knowledge. If you cannot answer something without real-time data, say so clearly and suggest the user switch to Gemini with Web search enabled. ';
+                    systemInstruction += 'You are running on Groq. Do NOT output tool call syntax. ';
                 }
                 if (useAgent) {
                     const now = new Date();
-                    systemInstruction += "WEB SEARCH IS CURRENTLY ENABLED. Today's date is " + now.toDateString() + ". You have access to real-time Google Search results via the google_search tool. Use it to answer questions about current events, today's date, live data, or anything requiring up-to-date information. Do NOT tell the user to enable web search — it is already on. ";
+                    if (platform === 'gemini') {
+                        systemInstruction += "WEB SEARCH IS CURRENTLY ENABLED. Today's date is " + now.toDateString() + ". You have access to real-time Google Search results via the google_search tool. Use it to answer questions about current events, today's date, live data, or anything requiring up-to-date information. Do NOT tell the user to enable web search — it is already on. ";
+                    } else {
+
+                    }
                 } else {
-                    systemInstruction += "Web search is currently OFF. If the user asks about real-time info (today's date, current events, live data), answer from your training knowledge and mention they can tap the Web (🔍) button to enable real-time search. ";
+                    systemInstruction += "Web search is currently OFF. If the user asks about real-time info (today's date, current events, live data), answer from your training knowledge and suggest they tap the Web (🔍) button to enable real-time search. ";
                 }
                 if (customInstructions) systemInstruction += '\n\nUser custom instructions: ' + customInstructions;
 
@@ -2374,10 +2494,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 let queries = [];
                 let renderDirty = false;
                 let rafId = null;
-                let streamActive = true; // keeps RAF alive until fetch fully done
+                let streamActive = true;
+                let extraFrames = 0;      // drain after streamActive=false
+                let lastMdRender = 0;     // throttle markdown render
+                const MD_INTERVAL = 120;  // ms between full markdown renders
 
-                // RAF render loop — 60fps, decoupled from network
-                function rafRender() {
+                function rafRender(ts) {
                     if (renderDirty) {
                         renderDirty = false;
                         let displayThink = '';
@@ -2405,16 +2527,34 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             updateSendButton();
                             liveAppended = true;
                         }
+                        // Thinking text — plain text is fine
                         if (thinkBody.textContent !== displayThink) {
                             thinkBody.textContent = displayThink;
                             thinkBody.scrollTop = thinkBody.scrollHeight;
                         }
-                        if (liveTextEl.textContent !== displayMain) {
-                            liveTextEl.textContent = displayMain;
-                            scrollToBottom();
+                        // Main text — render markdown+math (throttled) so LaTeX shows live
+                        if (displayMain) {
+                            const now = ts || performance.now();
+                            if (now - lastMdRender > MD_INTERVAL || !streamActive) {
+                                lastMdRender = now;
+                                liveTextEl.innerHTML = formatMarkdown(displayMain);
+                                liveTextEl.style.whiteSpace = '';
+                            } else if (!liveTextEl.innerHTML) {
+                                // First frame — always render immediately
+                                liveTextEl.innerHTML = formatMarkdown(displayMain);
+                                liveTextEl.style.whiteSpace = '';
+                            }
+                        } else {
+                            liveTextEl.textContent = '';
                         }
+                        scrollToBottom();
                     }
-                    if (streamActive) rafId = requestAnimationFrame(rafRender);
+                    if (streamActive) {
+                        rafId = requestAnimationFrame(rafRender);
+                    } else if (extraFrames > 0) {
+                        extraFrames--;
+                        rafId = requestAnimationFrame(rafRender);
+                    }
                 }
                 rafId = requestAnimationFrame(rafRender);
 
@@ -2459,10 +2599,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             }
                         }
 
-                        if (platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral') {
+                        // When web search is ON, always use Gemini regardless of selected platform
+                        if ((platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral') && !useAgent) {
                             const isGroq = platform === 'groq';
                             const isTogether = platform === 'together';
                             const isMistral = platform === 'mistral';
+
                             const chatMessages = [{ role: 'system', content: systemInstruction }];
                             for (const msg of messages) {
                                 if (msg.isError) continue;
@@ -2522,13 +2664,13 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             }
                             if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
                             if (platform === 'mistral') {
-                    systemInstruction += 'You are running on Mistral AI. You do NOT have tools or web search. Answer from training knowledge only. ';
+                    systemInstruction += 'You are running on Mistral AI. ';
                 }
                 if (platform === 'together') {
-                    systemInstruction += 'You are running on Together AI (fast open-source model inference). You do NOT have any tools, plugins, or web search capability. Do NOT attempt to call any functions or tools. Answer entirely from your training knowledge. ';
+                    systemInstruction += 'You are running on Together AI. Do NOT output tool call syntax. ';
                 }
                 if (platform === 'groq') {
-                    systemInstruction += 'You are running on Groq (ultra-fast LLM inference). You do NOT have any tools, plugins, or web search capability. Do NOT attempt to call any functions or tools. Do NOT output tool call syntax. Answer entirely from your training knowledge. If you cannot answer something without real-time data, say so clearly and suggest the user switch to Gemini with Web search enabled. ';
+                    systemInstruction += 'You are running on Groq. Do NOT output tool call syntax. ';
                 }
                 if (useAgent) {
                                 // Web search: fetch non-streaming (grounding requires it)
@@ -2589,7 +2731,11 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 }
 
                 // ── FINALISE ──
+                renderDirty = true;   // ensure RAF sees final state
+                extraFrames = 5;      // run 5 extra frames after stream ends
                 streamActive = false;
+                // Don't cancel RAF yet — let extraFrames drain for final paint
+                await new Promise(r => setTimeout(r, 50)); // small wait for RAF to paint
                 if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
                 // Do one final RAF render pass to flush remaining content
                 renderDirty = true;
@@ -2598,14 +2744,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 const tOF = fullRaw.indexOf('<think>'), tCF = fullRaw.indexOf('</think>');
                 if (tOF !== -1 && tCF !== -1) { displayThinkFinal = fullRaw.slice(tOF+7,tCF); displayMainFinal = fullRaw.slice(tCF+8).trimStart(); }
                 else if (tOF !== -1) { displayThinkFinal = fullRaw.slice(tOF+7); displayMainFinal = ''; }
-                thinkBody.textContent = displayThinkFinal;
-                liveTextEl.textContent = displayMainFinal;
-                if (!liveAppended && fullRaw.trim()) { messagesWrapper.appendChild(liveWrapper); liveAppended = true; }
-                if (!liveAppended) { messagesWrapper.appendChild(liveWrapper); }
-                isStreaming = false;
-                liveCursor.style.display = 'none';
-                updateSendButton();
-
+                // Extract think vs main text
                 let mainText = fullRaw;
                 let thinkingText = null;
                 const thinkMatch = fullRaw.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
@@ -2614,7 +2753,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                     mainText = fullRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
                 }
 
-                // Render final markdown in place (replace plaintext)
+                thinkBody.textContent = thinkingText || '';
+                if (!liveAppended && fullRaw.trim()) { messagesWrapper.appendChild(liveWrapper); liveAppended = true; }
+                if (!liveAppended) { messagesWrapper.appendChild(liveWrapper); }
+                isStreaming = false;
+                liveCursor.style.display = 'none';
+                updateSendButton();
+
+                // Final markdown render (RAF may have done this already, but force it clean)
                 liveTextEl.className = 'md-content text-[#2C2B29] leading-relaxed';
                 liveTextEl.innerHTML = formatMarkdown(mainText);
                 liveTextEl.style.whiteSpace = '';
