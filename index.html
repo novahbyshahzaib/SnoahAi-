@@ -724,11 +724,100 @@
         </div>
     </div>
 
+        <!-- ===== COOKIE CONSENT BANNER ===== -->
+        <div id="cookie-banner" class="absolute bottom-0 left-0 right-0 z-[60] hidden">
+            <div class="bg-[#2C2B29] text-white rounded-t-[22px] shadow-2xl p-5 mx-0">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-full bg-[#D25D38]/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="8" cy="9" r="1.5" fill="#D25D38"/><circle cx="15" cy="11" r="1.5" fill="#D25D38"/><circle cx="10" cy="15" r="1.5" fill="#D25D38"/><circle cx="16" cy="16" r="1" fill="#D25D38"/><circle cx="6" cy="13" r="1" fill="#D25D38"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-serif font-semibold text-[15px] mb-1">Cookie & Storage Consent</h3>
+                        <p class="text-[12px] text-white/70 leading-relaxed">SnoahAI uses local storage to save your preferences and API keys. <strong class="text-white/90">Accept</strong> to save multiple API keys per platform for auto-rotation on rate limits. <strong class="text-white/90">Reject</strong> to limit storage to 1 key per platform.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 mb-2">
+                    <button onclick="rejectCookies()" class="flex-1 py-2.5 rounded-xl border border-white/20 text-[13px] text-white/80 hover:bg-white/10 transition-colors font-medium">Reject</button>
+                    <button onclick="acceptCookies()" class="flex-1 py-2.5 rounded-xl bg-[#D25D38] text-white text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Accept All</button>
+                </div>
+                <p class="text-[11px] text-white/50 text-center">By using SnoahAI you agree to our <button onclick="openTermsModal()" class="underline text-[#D25D38]/80 hover:text-[#D25D38]">Terms & Conditions</button></p>
+            </div>
+        </div>
+
+        <!-- ===== TERMS & CONDITIONS MODAL ===== -->
+        <div id="terms-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
+            <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeTermsModal()"></div>
+            <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height: 88%;">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-[#F2F0E9] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        </div>
+                        <h2 class="font-serif font-semibold text-[17px]">Terms & Conditions</h2>
+                    </div>
+                    <button onclick="closeTermsModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="p-5 overflow-y-auto flex-1 text-[13px] text-[#5B5951] leading-relaxed space-y-4">
+                    <p class="text-[12px] text-[#A3A095]">Last updated: March 2026</p>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">1. Acceptance of Terms</h3>
+                        <p>By accessing and using SnoahAI, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use this application.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">2. Service Description</h3>
+                        <p>SnoahAI is an AI chat assistant that connects to third-party AI platforms (Google Gemini, OpenRouter, Groq, Together AI, Mistral AI) using API keys that you provide. SnoahAI does not provide its own AI models.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">3. API Keys & Data Storage</h3>
+                        <p>Your API keys and preferences are stored locally on your device using browser local storage. SnoahAI does not transmit your keys to any server other than the selected AI platform's official API endpoint.</p>
+                        <ul class="list-disc list-inside mt-1.5 space-y-1">
+                            <li><strong>Cookies Accepted:</strong> You may store multiple API keys per platform, enabling auto-rotation on rate limits for uninterrupted usage.</li>
+                            <li><strong>Cookies Rejected:</strong> Storage is limited to 1 API key per platform. Additional keys cannot be saved.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">4. User Responsibilities</h3>
+                        <p>You are responsible for safeguarding your API keys and for any charges incurred through their use. Do not share your API keys publicly. You must comply with the terms of service of each third-party AI platform.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">5. Privacy</h3>
+                        <p>SnoahAI operates entirely in your browser. Chat history, settings, and API keys are stored in your browser's local storage and are not sent to SnoahAI's servers. Conversations are sent directly to the AI platform you have selected.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">6. Disclaimer</h3>
+                        <p>SnoahAI is provided "as is" without warranties of any kind. AI responses may contain inaccuracies. Do not rely on SnoahAI for medical, legal, or financial advice without consulting a qualified professional.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">7. Limitation of Liability</h3>
+                        <p>SnoahAI and its developer shall not be liable for any damages arising from the use of this application, including but not limited to data loss, API charges, or inaccurate AI responses.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">8. Changes to Terms</h3>
+                        <p>These terms may be updated from time to time. Continued use of SnoahAI after changes constitutes acceptance of the updated terms.</p>
+                    </div>
+                </div>
+                <div class="px-5 py-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
+                    <button onclick="closeTermsModal()" class="w-full py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Close</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- ===== APPLICATION LOGIC ===== -->
     <script>
         // --- State ---
+        let cookiesAccepted = localStorage.getItem('snoah_cookies_accepted'); // 'true', 'false', or null
         let platform = localStorage.getItem('snoah_platform') || 'gemini';
         // Key pools — auto-rotate on rate limit
         let geminiKeys = JSON.parse(localStorage.getItem('snoah_gemini_keys') || '[]');
@@ -828,6 +917,43 @@
         applyFontSize(fontSize);
         applyTheme(currentTheme);
         updatePinBadge();
+        showCookieBannerIfNeeded();
+
+        // --- Cookie Consent & Terms ---
+        function showCookieBannerIfNeeded() {
+            if (cookiesAccepted !== 'true') {
+                document.getElementById('cookie-banner').classList.remove('hidden');
+            }
+        }
+
+        function acceptCookies() {
+            cookiesAccepted = 'true';
+            localStorage.setItem('snoah_cookies_accepted', 'true');
+            document.getElementById('cookie-banner').classList.add('hidden');
+            showToast('Cookies accepted ✓');
+        }
+
+        function rejectCookies() {
+            cookiesAccepted = 'false';
+            localStorage.setItem('snoah_cookies_accepted', 'false');
+            document.getElementById('cookie-banner').classList.add('hidden');
+            // Enforce single-key limit: trim existing keys to 1 per platform
+            if (geminiKeys.length > 1) { geminiKeys = [geminiKeys[0]]; localStorage.setItem('snoah_gemini_keys', JSON.stringify(geminiKeys)); geminiKeyIdx = 0; apiKey = geminiKeys[0]; }
+            if (orKeys.length > 1) { orKeys = [orKeys[0]]; localStorage.setItem('snoah_or_keys', JSON.stringify(orKeys)); orKeyIdx = 0; orApiKey = orKeys[0]; }
+            if (groqKeys.length > 1) { groqKeys = [groqKeys[0]]; localStorage.setItem('snoah_groq_keys', JSON.stringify(groqKeys)); groqKeyIdx = 0; groqApiKey = groqKeys[0]; }
+            if (togetherKeys.length > 1) { togetherKeys = [togetherKeys[0]]; localStorage.setItem('snoah_together_keys', JSON.stringify(togetherKeys)); togetherKeyIdx = 0; togetherApiKey = togetherKeys[0]; }
+            if (mistralKeys.length > 1) { mistralKeys = [mistralKeys[0]]; localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys)); mistralKeyIdx = 0; mistralApiKey = mistralKeys[0]; }
+            renderKeysList();
+            showToast('Cookies rejected — limited to 1 key per platform');
+        }
+
+        function openTermsModal() {
+            document.getElementById('terms-modal').classList.remove('hidden');
+        }
+
+        function closeTermsModal() {
+            document.getElementById('terms-modal').classList.add('hidden');
+        }
 
         // --- UI Interactions ---
 
@@ -1266,6 +1392,12 @@
             const input = document.getElementById('settings-apikey');
             const key = input.value.trim();
             if (!key) { showToast('Paste a key first'); return; }
+            // Enforce single-key limit when cookies not accepted
+            const currentKeys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : geminiKeys;
+            if (cookiesAccepted !== 'true' && currentKeys.length >= 1) {
+                showToast('Accept cookies to save multiple API keys');
+                return;
+            }
             if (platform === 'openrouter') {
                 if (orKeys.includes(key)) { showToast('Key already added'); return; }
                 orKeys.push(key); localStorage.setItem('snoah_or_keys', JSON.stringify(orKeys)); orApiKey = orKeys[orKeyIdx];
