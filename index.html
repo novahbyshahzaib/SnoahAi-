@@ -430,6 +430,27 @@
                             placeholder="e.g. I'm a 2nd year medical student. Always tie explanations to clinical relevance. Be concise but don't skip key mechanisms. When answering questions, consider pharmacology implications."
                             class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2.5 text-[14px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 resize-none leading-relaxed placeholder:text-[#C5C3BB]"></textarea>
                     </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Token Management -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Token Management</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Monitor token usage across all AI platforms, set limits, and view usage history.</p>
+                        <button onclick="closeSettings(); openTokenModal();" class="w-full flex items-center justify-between px-4 py-3 bg-white border border-[#E5E3DB] rounded-xl hover:bg-[#F2F0E9] transition-colors group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] flex items-center justify-center group-hover:bg-[#EAE8E0]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                                </div>
+                                <div class="text-left">
+                                    <span class="text-[13px] font-semibold text-[#2C2B29] block">Token Usage Dashboard</span>
+                                    <span id="settings-token-summary" class="text-[11px] text-[#A3A095]">View usage & set limits</span>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] flex gap-3 shrink-0 bg-[#FAF9F6]">
                     <button onclick="closeSettings()" class="flex-1 py-2.5 rounded-xl border border-[#E5E3DB] text-[14px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">Cancel</button>
@@ -920,6 +941,31 @@
             </div>
         </div>
 
+        <!-- ===== TOKEN MANAGEMENT MODAL ===== -->
+        <div id="token-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
+            <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeTokenModal()"></div>
+            <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height: 90%;">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-[#F2F0E9] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                        </div>
+                        <h2 class="font-serif font-semibold text-[17px]">Token Management</h2>
+                    </div>
+                    <button onclick="closeTokenModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div id="token-modal-content" class="p-5 overflow-y-auto flex-1 space-y-5">
+                    <!-- Content rendered by JS -->
+                </div>
+                <div class="px-5 py-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6] flex gap-3">
+                    <button onclick="confirmResetTokenUsage()" class="flex-1 py-2.5 rounded-xl border border-[#E5E3DB] text-[14px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors font-medium">Reset All</button>
+                    <button onclick="closeTokenModal()" class="flex-1 py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Close</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- ===== APPLICATION LOGIC ===== -->
@@ -994,6 +1040,51 @@
         ];
         let isListening = false;
         let speechRecognition = null;
+
+        // --- Token Management ---
+        const TOKEN_PLATFORMS = ['gemini','openrouter','groq','together','mistral'];
+        const TOKEN_PLATFORM_LABELS = { gemini:'Gemini', openrouter:'OpenRouter', groq:'Groq', together:'Together AI', mistral:'Mistral AI' };
+        const TOKEN_PLATFORM_COLORS = { gemini:'#4285F4', openrouter:'#8B5CF6', groq:'#F97316', together:'#10B981', mistral:'#EF4444' };
+        let tokenUsage = JSON.parse(localStorage.getItem('snoah_token_usage') || 'null') || {
+            gemini:     { promptTokens:0, completionTokens:0, totalTokens:0, requestCount:0 },
+            openrouter: { promptTokens:0, completionTokens:0, totalTokens:0, requestCount:0 },
+            groq:       { promptTokens:0, completionTokens:0, totalTokens:0, requestCount:0 },
+            together:   { promptTokens:0, completionTokens:0, totalTokens:0, requestCount:0 },
+            mistral:    { promptTokens:0, completionTokens:0, totalTokens:0, requestCount:0 },
+            limits:     { gemini:0, openrouter:0, groq:0, together:0, mistral:0 },
+            history:    []
+        };
+        // Track tokens from current stream
+        let lastStreamUsage = null;
+
+        function saveTokenUsage() {
+            try { localStorage.setItem('snoah_token_usage', JSON.stringify(tokenUsage)); } catch(e) {}
+        }
+
+        function recordTokenUsage(plat, prompt, completion, model) {
+            if (!tokenUsage[plat]) return;
+            const total = (prompt || 0) + (completion || 0);
+            tokenUsage[plat].promptTokens += (prompt || 0);
+            tokenUsage[plat].completionTokens += (completion || 0);
+            tokenUsage[plat].totalTokens += total;
+            tokenUsage[plat].requestCount += 1;
+            tokenUsage.history.unshift({ platform: plat, model: model || '', promptTokens: prompt || 0, completionTokens: completion || 0, totalTokens: total, ts: Date.now() });
+            if (tokenUsage.history.length > 100) tokenUsage.history = tokenUsage.history.slice(0, 100);
+            saveTokenUsage();
+        }
+
+        function checkTokenLimit(plat) {
+            const limit = tokenUsage.limits[plat] || 0;
+            if (limit <= 0) return true; // no limit
+            return tokenUsage[plat].totalTokens < limit;
+        }
+
+        function formatTokenCount(n) {
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return n.toString();
+        }
+
         if (isDarkMode) document.getElementById('html-root').classList.add('dark');
 
         function getApiUrl(stream=false) {
@@ -1070,6 +1161,129 @@
 
         function closeAboutModal() {
             document.getElementById('about-modal').classList.add('hidden');
+        }
+
+        // --- Token Management ---
+
+        function openTokenModal() {
+            renderTokenModal();
+            document.getElementById('token-modal').classList.remove('hidden');
+        }
+
+        function closeTokenModal() {
+            document.getElementById('token-modal').classList.add('hidden');
+        }
+
+        function renderTokenModal() {
+            const container = document.getElementById('token-modal-content');
+            // Calculate totals
+            let grandTotal = 0, grandPrompt = 0, grandCompletion = 0, grandRequests = 0;
+            TOKEN_PLATFORMS.forEach(p => {
+                grandTotal += tokenUsage[p].totalTokens;
+                grandPrompt += tokenUsage[p].promptTokens;
+                grandCompletion += tokenUsage[p].completionTokens;
+                grandRequests += tokenUsage[p].requestCount;
+            });
+
+            let html = '';
+
+            // Overview Card
+            html += '<div class="bg-white rounded-2xl border border-[#E5E3DB] p-4">';
+            html += '<h3 class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest mb-3">Overall Usage</h3>';
+            html += '<div class="grid grid-cols-2 gap-3">';
+            html += '<div class="bg-[#F2F0E9] rounded-xl p-3 text-center"><p class="text-[20px] font-bold text-[#2C2B29]">' + formatTokenCount(grandTotal) + '</p><p class="text-[11px] text-[#A3A095]">Total Tokens</p></div>';
+            html += '<div class="bg-[#F2F0E9] rounded-xl p-3 text-center"><p class="text-[20px] font-bold text-[#2C2B29]">' + grandRequests + '</p><p class="text-[11px] text-[#A3A095]">Total Requests</p></div>';
+            html += '<div class="bg-[#F2F0E9] rounded-xl p-3 text-center"><p class="text-[20px] font-bold text-[#D25D38]">' + formatTokenCount(grandPrompt) + '</p><p class="text-[11px] text-[#A3A095]">Prompt Tokens</p></div>';
+            html += '<div class="bg-[#F2F0E9] rounded-xl p-3 text-center"><p class="text-[20px] font-bold text-[#2D7A4F]">' + formatTokenCount(grandCompletion) + '</p><p class="text-[11px] text-[#A3A095]">Completion Tokens</p></div>';
+            html += '</div></div>';
+
+            // Per-Platform Cards
+            html += '<div class="space-y-3">';
+            html += '<h3 class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest">Usage by Platform</h3>';
+            TOKEN_PLATFORMS.forEach(p => {
+                const u = tokenUsage[p];
+                const limit = tokenUsage.limits[p] || 0;
+                const pct = limit > 0 ? Math.min((u.totalTokens / limit) * 100, 100) : 0;
+                const isOverLimit = limit > 0 && u.totalTokens >= limit;
+                const color = TOKEN_PLATFORM_COLORS[p];
+                html += '<div class="bg-white rounded-2xl border border-[#E5E3DB] p-4">';
+                html += '<div class="flex items-center justify-between mb-3">';
+                html += '<div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full" style="background:' + color + '"></div><span class="text-[14px] font-semibold text-[#2C2B29]">' + TOKEN_PLATFORM_LABELS[p] + '</span></div>';
+                html += '<span class="text-[12px] text-[#A3A095]">' + u.requestCount + ' request' + (u.requestCount !== 1 ? 's' : '') + '</span>';
+                html += '</div>';
+
+                // Token counts
+                html += '<div class="grid grid-cols-3 gap-2 mb-3">';
+                html += '<div class="text-center"><p class="text-[15px] font-bold text-[#2C2B29]">' + formatTokenCount(u.promptTokens) + '</p><p class="text-[10px] text-[#A3A095]">Prompt</p></div>';
+                html += '<div class="text-center"><p class="text-[15px] font-bold text-[#2C2B29]">' + formatTokenCount(u.completionTokens) + '</p><p class="text-[10px] text-[#A3A095]">Completion</p></div>';
+                html += '<div class="text-center"><p class="text-[15px] font-bold text-[#2C2B29]">' + formatTokenCount(u.totalTokens) + '</p><p class="text-[10px] text-[#A3A095]">Total</p></div>';
+                html += '</div>';
+
+                // Limit bar
+                if (limit > 0) {
+                    html += '<div class="mb-2">';
+                    html += '<div class="flex justify-between text-[10px] text-[#A3A095] mb-1"><span>' + formatTokenCount(u.totalTokens) + ' used</span><span>' + formatTokenCount(limit) + ' limit</span></div>';
+                    html += '<div class="w-full h-2 bg-[#F2F0E9] rounded-full overflow-hidden"><div class="h-full rounded-full transition-all" style="width:' + pct + '%;background:' + (isOverLimit ? '#DC2626' : color) + '"></div></div>';
+                    if (isOverLimit) html += '<p class="text-[10px] text-[#DC2626] mt-1">⚠️ Token limit reached</p>';
+                    html += '</div>';
+                }
+
+                // Limit setting
+                html += '<div class="flex items-center gap-2">';
+                html += '<input type="number" id="limit-' + p + '" value="' + (limit || '') + '" placeholder="No limit" min="0" step="1000" class="flex-1 bg-[#F2F0E9] border border-[#E5E3DB] rounded-lg px-3 py-1.5 text-[12px] text-[#2C2B29] focus:outline-none focus:ring-1 focus:ring-[#D25D38]/30">';
+                html += '<button onclick="setTokenLimit(\'' + p + '\')" class="px-3 py-1.5 bg-[#D25D38] text-white rounded-lg text-[11px] font-semibold hover:bg-[#B84E2E] transition-colors">Set Limit</button>';
+                html += '</div>';
+
+                html += '</div>';
+            });
+            html += '</div>';
+
+            // Recent History
+            html += '<div>';
+            html += '<h3 class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest mb-3">Recent Usage History</h3>';
+            if (tokenUsage.history.length === 0) {
+                html += '<p class="text-[13px] text-[#A3A095] text-center py-4">No usage recorded yet. Start chatting to see token usage.</p>';
+            } else {
+                html += '<div class="space-y-2 max-h-[200px] overflow-y-auto">';
+                tokenUsage.history.slice(0, 20).forEach(h => {
+                    const time = new Date(h.ts);
+                    const timeStr = time.toLocaleDateString(undefined, { month:'short', day:'numeric' }) + ' ' + time.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+                    const color = TOKEN_PLATFORM_COLORS[h.platform] || '#6B7280';
+                    html += '<div class="flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-[#E5E3DB]">';
+                    html += '<div class="flex items-center gap-2 min-w-0">';
+                    html += '<div class="w-2 h-2 rounded-full shrink-0" style="background:' + color + '"></div>';
+                    html += '<div class="min-w-0"><p class="text-[12px] font-medium text-[#2C2B29] truncate">' + (TOKEN_PLATFORM_LABELS[h.platform] || h.platform) + '</p>';
+                    html += '<p class="text-[10px] text-[#A3A095] truncate">' + (h.model || 'Unknown model') + '</p></div>';
+                    html += '</div>';
+                    html += '<div class="text-right shrink-0 ml-2"><p class="text-[12px] font-semibold text-[#2C2B29]">' + formatTokenCount(h.totalTokens) + '</p>';
+                    html += '<p class="text-[10px] text-[#A3A095]">' + timeStr + '</p></div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        function setTokenLimit(plat) {
+            const input = document.getElementById('limit-' + plat);
+            const val = parseInt(input.value) || 0;
+            tokenUsage.limits[plat] = Math.max(0, val);
+            saveTokenUsage();
+            renderTokenModal();
+            showToast(TOKEN_PLATFORM_LABELS[plat] + ' limit ' + (val > 0 ? 'set to ' + formatTokenCount(val) : 'removed'));
+        }
+
+        function confirmResetTokenUsage() {
+            if (!confirm('Reset all token usage data? This cannot be undone.')) return;
+            TOKEN_PLATFORMS.forEach(p => {
+                tokenUsage[p] = { promptTokens:0, completionTokens:0, totalTokens:0, requestCount:0 };
+            });
+            tokenUsage.history = [];
+            saveTokenUsage();
+            renderTokenModal();
+            showToast('Token usage reset');
         }
 
         // --- UI Interactions ---
@@ -2129,6 +2343,10 @@
                         const parts = data.candidates?.[0]?.content?.parts || [];
                         const text = parts.map(p => p.text || '').join('').trim();
                         if (!text) continue;
+                        // Capture token usage from web search
+                        if (data.usageMetadata) {
+                            recordTokenUsage('gemini', data.usageMetadata.promptTokenCount || 0, data.usageMetadata.candidatesTokenCount || 0, model);
+                        }
                         const meta = data.candidates?.[0]?.groundingMetadata || {};
                         const srcMap = new Map();
                         (meta.groundingChunks || []).forEach(ch => {
@@ -2576,6 +2794,12 @@
             const hasImage = uploadedImages.length > 0 || uploadedImage !== null;
             if ((!hasText && !hasImage) || isLoading || isStreaming) return;
 
+            // Check token limit
+            if (!checkTokenLimit(platform)) {
+                showToast('⚠️ Token limit reached for ' + TOKEN_PLATFORM_LABELS[platform] + '. Increase or remove limit in Settings → Token Management.');
+                return;
+            }
+
             welcomeScreen.classList.add('hidden');
 
             const imagesToSend = uploadedImages.length > 0 ? [...uploadedImages] : (uploadedImage ? [uploadedImage] : []);
@@ -2816,6 +3040,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             const reader = res.body.getReader();
                             const decoder = new TextDecoder();
                             let buf = '';
+                            lastStreamUsage = null;
                             while (true) {
                                 const { done, value } = await reader.read();
                                 if (done) break;
@@ -2836,9 +3061,23 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                             chks.forEach(ch => { if (ch.web?.uri) uniqueSources.push({ uri: ch.web.uri, title: ch.web.title || ch.web.uri }); });
                                             queries = meta.webSearchQueries || queries;
                                         }
+                                        // Capture Gemini usage metadata
+                                        if (chunk.usageMetadata) {
+                                            lastStreamUsage = {
+                                                promptTokens: chunk.usageMetadata.promptTokenCount || 0,
+                                                completionTokens: chunk.usageMetadata.candidatesTokenCount || 0
+                                            };
+                                        }
                                         // OpenRouter SSE format
                                         const delta = chunk.choices?.[0]?.delta?.content;
                                         if (delta) fullRaw += delta;
+                                        // Capture OpenAI-compatible usage
+                                        if (chunk.usage) {
+                                            lastStreamUsage = {
+                                                promptTokens: chunk.usage.prompt_tokens || 0,
+                                                completionTokens: chunk.usage.completion_tokens || 0
+                                            };
+                                        }
                                     } catch(e) {}
 
                                     // ── LIVE RENDER (RAF-throttled) ──
@@ -2883,7 +3122,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             const res = await fetch(chatUrl, {
                                 method: 'POST',
                                 headers: chatHeaders,
-                                body: JSON.stringify({ model: chatModel, messages: chatMessages, stream: true }),
+                                body: JSON.stringify({ model: chatModel, messages: chatMessages, stream: true, stream_options: { include_usage: true } }),
                                 signal: abortController.signal
                             });
                             if (res.status === 429 || res.status === 503) {
@@ -2939,6 +3178,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                 const gParts = data.candidates?.[0]?.content?.parts || [];
                                 const webRaw = gParts.map(p => p.text || '').join('');
                                 const meta = data.candidates?.[0]?.groundingMetadata || {};
+                                // Capture token usage from Gemini non-streaming response
+                                if (data.usageMetadata) {
+                                    recordTokenUsage('gemini', data.usageMetadata.promptTokenCount || 0, data.usageMetadata.candidatesTokenCount || 0, modelId);
+                                }
                                 const chks = meta.groundingChunks || [];
                                 const attrs = meta.groundingAttributions || [];
                                 const srcMap = new Map();
@@ -2980,6 +3223,13 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 }
 
                 // ── FINALISE ──
+                // Record token usage from stream
+                if (lastStreamUsage) {
+                    const activePlat = platform;
+                    const activeModel = platform === 'gemini' ? modelId : platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : mistralModelId;
+                    recordTokenUsage(activePlat, lastStreamUsage.promptTokens, lastStreamUsage.completionTokens, activeModel);
+                    lastStreamUsage = null;
+                }
                 renderDirty = true;   // ensure RAF sees final state
                 extraFrames = 5;      // run 5 extra frames after stream ends
                 streamActive = false;
