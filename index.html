@@ -63,6 +63,10 @@
             'pin': '<line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>',
             'pin-off': '<line x1="2" y1="2" x2="22" y2="22"/><line x1="12" y1="17" x2="12" y2="22"/><path d="M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h12"/><path d="M15 9.34V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0-1 .27"/>',
             'images': '<path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/>',
+            'paperclip': '<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+            'bell': '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+            'mail': '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+            'clock': '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
             'filter': '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
         },
         createIcons() {
@@ -323,7 +327,7 @@
         <!-- Drag & Drop Overlay -->
         <div id="drag-overlay">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-            <p style="color:#D25D38;font-weight:600;font-size:14px;">Drop image to attach</p>
+            <p style="color:#D25D38;font-weight:600;font-size:14px;">Drop file to attach</p>
         </div>
 
         <!-- Sidebar Overlay -->
@@ -526,13 +530,21 @@
                         <i data-lucide="info" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
                         <span class="text-[14px] text-[#5B5951]">About Us</span>
                     </button>
+                    <button onclick="openUpdatesModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
+                        <i data-lucide="bell" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
+                        <span class="text-[14px] text-[#5B5951]">Updates</span>
+                    </button>
+                    <button onclick="openContactModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
+                        <i data-lucide="mail" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
+                        <span class="text-[14px] text-[#5B5951]">Contact Us</span>
+                    </button>
                 </div>
             </div>
             <div class="p-5 border-t border-[#EAE8E0] bg-[#F2F0E9]">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-[#D25D38] text-white flex items-center justify-center font-bold text-sm shadow-sm">ON</div>
+                    <div class="w-8 h-8 rounded-full bg-[#D25D38] text-white flex items-center justify-center font-bold text-sm shadow-sm">SM</div>
                     <div>
-                        <p class="text-[13px] font-semibold text-[#2C2B29]">OgNovah</p>
+                        <p class="text-[13px] font-semibold text-[#2C2B29]">Shahzaib Muzaffar</p>
                         <p class="text-[11px] text-[#737166]">SnoahAI User</p>
                     </div>
                 </div>
@@ -577,6 +589,14 @@
                 </div>
             </div>
 
+            <!-- Temp Chat Indicator -->
+            <div id="temp-chat-banner" class="hidden w-full flex justify-center mb-2">
+                <div class="flex items-center gap-2 bg-[#FEF3C7] text-[#92400E] px-4 py-1.5 rounded-full text-[12px] font-semibold border border-[#FDE68A] shadow-sm">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                    <span>Temp Chat — this conversation won't be saved</span>
+                </div>
+            </div>
+
             <!-- Messages go here -->
             <div id="messages-wrapper" class="flex flex-col space-y-7 w-full"></div>
 
@@ -592,7 +612,7 @@
         </div>
 
         <!-- Hidden image file input (multiple) -->
-        <input type="file" id="image-input" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event)">
+        <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.md" multiple class="hidden" onchange="handleFileUpload(event)">
 
         <!-- ===== BOTTOM INPUT AREA ===== -->
         <!-- Scroll jump button -->
@@ -611,8 +631,11 @@
                     <button id="btn-agent" onclick="toggleFeature('agent')" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="search" class="w-3.5 h-3.5"></i> Web
                     </button>
-                    <button id="btn-image" onclick="triggerImageUpload()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
-                        <i data-lucide="image" class="w-3.5 h-3.5"></i> Image
+                    <button id="btn-image" onclick="triggerFileUpload()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
+                        <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> Attach
+                    </button>
+                    <button id="btn-temp-chat" onclick="toggleTempChat()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
+                        <i data-lucide="clock" class="w-3.5 h-3.5"></i> Temp Chat
                     </button>
                     <button id="btn-length" onclick="cycleLength()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="align-left" class="w-3.5 h-3.5"></i> <span id="length-label">Normal</span>
@@ -631,7 +654,7 @@
 
                 <!-- Input Box -->
                 <div class="flex items-end gap-2 px-3 pb-3 pt-2 bg-white">
-                    <button onclick="triggerImageUpload()" title="Attach image" class="p-2 mb-0.5 text-[#8C897D] hover:text-[#D25D38] transition-colors rounded-full hover:bg-[#F2F0E9]">
+                    <button onclick="triggerFileUpload()" title="Attach file" class="p-2 mb-0.5 text-[#8C897D] hover:text-[#D25D38] transition-colors rounded-full hover:bg-[#F2F0E9]">
                         <i data-lucide="plus" class="w-[22px] h-[22px]"></i>
                     </button>
                     
@@ -857,12 +880,12 @@
                     <div class="text-center space-y-2">
                         <div class="w-14 h-14 rounded-2xl bg-[#D25D38] text-white flex items-center justify-center font-bold text-xl shadow-md mx-auto">S</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI</h3>
-                        <p class="text-[12px] text-[#A3A095]">Version 1.0 &middot; Built by OgNovah</p>
+                        <p class="text-[12px] text-[#A3A095]">Version 1.0 &middot; Built by Shahzaib Muzaffar</p>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">Who We Are</h3>
-                        <p>SnoahAI is a privacy-first AI chat assistant built by <strong>OgNovah</strong>. Our mission is to provide a seamless, intelligent conversational experience that connects you to the world's leading AI platforms — all from a single, elegant interface that runs entirely in your browser.</p>
+                        <p>SnoahAI is a privacy-first AI chat assistant built by <strong>Shahzaib Muzaffar</strong>. Our mission is to provide a seamless, intelligent conversational experience that connects you to the world's leading AI platforms — all from a single, elegant interface that runs entirely in your browser.</p>
                     </div>
 
                     <div>
@@ -877,7 +900,7 @@
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">Contact</h3>
-                        <p>SnoahAI is developed and maintained by OgNovah. For feedback, suggestions, or issues, please reach out through our GitHub repository.</p>
+                        <p>SnoahAI is developed and maintained by Shahzaib Muzaffar. For feedback, suggestions, or issues, please reach out through our GitHub repository.</p>
                     </div>
 
                     <!-- Terms & Conditions Section -->
@@ -941,6 +964,98 @@
             </div>
         </div>
 
+        <!-- ===== UPDATES MODAL ===== -->
+        <div id="updates-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
+            <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeUpdatesModal()"></div>
+            <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height: 88%;">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-[#F2F0E9] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                        </div>
+                        <h2 class="font-serif font-semibold text-[17px]">Updates</h2>
+                    </div>
+                    <button onclick="closeUpdatesModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="p-5 overflow-y-auto flex-1 text-[13px] text-[#5B5951] leading-relaxed space-y-5">
+                    <div class="text-center space-y-2">
+                        <div class="text-3xl">🆕</div>
+                        <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">Temp Chat &amp; New Features</h3>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">Beta Testing</span>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">What's New</h3>
+                        <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Temp Chat</strong> — Start a temporary conversation that won't be saved to your chat history. Perfect for quick questions or sensitive topics.</li>
+                            <li><strong>File Attachments</strong> — You can now attach PDFs, text files, CSVs, JSON, Markdown, and other documents in addition to images. Document content is extracted and sent as context.</li>
+                            <li><strong>Contact Us</strong> — Reach the developer directly via Telegram or Instagram from the sidebar.</li>
+                            <li><strong>Updates Panel</strong> — Stay informed about the latest features and changes (you're looking at it!).</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-[#FEF3C7] border border-[#FDE68A] rounded-xl p-4">
+                        <h4 class="font-semibold text-[13px] text-[#92400E] mb-1">⚠️ Beta Testing Disclaimer</h4>
+                        <p class="text-[12px] text-[#92400E]/80">These features are currently in beta testing and may contain bugs or behave unexpectedly. Your feedback is invaluable — please report any issues through the Contact Us option in the sidebar. Features and behavior may change without notice.</p>
+                    </div>
+                </div>
+                <div class="px-5 py-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
+                    <button onclick="closeUpdatesModal()" class="w-full py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CONTACT US MODAL ===== -->
+        <div id="contact-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
+            <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeContactModal()"></div>
+            <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height: 88%;">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-[#F2F0E9] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        </div>
+                        <h2 class="font-serif font-semibold text-[17px]">Contact Us</h2>
+                    </div>
+                    <button onclick="closeContactModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="p-5 overflow-y-auto flex-1 text-[13px] text-[#5B5951] leading-relaxed space-y-5">
+                    <div class="text-center space-y-2 mb-2">
+                        <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">Get in Touch</h3>
+                        <p class="text-[12px] text-[#A3A095]">Reach out to Shahzaib Muzaffar through any of the channels below</p>
+                    </div>
+
+                    <a href="https://t.me/Owner_Of_Crypton" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
+                        <div class="w-10 h-10 rounded-xl bg-[#E3F2FD] flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A6EBD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">Telegram</p>
+                            <p class="text-[12px] text-[#A3A095]">@Owner_Of_Crypton</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                    </a>
+
+                    <a href="https://instagram.com/shahzaib_muzaffar_7" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
+                        <div class="w-10 h-10 rounded-xl bg-[#FCE4EC] flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C4396B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">Instagram</p>
+                            <p class="text-[12px] text-[#A3A095]">@shahzaib_muzaffar_7</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                    </a>
+                </div>
+                <div class="px-5 py-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
+                    <button onclick="closeContactModal()" class="w-full py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Close</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ===== TOKEN MANAGEMENT MODAL ===== -->
         <div id="token-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
             <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeTokenModal()"></div>
@@ -999,6 +1114,7 @@
         let messages = [];
         let isLoading = false;
         let isStreaming = false;
+        let isTempChat = false;
         let useThinking = false;
         let useAgent = false;
         let isSidebarOpen = false;
@@ -1161,6 +1277,42 @@
 
         function closeAboutModal() {
             document.getElementById('about-modal').classList.add('hidden');
+        }
+
+        function openUpdatesModal() {
+            if (isSidebarOpen) toggleSidebar();
+            document.getElementById('updates-modal').classList.remove('hidden');
+        }
+
+        function closeUpdatesModal() {
+            document.getElementById('updates-modal').classList.add('hidden');
+        }
+
+        function openContactModal() {
+            if (isSidebarOpen) toggleSidebar();
+            document.getElementById('contact-modal').classList.remove('hidden');
+        }
+
+        function closeContactModal() {
+            document.getElementById('contact-modal').classList.add('hidden');
+        }
+
+        function toggleTempChat() {
+            isTempChat = !isTempChat;
+            updateTempChatUI();
+        }
+
+        function updateTempChatUI() {
+            const btn = document.getElementById('btn-temp-chat');
+            const banner = document.getElementById('temp-chat-banner');
+            if (btn) {
+                btn.className = isTempChat
+                    ? "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]"
+                    : "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
+            }
+            if (banner) {
+                banner.classList.toggle('hidden', !isTempChat);
+            }
         }
 
         // --- Token Management ---
@@ -1329,10 +1481,10 @@
         appContainer.addEventListener('drop', e => {
             e.preventDefault();
             document.getElementById('drag-overlay').classList.remove('active');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const fakeEvt = { target: { files: [file] } };
-                handleImageUpload(fakeEvt);
+            const files = Array.from(e.dataTransfer.files);
+            if (files.length > 0) {
+                const fakeEvt = { target: { files: files } };
+                handleFileUpload(fakeEvt);
             }
         });
 
@@ -1460,6 +1612,7 @@
         }
 
         function saveCurrentChat() {
+            if (isTempChat) return;
             if (!currentChatId || messages.length === 0) return;
             const saveable = messages.filter(m => !m.isError).map(m => ({
                 role: m.role,
@@ -1556,6 +1709,8 @@
             messages = [];
             messagesWrapper.innerHTML = '';
             welcomeScreen.classList.remove('hidden');
+            isTempChat = false;
+            updateTempChatUI();
             renderChatHistoryList();
             if (isSidebarOpen) toggleSidebar();
         }
@@ -2513,24 +2668,62 @@
             setTimeout(() => { toast.style.animation = 'toastOut 0.2s ease forwards'; setTimeout(() => toast.remove(), 200); }, 2000);
         }
 
-        // --- Image Upload ---
-        function triggerImageUpload() { document.getElementById('image-input').click(); }
+        // --- File Upload ---
+        function triggerFileUpload() { document.getElementById('file-input').click(); }
 
-        function handleImageUpload(event) {
-            const files = Array.from(event.target.files).filter(f => f.type.startsWith('image/'));
+        const DOCUMENT_EXTENSIONS = ['.pdf','.doc','.docx','.txt','.csv','.json','.xml','.md'];
+        const DOCUMENT_MIME_TYPES = ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/plain','text/csv','application/json','text/xml','application/xml','text/markdown'];
+
+        function isDocumentFile(file) {
+            if (DOCUMENT_MIME_TYPES.some(m => file.type === m)) return true;
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            return DOCUMENT_EXTENSIONS.includes(ext);
+        }
+
+        function handleFileUpload(event) {
+            const files = Array.from(event.target.files);
             if (!files.length) return;
+            const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
             let loaded = 0;
+            const total = files.length;
             files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const full = e.target.result;
-                    uploadedImages.push({ data: full.split(',')[1], mimeType: file.type, previewUrl: full });
+                if (file.size > MAX_FILE_SIZE) {
+                    showToast('⚠️ File too large: ' + file.name + ' (max 10 MB)');
                     loaded++;
-                    if (loaded === files.length) renderImagePreviews();
-                };
-                reader.readAsDataURL(file);
+                    if (loaded === total) renderImagePreviews();
+                    return;
+                }
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const full = e.target.result;
+                        uploadedImages.push({ data: full.split(',')[1], mimeType: file.type, previewUrl: full, isImage: true });
+                        loaded++;
+                        if (loaded === total) renderImagePreviews();
+                    };
+                    reader.readAsDataURL(file);
+                } else if (isDocumentFile(file)) {
+                    const textReader = new FileReader();
+                    textReader.onload = (e) => {
+                        const textContent = e.target.result;
+                        uploadedImages.push({
+                            data: null,
+                            mimeType: file.type,
+                            previewUrl: null,
+                            isImage: false,
+                            fileName: file.name,
+                            textContent: textContent
+                        });
+                        loaded++;
+                        if (loaded === total) renderImagePreviews();
+                    };
+                    textReader.readAsText(file);
+                } else {
+                    loaded++;
+                    if (loaded === total) renderImagePreviews();
+                }
             });
-            event.target.value = '';
+            if (event.target.value !== undefined) event.target.value = '';
         }
 
         function renderImagePreviews() {
@@ -2538,13 +2731,25 @@
             const container = document.getElementById('image-preview-container');
             if (!uploadedImages.length) { container.classList.add('hidden'); return; }
             container.classList.remove('hidden');
-            strip.innerHTML = uploadedImages.map((img, i) =>
-                '<div class="multi-img-item shrink-0" style="position:relative;">' +
-                '<img src="' + img.previewUrl + '" class="h-14 w-14 rounded-xl object-cover border border-[#E5E3DB] shadow-sm">' +
-                '<button onclick="removeImage(' + i + ')" style="position:absolute;top:-6px;right:-6px;" class="w-[18px] h-[18px] bg-[#2C2B29] text-white rounded-full flex items-center justify-center shadow hover:bg-[#D25D38] transition-colors">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                '</button></div>'
-            ).join('');
+            strip.innerHTML = uploadedImages.map((img, i) => {
+                if (img.isImage !== false && img.previewUrl) {
+                    return '<div class="multi-img-item shrink-0" style="position:relative;">' +
+                        '<img src="' + img.previewUrl + '" class="h-14 w-14 rounded-xl object-cover border border-[#E5E3DB] shadow-sm">' +
+                        '<button onclick="removeImage(' + i + ')" style="position:absolute;top:-6px;right:-6px;" class="w-[18px] h-[18px] bg-[#2C2B29] text-white rounded-full flex items-center justify-center shadow hover:bg-[#D25D38] transition-colors">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                        '</button></div>';
+                } else {
+                    const fname = escapeHTML(img.fileName || 'document');
+                    return '<div class="multi-img-item shrink-0" style="position:relative;">' +
+                        '<div class="h-14 w-14 rounded-xl border border-[#E5E3DB] shadow-sm bg-[#F2F0E9] flex flex-col items-center justify-center gap-0.5">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>' +
+                        '<span class="text-[8px] text-[#737166] max-w-[50px] truncate">' + fname + '</span>' +
+                        '</div>' +
+                        '<button onclick="removeImage(' + i + ')" style="position:absolute;top:-6px;right:-6px;" class="w-[18px] h-[18px] bg-[#2C2B29] text-white rounded-full flex items-center justify-center shadow hover:bg-[#D25D38] transition-colors">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                        '</button></div>';
+                }
+            }).join('');
             const count = uploadedImages.length;
             const btnImageToggle = document.getElementById('btn-image');
             if (btnImageToggle) btnImageToggle.className = count > 0
@@ -2821,7 +3026,14 @@
             if (imagesToSend.length > 0) {
                 bubble += '<div class="flex flex-wrap gap-1.5 mb-2">';
                 imagesToSend.forEach(img => {
-                    bubble += '<img src="' + img.previewUrl + '" alt="Attached" class="max-h-36 max-w-[120px] rounded-xl object-contain border border-[#E5E3DB]/50">';
+                    if (img.isImage !== false && img.previewUrl) {
+                        bubble += '<img src="' + img.previewUrl + '" alt="Attached" class="max-h-36 max-w-[120px] rounded-xl object-contain border border-[#E5E3DB]/50">';
+                    } else {
+                        const fname = escapeHTML(img.fileName || 'document');
+                        bubble += '<div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#F2F0E9] border border-[#E5E3DB]">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+                            '<span class="text-[12px] text-[#5B5951] font-medium">' + fname + '</span></div>';
+                    }
                 });
                 bubble += '</div>';
             }
@@ -2925,7 +3137,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                     const parts = [];
                     if (contentText) parts.push({ text: contentText });
                     if (msg.images && msg === messages[messages.length - 1]) {
-                        msg.images.forEach(img => parts.push({ inlineData: { mimeType: img.mimeType, data: img.data } }));
+                        msg.images.forEach(img => {
+                            if (img.isImage !== false && img.data) {
+                                parts.push({ inlineData: { mimeType: img.mimeType, data: img.data } });
+                            } else if (img.textContent) {
+                                const docLabel = img.fileName ? '[Attached file: ' + img.fileName + ']\n' : '';
+                                parts.push({ text: docLabel + img.textContent });
+                            }
+                        });
                     }
                     if (parts.length === 0) parts.push({ text: '' });
                     if (mappedRole === lastRole && !msg.images?.length && formattedContents.length > 0) {
@@ -3503,6 +3722,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
             messages = [];
             messagesWrapper.innerHTML = '';
             welcomeScreen.classList.remove('hidden');
+            isTempChat = false;
+            updateTempChatUI();
             updatePinBadge();
             if (isSidebarOpen) toggleSidebar();
         }
