@@ -501,6 +501,10 @@
                         <i data-lucide="trash-2" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
                         <span class="text-[14px] text-[#5B5951] group-hover:text-[#D25D38]">Delete Chat History</span>
                     </button>
+                    <button onclick="openAboutModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
+                        <i data-lucide="info" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
+                        <span class="text-[14px] text-[#5B5951]">About Us</span>
+                    </button>
                 </div>
             </div>
             <div class="p-5 border-t border-[#EAE8E0] bg-[#F2F0E9]">
@@ -812,6 +816,110 @@
             </div>
         </div>
 
+        <!-- ===== ABOUT US MODAL ===== -->
+        <div id="about-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
+            <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeAboutModal()"></div>
+            <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height: 88%;">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-[#F2F0E9] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        </div>
+                        <h2 class="font-serif font-semibold text-[17px]">About Us</h2>
+                    </div>
+                    <button onclick="closeAboutModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="p-5 overflow-y-auto flex-1 text-[13px] text-[#5B5951] leading-relaxed space-y-5">
+                    <!-- About Section -->
+                    <div class="text-center space-y-2">
+                        <div class="w-14 h-14 rounded-2xl bg-[#D25D38] text-white flex items-center justify-center font-bold text-xl shadow-md mx-auto">S</div>
+                        <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI</h3>
+                        <p class="text-[12px] text-[#A3A095]">Version 1.0 &middot; Built by OgNovah</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">Who We Are</h3>
+                        <p>SnoahAI is a privacy-first AI chat assistant built by <strong>OgNovah</strong>. Our mission is to provide a seamless, intelligent conversational experience that connects you to the world's leading AI platforms — all from a single, elegant interface that runs entirely in your browser.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">What We Do</h3>
+                        <p>SnoahAI serves as a unified gateway to multiple AI platforms including Google Gemini, OpenRouter, Groq, Together AI, and Mistral AI. We provide features like multi-model support, voice input & output, image analysis, code highlighting, math rendering, and much more — all without requiring a backend server.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">Our Philosophy</h3>
+                        <p>We believe your data belongs to you. SnoahAI stores everything locally in your browser — your API keys, chat history, settings, and preferences never leave your device. No accounts, no tracking, no servers collecting your conversations.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">Contact</h3>
+                        <p>SnoahAI is developed and maintained by OgNovah. For feedback, suggestions, or issues, please reach out through our GitHub repository.</p>
+                    </div>
+
+                    <!-- Terms & Conditions Section -->
+                    <div class="border-t border-[#EAE8E0] pt-5 mt-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            <h3 class="font-serif font-semibold text-[16px] text-[#2C2B29]">Terms & Conditions</h3>
+                        </div>
+                        <p class="text-[12px] text-[#A3A095] mb-3">Last updated: March 2026</p>
+
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">1. Acceptance of Terms</h4>
+                                <p>By accessing and using SnoahAI, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use this application.</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">2. Service Description</h4>
+                                <p>SnoahAI is an AI chat assistant that connects to third-party AI platforms (Google Gemini, OpenRouter, Groq, Together AI, Mistral AI) using API keys that you provide. SnoahAI does not provide its own AI models.</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">3. API Keys & Data Storage</h4>
+                                <p>Your API keys and preferences are stored locally on your device using browser local storage. SnoahAI does not transmit your keys to any server other than the selected AI platform's official API endpoint.</p>
+                                <ul class="list-disc list-inside mt-1.5 space-y-1">
+                                    <li><strong>Cookies Accepted:</strong> You may store multiple API keys per platform, enabling auto-rotation on rate limits for uninterrupted usage.</li>
+                                    <li><strong>Cookies Rejected:</strong> Storage is limited to 1 API key per platform. Additional keys cannot be saved.</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">4. User Responsibilities</h4>
+                                <p>You are responsible for safeguarding your API keys and for any charges incurred through their use. Do not share your API keys publicly. You must comply with the terms of service of each third-party AI platform.</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">5. Privacy</h4>
+                                <p>SnoahAI operates entirely in your browser. Chat history, settings, and API keys are stored in your browser's local storage and are not sent to SnoahAI's servers. Conversations are sent directly to the AI platform you have selected.</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">6. Disclaimer</h4>
+                                <p>SnoahAI is provided "as is" without warranties of any kind. AI responses may contain inaccuracies. Do not rely on SnoahAI for medical, legal, or financial advice without consulting a qualified professional.</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">7. Limitation of Liability</h4>
+                                <p>SnoahAI and its developer shall not be liable for any damages arising from the use of this application, including but not limited to data loss, API charges, or inaccurate AI responses.</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">8. Changes to Terms</h4>
+                                <p>These terms may be updated from time to time. Continued use of SnoahAI after changes constitutes acceptance of the updated terms.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-5 py-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
+                    <button onclick="closeAboutModal()" class="w-full py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Close</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- ===== APPLICATION LOGIC ===== -->
@@ -953,6 +1061,15 @@
 
         function closeTermsModal() {
             document.getElementById('terms-modal').classList.add('hidden');
+        }
+
+        function openAboutModal() {
+            if (isSidebarOpen) toggleSidebar();
+            document.getElementById('about-modal').classList.remove('hidden');
+        }
+
+        function closeAboutModal() {
+            document.getElementById('about-modal').classList.add('hidden');
         }
 
         // --- UI Interactions ---
