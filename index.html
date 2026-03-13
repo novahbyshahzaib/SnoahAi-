@@ -3119,10 +3119,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                 ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey }
                                 : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey, 'HTTP-Referer': 'https://snoah.ai', 'X-Title': 'SnoahAI' };
                             abortController = new AbortController();
+                            const chatBody = { model: chatModel, messages: chatMessages, stream: true };
+                            if (!isMistral) chatBody.stream_options = { include_usage: true };
                             const res = await fetch(chatUrl, {
                                 method: 'POST',
                                 headers: chatHeaders,
-                                body: JSON.stringify({ model: chatModel, messages: chatMessages, stream: true, stream_options: { include_usage: true } }),
+                                body: JSON.stringify(chatBody),
                                 signal: abortController.signal
                             });
                             if (res.status === 429 || res.status === 503) {
