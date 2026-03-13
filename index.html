@@ -2701,6 +2701,7 @@
                         loaded++;
                         if (loaded === total) renderImagePreviews();
                     };
+                    reader.onerror = () => { showToast('⚠️ Failed to read: ' + file.name); loaded++; if (loaded === total) renderImagePreviews(); };
                     reader.readAsDataURL(file);
                 } else if (isDocumentFile(file)) {
                     const textReader = new FileReader();
@@ -2717,6 +2718,7 @@
                         loaded++;
                         if (loaded === total) renderImagePreviews();
                     };
+                    textReader.onerror = () => { showToast('⚠️ Failed to read: ' + file.name); loaded++; if (loaded === total) renderImagePreviews(); };
                     textReader.readAsText(file);
                 } else {
                     loaded++;
