@@ -938,11 +938,15 @@
             localStorage.setItem('snoah_cookies_accepted', 'false');
             document.getElementById('cookie-banner').classList.add('hidden');
             // Enforce single-key limit: trim existing keys to 1 per platform
-            if (geminiKeys.length > 1) { geminiKeys = [geminiKeys[0]]; localStorage.setItem('snoah_gemini_keys', JSON.stringify(geminiKeys)); geminiKeyIdx = 0; apiKey = geminiKeys[0]; }
-            if (orKeys.length > 1) { orKeys = [orKeys[0]]; localStorage.setItem('snoah_or_keys', JSON.stringify(orKeys)); orKeyIdx = 0; orApiKey = orKeys[0]; }
-            if (groqKeys.length > 1) { groqKeys = [groqKeys[0]]; localStorage.setItem('snoah_groq_keys', JSON.stringify(groqKeys)); groqKeyIdx = 0; groqApiKey = groqKeys[0]; }
-            if (togetherKeys.length > 1) { togetherKeys = [togetherKeys[0]]; localStorage.setItem('snoah_together_keys', JSON.stringify(togetherKeys)); togetherKeyIdx = 0; togetherApiKey = togetherKeys[0]; }
-            if (mistralKeys.length > 1) { mistralKeys = [mistralKeys[0]]; localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys)); mistralKeyIdx = 0; mistralApiKey = mistralKeys[0]; }
+            function trimKeys(keys, storageKey) {
+                if (keys.length > 1) { keys.length = 1; localStorage.setItem(storageKey, JSON.stringify(keys)); }
+                return keys[0] || '';
+            }
+            apiKey = trimKeys(geminiKeys, 'snoah_gemini_keys'); geminiKeyIdx = 0;
+            orApiKey = trimKeys(orKeys, 'snoah_or_keys'); orKeyIdx = 0;
+            groqApiKey = trimKeys(groqKeys, 'snoah_groq_keys'); groqKeyIdx = 0;
+            togetherApiKey = trimKeys(togetherKeys, 'snoah_together_keys'); togetherKeyIdx = 0;
+            mistralApiKey = trimKeys(mistralKeys, 'snoah_mistral_keys'); mistralKeyIdx = 0;
             renderKeysList();
             showToast('Cookies rejected — limited to 1 key per platform');
         }
