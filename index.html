@@ -112,23 +112,28 @@
         .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
         .animate-modal { animation: slideInModal 0.25s ease-out forwards; }
 
-        /* Blinking Cursor */
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        /* Blinking Cursor — smooth pulse */
+        @keyframes cursorPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
         .thinking-dots::after {
             content: '●●●';
-            animation: tdots 1.2s steps(3,end) infinite;
+            animation: tdots 1.4s ease-in-out infinite;
             letter-spacing: 3px;
             font-size: 10px;
             color: #8C897D;
             margin-left: 4px;
         }
         @keyframes tdots {
-            0%   { content: '●'; }
-            33%  { content: '●●'; }
-            66%  { content: '●●●'; }
-            100% { content: '●●●'; }
+            0%   { content: '●'; opacity: 0.4; }
+            25%  { content: '●●'; opacity: 0.7; }
+            50%  { content: '●●●'; opacity: 1; }
+            75%  { content: '●●'; opacity: 0.7; }
+            100% { content: '●'; opacity: 0.4; }
         }
-        .streaming-cursor { display: inline-block; width: 8px; height: 16px; margin-left: 4px; background-color: #D25D38; animation: blink 1s step-end infinite; }
+        .streaming-cursor { display: inline-block; width: 3px; height: 18px; margin-left: 2px; background-color: #D25D38; border-radius: 2px; animation: cursorPulse 0.8s ease-in-out infinite; vertical-align: text-bottom; }
+        /* Streaming indicator bar above input */
+        @keyframes streamingSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+        #streaming-bar-indicator { position: absolute; bottom: 100%; left: 0; right: 0; z-index: 25; pointer-events: none; transition: opacity 0.3s ease; overflow: hidden; }
+        #streaming-bar-indicator .bar-inner { height: 3px; background: linear-gradient(90deg, transparent, #D25D38, transparent); width: 50%; animation: streamingSlide 1.5s ease-in-out infinite; border-radius: 2px; }
 
         /* KaTeX Math Styles */
         .katex-display { overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
@@ -621,7 +626,16 @@
         </button>
 
         <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent pt-12 pb-5 sm:pb-8 px-4 shrink-0 z-20">
-            <div class="bg-white input-bg rounded-[24px] shadow-[0_2px_20px_-3px_rgba(0,0,0,0.08),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-[#E5E3DB] overflow-hidden flex flex-col">
+            <!-- Floating loading indicator above input bar -->
+            <div id="floating-loading" class="hidden justify-center mb-2 transition-all duration-300">
+                <div class="flex gap-1.5 items-center bg-[#F2F0E9] px-4 py-2 rounded-full border border-[#E5E3DB] shadow-sm">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-[#D25D38] animate-pulse"></i>
+                    <span id="floating-loading-text" class="text-[11px] font-bold text-[#737166] uppercase tracking-wider ml-1">SnoahAI is typing...</span>
+                </div>
+            </div>
+            <div class="relative bg-white input-bg rounded-[24px] shadow-[0_2px_20px_-3px_rgba(0,0,0,0.08),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-[#E5E3DB] overflow-hidden flex flex-col">
+                <!-- Streaming progress bar -->
+                <div id="streaming-bar-indicator" class="hidden"><div class="bar-inner"></div></div>
                 
                 <!-- Toggle Buttons -->
                 <div class="flex items-center gap-1.5 px-3 pt-3 pb-1.5 border-b border-[#F2F0E9] bg-white flex-wrap">
@@ -981,18 +995,47 @@
                 </div>
                 <div class="p-5 overflow-y-auto flex-1 text-[13px] text-[#5B5951] leading-relaxed space-y-5">
                     <div class="text-center space-y-2">
-                        <div class="text-3xl">🆕</div>
-                        <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">Temp Chat &amp; New Features</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">Beta Testing</span>
+                        <div class="text-3xl">🚀</div>
+                        <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v2.0 Beta</span>
                     </div>
 
                     <div>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">What's New</h3>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
-                            <li><strong>Temp Chat</strong> — Start a temporary conversation that won't be saved to your chat history. Perfect for quick questions or sensitive topics.</li>
-                            <li><strong>File Attachments</strong> — You can now attach PDFs, text files, CSVs, JSON, Markdown, and other documents in addition to images. Document content is extracted and sent as context.</li>
-                            <li><strong>Contact Us</strong> — Reach the developer directly via Telegram or Instagram from the sidebar.</li>
-                            <li><strong>Updates Panel</strong> — Stay informed about the latest features and changes (you're looking at it!).</li>
+                            <li><strong>Smooth Streaming Animation</strong> — Redesigned streaming cursor with smooth pulse animation and a progress bar above the input area for better visual feedback.</li>
+                            <li><strong>Floating Loading Indicator</strong> — The "SnoahAI is typing..." indicator now appears above the input bar, always visible during AI response generation.</li>
+                            <li><strong>Haptic Feedback</strong> — Subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.</li>
+                            <li><strong>Stream Timeout Protection</strong> — Automatic timeout after 45 seconds of no data, preventing infinite loading states. Clear error message displayed.</li>
+                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 30 features of the app and can answer any question about how to use them.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">📋 All Features</h3>
+                        <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>5 AI Platforms</strong> — Google Gemini, OpenRouter, Groq, Together AI, Mistral AI. Switch in Settings.</li>
+                            <li><strong>Thinking Mode</strong> — 🧠 AI reasons step-by-step with a live collapsible thinking block.</li>
+                            <li><strong>Web Search</strong> — 🔍 Real-time Google Search grounding via Gemini. Works from any platform when enabled.</li>
+                            <li><strong>File Attachments</strong> — 📎 Upload images, PDFs, text files, CSVs, JSON, Markdown, and more. Multi-file support with preview strip.</li>
+                            <li><strong>Temp Chat</strong> — 🕐 Temporary conversations that won't be saved to history.</li>
+                            <li><strong>Response Length</strong> — Cycle between Normal, Short, and Detailed response lengths.</li>
+                            <li><strong>Templates</strong> — 🔖 Pre-saved prompt starters with custom template support.</li>
+                            <li><strong>Dark Mode</strong> — Full dark theme via ☰ menu toggle.</li>
+                            <li><strong>Chat History</strong> — Auto-saved locally with auto-titling.</li>
+                            <li><strong>Chat Tags</strong> — Organize chats by category (Biology, Medicine, Physics, Code, Math, Other).</li>
+                            <li><strong>Pinned Messages</strong> — 📌 Pin important AI responses for quick access.</li>
+                            <li><strong>Summarize Chat</strong> — AI-generated 3-5 bullet summary of conversations.</li>
+                            <li><strong>Search Chats</strong> — Search across all saved conversations.</li>
+                            <li><strong>Custom Instructions &amp; AI Persona</strong> — Personalize AI behavior in Settings.</li>
+                            <li><strong>Themes</strong> — 4 color themes: Default, Ocean, Forest, Rose.</li>
+                            <li><strong>Slash Commands</strong> — Type / for quick shortcuts: /explain, /summarize, /translate, and more.</li>
+                            <li><strong>Code Runner</strong> — Run JavaScript and HTML code blocks inline.</li>
+                            <li><strong>TTS &amp; Voice Input</strong> — 🔊 Read responses aloud and 🎤 speak messages.</li>
+                            <li><strong>Multi-Key Pool</strong> — Add multiple API keys per platform with auto-rotation on rate limits.</li>
+                            <li><strong>Token Usage Tracking</strong> — Monitor your token usage per platform in Settings.</li>
+                            <li><strong>PWA Install</strong> — Install as a native-like app on Android home screen.</li>
+                            <li><strong>Contact Us</strong> — Reach the developer via Telegram or Instagram from the sidebar.</li>
                         </ul>
                     </div>
 
@@ -1216,6 +1259,9 @@
         const welcomeScreen = document.getElementById('welcome-screen');
         const loadingIndicator = document.getElementById('loading-indicator');
         const loadingText = document.getElementById('loading-text');
+        const floatingLoading = document.getElementById('floating-loading');
+        const floatingLoadingText = document.getElementById('floating-loading-text');
+        const streamingBarIndicator = document.getElementById('streaming-bar-indicator');
         const scrollAnchor = document.getElementById('scroll-anchor');
         const btnThinking = document.getElementById('btn-thinking');
         const btnAgent = document.getElementById('btn-agent');
@@ -3060,6 +3106,7 @@
 APP OVERVIEW:
 - Name: SnoahAI | Developer: Shahzaib Muzaffar | Full stack web app designed for Android browsers and installable as a PWA
 - The app can be installed on Android home screen (Add to Home Screen / PWA install banner) for a fullscreen native-like experience
+- Single-page app with all HTML/CSS/JS in one file, using Tailwind CSS for styling
 
 PLATFORMS & MODELS (all configurable in Settings):
 - Google Gemini: default platform. Models: gemini-2.5-flash, gemini-2.5-pro, etc. Supports web search grounding and image uploads.
@@ -3074,33 +3121,42 @@ MULTI-KEY POOL: Add multiple API keys per platform. On rate limit (429), app sil
 FEATURES:
 1. THINKING MODE (🧠 Thinking button): AI reasons step-by-step. A live collapsible "💭 Thinking…" block streams in real-time. Best for complex problems, math, logic. Available on all platforms.
 2. WEB SEARCH (🔍 Web button): When enabled, the app ALWAYS uses Gemini to handle the request — regardless of which platform is selected. Gemini uses Google Search grounding to fetch real-time results. When Web is OFF, the selected platform (Groq, Mistral, etc.) handles the request normally. This means Web Search always requires a valid Gemini API key in Settings.
-3. IMAGE UPLOAD (📷 Image button): Upload images for AI to analyze. Supported on Gemini and OpenRouter. Tap Image button or the + button.
-4. RESPONSE LENGTH (≡ Normal button): Cycles Normal → Short (2-4 sentences) → Detailed. Tap to cycle.
-5. TEMPLATES (🔖 Templates button): Pre-saved prompt starters. Built-in: Explain Simply, Clinical Summary, Compare & Contrast, Step by Step. Add custom templates with a name and text. Saved to device storage.
-6. DARK MODE: Menu (☰) → Light/Dark Mode toggle.
-7. CHAT HISTORY: All chats auto-saved locally. Access via ☰ menu. Auto-titled after first exchange.
-8. CHAT TAGS: Tag chats (Biology, Medicine, Physics, Code, Math, Other). Filter via ☰ menu.
-9. PINNED MESSAGES: Pin any AI response with the 📌 Pin button. View all pins via ☰ → Pinned Messages.
-10. SUMMARIZE CHAT: ☰ → Summarize Chat — generates 3-5 bullet summary.
-11. SEARCH CHATS: ☰ → search across all saved chats.
-12. CUSTOM INSTRUCTIONS: Settings → tell AI about yourself. Applied to every chat.
-13. AI PERSONA: Settings → override SnoahAI personality entirely.
-14. THEMES: Settings → 4 color themes (Default/orange, Ocean/blue, Forest/green, Rose/pink).
-15. FONT SIZE: Settings → Small / Medium / Large.
-16. SLASH COMMANDS: Type / in input for shortcuts: /explain, /summarize, /translate, /shorter, /longer, /bullets, /code, /compare.
-17. CODE RUNNER: Code blocks have a Run button (JS/HTML). Output inline.
-18. TTS: Every AI response has a 🔊 Read button for text-to-speech.
-19. VOICE INPUT: Mic button for speech-to-text input.
-20. SHARE/EXPORT: ☰ → Export or Share conversation.
-21. STOP STREAMING: Send button turns into ■ stop button during generation.
-22. PWA INSTALL: Orange install banner appears in browser — tap Install to add to home screen. Runs fullscreen with no browser bar.
+3. IMAGE UPLOAD (📎 Attach button / + button): Upload images for AI to analyze. Supported on Gemini and OpenRouter. Tap Attach button or the + button. Multi-image upload supported with preview strip.
+4. FILE ATTACHMENTS (📎 Attach button): Upload documents — PDFs, text files (.txt), CSVs, JSON, Markdown (.md), XML, .doc/.docx. Document content is extracted and sent as context to the AI. Combine with images in the same message.
+5. RESPONSE LENGTH (≡ Normal button): Cycles Normal → Short (2-4 sentences) → Detailed. Tap the button to cycle through lengths.
+6. TEMPLATES (🔖 Templates button): Pre-saved prompt starters. Built-in templates: Explain Simply, Clinical Summary, Compare & Contrast, Step by Step. Users can add custom templates with a name and text. Templates are saved to device storage.
+7. TEMP CHAT (🕐 Temp Chat button): Start a temporary conversation that won't be saved to chat history. Perfect for quick questions or sensitive topics. A yellow banner shows when Temp Chat is active. Toggle on/off with the Temp Chat button above the input.
+8. DARK MODE: Menu (☰) → Light/Dark Mode toggle. Full dark theme support across all UI elements.
+9. CHAT HISTORY: All chats auto-saved locally on device. Access via ☰ menu. Auto-titled after first exchange using AI.
+10. CHAT TAGS: Tag chats with categories (Biology, Medicine, Physics, Code, Math, Other). Filter chats by tag via ☰ menu.
+11. PINNED MESSAGES: Pin any AI response with the 📌 Pin button on the response. View all pins via ☰ → Pinned Messages.
+12. SUMMARIZE CHAT: ☰ → Summarize Chat — AI generates a 3-5 bullet point summary of the current conversation.
+13. SEARCH CHATS: ☰ → search icon to search across all saved chats by keyword.
+14. CUSTOM INSTRUCTIONS: Settings → Custom Instructions — tell AI about yourself, your preferences, or context. Applied to every chat automatically.
+15. AI PERSONA: Settings → AI Persona — override SnoahAI personality entirely with a custom persona description.
+16. THEMES: Settings → 4 color themes (Default/orange, Ocean/blue, Forest/green, Rose/pink). Changes accent colors throughout the app.
+17. FONT SIZE: Settings → Small / Medium / Large text size adjustment.
+18. SLASH COMMANDS: Type / in the input box for quick shortcuts: /explain, /summarize, /translate, /shorter, /longer, /bullets, /code, /compare. These insert prompt templates instantly.
+19. CODE RUNNER: Code blocks in AI responses have a ▶ Run button (supports JavaScript and HTML). Output displays inline below the code block.
+20. TTS (Text-to-Speech): Every AI response has a 🔊 Read button to read the response aloud using the device's speech synthesis.
+21. VOICE INPUT: Mic 🎤 button next to the input for speech-to-text input. Speaks your message and converts to text.
+22. SHARE/EXPORT: ☰ → Export or Share conversation as text.
+23. STOP STREAMING: Send button turns into a ■ stop button during AI response generation. Tap to cancel the current response.
+24. PWA INSTALL: Orange install banner appears in browser — tap Install to add to home screen. Runs fullscreen with no browser bar for a native app feel.
+25. TOKEN USAGE TRACKING: Settings → Token Usage section. Tracks prompt tokens, completion tokens, total tokens, and request count per platform. View usage history and manage limits.
+26. CONTACT DEVELOPER: ☰ → Contact Us — reach the developer (Shahzaib Muzaffar) directly via Telegram (@Owner_Of_Crypton) or Instagram (@shahzaib_muzaffar_7).
+27. UPDATES PANEL: ☰ → Updates — view the latest features, changes, and announcements about SnoahAI.
+28. HAPTIC FEEDBACK: The app provides subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.
+29. SMOOTH STREAMING: AI responses stream in real-time with a smooth animated cursor. A floating loading indicator appears above the input bar during generation.
+30. STREAM TIMEOUT PROTECTION: If the AI takes too long to respond (45+ seconds of no data), the request is automatically cancelled with a helpful error message, preventing infinite loading states.
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
-- For today's date, current news, live data: enable Web Search (🔍) — Gemini platform only, Now when enabled web search in any platform the gemini will be used for that response 
-- Groq, Together AI, Mistral: no web search available on these platforms
+- For today's date, current news, live data: enable Web Search (🔍) — when enabled, Gemini is always used regardless of selected platform
+- Groq, Together AI, Mistral: no web search capability on these platforms directly (Web button switches to Gemini)
+- All data is stored locally on the device — no cloud sync between devices
 
-DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mobile-first web apps.
+DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mobile-first web apps. Contact: Telegram @Owner_Of_Crypton, Instagram @shahzaib_muzaffar_7.
 
 Always answer questions about the app based on the above. If asked "what can you do" or "how do I use X feature", explain it clearly based on this documentation.
 
@@ -3256,15 +3312,29 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 let attempts = 0;
                 while (attempts <= totalKeys) {
                     try {
-                        // ── READ SSE STREAM ──
+                        // ── READ SSE STREAM (with timeout) ──
                         async function readStream(res) {
                             const reader = res.body.getReader();
                             const decoder = new TextDecoder();
                             let buf = '';
                             lastStreamUsage = null;
+                            const STREAM_TIMEOUT = 45000; // 45 seconds no-data timeout
+                            let lastDataTime = Date.now();
                             while (true) {
-                                const { done, value } = await reader.read();
+                                // Race between read and timeout
+                                const timeoutPromise = new Promise((_, reject) => {
+                                    const checkTimeout = () => {
+                                        if (Date.now() - lastDataTime > STREAM_TIMEOUT) {
+                                            reject(new Error('Stream timeout: No data received for ' + (STREAM_TIMEOUT / 1000) + ' seconds'));
+                                        }
+                                    };
+                                    setTimeout(checkTimeout, STREAM_TIMEOUT);
+                                });
+                                const { done, value } = await Promise.race([reader.read(), timeoutPromise]);
                                 if (done) break;
+                                lastDataTime = Date.now();
+                                // Haptic pulse on data received (throttled)
+                                if (navigator.vibrate && !liveAppended) navigator.vibrate(15);
                                 buf += decoder.decode(value, { stream: true });
                                 const lines = buf.split('\n');
                                 buf = lines.pop(); // keep incomplete line
@@ -3353,6 +3423,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                 ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey }
                                 : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey, 'HTTP-Referer': 'https://snoah.ai', 'X-Title': 'SnoahAI' };
                             abortController = new AbortController();
+                            // Connection timeout: abort if no response within 60s
+                            const connTimeout1 = setTimeout(() => { if (abortController) { abortController._timedOut = true; abortController.abort(); } }, 60000);
                             const chatBody = { model: chatModel, messages: chatMessages, stream: true };
                             if (!isMistral) chatBody.stream_options = { include_usage: true };
                             const res = await fetch(chatUrl, {
@@ -3367,12 +3439,15 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                 throw new Error('HTTP ' + res.status + ': ' + await res.text());
                             }
                             if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
+                            clearTimeout(connTimeout1);
                             await readStream(res);
                             abortController = null;
                         } else {
                             const payload = { contents: formattedContents, systemInstruction: { parts: [{ text: systemInstruction }] } };
                             if (useAgent) payload.tools = [{ google_search: {} }];
                             abortController = new AbortController();
+                            // Connection timeout: abort if no response within 60s
+                            const connTimeout2 = setTimeout(() => { if (abortController) { abortController._timedOut = true; abortController.abort(); } }, 60000);
                             // google_search grounding does NOT work with SSE streaming — must use generateContent
                             const geminiUrl = getApiUrl(useAgent ? false : true);
                             const res = await fetch(geminiUrl, {
@@ -3387,7 +3462,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                 throw new Error('HTTP ' + res.status + ': ' + await res.text());
                             }
                             if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
-                            if (platform === 'mistral') {
+                            clearTimeout(connTimeout2);
                     systemInstruction += 'You are running on Mistral AI. ';
                 }
                 if (platform === 'together') {
@@ -3493,6 +3568,11 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 if (!liveAppended) { messagesWrapper.appendChild(liveWrapper); }
                 isStreaming = false;
                 liveCursor.style.display = 'none';
+                streamingBarIndicator.classList.add('hidden');
+                floatingLoading.classList.add('hidden');
+                floatingLoading.classList.remove('flex');
+                // Haptic feedback on stream complete
+                if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
                 updateSendButton();
 
                 // Final markdown render (RAF may have done this already, but force it clean)
@@ -3561,7 +3641,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 if (messages.filter(m=>m.role==='user').length === 1) autoTitleChat();
 
             } catch (error) {
-                if (error.name === 'AbortError') return;
+                // User-initiated abort (stop button) — silent return
+                if (error.name === 'AbortError' && !abortController?._timedOut) return;
+                // Timeout-induced abort — show timeout message
+                if (error.name === 'AbortError' && abortController?._timedOut) {
+                    error.message = 'Stream timeout: Connection timed out after 60 seconds';
+                }
                 // Remove orphaned live bubble if it was never populated
                 if (typeof liveWrapper !== 'undefined' && liveWrapper.isConnected) {
                     const hasContent = liveWrapper.querySelector('#text-live-' + liveUID)?.textContent?.trim();
@@ -3581,7 +3666,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 const isRateLimit = /quota|rate.?limit|429/i.test(errText) || httpStatus === 429;
                 const isCredit = /credit|billing|payment|insufficient|balance/i.test(errText) || httpStatus === 402;
                 const isAuth = /api.?key|unauthorized|invalid.?key|authentication/i.test(errText) || httpStatus === 401;
-                const displayErr = isRateLimit
+                const isTimeout = /stream timeout|timed? ?out|no data received/i.test(errText);
+                const displayErr = isTimeout
+                    ? '⚠️ Response timed out — the AI took too long to reply. Please try again.'
+                    : isRateLimit
                     ? '⚠️ Rate limit reached. Wait a moment or add more API keys in Settings.'
                     : isCredit
                     ? '⚠️ Credit limit exceeded. Use a -Free model (e.g. Llama-3.3-70B-Instruct-Turbo-Free). Check your account at api.together.ai'
@@ -3597,20 +3685,35 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 abortController = null;
                 setIsLoading(false);
                 isStreaming = false;
+                streamingBarIndicator.classList.add('hidden');
+                floatingLoading.classList.add('hidden');
+                floatingLoading.classList.remove('flex');
                 updateSendButton();
             }
         }
 
         function setIsLoading(loading) {
             isLoading = loading;
+            const statusText = (useThinking && useAgent) ? 'Thinking & Searching...' : useThinking ? 'Thinking...' : useAgent ? 'Searching Web...' : 'SnoahAI is typing...';
             if (loading) {
                 loadingIndicator.classList.remove('hidden');
                 loadingIndicator.classList.add('flex');
-                loadingText.innerText = (useThinking && useAgent) ? 'Thinking & Searching...' : useThinking ? 'Thinking...' : useAgent ? 'Searching Web...' : 'SnoahAI is typing...';
+                loadingText.innerText = statusText;
+                // Show floating indicator above input bar
+                floatingLoading.classList.remove('hidden');
+                floatingLoading.classList.add('flex');
+                floatingLoadingText.innerText = statusText;
+                // Show streaming bar (stays visible during streaming too)
+                streamingBarIndicator.classList.remove('hidden');
+                // Haptic feedback on loading start
+                if (navigator.vibrate) navigator.vibrate(30);
                 updateSendButton();
             } else {
                 loadingIndicator.classList.add('hidden');
                 loadingIndicator.classList.remove('flex');
+                floatingLoading.classList.add('hidden');
+                floatingLoading.classList.remove('flex');
+                // Note: streaming bar stays visible during streaming; hidden in finally block
             }
             lucide.createIcons();
             scrollToBottom();
