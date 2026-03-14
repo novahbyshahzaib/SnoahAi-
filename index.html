@@ -1358,9 +1358,11 @@
         }
 
         function getInitials(name) {
-            const parts = name.trim().split(/\s+/);
+            const parts = name.trim().split(/\s+/).filter(p => p.length > 0);
             if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-            return name.substring(0, 2).toUpperCase();
+            if (parts.length === 1 && parts[0].length >= 2) return parts[0].substring(0, 2).toUpperCase();
+            if (parts.length === 1) return parts[0][0].toUpperCase();
+            return 'U';
         }
 
         function updateSidebarUserName() {
@@ -2672,17 +2674,16 @@
         function getBestVoice() {
             const voices = window.speechSynthesis.getVoices();
             if (!voices.length) return null;
-            // Prefer high-quality English voices
+            // Prefer high-quality English voices by name
             const preferred = [
                 'Google UK English Female', 'Google US English', 'Google UK English Male',
-                'Microsoft Zira', 'Microsoft David', 'Samantha', 'Karen', 'Daniel',
-                'Google UK English Female', 'en-US', 'en-GB'
+                'Microsoft Zira', 'Microsoft David', 'Samantha', 'Karen', 'Daniel'
             ];
             for (const name of preferred) {
-                const v = voices.find(v => v.name.includes(name));
+                const v = voices.find(v => v.name === name);
                 if (v) return v;
             }
-            // Fallback: any English voice
+            // Fallback: any English voice by lang property
             const enVoice = voices.find(v => v.lang && v.lang.startsWith('en'));
             return enVoice || voices[0];
         }
