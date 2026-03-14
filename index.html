@@ -3320,20 +3320,22 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             lastStreamUsage = null;
                             const STREAM_TIMEOUT = 45000; // 45 seconds no-data timeout
                             let lastDataTime = Date.now();
+                            let streamTimeoutId = null;
+                            try {
                             while (true) {
                                 // Race between read and timeout
                                 const timeoutPromise = new Promise((_, reject) => {
-                                    const checkTimeout = () => {
+                                    streamTimeoutId = setTimeout(() => {
                                         if (Date.now() - lastDataTime > STREAM_TIMEOUT) {
                                             reject(new Error('Stream timeout: No data received for ' + (STREAM_TIMEOUT / 1000) + ' seconds'));
                                         }
-                                    };
-                                    setTimeout(checkTimeout, STREAM_TIMEOUT);
+                                    }, STREAM_TIMEOUT);
                                 });
                                 const { done, value } = await Promise.race([reader.read(), timeoutPromise]);
+                                if (streamTimeoutId) { clearTimeout(streamTimeoutId); streamTimeoutId = null; }
                                 if (done) break;
                                 lastDataTime = Date.now();
-                                // Haptic pulse on data received (throttled)
+                                // Haptic pulse on first data received
                                 if (navigator.vibrate && !liveAppended) navigator.vibrate(15);
                                 buf += decoder.decode(value, { stream: true });
                                 const lines = buf.split('\n');
@@ -3376,6 +3378,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                     renderDirty = true;
                                 }
                             }
+                            } finally { if (streamTimeoutId) clearTimeout(streamTimeoutId); }
                         }
 
                         // When web search is ON, always use Gemini regardless of selected platform
