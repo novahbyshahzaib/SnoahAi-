@@ -3466,15 +3466,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             }
                             if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
                             clearTimeout(connTimeout2);
-                    systemInstruction += 'You are running on Mistral AI. ';
-                }
-                if (platform === 'together') {
-                    systemInstruction += 'You are running on Together AI. Do NOT output tool call syntax. ';
-                }
-                if (platform === 'groq') {
-                    systemInstruction += 'You are running on Groq. Do NOT output tool call syntax. ';
-                }
-                if (useAgent) {
+                            if (useAgent) {
                                 // Web search: fetch non-streaming (grounding requires it)
                                 // Show "Searching web..." indicator in the bubble immediately
                                 if (!liveAppended) {
