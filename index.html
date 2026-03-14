@@ -256,6 +256,12 @@
         .dark #welcome-screen p { color: #9B9891 !important; }
         .dark #welcome-screen button { background: #252422 !important; border-color: #3A3835 !important; color: #C8C6BF !important; }
 
+        /* Name prompt modal */
+        .dark #name-prompt-modal > div:last-child { background: #1E1D1B !important; border-color: #3A3835 !important; }
+        .dark #name-prompt-modal h3 { color: #E8E6DF !important; }
+        .dark #name-prompt-modal p { color: #9B9891 !important; }
+        .dark #name-prompt-modal input { background: #252422 !important; border-color: #3A3835 !important; color: #E8E6DF !important; }
+
         /* Modals backdrop */
         .dark [class*="bg-\[\#2C2B29\]\/40"] { background: rgba(0,0,0,0.6) !important; }
         .dark [class*="bg-\[\#2C2B29\]\/30"] { background: rgba(0,0,0,0.4) !important; }
@@ -547,9 +553,9 @@
             </div>
             <div class="p-5 border-t border-[#EAE8E0] bg-[#F2F0E9]">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-[#D25D38] text-white flex items-center justify-center font-bold text-sm shadow-sm">SM</div>
+                    <div id="sidebar-user-initials" class="w-8 h-8 rounded-full bg-[#D25D38] text-white flex items-center justify-center font-bold text-sm shadow-sm">U</div>
                     <div>
-                        <p class="text-[13px] font-semibold text-[#2C2B29]">Shahzaib Muzaffar</p>
+                        <p id="sidebar-user-name" class="text-[13px] font-semibold text-[#2C2B29]">SnoahAI User</p>
                         <p class="text-[11px] text-[#737166]">SnoahAI User</p>
                     </div>
                 </div>
@@ -806,6 +812,22 @@
             </div>
         </div>
 
+        <!-- ===== NAME PROMPT MODAL ===== -->
+        <div id="name-prompt-modal" class="absolute inset-0 z-[65] flex items-center justify-center p-5 hidden">
+            <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm"></div>
+            <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full max-w-sm shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden">
+                <div class="p-6 text-center">
+                    <div class="w-14 h-14 bg-[#F2F0E9] rounded-[18px] flex items-center justify-center mx-auto mb-4 shadow-sm border border-[#E5E3DB]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29] mb-1">Welcome to SnoahAI!</h3>
+                    <p class="text-[13px] text-[#737166] mb-5">What should we call you?</p>
+                    <input id="name-prompt-input" type="text" placeholder="Enter your name" maxlength="30" class="w-full px-4 py-3 rounded-xl border border-[#E5E3DB] bg-white text-[14px] text-[#2C2B29] placeholder-[#A3A095] focus:outline-none focus:border-[#D25D38] focus:ring-1 focus:ring-[#D25D38]/30 mb-4" autocomplete="off">
+                    <button onclick="saveUserName()" class="w-full py-3 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Continue</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ===== TERMS & CONDITIONS MODAL ===== -->
         <div id="terms-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
             <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeTermsModal()"></div>
@@ -1003,11 +1025,14 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>User Name Personalization</strong> — New users are greeted with a name prompt on first visit. Your name is displayed in the sidebar and saved locally.</li>
+                            <li><strong>Improved TTS Voice</strong> — Text-to-Speech now uses a higher-quality voice (e.g., Google UK English Female) when available on your device.</li>
+                            <li><strong>TTS Auto-Stop Fix</strong> — TTS now properly stops at the end of the response instead of restarting. No more repeated playback.</li>
                             <li><strong>Smooth Streaming Animation</strong> — Redesigned streaming cursor with smooth pulse animation and a progress bar above the input area for better visual feedback.</li>
                             <li><strong>Floating Loading Indicator</strong> — The "SnoahAI is typing..." indicator now appears above the input bar, always visible during AI response generation.</li>
                             <li><strong>Haptic Feedback</strong> — Subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.</li>
                             <li><strong>Stream Timeout Protection</strong> — Automatic timeout after 45 seconds of no data, preventing infinite loading states. Clear error message displayed.</li>
-                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 30 features of the app and can answer any question about how to use them.</li>
+                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 32 features of the app and can answer any question about how to use them.</li>
                         </ul>
                     </div>
 
@@ -1031,11 +1056,12 @@
                             <li><strong>Themes</strong> — 4 color themes: Default, Ocean, Forest, Rose.</li>
                             <li><strong>Slash Commands</strong> — Type / for quick shortcuts: /explain, /summarize, /translate, and more.</li>
                             <li><strong>Code Runner</strong> — Run JavaScript and HTML code blocks inline.</li>
-                            <li><strong>TTS &amp; Voice Input</strong> — 🔊 Read responses aloud and 🎤 speak messages.</li>
+                            <li><strong>TTS &amp; Voice Input</strong> — 🔊 Read responses aloud with high-quality voice and 🎤 speak messages.</li>
                             <li><strong>Multi-Key Pool</strong> — Add multiple API keys per platform with auto-rotation on rate limits.</li>
                             <li><strong>Token Usage Tracking</strong> — Monitor your token usage per platform in Settings.</li>
                             <li><strong>PWA Install</strong> — Install as a native-like app on Android home screen.</li>
                             <li><strong>Contact Us</strong> — Reach the developer via Telegram or Instagram from the sidebar.</li>
+                            <li><strong>User Name Personalization</strong> — Your name is shown in the sidebar and saved locally on your device.</li>
                         </ul>
                     </div>
 
@@ -1187,6 +1213,7 @@
         let currentTheme = localStorage.getItem('snoah_theme') || 'default';
         const themeAccents = { default:'#D25D38', ocean:'#1A6EBD', forest:'#2D7A4F', rose:'#C4396B' };
         let customPersona = localStorage.getItem('snoah_persona') || '';
+        let userName = localStorage.getItem('snoah_user_name') || '';
         const SLASH_CMDS = [
             { cmd: '/explain',   label: 'Explain this',         desc: 'Simple explanation' },
             { cmd: '/summarize', label: 'Summarize',            desc: 'Brief summary' },
@@ -1279,6 +1306,8 @@
         applyTheme(currentTheme);
         updatePinBadge();
         showCookieBannerIfNeeded();
+        showNamePromptIfNeeded();
+        updateSidebarUserName();
 
         // --- Cookie Consent & Terms ---
         function showCookieBannerIfNeeded() {
@@ -1306,6 +1335,46 @@
             if (mistralKeys.length > 1) { mistralKeys = [mistralKeys[0]]; localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys)); mistralKeyIdx = 0; mistralApiKey = mistralKeys[0]; }
             renderKeysList();
             showToast('Cookies rejected — limited to 1 key per platform');
+        }
+
+        // --- Name Prompt ---
+        function showNamePromptIfNeeded() {
+            if (!userName) {
+                document.getElementById('name-prompt-modal').classList.remove('hidden');
+                const inp = document.getElementById('name-prompt-input');
+                inp.addEventListener('keydown', e => { if (e.key === 'Enter') saveUserName(); });
+            }
+        }
+
+        function saveUserName() {
+            const inp = document.getElementById('name-prompt-input');
+            const name = inp.value.trim();
+            if (!name) { showToast('Please enter your name'); inp.focus(); return; }
+            userName = name;
+            localStorage.setItem('snoah_user_name', userName);
+            document.getElementById('name-prompt-modal').classList.add('hidden');
+            updateSidebarUserName();
+            showToast('Welcome, ' + userName + '! 👋');
+        }
+
+        function getInitials(name) {
+            const parts = name.trim().split(/\s+/).filter(p => p.length > 0);
+            if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+            if (parts.length === 1 && parts[0].length >= 2) return parts[0].substring(0, 2).toUpperCase();
+            if (parts.length === 1) return parts[0][0].toUpperCase();
+            return 'U';
+        }
+
+        function updateSidebarUserName() {
+            const nameEl = document.getElementById('sidebar-user-name');
+            const initialsEl = document.getElementById('sidebar-user-initials');
+            if (userName) {
+                nameEl.textContent = userName;
+                initialsEl.textContent = getInitials(userName);
+            } else {
+                nameEl.textContent = 'SnoahAI User';
+                initialsEl.textContent = 'U';
+            }
         }
 
         function openTermsModal() {
@@ -2602,6 +2671,23 @@
         }
 
         // ── TEXT TO SPEECH ─────────────────────────────────────────────
+        function getBestVoice() {
+            const voices = window.speechSynthesis.getVoices();
+            if (!voices.length) return null;
+            // Prefer high-quality English voices by name
+            const preferred = [
+                'Google UK English Female', 'Google US English', 'Google UK English Male',
+                'Microsoft Zira', 'Microsoft David', 'Samantha', 'Karen', 'Daniel'
+            ];
+            for (const name of preferred) {
+                const v = voices.find(v => v.name === name);
+                if (v) return v;
+            }
+            // Fallback: any English voice by lang property
+            const enVoice = voices.find(v => v.lang && v.lang.startsWith('en'));
+            return enVoice || voices[0];
+        }
+
         function speakText(text, btn) {
             if (!('speechSynthesis' in window)) { showToast('TTS not supported in this browser'); return; }
             if (ttsActive) {
@@ -2618,26 +2704,43 @@
                 .replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*(.*?)\*/g,'$1')
                 .replace(/#{1,4} /g,'').replace(/\$\$[\s\S]*?\$\$/g,'math expression')
                 .replace(/\$([^$]+)\$/g,'$1').replace(/[\r\n]+/g,' ').trim();
+            window.speechSynthesis.cancel();
             ttsUtterance = new SpeechSynthesisUtterance(clean);
             ttsUtterance.rate = 0.95;
             ttsUtterance.pitch = 1;
+            const voice = getBestVoice();
+            if (voice) ttsUtterance.voice = voice;
             ttsUtterance.onstart = () => {
                 ttsActive = true;
                 btn.classList.add('tts-active','text-[#D25D38]');
                 btn._wasSpeaking = true;
             };
-            ttsUtterance.onend = ttsUtterance.onerror = () => {
+            ttsUtterance.onend = () => {
+                window.speechSynthesis.cancel();
+                ttsActive = false;
+                btn.classList.remove('tts-active','text-[#D25D38]');
+                btn._wasSpeaking = false;
+            };
+            ttsUtterance.onerror = () => {
+                window.speechSynthesis.cancel();
                 ttsActive = false;
                 btn.classList.remove('tts-active','text-[#D25D38]');
                 btn._wasSpeaking = false;
             };
             btn._wasSpeaking = false;
-            const doSpeak = () => window.speechSynthesis.speak(ttsUtterance);
+            const doSpeak = () => {
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(ttsUtterance);
+            };
             if (window.speechSynthesis.getVoices().length === 0) {
-                window.speechSynthesis.onvoiceschanged = doSpeak;
-                setTimeout(doSpeak, 300);
+                window.speechSynthesis.onvoiceschanged = () => {
+                    window.speechSynthesis.onvoiceschanged = null;
+                    const v = getBestVoice();
+                    if (v) ttsUtterance.voice = v;
+                    doSpeak();
+                };
             } else {
-                setTimeout(doSpeak, 50);
+                doSpeak();
             }
         }
 
@@ -3138,7 +3241,7 @@ FEATURES:
 17. FONT SIZE: Settings → Small / Medium / Large text size adjustment.
 18. SLASH COMMANDS: Type / in the input box for quick shortcuts: /explain, /summarize, /translate, /shorter, /longer, /bullets, /code, /compare. These insert prompt templates instantly.
 19. CODE RUNNER: Code blocks in AI responses have a ▶ Run button (supports JavaScript and HTML). Output displays inline below the code block.
-20. TTS (Text-to-Speech): Every AI response has a 🔊 Read button to read the response aloud using the device's speech synthesis.
+20. TTS (Text-to-Speech): Every AI response has a 🔊 Read button to read the response aloud using the device's speech synthesis. Uses a high-quality voice (e.g., Google UK English Female) when available. TTS automatically stops at the end — no repeat playback.
 21. VOICE INPUT: Mic 🎤 button next to the input for speech-to-text input. Speaks your message and converts to text.
 22. SHARE/EXPORT: ☰ → Export or Share conversation as text.
 23. STOP STREAMING: Send button turns into a ■ stop button during AI response generation. Tap to cancel the current response.
@@ -3149,6 +3252,8 @@ FEATURES:
 28. HAPTIC FEEDBACK: The app provides subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.
 29. SMOOTH STREAMING: AI responses stream in real-time with a smooth animated cursor. A floating loading indicator appears above the input bar during generation.
 30. STREAM TIMEOUT PROTECTION: If the AI takes too long to respond (45+ seconds of no data), the request is automatically cancelled with a helpful error message, preventing infinite loading states.
+31. USER NAME PERSONALIZATION: On first visit, users are prompted to enter their name. The name is displayed in the sidebar and saved to localStorage. The sidebar shows the user's initials and full name.
+32. IMPROVED TTS VOICE: TTS selects the best available voice on the device (preferring Google UK English Female, Google US English, etc.) for a more natural reading experience.
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
