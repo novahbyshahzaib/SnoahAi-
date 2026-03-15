@@ -1575,16 +1575,25 @@
         // Also update button on change/paste for robustness (some mobile browsers)
         chatInput.addEventListener('change', updateSendButton);
 
+        // Debounce guard to prevent double-firing from touchend + click on mobile
+        let lastSendTime = 0;
+        function debouncedSend() {
+            const now = Date.now();
+            if (now - lastSendTime < 300) return;
+            lastSendTime = now;
+            handleSendOrStop();
+        }
+
         // Robust send button click handler via addEventListener (replaces inline onclick)
         sendBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            handleSendOrStop();
+            debouncedSend();
         });
 
         // Fallback for mobile devices where click may not fire reliably
         sendBtn.addEventListener('touchend', function(e) {
             e.preventDefault();
-            handleSendOrStop();
+            debouncedSend();
         });
 
         chatInput.addEventListener('keydown', function(e) {
