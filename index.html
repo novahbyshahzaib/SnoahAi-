@@ -2034,13 +2034,14 @@
                 const firstUserText = saveable.find(m => m.role === 'user')?.text || 'Shared Chat';
                 const words = firstUserText.trim().split(/\s+/);
                 const title = words.slice(0, 2).join(' ') + (words.length > 2 ? '...' : '');
-                await firebaseDB.collection('shared_chats').doc(currentChatId).set({
+                const shareDocId = currentChatId + '_' + Date.now().toString(36);
+                await firebaseDB.collection('shared_chats').doc(shareDocId).set({
                     id: currentChatId,
                     title: title,
                     sharedAt: Date.now(),
                     messages: JSON.stringify(saveable)
                 });
-                const shareUrl = window.location.origin + window.location.pathname + '?shared=' + currentChatId;
+                const shareUrl = window.location.origin + window.location.pathname + '?shared=' + shareDocId;
                 if (navigator.share) {
                     navigator.share({ title: 'SnoahAI Chat', text: 'Check out this AI conversation', url: shareUrl }).catch(() => {});
                 } else {
@@ -2069,6 +2070,7 @@
                 if (welcomeScreen) welcomeScreen.classList.add('hidden');
                 // Show shared chat banner
                 const banner = document.createElement('div');
+                banner.id = 'shared-chat-banner';
                 banner.className = 'flex items-center justify-center gap-2 py-2 px-4 bg-[#FEF3C7] border-b border-[#FDE68A] text-[13px] text-[#92400E] font-medium';
                 banner.innerHTML = '🔗 Shared Chat (read-only) — <button onclick="exitSharedChat()" class="underline font-semibold">Start New Chat</button>';
                 if (messagesWrapper) messagesWrapper.before(banner);
@@ -2096,7 +2098,7 @@
 
         function exitSharedChat() {
             isSharedChatView = false;
-            const banner = document.querySelector('.bg-\\[\\#FEF3C7\\].border-b');
+            const banner = document.getElementById('shared-chat-banner');
             if (banner) banner.remove();
             const inputBox = document.getElementById('user-input');
             const sendBtn = document.getElementById('send-btn');
@@ -2230,12 +2232,21 @@
             const params = new URLSearchParams(window.location.search);
             const sharedId = params.get('shared');
             if (sharedId) {
-                setTimeout(() => loadSharedChat(sharedId), 500);
+                // Wait for DOM and Firebase to be ready
+                const tryLoad = () => {
+                    if (firebaseDB) { loadSharedChat(sharedId); }
+                    else { setTimeout(tryLoad, 300); }
+                };
+                setTimeout(tryLoad, 300);
             }
         })();
         // Load from Firebase if enabled
         if (chatStorageMode === 'firebase') {
-            setTimeout(() => loadChatsFromFirebase(), 800);
+            const trySync = () => {
+                if (firebaseDB) { loadChatsFromFirebase(); }
+                else { setTimeout(trySync, 300); }
+            };
+            setTimeout(trySync, 300);
         }
         // Update share link button visibility
         setTimeout(() => updateStorageUI(), 100);
@@ -3886,7 +3897,7 @@ LIMITATIONS:
 - Groq, Together AI, Mistral: no web search capability on these platforms directly (Web button switches to Gemini)
 - When using Local Storage mode, data is stored only on the device — switch to Firebase in Settings for cloud sync
 
-DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mobile-first web apps. Contact via Telegram: the EXACT username is @Owner_Of_Crypton (with underscores — O-w-n-e-r-UNDERSCORE-O-f-UNDERSCORE-C-r-y-p-t-o-n). Contact via Instagram: the EXACT username is @shahzaib_muzaffar_7 (with underscores). IMPORTANT: Always include the underscores exactly as shown when sharing these usernames. Do NOT remove or skip the underscore characters.
+DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mobile-first web apps. Contact via Telegram: @Owner_Of_Crypton (note: includes underscores between words). Contact via Instagram: @shahzaib_muzaffar_7 (note: includes underscores). IMPORTANT: Always preserve the underscore characters exactly as shown when sharing these usernames — never remove them.
 
 Always answer questions about the app based on the above. If asked "what can you do" or "how do I use X feature", explain it clearly based on this documentation.
 
