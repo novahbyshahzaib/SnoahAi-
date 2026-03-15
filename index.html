@@ -581,6 +581,12 @@
                             <a href="https://www.notion.so/profile/integrations" target="_blank" class="underline text-[#D25D38]">notion.so/profile/integrations</a>
                             → New Integration → Copy "Internal Integration Secret"
                         </p>
+                        <div class="mt-3">
+                            <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Default Save Page</label>
+                            <input type="text" id="settings-notionparent" placeholder="Paste Notion page URL to save into..."
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                            <p class="text-[11px] text-[#A3A095] mt-1 leading-relaxed">Open any Notion page → share it with your integration → paste its URL here. All saves will go into this page.</p>
+                        </div>
                     </div>
                 </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] flex gap-3 shrink-0 bg-[#FAF9F6]">
@@ -1141,6 +1147,7 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Notion Integration</strong> — Connect your Notion workspace in Settings. Say "add X to Notion", "save this to Notion", or tap the Notion button on any AI response. A confirmation modal shows before saving. Tasks go in as checkboxes, responses as sub-pages.</li>
                             <li><strong>User Name Personalization</strong> — New users are greeted with a name prompt on first visit. Your name is displayed in the sidebar and saved locally.</li>
                             <li><strong>Improved TTS Voice</strong> — Text-to-Speech now uses a higher-quality voice (e.g., Google UK English Female) when available on your device.</li>
                             <li><strong>TTS Auto-Stop Fix</strong> — TTS now properly stops at the end of the response instead of restarting. No more repeated playback.</li>
@@ -1148,7 +1155,7 @@
                             <li><strong>Floating Loading Indicator</strong> — The "SnoahAI is typing..." indicator now appears above the input bar, always visible during AI response generation.</li>
                             <li><strong>Haptic Feedback</strong> — Subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.</li>
                             <li><strong>Stream Timeout Protection</strong> — Automatic timeout after 45 seconds of no data, preventing infinite loading states. Clear error message displayed.</li>
-                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 35 features of the app and can answer any question about how to use them.</li>
+                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 36 features of the app and can answer any question about how to use them.</li>
                             <li><strong>Advanced Model Parameters</strong> — Fine-tune AI responses with Temperature, Top P, Top K, and Max Tokens sliders in Settings.</li>
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — AI can now generate Mermaid diagrams (flowcharts, sequence diagrams, etc.) rendered visually in responses.</li>
                             <li><strong>Multi-AI Response</strong> — Enable in Settings to query multiple AI platforms simultaneously. View each AI's response from a dropdown selector.</li>
@@ -1184,6 +1191,7 @@
                             <li><strong>Advanced Model Parameters</strong> — ⚙️ Tune Temperature, Top P, Top K, and Max Tokens in Settings for fine-grained control over AI responses.</li>
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — 📊 AI responses with Mermaid code blocks are automatically rendered as visual diagrams (flowcharts, sequence diagrams, pie charts, etc.).</li>
                             <li><strong>Multi-AI Response</strong> — 🤖 Enable in Settings to send your question to multiple AI platforms at once. View each AI's answer from a dropdown. Thinking &amp; Web Search are disabled when active.</li>
+                            <li><strong>Notion Integration</strong> — 📝 Connect Notion in Settings. Save any AI response to Notion with one tap, or use natural language: "add X to Notion", "save this to Notion". Confirmation modal before every save.</li>
                         </ul>
                     </div>
 
@@ -1194,6 +1202,44 @@
                 </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
                     <button onclick="closeUpdatesModal()" class="w-full py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== NOTION SAVE MODAL ===== -->
+        <div id="notion-save-modal" class="absolute inset-0 z-[80] flex items-center justify-center p-5 hidden">
+            <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeNotionModal()"></div>
+            <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height:80%;">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-[#F2F0E9] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        </div>
+                        <h2 class="font-serif font-semibold text-[17px]">Save to Notion</h2>
+                    </div>
+                    <button onclick="closeNotionModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="p-5 space-y-4 overflow-y-auto flex-1">
+                    <div id="notion-modal-type-badge" class="inline-block px-2.5 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold border border-[#FDE68A]">SAVE RESPONSE</div>
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Title</label>
+                        <input type="text" id="notion-modal-title" placeholder="Page title..."
+                            class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2.5 text-[14px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Content Preview</label>
+                        <div id="notion-modal-preview" class="bg-[#F2F0E9] rounded-xl px-3 py-2.5 text-[12px] text-[#5B5951] max-h-[100px] overflow-y-auto leading-relaxed border border-[#E5E3DB]"></div>
+                    </div>
+                    <div id="notion-modal-parent-info" class="text-[11px] text-[#A3A095] leading-relaxed"></div>
+                </div>
+                <div class="px-5 py-4 border-t border-[#EAE8E0] flex gap-3 shrink-0 bg-[#FAF9F6]">
+                    <button onclick="closeNotionModal()" class="flex-1 py-2.5 rounded-xl border border-[#E5E3DB] text-[14px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">Cancel</button>
+                    <button onclick="confirmNotionSave()" class="flex-1 py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Save to Notion
+                    </button>
                 </div>
             </div>
         </div>
@@ -1322,6 +1368,7 @@
         let multiAIPlatforms = JSON.parse(localStorage.getItem('snoah_multi_ai_platforms') || '[]');
         // Notion Integration
         let notionKey = localStorage.getItem('snoah_notion_key') || '';
+        let notionParentPageId = localStorage.getItem('snoah_notion_parent') || '';
         const NOTION_PROXY = '/api/notion';
         let uploadedImage = null; // { data, mimeType, previewUrl }
         let messages = [];
@@ -2049,6 +2096,8 @@
             // Load Notion key
             const notionInput = document.getElementById('settings-notionkey');
             if (notionInput) notionInput.value = notionKey ? notionKey.substring(0,8) + '••••••••' : '';
+            const notionParentInput = document.getElementById('settings-notionparent');
+            if (notionParentInput) notionParentInput.value = notionParentPageId || '';
             renderNotionKeyStatus();
             // Load advanced model parameters
             const tempSlider = document.getElementById('param-temperature');
@@ -2129,6 +2178,17 @@
             if (nkInput && nkInput.value && !nkInput.value.includes('••')) {
                 notionKey = nkInput.value.trim();
                 localStorage.setItem('snoah_notion_key', notionKey);
+            }
+            // Save Notion parent page
+            const npInput = document.getElementById('settings-notionparent');
+            if (npInput) {
+                const rawUrl = npInput.value.trim();
+                if (rawUrl) {
+                    // Extract page ID from URL e.g. notion.so/Page-Title-abc123def456 → abc123def456 (32 hex chars)
+                    const match = rawUrl.match(/([a-f0-9]{32})|([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i);
+                    notionParentPageId = match ? match[0].replace(/-/g, '') : rawUrl;
+                    localStorage.setItem('snoah_notion_parent', notionParentPageId);
+                }
             }
 
             closeSettings();
@@ -2325,6 +2385,8 @@
         // --- Notion Integration ---
         // =========================================================
 
+        let notionModalPayload = null; // { content, title, type }
+
         function toggleNotionKeyVisibility() {
             const input = document.getElementById('settings-notionkey');
             const icon = document.getElementById('notion-eye-icon');
@@ -2356,72 +2418,129 @@
                     headers: { 'Content-Type': 'application/json', 'x-notion-key': notionKey },
                     body: body ? JSON.stringify(body) : undefined
                 });
-                if (!resp.ok) {
-                    const err = await resp.json().catch(() => ({}));
-                    throw new Error(err.message || 'Notion API error ' + resp.status);
-                }
-                return await resp.json();
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.message || 'Notion error ' + resp.status);
+                return data;
             } catch (e) {
-                showToast('Notion error: ' + e.message);
+                showToast('Notion: ' + e.message.substring(0, 60));
                 return null;
             }
         }
 
-        async function saveToNotion(content, title) {
-            if (!notionKey) { showToast('Add your Notion token in Settings first'); return; }
-            showToast('Saving to Notion...');
-            const pageTitle = title || 'SnoahAI · ' + new Date().toLocaleDateString();
-            const result = await notionAPICall('POST', 'pages', {
-                parent: { type: 'page_id', page_id: null }, // will be top-level
-                properties: { title: [{ text: { content: pageTitle } }] },
-                children: [{ object: 'block', type: 'paragraph', paragraph: { rich_text: [{ text: { content: content.substring(0, 2000) } }] } }]
-            });
-            if (result && result.url) {
-                showToast('Saved to Notion ✓');
+        // Open the Notion save modal — used by both the button and natural language
+        function openNotionModal(content, title, type) {
+            notionModalPayload = { content, title: title || '', type: type || 'response' };
+            const modal = document.getElementById('notion-save-modal');
+            const titleInput = document.getElementById('notion-modal-title');
+            const preview = document.getElementById('notion-modal-preview');
+            const badge = document.getElementById('notion-modal-type-badge');
+            const parentInfo = document.getElementById('notion-modal-parent-info');
+            if (!modal) return;
+            if (titleInput) titleInput.value = title || ('SnoahAI · ' + new Date().toLocaleDateString());
+            if (preview) preview.textContent = content.substring(0, 300) + (content.length > 300 ? '...' : '');
+            if (badge) badge.textContent = type === 'task' ? 'ADD TO-DO TASK' : 'SAVE RESPONSE';
+            if (parentInfo) {
+                if (notionParentPageId) {
+                    parentInfo.innerHTML = '📄 Will save into your connected Notion page.';
+                } else {
+                    parentInfo.innerHTML = '⚠️ No default page set. Go to <strong>Settings → Notion Integration → Default Save Page</strong> and paste a Notion page URL you\'ve shared with your integration.';
+                }
             }
+            modal.classList.remove('hidden');
+            if (titleInput) titleInput.focus();
+            lucide.createIcons();
         }
 
-        async function notionQuickAdd(taskText, pageHint) {
-            if (!notionKey) { showToast('Add your Notion token in Settings first'); return; }
-            showToast('Adding to Notion...');
-            // Search for a matching page to add to
-            let parentId = null;
-            if (pageHint) {
-                const search = await notionAPICall('POST', 'search', { query: pageHint, filter: { value: 'page', property: 'object' }, page_size: 1 });
-                if (search && search.results && search.results.length > 0) parentId = search.results[0].id;
+        function closeNotionModal() {
+            const modal = document.getElementById('notion-save-modal');
+            if (modal) modal.classList.add('hidden');
+            notionModalPayload = null;
+        }
+
+        async function confirmNotionSave() {
+            if (!notionModalPayload) return;
+            if (!notionParentPageId) {
+                showToast('Set a Default Save Page in Settings first');
+                closeNotionModal();
+                return;
             }
-            if (parentId) {
-                // Append a to-do block to the existing page
-                const result = await notionAPICall('PATCH', 'blocks/' + parentId + '/children', {
-                    children: [{ object: 'block', type: 'to_do', to_do: { rich_text: [{ text: { content: taskText } }], checked: false } }]
+            const titleInput = document.getElementById('notion-modal-title');
+            const title = titleInput ? titleInput.value.trim() : notionModalPayload.title;
+            const { content, type } = notionModalPayload;
+            closeNotionModal();
+
+            if (type === 'task') {
+                // Append a to-do checkbox block to the parent page
+                showToast('Adding task to Notion...');
+                const result = await notionAPICall('PATCH', 'blocks/' + notionParentPageId + '/children', {
+                    children: [{ object: 'block', type: 'to_do', to_do: { rich_text: [{ text: { content: content } }], checked: false } }]
                 });
-                if (result) showToast('Added to Notion page ✓');
+                if (result) showToast('Task added to Notion ✓');
             } else {
-                // Create a new top-level page with the task
+                // Create a sub-page inside the parent page
+                showToast('Saving to Notion...');
                 const result = await notionAPICall('POST', 'pages', {
-                    parent: { type: 'workspace', workspace: true },
-                    properties: { title: [{ text: { content: 'SnoahAI Tasks' } }] },
-                    children: [{ object: 'block', type: 'to_do', to_do: { rich_text: [{ text: { content: taskText } }], checked: false } }]
+                    parent: { type: 'page_id', page_id: notionParentPageId },
+                    properties: { title: [{ text: { content: title } }] },
+                    children: [{
+                        object: 'block', type: 'paragraph',
+                        paragraph: { rich_text: [{ text: { content: content.substring(0, 2000) } }] }
+                    }]
                 });
-                if (result && result.url) showToast('Added to Notion ✓');
+                if (result && result.url) showToast('Saved to Notion ✓');
             }
         }
 
-        // Detect natural language Notion commands from user message
-        // Returns { isNotionCmd, type, payload } or null
+        // Detect Notion commands from user text — returns intent or null
         function detectNotionCommand(text) {
-            const t = text.toLowerCase().trim();
-            // "save to notion" / "save this to notion"
-            if (/save\s+(this\s+)?(to|in|on)\s+notion/i.test(text)) return { type: 'save_last', payload: null };
-            // "add X to notion" / "add X to my notion to-do" / "add X to notion to-do list"
-            const addMatch = text.match(/add\s+(.+?)\s+to\s+(my\s+)?notion(\s+to.?do|\s+tasks?|\s+list)?/i);
+            if (/save\s+(this\s+)?(to|in|on)\s+notion/i.test(text)) return { type: 'save_last' };
+            const addMatch = text.match(/add\s+(.+?)\s+to\s+(my\s+)?notion/i);
             if (addMatch) return { type: 'add_task', payload: addMatch[1].trim() };
-            // "create a notion page called X" / "create notion page X"
             const createMatch = text.match(/create\s+(a\s+)?notion\s+page\s+(called\s+|named\s+)?(.+)/i);
             if (createMatch) return { type: 'create_page', payload: createMatch[3].trim() };
-            // "show my notion" / "open notion"
-            if (/show\s+(my\s+)?notion|open\s+notion/i.test(text)) return { type: 'info', payload: null };
             return null;
+        }
+
+        // Show a Notion action card in the chat (instead of silently executing)
+        function showNotionActionCard(type, payload) {
+            const container = document.getElementById('messages-wrapper') || document.getElementById('chat-container');
+            if (!container) return;
+            const card = document.createElement('div');
+            card.className = 'notion-action-card flex items-center gap-3 mx-auto my-2 px-4 py-3 bg-[#FFFBF0] border border-[#FDE68A] rounded-2xl text-[13px] text-[#5B5951] max-w-[380px] shadow-sm';
+            const icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+            let label = '';
+            let onClickFn = '';
+            if (type === 'save_last') {
+                label = 'Save last AI response to Notion';
+                card.dataset.action = 'save_last';
+            } else if (type === 'add_task') {
+                label = 'Add "<strong>' + payload + '</strong>" to Notion';
+                card.dataset.action = 'add_task';
+                card.dataset.payload = payload;
+            } else if (type === 'create_page') {
+                label = 'Create Notion page "<strong>' + payload + '</strong>"';
+                card.dataset.action = 'create_page';
+                card.dataset.payload = payload;
+            }
+            card.innerHTML = icon +
+                '<span class="flex-1 leading-snug">' + label + '</span>' +
+                '<button class="shrink-0 px-3 py-1.5 bg-[#D25D38] text-white text-[12px] font-bold rounded-xl hover:bg-[#B84E2E] active:scale-95 transition-all">Save</button>';
+            card.querySelector('button').addEventListener('click', async () => {
+                const action = card.dataset.action;
+                if (action === 'save_last') {
+                    const msgs = document.querySelectorAll('.ai-message');
+                    const last = msgs[msgs.length - 1];
+                    const content = last ? ((last.querySelector('.md-content') || last).innerText || '') : 'No response found.';
+                    openNotionModal(content, 'SnoahAI · ' + new Date().toLocaleDateString(), 'response');
+                } else if (action === 'add_task') {
+                    openNotionModal(card.dataset.payload, card.dataset.payload, 'task');
+                } else if (action === 'create_page') {
+                    openNotionModal('', card.dataset.payload, 'response');
+                }
+                card.remove();
+            });
+            container.appendChild(card);
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function addSaveToNotionButton(msgEl) {
@@ -2429,15 +2548,28 @@
             const actions = msgEl.querySelector('.msg-actions');
             if (!actions || actions.querySelector('.notion-save-btn')) return;
             const btn = document.createElement('button');
-            btn.className = 'notion-save-btn flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold text-[#5B5951] hover:bg-[#F2F0E9] transition-colors border border-transparent hover:border-[#E5E3DB]';
+            btn.className = 'notion-save-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors';
             btn.title = 'Save to Notion';
-            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Notion';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Notion';
             btn.onclick = () => {
                 const textEl = msgEl.querySelector('.md-content') || msgEl.querySelector('.ai-msg-text');
                 const content = textEl ? (textEl.innerText || textEl.textContent) : '';
-                saveToNotion(content);
+                openNotionModal(content, 'SnoahAI · ' + new Date().toLocaleDateString(), 'response');
             };
             actions.appendChild(btn);
+        }
+
+        function toggleNotionKeyVisibility() {
+            const input = document.getElementById('settings-notionkey');
+            const icon = document.getElementById('notion-eye-icon');
+            if (!input || input.value.includes('••')) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) { icon.setAttribute('data-lucide', 'eye-off'); lucide.createIcons(); }
+            } else {
+                input.type = 'password';
+                if (icon) { icon.setAttribute('data-lucide', 'eye'); lucide.createIcons(); }
+            }
         }
 
         function toggleApiKeyVisibility() {
@@ -3669,28 +3801,14 @@
             const hasImage = uploadedImages.length > 0 || uploadedImage !== null;
             if ((!hasText && !hasImage) || isLoading || isStreaming) return;
 
-            // Detect Notion natural language commands
+            // Detect Notion natural language commands — show action card instead of executing silently
             if (hasText && notionKey) {
                 const notionCmd = detectNotionCommand(textToSubmit.trim());
                 if (notionCmd) {
+                    showNotionActionCard(notionCmd.type, notionCmd.payload || '');
                     chatInput.value = '';
                     chatInput.style.height = 'auto';
-                    if (notionCmd.type === 'save_last') {
-                        const msgs = document.querySelectorAll('.ai-message');
-                        const last = msgs[msgs.length - 1];
-                        const content = last ? (last.querySelector('.md-content') || last).innerText : 'No response to save.';
-                        await saveToNotion(content);
-                    } else if (notionCmd.type === 'add_task') {
-                        const pageHint = textToSubmit.match(/to(?:\s+my)?\s+notion\s+(.+)/i)?.[1]?.trim();
-                        await notionQuickAdd(notionCmd.payload, pageHint && pageHint !== notionCmd.payload ? pageHint : null);
-                    } else if (notionCmd.type === 'create_page') {
-                        await notionAPICall('POST', 'pages', {
-                            parent: { type: 'workspace', workspace: true },
-                            properties: { title: [{ text: { content: notionCmd.payload } }] }
-                        }).then(r => r ? showToast('Page "' + notionCmd.payload + '" created ✓') : null);
-                    } else if (notionCmd.type === 'info') {
-                        showToast('Notion connected · ' + notionKey.substring(0,8) + '••••');
-                    }
+                    updateSendButton();
                     return;
                 }
             }
@@ -3810,6 +3928,7 @@ FEATURES:
 33. ADVANCED MODEL PARAMETERS: Settings → Advanced Model Parameters. Users can adjust Temperature (0-2, controls randomness), Top P (0-1, nucleus sampling), Top K (1-100, Gemini only), and Max Tokens (256-16384, max response length). These are sent with every API request.
 34. MULTI-MODAL OUTPUT (DIAGRAMS): When the AI generates a Mermaid code block (e.g. flowcharts, sequence diagrams, pie charts), it is automatically rendered as a visual diagram in the response. Use \`\`\`mermaid code blocks to generate visual diagrams, flowcharts, and charts.
 35. MULTI-AI RESPONSE: Settings → Multi-AI Response toggle. When enabled, the user's message is sent to multiple AI platforms simultaneously. Each AI's response is shown in a dropdown selector so the user can compare answers. Thinking Mode and Web Search are automatically disabled when Multi-AI is active. Platforms must have valid API keys configured.
+36. NOTION INTEGRATION: Settings → Notion Integration. Users can connect their Notion workspace by pasting a Notion Integration Token (get from notion.so/profile/integrations). Set a Default Save Page URL (must be a Notion page shared with the integration). Once connected: (a) Every AI response has a "Notion" button (next to Copy/Read/Pin) to save it to Notion. (b) Natural language commands work — type "add X to Notion", "save this to Notion", or "create a Notion page called X" and an action card appears in chat with a Save button. Tapping it opens a confirmation modal showing the title and content preview before saving. Tasks are saved as to-do checkboxes; responses are saved as sub-pages inside the configured parent page.
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
