@@ -14,6 +14,8 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiI+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTAiIGZpbGw9IiNEMjVEMzgiLz4KICA8cGF0aCBkPSJNMjU2IDEyMCBDMTU2IDEyMCA3NiAxODggNzYgMjcyIEM3NiAzMTYgMTAwIDM1NiAxMzggMzgyIEwxMjQgNDMyIEwxODIgNDA0IEMyMDYgNDEyIDIzMCA0MTYgMjU2IDQxNiBDMzU2IDQxNiA0MzYgMzQ4IDQzNiAyNjQgQzQzNiAxODAgMzU2IDEyMCAyNTYgMTIwWiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOTUiLz4KICA8Y2lyY2xlIGN4PSIxNzYiIGN5PSIyNjgiIHI9IjIyIiBmaWxsPSIjRDI1RDM4Ii8+CiAgPGNpcmNsZSBjeD0iMjU2IiBjeT0iMjY4IiByPSIyMiIgZmlsbD0iI0QyNUQzOCIvPgogIDxjaXJjbGUgY3g9IjMzNiIgY3k9IjI2OCIgcj0iMjIiIGZpbGw9IiNEMjVEMzgiLz4KPC9zdmc+">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Mermaid (diagrams) -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <!-- Lucide Icons (pinned version for reliable loading) -->
     <!-- Inline Icon System (no CDN, no MIME issues) -->
     <script>
@@ -401,6 +403,57 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
+                    <!-- Advanced Model Parameters -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Advanced Model Parameters</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Fine-tune AI response behaviour. Leave defaults for balanced output.</p>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[12px] font-semibold text-[#5B5951]">Temperature</span>
+                                    <span id="param-temp-val" class="text-[12px] font-mono text-[#A3A095]">0.7</span>
+                                </div>
+                                <input type="range" id="param-temperature" min="0" max="2" step="0.1" value="0.7"
+                                    oninput="document.getElementById('param-temp-val').textContent=this.value"
+                                    class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
+                                <p class="text-[10px] text-[#A3A095] mt-0.5">Lower = more focused, Higher = more creative</p>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[12px] font-semibold text-[#5B5951]">Top P</span>
+                                    <span id="param-topp-val" class="text-[12px] font-mono text-[#A3A095]">0.9</span>
+                                </div>
+                                <input type="range" id="param-top-p" min="0" max="1" step="0.05" value="0.9"
+                                    oninput="document.getElementById('param-topp-val').textContent=this.value"
+                                    class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
+                                <p class="text-[10px] text-[#A3A095] mt-0.5">Nucleus sampling — lower values narrow the token pool</p>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[12px] font-semibold text-[#5B5951]">Top K</span>
+                                    <span id="param-topk-val" class="text-[12px] font-mono text-[#A3A095]">40</span>
+                                </div>
+                                <input type="range" id="param-top-k" min="1" max="100" step="1" value="40"
+                                    oninput="document.getElementById('param-topk-val').textContent=this.value"
+                                    class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
+                                <p class="text-[10px] text-[#A3A095] mt-0.5">Limits tokens considered — Gemini only</p>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[12px] font-semibold text-[#5B5951]">Max Tokens</span>
+                                    <span id="param-maxtok-val" class="text-[12px] font-mono text-[#A3A095]">4096</span>
+                                </div>
+                                <input type="range" id="param-max-tokens" min="256" max="16384" step="256" value="4096"
+                                    oninput="document.getElementById('param-maxtok-val').textContent=this.value"
+                                    class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
+                                <p class="text-[10px] text-[#A3A095] mt-0.5">Maximum length of AI response in tokens</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
                     <!-- System Prompt / Persona -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">AI Persona (System Prompt)</label>
@@ -465,6 +518,44 @@
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                         </button>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Multi-AI Response -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Multi-AI Response</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Send your question to multiple AI platforms simultaneously. View each AI's response from a dropdown. Thinking mode &amp; Web Search are disabled when active.</p>
+                        <div class="flex items-center justify-between px-4 py-3 bg-white border border-[#E5E3DB] rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                </div>
+                                <span class="text-[13px] font-semibold text-[#2C2B29]">Enable Multi-AI</span>
+                            </div>
+                            <button id="multi-ai-toggle" onclick="toggleMultiAI()" class="relative w-11 h-6 rounded-full transition-colors duration-300 bg-[#E5E3DB]" role="switch" aria-checked="false">
+                                <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                        <div id="multi-ai-platforms" class="hidden mt-3 space-y-2">
+                            <p class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest mb-1">Select Platforms to Query</p>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="gemini" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Gemini</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="openrouter" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">OpenRouter</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="groq" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Groq</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="together" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Together AI</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="mistral" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Mistral AI</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] flex gap-3 shrink-0 bg-[#FAF9F6]">
@@ -1032,7 +1123,10 @@
                             <li><strong>Floating Loading Indicator</strong> — The "SnoahAI is typing..." indicator now appears above the input bar, always visible during AI response generation.</li>
                             <li><strong>Haptic Feedback</strong> — Subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.</li>
                             <li><strong>Stream Timeout Protection</strong> — Automatic timeout after 45 seconds of no data, preventing infinite loading states. Clear error message displayed.</li>
-                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 32 features of the app and can answer any question about how to use them.</li>
+                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 35 features of the app and can answer any question about how to use them.</li>
+                            <li><strong>Advanced Model Parameters</strong> — Fine-tune AI responses with Temperature, Top P, Top K, and Max Tokens sliders in Settings.</li>
+                            <li><strong>Multi-Modal Output (Diagrams)</strong> — AI can now generate Mermaid diagrams (flowcharts, sequence diagrams, etc.) rendered visually in responses.</li>
+                            <li><strong>Multi-AI Response</strong> — Enable in Settings to query multiple AI platforms simultaneously. View each AI's response from a dropdown selector.</li>
                         </ul>
                     </div>
 
@@ -1062,6 +1156,9 @@
                             <li><strong>PWA Install</strong> — Install as a native-like app on Android home screen.</li>
                             <li><strong>Contact Us</strong> — Reach the developer via Telegram or Instagram from the sidebar.</li>
                             <li><strong>User Name Personalization</strong> — Your name is shown in the sidebar and saved locally on your device.</li>
+                            <li><strong>Advanced Model Parameters</strong> — ⚙️ Tune Temperature, Top P, Top K, and Max Tokens in Settings for fine-grained control over AI responses.</li>
+                            <li><strong>Multi-Modal Output (Diagrams)</strong> — 📊 AI responses with Mermaid code blocks are automatically rendered as visual diagrams (flowcharts, sequence diagrams, pie charts, etc.).</li>
+                            <li><strong>Multi-AI Response</strong> — 🤖 Enable in Settings to send your question to multiple AI platforms at once. View each AI's answer from a dropdown. Thinking &amp; Web Search are disabled when active.</li>
                         </ul>
                     </div>
 
@@ -1190,6 +1287,14 @@
         let mistralApiKey = mistralKeys[0] || '';
         let mistralModelId = localStorage.getItem('snoah_mistral_model') || 'mistral-small-latest';
         let customInstructions = localStorage.getItem('snoah_instructions') || '';
+        // Advanced Model Parameters
+        let paramTemperature = parseFloat(localStorage.getItem('snoah_param_temp') || '0.7');
+        let paramTopP = parseFloat(localStorage.getItem('snoah_param_topp') || '0.9');
+        let paramTopK = parseInt(localStorage.getItem('snoah_param_topk') || '40');
+        let paramMaxTokens = parseInt(localStorage.getItem('snoah_param_maxtokens') || '4096');
+        // Multi-AI Response
+        let multiAIEnabled = localStorage.getItem('snoah_multi_ai') === 'true';
+        let multiAIPlatforms = JSON.parse(localStorage.getItem('snoah_multi_ai_platforms') || '[]');
         let uploadedImage = null; // { data, mimeType, previewUrl }
         let messages = [];
         let isLoading = false;
@@ -1283,6 +1388,10 @@
         }
 
         if (isDarkMode) document.getElementById('html-root').classList.add('dark');
+
+        // Initialize Mermaid for diagrams
+        if (typeof mermaid !== 'undefined') { mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' }); }
+        function renderMermaidDiagrams() { if (typeof mermaid !== 'undefined') { try { mermaid.run({ querySelector: '.mermaid' }); } catch(e) { console.warn('Mermaid render error:', e); } } }
 
         function getApiUrl(stream=false) {
             const action = stream ? 'streamGenerateContent' : 'generateContent';
@@ -1675,17 +1784,29 @@
 
         function toggleFeature(feature) {
             if (feature === 'thinking') {
+                if (multiAIEnabled) { showToast('⚠️ Thinking mode is disabled while Multi-AI is active.'); return; }
                 useThinking = !useThinking;
                 btnThinking.className = useThinking
                     ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FDF4F2] text-[#D25D38] border border-[#F8E3DE]"
                     : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
             } else if (feature === 'agent') {
-
+                if (multiAIEnabled) { showToast('⚠️ Web Search is disabled while Multi-AI is active.'); return; }
                 useAgent = !useAgent;
                 btnAgent.className = useAgent
                     ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#E8F0FE] text-[#1967D2] border border-[#D2E3FC]"
                     : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
             }
+        }
+
+        function updateToggleButtons() {
+            const btnThinking = document.getElementById('btn-thinking');
+            const btnAgent = document.getElementById('btn-agent');
+            if (btnThinking) btnThinking.className = useThinking
+                ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FDF4F2] text-[#D25D38] border border-[#F8E3DE]"
+                : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
+            if (btnAgent) btnAgent.className = useAgent
+                ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#E8F0FE] text-[#1967D2] border border-[#D2E3FC]"
+                : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
         }
 
         function toggleExpand(buttonId, contentId) {
@@ -1897,6 +2018,19 @@
             document.getElementById('settings-apikey').value = '';
             document.getElementById('settings-instructions').value = customInstructions;
             document.getElementById('settings-persona').value = customPersona;
+            // Load advanced model parameters
+            const tempSlider = document.getElementById('param-temperature');
+            const topPSlider = document.getElementById('param-top-p');
+            const topKSlider = document.getElementById('param-top-k');
+            const maxTokSlider = document.getElementById('param-max-tokens');
+            if (tempSlider) { tempSlider.value = paramTemperature; document.getElementById('param-temp-val').textContent = paramTemperature; }
+            if (topPSlider) { topPSlider.value = paramTopP; document.getElementById('param-topp-val').textContent = paramTopP; }
+            if (topKSlider) { topKSlider.value = paramTopK; document.getElementById('param-topk-val').textContent = paramTopK; }
+            if (maxTokSlider) { maxTokSlider.value = paramMaxTokens; document.getElementById('param-maxtok-val').textContent = paramMaxTokens; }
+            // Load multi-AI state
+            updateMultiAIToggleUI();
+            const cbs = document.querySelectorAll('.multi-ai-cb');
+            cbs.forEach(cb => { cb.checked = multiAIPlatforms.includes(cb.value); });
             updateFontSizeBtns();
             updatePlatformUI();
             renderKeysList();
@@ -1940,9 +2074,56 @@
             localStorage.setItem('snoah_instructions', customInstructions);
             localStorage.setItem('snoah_persona', customPersona);
 
+            // Save advanced model parameters
+            paramTemperature = parseFloat(document.getElementById('param-temperature').value);
+            paramTopP = parseFloat(document.getElementById('param-top-p').value);
+            paramTopK = parseInt(document.getElementById('param-top-k').value);
+            paramMaxTokens = parseInt(document.getElementById('param-max-tokens').value);
+            localStorage.setItem('snoah_param_temp', paramTemperature);
+            localStorage.setItem('snoah_param_topp', paramTopP);
+            localStorage.setItem('snoah_param_topk', paramTopK);
+            localStorage.setItem('snoah_param_maxtokens', paramMaxTokens);
+
+            // Save multi-AI settings
+            const selectedPlatforms = [];
+            document.querySelectorAll('.multi-ai-cb:checked').forEach(cb => selectedPlatforms.push(cb.value));
+            multiAIPlatforms = selectedPlatforms;
+            localStorage.setItem('snoah_multi_ai_platforms', JSON.stringify(multiAIPlatforms));
+
             updateModelLabels();
             closeSettings();
             showToast('Settings saved ✓');
+        }
+
+        function toggleMultiAI() {
+            multiAIEnabled = !multiAIEnabled;
+            localStorage.setItem('snoah_multi_ai', multiAIEnabled);
+            if (multiAIEnabled) {
+                // Disable thinking and web search for simplicity
+                useThinking = false;
+                useAgent = false;
+                updateToggleButtons();
+            }
+            updateMultiAIToggleUI();
+        }
+
+        function updateMultiAIToggleUI() {
+            const toggle = document.getElementById('multi-ai-toggle');
+            const platformsDiv = document.getElementById('multi-ai-platforms');
+            if (!toggle) return;
+            if (multiAIEnabled) {
+                toggle.classList.remove('bg-[#E5E3DB]');
+                toggle.classList.add('bg-[#D25D38]');
+                toggle.setAttribute('aria-checked', 'true');
+                toggle.querySelector('span').style.transform = 'translateX(20px)';
+                if (platformsDiv) platformsDiv.classList.remove('hidden');
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#E5E3DB]');
+                toggle.setAttribute('aria-checked', 'false');
+                toggle.querySelector('span').style.transform = 'translateX(0)';
+                if (platformsDiv) platformsDiv.classList.add('hidden');
+            }
         }
 
         function selectPlatform(p) {
@@ -3056,16 +3237,24 @@
                     } else {
                         inCode = false;
                         const codeText = codeLines.join('\n');
-                        const b64 = btoa(unescape(encodeURIComponent(codeText)));
-                        const canRun = ['javascript','js','html','python','py'].includes(codeLang);
-                        html += '<div class="code-block-wrap my-3 rounded-xl overflow-hidden border border-[#3A3835] shadow-md">' +
-                            '<div class="flex items-center justify-between px-3 py-2 bg-[#2C2B29]">' +
-                            '<span class="text-[11px] font-mono font-bold text-[#A3A095] uppercase tracking-wider">' + escapeHTML(codeLang) + '</span>' +
-                            '<div class="flex items-center gap-2">' +
-                            (canRun ? '<button onclick="runCode(this,\'' + b64 + '\',\'' + codeLang + '\')" class="text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors flex items-center gap-1"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><polygon points=\'5 3 19 12 5 21 5 3\'/></svg>Run</button>' : '') +
-                            '<button onclick="copyCode(this,\'' + b64 + '\')" class="flex items-center gap-1 text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy</span></button>' +
-                            '</div></div>' +
-                            '<pre class="overflow-x-auto p-4 bg-[#1E1D1B] text-[#E8E6DF] text-[13px] font-mono leading-relaxed"><code>' + escapeHTML(codeText) + '</code></pre></div>';
+                        if (codeLang === 'mermaid') {
+                            // Render as Mermaid diagram
+                            const mermaidId = 'mermaid_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+                            html += '<div class="my-3 rounded-xl overflow-hidden border border-[#E5E3DB] bg-white p-4">' +
+                                '<div class="flex items-center gap-2 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><span class="text-[11px] font-bold text-[#A3A095] uppercase tracking-wider">Diagram</span></div>' +
+                                '<div class="mermaid" id="' + mermaidId + '">' + escapeHTML(codeText) + '</div></div>';
+                        } else {
+                            const b64 = btoa(unescape(encodeURIComponent(codeText)));
+                            const canRun = ['javascript','js','html','python','py'].includes(codeLang);
+                            html += '<div class="code-block-wrap my-3 rounded-xl overflow-hidden border border-[#3A3835] shadow-md">' +
+                                '<div class="flex items-center justify-between px-3 py-2 bg-[#2C2B29]">' +
+                                '<span class="text-[11px] font-mono font-bold text-[#A3A095] uppercase tracking-wider">' + escapeHTML(codeLang) + '</span>' +
+                                '<div class="flex items-center gap-2">' +
+                                (canRun ? '<button onclick="runCode(this,\'' + b64 + '\',\'' + codeLang + '\')" class="text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors flex items-center gap-1"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><polygon points=\'5 3 19 12 5 21 5 3\'/></svg>Run</button>' : '') +
+                                '<button onclick="copyCode(this,\'' + b64 + '\')" class="flex items-center gap-1 text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy</span></button>' +
+                                '</div></div>' +
+                                '<pre class="overflow-x-auto p-4 bg-[#1E1D1B] text-[#E8E6DF] text-[13px] font-mono leading-relaxed"><code>' + escapeHTML(codeText) + '</code></pre></div>';
+                        }
                     }
                     continue;
                 }
@@ -3183,7 +3372,140 @@
             submitMessage(chatInput.value);
         }
 
+        function handleSendClick() {
+            submitMessage(chatInput.value);
+        }
+
+        // ── MULTI-AI RESPONSE ──────────────────────────────────────────
+        const MULTI_AI_LABELS = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI' };
+        const MULTI_AI_URLS = { openrouter: 'https://openrouter.ai/api/v1/chat/completions', groq: 'https://api.groq.com/openai/v1/chat/completions', together: 'https://api.together.xyz/v1/chat/completions', mistral: 'https://api.mistral.ai/v1/chat/completions' };
+        function getMultiAIKey(p) { return p === 'gemini' ? (geminiKeys[0] || apiKey) : p === 'openrouter' ? (orKeys[0] || orApiKey) : p === 'groq' ? (groqKeys[0] || groqApiKey) : p === 'together' ? (togetherKeys[0] || togetherApiKey) : (mistralKeys[0] || mistralApiKey); }
+        function getMultiAIModel(p) { return p === 'gemini' ? modelId : p === 'openrouter' ? orModelId : p === 'groq' ? groqModelId : p === 'together' ? togetherModelId : mistralModelId; }
+
+        async function multiAIFetchSingle(p, userText, sysInstruction) {
+            const key = getMultiAIKey(p);
+            const mdl = getMultiAIModel(p);
+            if (!key) return { platform: p, text: '⚠️ No API key configured for ' + MULTI_AI_LABELS[p] + '.', error: true };
+            try {
+                if (p === 'gemini') {
+                    const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + mdl + ':generateContent?key=' + key;
+                    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: userText }] }], systemInstruction: { parts: [{ text: sysInstruction }] }, generationConfig: { temperature: paramTemperature, topP: paramTopP, topK: paramTopK, maxOutputTokens: paramMaxTokens } }) });
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    const d = await r.json();
+                    return { platform: p, text: d.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '(empty response)' };
+                } else {
+                    const url = MULTI_AI_URLS[p];
+                    const hdrs = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key };
+                    if (p === 'openrouter') { hdrs['HTTP-Referer'] = 'https://snoah.ai'; hdrs['X-Title'] = 'SnoahAI'; }
+                    const r = await fetch(url, { method: 'POST', headers: hdrs, body: JSON.stringify({ model: mdl, messages: [{ role: 'system', content: sysInstruction }, { role: 'user', content: userText }], temperature: paramTemperature, top_p: paramTopP, max_tokens: paramMaxTokens }) });
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    const d = await r.json();
+                    return { platform: p, text: d.choices?.[0]?.message?.content?.trim() || '(empty response)' };
+                }
+            } catch(e) {
+                return { platform: p, text: '⚠️ Error from ' + MULTI_AI_LABELS[p] + ': ' + e.message, error: true };
+            }
+        }
+
+        async function submitMultiAI(textToSubmit) {
+            const hasText = textToSubmit && textToSubmit.trim() !== '';
+            if (!hasText || isLoading || isStreaming) return;
+            const platforms = multiAIPlatforms.filter(p => getMultiAIKey(p));
+            if (platforms.length === 0) { showToast('⚠️ Select at least one platform with a valid API key for Multi-AI.'); return; }
+
+            welcomeScreen.classList.add('hidden');
+            const textToSend = textToSubmit.trim();
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            updateSendButton();
+
+            const userMsg = { role: 'user', text: textToSend };
+            messages.push(userMsg);
+            if (messages.length === 1) saveCurrentChat();
+
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex w-full justify-end animate-slide-up";
+            userDiv.innerHTML = '<div class="bg-[#EFECE6] text-[#2C2B29] max-w-[85%] rounded-[24px] rounded-br-md px-5 py-3 text-[15.5px] shadow-sm font-sans border border-[#E5E3DB]/50 break-words">' + escapeHTML(textToSend) + '</div>';
+            messagesWrapper.appendChild(userDiv);
+            scrollToBottom();
+
+            setIsLoading(true);
+
+            const lengthDirective = responseLength === 'short' ? 'Be brief and concise — 2-4 sentences max. ' : responseLength === 'detailed' ? 'Be thorough and detailed. ' : '';
+            const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + lengthDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '');
+
+            try {
+                const results = await Promise.all(platforms.map(p => multiAIFetchSingle(p, textToSend, sysInstruction)));
+
+                setIsLoading(false);
+
+                // Build multi-AI response wrapper with dropdown
+                const multiUID = 'multi_' + Date.now();
+                const multiWrapper = document.createElement('div');
+                multiWrapper.className = 'flex w-full justify-start animate-slide-up';
+                let dropdownOpts = results.map((r, i) => '<option value="' + i + '">' + MULTI_AI_LABELS[r.platform] + (r.error ? ' ⚠️' : '') + '</option>').join('');
+                multiWrapper.innerHTML =
+                    '<div class="flex flex-col w-full max-w-[95%]">' +
+                        '<div class="flex items-center gap-2 mb-2">' +
+                            '<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F2F0E9] border border-[#E5E3DB]">' +
+                                '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' +
+                                '<span class="text-[11px] font-bold text-[#737166] uppercase tracking-wider">Multi-AI</span>' +
+                            '</div>' +
+                            '<select id="multi-sel-' + multiUID + '" onchange="switchMultiAIView(\'' + multiUID + '\')" class="px-3 py-1.5 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer pr-7" style="background-image:url(\'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23A3A095%22 stroke-width=%222%22><path d=%22m7 15 5 5 5-5%22/><path d=%22m7 9 5-5 5 5%22/></svg>\');background-repeat:no-repeat;background-position:right 8px center">' + dropdownOpts + '</select>' +
+                        '</div>' +
+                        results.map((r, i) =>
+                            '<div id="multi-resp-' + multiUID + '-' + i + '" class="' + (i === 0 ? '' : 'hidden ') + '">' +
+                                '<div class="md-content text-[#2C2B29] leading-relaxed text-[15px]">' + formatMarkdown(r.text) + '</div>' +
+                                '<div class="msg-actions flex items-center gap-1.5 mt-2.5">' +
+                                    '<button onclick="copyMsgText(this)" data-text="' + encodeURIComponent(r.text) + '" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="clipboard" class="w-3 h-3"></i> Copy</button>' +
+                                '</div>' +
+                            '</div>'
+                        ).join('') +
+                    '</div>';
+                messagesWrapper.appendChild(multiWrapper);
+                lucide.createIcons();
+                scrollToBottom();
+
+                // Save the first response to messages (for chat history)
+                const bestResult = results.find(r => !r.error) || results[0];
+                const aiMsg = { role: 'model', text: bestResult.text, originalText: bestResult.text, multiAI: results.map(r => ({ platform: r.platform, text: r.text, error: r.error })) };
+                messages.push(aiMsg);
+                saveCurrentChat();
+                if (messages.filter(m => m.role === 'user').length === 1) autoTitleChat();
+
+            } catch(e) {
+                console.error('Multi-AI error:', e);
+                const errDiv = document.createElement('div');
+                errDiv.className = "flex w-full justify-start animate-slide-up";
+                errDiv.innerHTML = '<div class="text-[#D25D38] bg-[#FDF4F2] px-4 py-3 rounded-xl border border-[#F8E3DE] text-[15px] max-w-[95%]">⚠️ Multi-AI request failed: ' + escapeHTML(e.message) + '</div>';
+                messagesWrapper.appendChild(errDiv);
+                scrollToBottom();
+            } finally {
+                setIsLoading(false);
+                isStreaming = false;
+                updateSendButton();
+            }
+        }
+
+        window.switchMultiAIView = function(uid) {
+            const sel = document.getElementById('multi-sel-' + uid);
+            if (!sel) return;
+            const idx = parseInt(sel.value);
+            // Hide all responses in this multi-AI block
+            let i = 0;
+            while (true) {
+                const el = document.getElementById('multi-resp-' + uid + '-' + i);
+                if (!el) break;
+                el.classList.toggle('hidden', i !== idx);
+                i++;
+            }
+        };
+
         async function submitMessage(textToSubmit) {
+            // Delegate to multi-AI if enabled
+            if (multiAIEnabled && multiAIPlatforms.length > 0) {
+                return submitMultiAI(textToSubmit);
+            }
             const hasText = textToSubmit && textToSubmit.trim() !== '';
             const hasImage = uploadedImages.length > 0 || uploadedImage !== null;
             if ((!hasText && !hasImage) || isLoading || isStreaming) return;
@@ -3300,6 +3622,9 @@ FEATURES:
 30. STREAM TIMEOUT PROTECTION: If the AI takes too long to respond (45+ seconds of no data), the request is automatically cancelled with a helpful error message, preventing infinite loading states.
 31. USER NAME PERSONALIZATION: On first visit, users are prompted to enter their name. The name is displayed in the sidebar and saved to localStorage. The sidebar shows the user's initials and full name.
 32. IMPROVED TTS VOICE: TTS selects the best available voice on the device (preferring Google UK English Female, Google US English, etc.) for a more natural reading experience.
+33. ADVANCED MODEL PARAMETERS: Settings → Advanced Model Parameters. Users can adjust Temperature (0-2, controls randomness), Top P (0-1, nucleus sampling), Top K (1-100, Gemini only), and Max Tokens (256-16384, max response length). These are sent with every API request.
+34. MULTI-MODAL OUTPUT (DIAGRAMS): When the AI generates a Mermaid code block (e.g. flowcharts, sequence diagrams, pie charts), it is automatically rendered as a visual diagram in the response. Use \`\`\`mermaid code blocks to generate visual diagrams, flowcharts, and charts.
+35. MULTI-AI RESPONSE: Settings → Multi-AI Response toggle. When enabled, the user's message is sent to multiple AI platforms simultaneously. Each AI's response is shown in a dropdown selector so the user can compare answers. Thinking Mode and Web Search are automatically disabled when Multi-AI is active. Platforms must have valid API keys configured.
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
@@ -3580,7 +3905,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             abortController = new AbortController();
                             // Connection timeout: abort if no response within 60s
                             const connTimeout1 = setTimeout(() => { if (abortController) { abortController._timedOut = true; abortController.abort(); } }, 60000);
-                            const chatBody = { model: chatModel, messages: chatMessages, stream: true };
+                            const chatBody = { model: chatModel, messages: chatMessages, stream: true, temperature: paramTemperature, top_p: paramTopP, max_tokens: paramMaxTokens };
                             if (!isMistral) chatBody.stream_options = { include_usage: true };
                             const res = await fetch(chatUrl, {
                                 method: 'POST',
@@ -3598,7 +3923,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             await readStream(res);
                             abortController = null;
                         } else {
-                            const payload = { contents: formattedContents, systemInstruction: { parts: [{ text: systemInstruction }] } };
+                            const payload = { contents: formattedContents, systemInstruction: { parts: [{ text: systemInstruction }] }, generationConfig: { temperature: paramTemperature, topP: paramTopP, topK: paramTopK, maxOutputTokens: paramMaxTokens } };
                             if (useAgent) payload.tools = [{ google_search: {} }];
                             abortController = new AbortController();
                             // Connection timeout: abort if no response within 60s
@@ -3726,6 +4051,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 liveTextEl.className = 'md-content text-[#2C2B29] leading-relaxed';
                 liveTextEl.innerHTML = formatMarkdown(mainText);
                 liveTextEl.style.whiteSpace = '';
+                renderMermaidDiagrams();
 
                 // Update thinking block to final state
                 if (thinkingText) {
@@ -3933,6 +4259,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                     if (pinBtn) pinBtn.onclick = () => pinMessage(fullText, pinBtn);
                 }
                 lucide.createIcons();
+                renderMermaidDiagrams();
                 scrollToBottom();
             }
 
