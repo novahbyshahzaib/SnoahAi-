@@ -12,6 +12,9 @@
     <meta name="apple-mobile-web-app-title" content="SnoahAI">
     <meta name="theme-color" content="#D25D38">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiI+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTAiIGZpbGw9IiNEMjVEMzgiLz4KICA8cGF0aCBkPSJNMjU2IDEyMCBDMTU2IDEyMCA3NiAxODggNzYgMjcyIEM3NiAzMTYgMTAwIDM1NiAxMzggMzgyIEwxMjQgNDMyIEwxODIgNDA0IEMyMDYgNDEyIDIzMCA0MTYgMjU2IDQxNiBDMzU2IDQxNiA0MzYgMzQ4IDQzNiAyNjQgQzQzNiAxODAgMzU2IDEyMCAyNTYgMTIwWiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOTUiLz4KICA8Y2lyY2xlIGN4PSIxNzYiIGN5PSIyNjgiIHI9IjIyIiBmaWxsPSIjRDI1RDM4Ii8+CiAgPGNpcmNsZSBjeD0iMjU2IiBjeT0iMjY4IiByPSIyMiIgZmlsbD0iI0QyNUQzOCIvPgogIDxjaXJjbGUgY3g9IjMzNiIgY3k9IjI2OCIgcj0iMjIiIGZpbGw9IiNEMjVEMzgiLz4KPC9zdmc+">
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Mermaid (diagrams) -->
@@ -70,6 +73,7 @@
             'mail': '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
             'clock': '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
             'filter': '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+            'link': '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
         },
         createIcons() {
             document.querySelectorAll('i[data-lucide]').forEach(el => {
@@ -557,6 +561,20 @@
                             </label>
                         </div>
                     </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Chat Storage (Local vs Firebase) -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Chat Storage</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Choose where to save your chats. Firebase enables cloud sync and link sharing.</p>
+                        <div class="flex gap-2">
+                            <button onclick="setChatStorage('local')" id="storage-local-btn" class="flex-1 py-2.5 rounded-xl border text-[13px] font-medium transition-colors border-[#D25D38] bg-[#FDF4F2] text-[#D25D38]">📱 Local Storage</button>
+                            <button onclick="setChatStorage('firebase')" id="storage-firebase-btn" class="flex-1 py-2.5 rounded-xl border text-[13px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">☁️ Firebase Cloud</button>
+                        </div>
+                        <p id="storage-hint" class="text-[11px] text-[#A3A095] mt-1.5">Currently using: <span class="font-semibold text-[#5B5951]">Local Storage</span></p>
+                    </div>
                 </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] flex gap-3 shrink-0 bg-[#FAF9F6]">
                     <button onclick="closeSettings()" class="flex-1 py-2.5 rounded-xl border border-[#E5E3DB] text-[14px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">Cancel</button>
@@ -615,6 +633,10 @@
                     <button onclick="shareChat()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
                         <i data-lucide="share-2" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
                         <span class="text-[14px] text-[#5B5951]">Share Chat</span>
+                    </button>
+                    <button onclick="shareChatViaLink()" id="share-link-btn" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group hidden">
+                        <i data-lucide="link" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
+                        <span class="text-[14px] text-[#5B5951]">Share via Link</span>
                     </button>
                     <button onclick="summarizeChat()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
                         <i data-lucide="file-text" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
@@ -1116,6 +1138,9 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Firebase Cloud Storage</strong> — Choose between Local Storage and Firebase Cloud in Settings → Chat Storage. Sync your chats to the cloud and access them from any device.</li>
+                            <li><strong>Chat Link Sharing</strong> — Share any conversation via a unique link (☰ → Share via Link). Anyone with the link can view the exact chat in read-only mode. Requires Firebase storage.</li>
+                            <li><strong>Contact Info Fix</strong> — AI now correctly preserves underscores in developer usernames (@Owner_Of_Crypton, @shahzaib_muzaffar_7).</li>
                             <li><strong>User Name Personalization</strong> — New users are greeted with a name prompt on first visit. Your name is displayed in the sidebar and saved locally.</li>
                             <li><strong>Improved TTS Voice</strong> — Text-to-Speech now uses a higher-quality voice (e.g., Google UK English Female) when available on your device.</li>
                             <li><strong>TTS Auto-Stop Fix</strong> — TTS now properly stops at the end of the response instead of restarting. No more repeated playback.</li>
@@ -1123,7 +1148,7 @@
                             <li><strong>Floating Loading Indicator</strong> — The "SnoahAI is typing..." indicator now appears above the input bar, always visible during AI response generation.</li>
                             <li><strong>Haptic Feedback</strong> — Subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.</li>
                             <li><strong>Stream Timeout Protection</strong> — Automatic timeout after 45 seconds of no data, preventing infinite loading states. Clear error message displayed.</li>
-                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 35 features of the app and can answer any question about how to use them.</li>
+                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 37 features of the app and can answer any question about how to use them.</li>
                             <li><strong>Advanced Model Parameters</strong> — Fine-tune AI responses with Temperature, Top P, Top K, and Max Tokens sliders in Settings.</li>
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — AI can now generate Mermaid diagrams (flowcharts, sequence diagrams, etc.) rendered visually in responses.</li>
                             <li><strong>Multi-AI Response</strong> — Enable in Settings to query multiple AI platforms simultaneously. View each AI's response from a dropdown selector.</li>
@@ -1159,6 +1184,8 @@
                             <li><strong>Advanced Model Parameters</strong> — ⚙️ Tune Temperature, Top P, Top K, and Max Tokens in Settings for fine-grained control over AI responses.</li>
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — 📊 AI responses with Mermaid code blocks are automatically rendered as visual diagrams (flowcharts, sequence diagrams, pie charts, etc.).</li>
                             <li><strong>Multi-AI Response</strong> — 🤖 Enable in Settings to send your question to multiple AI platforms at once. View each AI's answer from a dropdown. Thinking &amp; Web Search are disabled when active.</li>
+                            <li><strong>Firebase Cloud Storage</strong> — ☁️ Choose between Local Storage and Firebase Cloud in Settings → Chat Storage. Sync chats to the cloud for cross-device access.</li>
+                            <li><strong>Chat Link Sharing</strong> — 🔗 Share conversations via a unique link (☰ → Share via Link). Recipients see the exact chat in read-only mode. Firebase storage required.</li>
                         </ul>
                     </div>
 
@@ -1295,6 +1322,29 @@
         // Multi-AI Response
         let multiAIEnabled = localStorage.getItem('snoah_multi_ai') === 'true';
         let multiAIPlatforms = JSON.parse(localStorage.getItem('snoah_multi_ai_platforms') || '[]');
+        // Firebase / Chat Storage
+        let chatStorageMode = localStorage.getItem('snoah_chat_storage') || 'local'; // 'local' | 'firebase'
+        let firebaseDB = null;
+        let isSharedChatView = false;
+        (function initFirebase() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBjPEh5Dq_OYiQduLXakDod_huPyQQMk0E",
+                    authDomain: "novah-pub.firebaseapp.com",
+                    projectId: "novah-pub",
+                    storageBucket: "novah-pub.firebasestorage.app",
+                    messagingSenderId: "609580159558",
+                    appId: "1:609580159558:web:1823d4dd939e470e0df047",
+                    measurementId: "G-VNWM5G0X2Z"
+                };
+                if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                if (typeof firebase !== 'undefined') {
+                    firebaseDB = firebase.firestore();
+                }
+            } catch(e) { console.warn('Firebase init error:', e); }
+        })();
         let uploadedImage = null; // { data, mimeType, previewUrl }
         let messages = [];
         let isLoading = false;
@@ -1904,7 +1954,194 @@
             // Keep only 30 chats to avoid localStorage overflow
             allChats = allChats.slice(0, 30);
             try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(e) {}
+            // Also save to Firebase if enabled
+            if (chatStorageMode === 'firebase') { saveToFirebase(entry); }
             renderChatHistoryList();
+        }
+
+        // ── FIREBASE CHAT FUNCTIONS ───────────────────────────────────────
+        async function saveToFirebase(chatEntry) {
+            if (!firebaseDB) return;
+            try {
+                await firebaseDB.collection('chats').doc(chatEntry.id).set({
+                    id: chatEntry.id,
+                    title: chatEntry.title,
+                    updatedAt: chatEntry.updatedAt,
+                    messages: JSON.stringify(chatEntry.messages),
+                    tag: chatEntry.tag || null
+                });
+            } catch(e) { console.warn('Firebase save error:', e); }
+        }
+
+        async function loadChatsFromFirebase() {
+            if (!firebaseDB) return;
+            try {
+                const snapshot = await firebaseDB.collection('chats').orderBy('updatedAt', 'desc').limit(30).get();
+                const firebaseChats = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    firebaseChats.push({
+                        id: data.id,
+                        title: data.title,
+                        updatedAt: data.updatedAt,
+                        messages: JSON.parse(data.messages || '[]'),
+                        tag: data.tag || null
+                    });
+                });
+                // Merge with local: Firebase chats take priority
+                const localIds = new Set(allChats.map(c => c.id));
+                firebaseChats.forEach(fc => {
+                    if (!localIds.has(fc.id)) {
+                        allChats.push(fc);
+                    } else {
+                        const idx = allChats.findIndex(c => c.id === fc.id);
+                        if (idx >= 0 && fc.updatedAt > allChats[idx].updatedAt) {
+                            allChats[idx] = fc;
+                        }
+                    }
+                });
+                allChats.sort((a,b) => b.updatedAt - a.updatedAt);
+                allChats = allChats.slice(0, 30);
+                try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(e) {}
+                renderChatHistoryList();
+            } catch(e) { console.warn('Firebase load error:', e); }
+        }
+
+        async function deleteFromFirebase(chatId) {
+            if (!firebaseDB) return;
+            try { await firebaseDB.collection('chats').doc(chatId).delete(); } catch(e) {}
+        }
+
+        async function shareChatViaLink() {
+            if (chatStorageMode !== 'firebase') {
+                showToast('Link sharing requires Firebase storage');
+                return;
+            }
+            if (!currentChatId || messages.length === 0) {
+                showToast('Nothing to share');
+                return;
+            }
+            // Save current chat to Firebase first
+            saveCurrentChat();
+            try {
+                // Create/update a shared entry
+                const saveable = messages.filter(m => !m.isError).map(m => ({
+                    role: m.role,
+                    text: m.text || '',
+                    thinking: m.thinking || null,
+                    sources: m.sources || []
+                }));
+                const firstUserText = saveable.find(m => m.role === 'user')?.text || 'Shared Chat';
+                const words = firstUserText.trim().split(/\s+/);
+                const title = words.slice(0, 2).join(' ') + (words.length > 2 ? '...' : '');
+                const shareDocId = currentChatId + '_' + Date.now().toString(36);
+                await firebaseDB.collection('shared_chats').doc(shareDocId).set({
+                    id: currentChatId,
+                    title: title,
+                    sharedAt: Date.now(),
+                    messages: JSON.stringify(saveable)
+                });
+                const shareUrl = window.location.origin + window.location.pathname + '?shared=' + shareDocId;
+                if (navigator.share) {
+                    navigator.share({ title: 'SnoahAI Chat', text: 'Check out this AI conversation', url: shareUrl }).catch(() => {});
+                } else {
+                    navigator.clipboard.writeText(shareUrl).then(() => showToast('Share link copied ✓')).catch(() => showToast('Could not copy link'));
+                }
+            } catch(e) {
+                console.warn('Share error:', e);
+                showToast('Failed to create share link');
+            }
+            if (isSidebarOpen) toggleSidebar();
+        }
+
+        async function loadSharedChat(sharedId) {
+            if (!firebaseDB) { showToast('Firebase not available'); return; }
+            try {
+                const doc = await firebaseDB.collection('shared_chats').doc(sharedId).get();
+                if (!doc.exists) { showToast('Shared chat not found'); return; }
+                const data = doc.data();
+                const sharedMessages = JSON.parse(data.messages || '[]');
+                isSharedChatView = true;
+                messages = sharedMessages.map(m => ({...m}));
+                currentChatId = null;
+                const messagesWrapper = document.getElementById('messages-wrapper');
+                const welcomeScreen = document.getElementById('welcome-screen');
+                if (messagesWrapper) messagesWrapper.innerHTML = '';
+                if (welcomeScreen) welcomeScreen.classList.add('hidden');
+                // Show shared chat banner
+                const banner = document.createElement('div');
+                banner.id = 'shared-chat-banner';
+                banner.className = 'flex items-center justify-center gap-2 py-2 px-4 bg-[#FEF3C7] border-b border-[#FDE68A] text-[13px] text-[#92400E] font-medium';
+                banner.innerHTML = '🔗 Shared Chat (read-only) — <button onclick="exitSharedChat()" class="underline font-semibold">Start New Chat</button>';
+                if (messagesWrapper) messagesWrapper.before(banner);
+                // Render messages
+                sharedMessages.forEach(m => {
+                    if (m.role === 'user') {
+                        const userDiv = document.createElement('div');
+                        userDiv.className = "flex w-full justify-end animate-slide-up";
+                        userDiv.innerHTML = '<div class="bg-[#EFECE6] user-bubble text-[#2C2B29] max-w-[85%] rounded-[24px] rounded-br-md px-5 py-3 text-[15.5px] shadow-sm font-sans border border-[#E5E3DB]/50 break-words">' + escapeHTML(m.text) + '</div>';
+                        messagesWrapper.appendChild(userDiv);
+                    } else {
+                        renderAIResponse(m, true);
+                    }
+                });
+                // Disable input in shared view
+                const inputBox = document.getElementById('user-input');
+                const sendBtn = document.getElementById('send-btn');
+                if (inputBox) { inputBox.disabled = true; inputBox.placeholder = 'Shared chat — read-only'; }
+                if (sendBtn) sendBtn.style.display = 'none';
+            } catch(e) {
+                console.warn('Load shared chat error:', e);
+                showToast('Could not load shared chat');
+            }
+        }
+
+        function exitSharedChat() {
+            isSharedChatView = false;
+            const banner = document.getElementById('shared-chat-banner');
+            if (banner) banner.remove();
+            const inputBox = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            if (inputBox) { inputBox.disabled = false; inputBox.placeholder = 'Ask SnoahAI anything...'; }
+            if (sendBtn) sendBtn.style.display = '';
+            // Clear URL params
+            window.history.replaceState({}, '', window.location.pathname);
+            startNewChat();
+        }
+
+        function setChatStorage(mode) {
+            chatStorageMode = mode;
+            localStorage.setItem('snoah_chat_storage', mode);
+            updateStorageUI();
+            if (mode === 'firebase' && firebaseDB) {
+                loadChatsFromFirebase();
+                showToast('Switched to Firebase Cloud ☁️');
+            } else {
+                showToast('Switched to Local Storage 📱');
+            }
+        }
+
+        function updateStorageUI() {
+            const localBtn = document.getElementById('storage-local-btn');
+            const fbBtn = document.getElementById('storage-firebase-btn');
+            const hint = document.getElementById('storage-hint');
+            const shareLinkBtn = document.getElementById('share-link-btn');
+            if (localBtn && fbBtn) {
+                if (chatStorageMode === 'firebase') {
+                    fbBtn.className = 'flex-1 py-2.5 rounded-xl border text-[13px] font-medium transition-colors border-[#D25D38] bg-[#FDF4F2] text-[#D25D38]';
+                    localBtn.className = 'flex-1 py-2.5 rounded-xl border text-[13px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]';
+                } else {
+                    localBtn.className = 'flex-1 py-2.5 rounded-xl border text-[13px] font-medium transition-colors border-[#D25D38] bg-[#FDF4F2] text-[#D25D38]';
+                    fbBtn.className = 'flex-1 py-2.5 rounded-xl border text-[13px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]';
+                }
+            }
+            if (hint) {
+                hint.innerHTML = 'Currently using: <span class="font-semibold text-[#5B5951]">' + (chatStorageMode === 'firebase' ? 'Firebase Cloud' : 'Local Storage') + '</span>';
+            }
+            // Show/hide share link button (only for Firebase)
+            if (shareLinkBtn) {
+                shareLinkBtn.classList.toggle('hidden', chatStorageMode !== 'firebase');
+            }
         }
 
         function renderChatHistoryList() {
@@ -1965,6 +2202,7 @@
         function deleteSingleChat(chatId) {
             allChats = allChats.filter(c => c.id !== chatId);
             try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(e) {}
+            if (chatStorageMode === 'firebase') { deleteFromFirebase(chatId); }
             if (currentChatId === chatId) {
                 currentChatId = null;
                 messages = [];
@@ -1989,6 +2227,29 @@
         // Init on load
         currentChatId = generateChatId();
         renderChatHistoryList();
+        // Check for shared chat URL
+        (function checkSharedChat() {
+            const params = new URLSearchParams(window.location.search);
+            const sharedId = params.get('shared');
+            if (sharedId) {
+                // Wait for DOM and Firebase to be ready
+                const tryLoad = () => {
+                    if (firebaseDB) { loadSharedChat(sharedId); }
+                    else { setTimeout(tryLoad, 300); }
+                };
+                setTimeout(tryLoad, 300);
+            }
+        })();
+        // Load from Firebase if enabled
+        if (chatStorageMode === 'firebase') {
+            const trySync = () => {
+                if (firebaseDB) { loadChatsFromFirebase(); }
+                else { setTimeout(trySync, 300); }
+            };
+            setTimeout(trySync, 300);
+        }
+        // Update share link button visibility
+        setTimeout(() => updateStorageUI(), 100);
 
         function updateModelLabels() {
             const badge = document.getElementById('header-model-badge');
@@ -2034,6 +2295,7 @@
             updateFontSizeBtns();
             updatePlatformUI();
             renderKeysList();
+            updateStorageUI();
             document.getElementById('settings-modal').classList.remove('hidden');
             if (isSidebarOpen) toggleSidebar();
             lucide.createIcons();
@@ -3361,6 +3623,7 @@
         // =========================================================
 
         function handleSendOrStop() {
+            if (isSharedChatView) { showToast('Shared chat is read-only'); return; }
             if (isLoading || isStreaming) {
                 stopGeneration();
             } else {
@@ -3615,7 +3878,7 @@ FEATURES:
 23. STOP STREAMING: Send button turns into a ■ stop button during AI response generation. Tap to cancel the current response.
 24. PWA INSTALL: Orange install banner appears in browser — tap Install to add to home screen. Runs fullscreen with no browser bar for a native app feel.
 25. TOKEN USAGE TRACKING: Settings → Token Usage section. Tracks prompt tokens, completion tokens, total tokens, and request count per platform. View usage history and manage limits.
-26. CONTACT DEVELOPER: ☰ → Contact Us — reach the developer (Shahzaib Muzaffar) directly via Telegram (@Owner_Of_Crypton) or Instagram (@shahzaib_muzaffar_7).
+26. CONTACT DEVELOPER: ☰ → Contact Us — reach the developer (Shahzaib Muzaffar) directly via Telegram (exact username: @Owner_Of_Crypton with underscores) or Instagram (exact username: @shahzaib_muzaffar_7 with underscores).
 27. UPDATES PANEL: ☰ → Updates — view the latest features, changes, and announcements about SnoahAI.
 28. HAPTIC FEEDBACK: The app provides subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.
 29. SMOOTH STREAMING: AI responses stream in real-time with a smooth animated cursor. A floating loading indicator appears above the input bar during generation.
@@ -3625,14 +3888,16 @@ FEATURES:
 33. ADVANCED MODEL PARAMETERS: Settings → Advanced Model Parameters. Users can adjust Temperature (0-2, controls randomness), Top P (0-1, nucleus sampling), Top K (1-100, Gemini only), and Max Tokens (256-16384, max response length). These are sent with every API request.
 34. MULTI-MODAL OUTPUT (DIAGRAMS): When the AI generates a Mermaid code block (e.g. flowcharts, sequence diagrams, pie charts), it is automatically rendered as a visual diagram in the response. Use \`\`\`mermaid code blocks to generate visual diagrams, flowcharts, and charts.
 35. MULTI-AI RESPONSE: Settings → Multi-AI Response toggle. When enabled, the user's message is sent to multiple AI platforms simultaneously. Each AI's response is shown in a dropdown selector so the user can compare answers. Thinking Mode and Web Search are automatically disabled when Multi-AI is active. Platforms must have valid API keys configured.
+36. FIREBASE CLOUD STORAGE: Settings → Chat Storage section. Users can choose between Local Storage (device only) and Firebase Cloud. When Firebase is selected, chats are synced to the cloud and accessible from any device. Local storage still works as a fallback.
+37. CHAT LINK SHARING: When Firebase Cloud storage is enabled, users can share any chat via a unique link (☰ → Share via Link). Anyone with the link can view the exact conversation in read-only mode. This feature is only available when Chat Storage is set to Firebase.
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
 - For today's date, current news, live data: enable Web Search (🔍) — when enabled, Gemini is always used regardless of selected platform
 - Groq, Together AI, Mistral: no web search capability on these platforms directly (Web button switches to Gemini)
-- All data is stored locally on the device — no cloud sync between devices
+- When using Local Storage mode, data is stored only on the device — switch to Firebase in Settings for cloud sync
 
-DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mobile-first web apps. Contact: Telegram @Owner_Of_Crypton, Instagram @shahzaib_muzaffar_7.
+DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mobile-first web apps. Contact via Telegram: @Owner_Of_Crypton (note: includes underscores between words). Contact via Instagram: @shahzaib_muzaffar_7 (note: includes underscores). IMPORTANT: Always preserve the underscore characters exactly as shown when sharing these usernames — never remove them.
 
 Always answer questions about the app based on the above. If asked "what can you do" or "how do I use X feature", explain it clearly based on this documentation.
 
