@@ -683,7 +683,7 @@
                     <button id="mic-btn" onclick="toggleVoiceInput()" class="p-2 mb-0.5 text-[#8C897D] hover:text-[#D25D38] transition-colors rounded-full hover:bg-[#F2F0E9]">
                         <i data-lucide="mic" class="w-[18px] h-[18px]"></i>
                     </button>
-                    <button id="send-btn" disabled class="p-2.5 mb-0.5 rounded-full transition-all duration-300 flex items-center justify-center bg-[#EAE8E0] text-[#A3A095] cursor-not-allowed">
+                    <button id="send-btn" type="button" aria-disabled="true" class="p-2.5 mb-0.5 rounded-full transition-all duration-300 flex items-center justify-center bg-[#EAE8E0] text-[#A3A095] cursor-not-allowed">
                         <svg id="send-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-0.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                     </button>
                 </div>
@@ -1572,10 +1572,28 @@
             updateSendButton();
         });
 
+        // Also update button on change/paste for robustness (some mobile browsers)
+        chatInput.addEventListener('change', updateSendButton);
+
+        // Debounce guard to prevent double-firing from touchend + click on mobile
+        let lastSendTime = 0;
+        function debouncedSend() {
+            const now = Date.now();
+            if (now - lastSendTime < 300) return;
+            lastSendTime = now;
+            handleSendOrStop();
+        }
+
         // Robust send button click handler via addEventListener (replaces inline onclick)
         sendBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            handleSendOrStop();
+            debouncedSend();
+        });
+
+        // Fallback for mobile devices where click may not fire reliably
+        sendBtn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            debouncedSend();
         });
 
         chatInput.addEventListener('keydown', function(e) {
@@ -1625,17 +1643,17 @@
             const hasInput = chatInput.value.trim() !== '' || uploadedImages.length > 0 || uploadedImage !== null;
             if (isLoading || isStreaming) {
                 // Show stop (square) button
-                sendBtn.disabled = false;
+                sendBtn.removeAttribute('aria-disabled');
                 sendBtn.className = "p-2.5 mb-0.5 rounded-xl transition-all duration-300 flex items-center justify-center bg-[#D25D38] text-white shadow-md active:scale-95";
                 sendBtn.style.backgroundColor = window._themeAccent || '#D25D38';
                 if (icon) { icon.setAttribute('viewBox','0 0 24 24'); icon.innerHTML = '<rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" stroke="none"/>'; }
             } else if (hasInput) {
-                sendBtn.disabled = false;
+                sendBtn.removeAttribute('aria-disabled');
                 sendBtn.className = "p-2.5 mb-0.5 rounded-full transition-all duration-300 flex items-center justify-center text-white shadow-md hover:shadow-lg transform active:scale-95";
                 sendBtn.style.backgroundColor = window._themeAccent || '#D25D38';
                 if (icon) { icon.innerHTML = '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>'; }
             } else {
-                sendBtn.disabled = true;
+                sendBtn.setAttribute('aria-disabled', 'true');
                 sendBtn.className = "p-2.5 mb-0.5 rounded-full transition-all duration-300 flex items-center justify-center bg-[#EAE8E0] text-[#A3A095] cursor-not-allowed";
                 sendBtn.style.backgroundColor = '';
                 if (icon) { icon.innerHTML = '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>'; }
@@ -2515,7 +2533,7 @@
 
             // Directly update send button colour
             const sendBtnEl = document.getElementById('send-btn');
-            if (sendBtnEl && !sendBtnEl.disabled) {
+            if (sendBtnEl && sendBtnEl.getAttribute('aria-disabled') !== 'true') {
                 sendBtnEl.style.backgroundColor = acc;
             }
             window._themeAccent = acc;
@@ -3173,6 +3191,14 @@
             // Check token limit
             if (!checkTokenLimit(platform)) {
                 showToast('⚠️ Token limit reached for ' + TOKEN_PLATFORM_LABELS[platform] + '. Increase or remove limit in Settings → Token Management.');
+                return;
+            }
+
+            // Pre-flight API key validation
+            const activeKey = platform === 'gemini' ? apiKey : platform === 'openrouter' ? orApiKey : platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : mistralApiKey;
+            if (!activeKey) {
+                const platformLabel = platform === 'gemini' ? 'Gemini (aistudio.google.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'together' ? 'Together AI (api.together.ai)' : 'Mistral AI (console.mistral.ai)';
+                showToast('🔑 Please add an API key for ' + platformLabel + ' in Settings first.');
                 return;
             }
 
