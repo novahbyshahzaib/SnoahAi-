@@ -2575,6 +2575,7 @@
             if (!notionAutoSave || !notionKey || !notionParentPageId || !text || !text.trim()) return;
             try {
                 const title = 'SnoahAI · ' + new Date().toLocaleDateString() + ' · ' + new Date().toLocaleTimeString();
+                // Notion API limits rich_text content to 2000 chars per block
                 await notionAPICall('POST', 'pages', {
                     parent: { type: 'page_id', page_id: notionParentPageId },
                     properties: { title: [{ text: { content: title } }] },
@@ -4414,7 +4415,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             // Connection timeout: abort if no response within 60s
                             const connTimeout1 = setTimeout(() => { if (abortController) { abortController._timedOut = true; abortController.abort(); } }, 60000);
                             const chatBody = { model: chatModel, messages: chatMessages, stream: true, temperature: paramTemperature, top_p: paramTopP, max_tokens: paramMaxTokens };
-                            if (!isMistral) chatBody.stream_options = { include_usage: true };
+                            if (!isMistral && !isNvidia && !isHF) chatBody.stream_options = { include_usage: true };
                             const res = await fetch(chatUrl, {
                                 method: 'POST',
                                 headers: chatHeaders,
