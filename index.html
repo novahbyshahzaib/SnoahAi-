@@ -373,6 +373,10 @@
                                 <option value="groq">Groq</option>
                                 <option value="together">Together AI</option>
                                 <option value="mistral">Mistral AI</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="nvidia">NVIDIA</option>
+                                <option value="huggingface">Hugging Face</option>
+                                <option value="githubmodels">GitHub Models</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
@@ -555,6 +559,18 @@
                             <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
                                 <input type="checkbox" value="mistral" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Mistral AI</span>
                             </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="openai" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">OpenAI</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="nvidia" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">NVIDIA</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="huggingface" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Hugging Face</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="githubmodels" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">GitHub Models</span>
+                            </label>
                         </div>
                     </div>
 
@@ -586,6 +602,15 @@
                             <input type="text" id="settings-notionparent" placeholder="Paste Notion page URL to save into..."
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
                             <p class="text-[11px] text-[#A3A095] mt-1 leading-relaxed">Open any Notion page → share it with your integration → paste its URL here. All saves will go into this page.</p>
+                        </div>
+                        <div class="mt-3 flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Auto-Save AI Responses</p>
+                                <p class="text-[11px] text-[#A3A095]">Automatically save every AI response to Notion</p>
+                            </div>
+                            <button id="notion-autosave-toggle" onclick="toggleNotionAutoSave()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1147,6 +1172,8 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Notion Auto-Save</strong> — Enable "Auto-Save AI Responses" toggle in Notion Integration settings. Every AI response is automatically saved to your configured Notion page — no manual tapping needed.</li>
+                            <li><strong>4 New AI Platforms</strong> — OpenAI, NVIDIA, Hugging Face, and GitHub Models added. All use backend proxies for CORS protection. Switch in Settings → Platform dropdown.</li>
                             <li><strong>Notion Integration</strong> — Connect your Notion workspace in Settings. Say "add X to Notion", "save this to Notion", or tap the Notion button on any AI response. A confirmation modal shows before saving. Tasks go in as checkboxes, responses as sub-pages.</li>
                             <li><strong>User Name Personalization</strong> — New users are greeted with a name prompt on first visit. Your name is displayed in the sidebar and saved locally.</li>
                             <li><strong>Improved TTS Voice</strong> — Text-to-Speech now uses a higher-quality voice (e.g., Google UK English Female) when available on your device.</li>
@@ -1155,7 +1182,7 @@
                             <li><strong>Floating Loading Indicator</strong> — The "SnoahAI is typing..." indicator now appears above the input bar, always visible during AI response generation.</li>
                             <li><strong>Haptic Feedback</strong> — Subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.</li>
                             <li><strong>Stream Timeout Protection</strong> — Automatic timeout after 45 seconds of no data, preventing infinite loading states. Clear error message displayed.</li>
-                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 36 features of the app and can answer any question about how to use them.</li>
+                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 39 features of the app and can answer any question about how to use them.</li>
                             <li><strong>Advanced Model Parameters</strong> — Fine-tune AI responses with Temperature, Top P, Top K, and Max Tokens sliders in Settings.</li>
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — AI can now generate Mermaid diagrams (flowcharts, sequence diagrams, etc.) rendered visually in responses.</li>
                             <li><strong>Multi-AI Response</strong> — Enable in Settings to query multiple AI platforms simultaneously. View each AI's response from a dropdown selector.</li>
@@ -1165,7 +1192,7 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">📋 All Features</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
-                            <li><strong>5 AI Platforms</strong> — Google Gemini, OpenRouter, Groq, Together AI, Mistral AI. Switch in Settings.</li>
+                            <li><strong>9 AI Platforms</strong> — Google Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA, Hugging Face, GitHub Models. Switch in Settings.</li>
                             <li><strong>Thinking Mode</strong> — 🧠 AI reasons step-by-step with a live collapsible thinking block.</li>
                             <li><strong>Web Search</strong> — 🔍 Real-time Google Search grounding via Gemini. Works from any platform when enabled.</li>
                             <li><strong>File Attachments</strong> — 📎 Upload images, PDFs, text files, CSVs, JSON, Markdown, and more. Multi-file support with preview strip.</li>
@@ -1192,6 +1219,8 @@
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — 📊 AI responses with Mermaid code blocks are automatically rendered as visual diagrams (flowcharts, sequence diagrams, pie charts, etc.).</li>
                             <li><strong>Multi-AI Response</strong> — 🤖 Enable in Settings to send your question to multiple AI platforms at once. View each AI's answer from a dropdown. Thinking &amp; Web Search are disabled when active.</li>
                             <li><strong>Notion Integration</strong> — 📝 Connect Notion in Settings. Save any AI response to Notion with one tap, or use natural language: "add X to Notion", "save this to Notion". Confirmation modal before every save.</li>
+                            <li><strong>Notion Auto-Save</strong> — 🔄 Toggle "Auto-Save AI Responses" in Notion settings. Every AI response is automatically saved to your Notion page without manual action.</li>
+                            <li><strong>Backend Proxied Platforms</strong> — 🔒 OpenAI, NVIDIA, Hugging Face, and GitHub Models use backend proxies to avoid CORS and browser block errors.</li>
                         </ul>
                     </div>
 
@@ -1357,6 +1386,23 @@
         let mistralKeyIdx = 0;
         let mistralApiKey = mistralKeys[0] || '';
         let mistralModelId = localStorage.getItem('snoah_mistral_model') || 'mistral-small-latest';
+        // New platforms
+        let openaiKeys = JSON.parse(localStorage.getItem('snoah_openai_keys') || '[]');
+        let openaiKeyIdx = 0;
+        let openaiApiKey = openaiKeys[0] || '';
+        let openaiModelId = localStorage.getItem('snoah_openai_model') || 'gpt-4o-mini';
+        let nvidiaKeys = JSON.parse(localStorage.getItem('snoah_nvidia_keys') || '[]');
+        let nvidiaKeyIdx = 0;
+        let nvidiaApiKey = nvidiaKeys[0] || '';
+        let nvidiaModelId = localStorage.getItem('snoah_nvidia_model') || 'meta/llama-3.1-8b-instruct';
+        let hfKeys = JSON.parse(localStorage.getItem('snoah_hf_keys') || '[]');
+        let hfKeyIdx = 0;
+        let hfApiKey = hfKeys[0] || '';
+        let hfModelId = localStorage.getItem('snoah_hf_model') || 'meta-llama/Llama-3.3-70B-Instruct';
+        let ghKeys = JSON.parse(localStorage.getItem('snoah_gh_keys') || '[]');
+        let ghKeyIdx = 0;
+        let ghApiKey = ghKeys[0] || '';
+        let ghModelId = localStorage.getItem('snoah_gh_model') || 'gpt-4o-mini';
         let customInstructions = localStorage.getItem('snoah_instructions') || '';
         // Advanced Model Parameters
         let paramTemperature = parseFloat(localStorage.getItem('snoah_param_temp') || '0.7');
@@ -1369,6 +1415,7 @@
         // Notion Integration
         let notionKey = localStorage.getItem('snoah_notion_key') || '';
         let notionParentPageId = localStorage.getItem('snoah_notion_parent') || '';
+        let notionAutoSave = localStorage.getItem('snoah_notion_autosave') === 'true';
         const NOTION_PROXY = '/api/notion';
         let uploadedImage = null; // { data, mimeType, previewUrl }
         let messages = [];
@@ -2068,8 +2115,8 @@
         function updateModelLabels() {
             const badge = document.getElementById('header-model-badge');
             const sidebarLabel = document.getElementById('sidebar-model-label');
-            const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : platform === 'together' ? 'Together AI' : platform === 'mistral' ? 'Mistral AI' : 'Gemini';
-            const activeModel = platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : modelId;
+            const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : platform === 'together' ? 'Together AI' : platform === 'mistral' ? 'Mistral AI' : platform === 'openai' ? 'OpenAI' : platform === 'nvidia' ? 'NVIDIA' : platform === 'huggingface' ? 'Hugging Face' : platform === 'githubmodels' ? 'GitHub Models' : 'Gemini';
+            const activeModel = platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'openai' ? openaiModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : modelId;
             if (badge) badge.textContent = 'NOVAH GEM';
             if (sidebarLabel) sidebarLabel.textContent = platLabel + ' · ' + activeModel;
         }
@@ -2087,6 +2134,14 @@
                 document.getElementById('settings-model').value = togetherModelId;
             } else if (platform === 'mistral') {
                 document.getElementById('settings-model').value = mistralModelId;
+            } else if (platform === 'openai') {
+                document.getElementById('settings-model').value = openaiModelId;
+            } else if (platform === 'nvidia') {
+                document.getElementById('settings-model').value = nvidiaModelId;
+            } else if (platform === 'huggingface') {
+                document.getElementById('settings-model').value = hfModelId;
+            } else if (platform === 'githubmodels') {
+                document.getElementById('settings-model').value = ghModelId;
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
@@ -2099,6 +2154,7 @@
             const notionParentInput = document.getElementById('settings-notionparent');
             if (notionParentInput) notionParentInput.value = notionParentPageId || '';
             renderNotionKeyStatus();
+            updateNotionAutoSaveUI();
             // Load advanced model parameters
             const tempSlider = document.getElementById('param-temperature');
             const topPSlider = document.getElementById('param-top-p');
@@ -2145,6 +2201,22 @@
                 if (newModel) mistralModelId = newModel;
                 localStorage.setItem('snoah_mistral_model', mistralModelId);
                 localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys));
+            } else if (platform === 'openai') {
+                if (newModel) openaiModelId = newModel;
+                localStorage.setItem('snoah_openai_model', openaiModelId);
+                localStorage.setItem('snoah_openai_keys', JSON.stringify(openaiKeys));
+            } else if (platform === 'nvidia') {
+                if (newModel) nvidiaModelId = newModel;
+                localStorage.setItem('snoah_nvidia_model', nvidiaModelId);
+                localStorage.setItem('snoah_nvidia_keys', JSON.stringify(nvidiaKeys));
+            } else if (platform === 'huggingface') {
+                if (newModel) hfModelId = newModel;
+                localStorage.setItem('snoah_hf_model', hfModelId);
+                localStorage.setItem('snoah_hf_keys', JSON.stringify(hfKeys));
+            } else if (platform === 'githubmodels') {
+                if (newModel) ghModelId = newModel;
+                localStorage.setItem('snoah_gh_model', ghModelId);
+                localStorage.setItem('snoah_gh_keys', JSON.stringify(ghKeys));
             } else {
                 if (newModel) modelId = newModel;
                 localStorage.setItem('snoah_model', modelId);
@@ -2239,6 +2311,14 @@
                 document.getElementById('settings-model').value = togetherModelId;
             } else if (p === 'mistral') {
                 document.getElementById('settings-model').value = mistralModelId;
+            } else if (p === 'openai') {
+                document.getElementById('settings-model').value = openaiModelId;
+            } else if (p === 'nvidia') {
+                document.getElementById('settings-model').value = nvidiaModelId;
+            } else if (p === 'huggingface') {
+                document.getElementById('settings-model').value = hfModelId;
+            } else if (p === 'githubmodels') {
+                document.getElementById('settings-model').value = ghModelId;
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
@@ -2251,6 +2331,10 @@
             const isGQ = platform === 'groq';
             const isTG = platform === 'together';
             const isMT = platform === 'mistral';
+            const isOA = platform === 'openai';
+            const isNV = platform === 'nvidia';
+            const isHF = platform === 'huggingface';
+            const isGH = platform === 'githubmodels';
             const noWeb = false; // Web uses Gemini when on non-Gemini platform
             const hint = document.getElementById('apikey-hint');
             const mhint = document.getElementById('model-hint');
@@ -2268,7 +2352,7 @@
                     btnAgent.style.pointerEvents = '';
                 }
             }
-            if (lbl) lbl.textContent = isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : isTG ? 'Together AI API Key' : isMT ? 'Mistral AI API Key' : 'Gemini API Key';
+            if (lbl) lbl.textContent = isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : isTG ? 'Together AI API Key' : isMT ? 'Mistral AI API Key' : isOA ? 'OpenAI API Key' : isNV ? 'NVIDIA API Key' : isHF ? 'Hugging Face Token' : isGH ? 'GitHub Token' : 'Gemini API Key';
             if (hint) hint.innerHTML = isOR
                 ? 'Get your key at <a href="https://openrouter.ai/keys" target="_blank" class="underline">openrouter.ai/keys</a>'
                 : isGQ
@@ -2277,6 +2361,14 @@
                 ? 'Get your key at <a href="https://api.together.ai" target="_blank" class="underline">api.together.ai</a>'
                 : isMT
                 ? 'Get your key at <a href="https://console.mistral.ai" target="_blank" class="underline">console.mistral.ai</a> (free, phone verify only)'
+                : isOA
+                ? 'Get your key at <a href="https://platform.openai.com/api-keys" target="_blank" class="underline">platform.openai.com/api-keys</a>'
+                : isNV
+                ? 'Get your key at <a href="https://build.nvidia.com" target="_blank" class="underline">build.nvidia.com</a>'
+                : isHF
+                ? 'Get your token at <a href="https://huggingface.co/settings/tokens" target="_blank" class="underline">huggingface.co/settings/tokens</a>'
+                : isGH
+                ? 'Get your token at <a href="https://github.com/settings/tokens" target="_blank" class="underline">github.com/settings/tokens</a>'
                 : 'Get your key at <a href="https://aistudio.google.com" target="_blank" class="underline">aistudio.google.com</a>';
             if (mhint) mhint.innerHTML = isOR
                 ? 'Default: <span class="font-mono text-[#5B5951]">z-ai/glm-4.5-air:free</span>'
@@ -2286,14 +2378,22 @@
                 ? 'Default: <span class="font-mono text-[#5B5951]">meta-llama/Llama-3.3-70B-Instruct-Turbo-Free</span>'
                 : isMT
                 ? 'Default: <span class="font-mono text-[#5B5951]">mistral-small-latest</span> · also: <span class="font-mono text-[#5B5951]">open-mistral-7b</span>'
+                : isOA
+                ? 'Default: <span class="font-mono text-[#5B5951]">gpt-4o-mini</span> · also: <span class="font-mono text-[#5B5951]">gpt-4o</span>'
+                : isNV
+                ? 'Default: <span class="font-mono text-[#5B5951]">meta/llama-3.1-8b-instruct</span>'
+                : isHF
+                ? 'Default: <span class="font-mono text-[#5B5951]">meta-llama/Llama-3.3-70B-Instruct</span>'
+                : isGH
+                ? 'Default: <span class="font-mono text-[#5B5951]">gpt-4o-mini</span> · also: <span class="font-mono text-[#5B5951]">Phi-3.5-mini-instruct</span>'
                 : 'Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> · <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span>';
         }
 
         function renderKeysList() {
             const list = document.getElementById('keys-list');
             if (!list) return;
-            const keys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : geminiKeys;
-            const activeIdx = platform === 'openrouter' ? orKeyIdx : platform === 'groq' ? groqKeyIdx : platform === 'together' ? togetherKeyIdx : platform === 'mistral' ? mistralKeyIdx : geminiKeyIdx;
+            const keys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'openai' ? openaiKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : geminiKeys;
+            const activeIdx = platform === 'openrouter' ? orKeyIdx : platform === 'groq' ? groqKeyIdx : platform === 'together' ? togetherKeyIdx : platform === 'mistral' ? mistralKeyIdx : platform === 'openai' ? openaiKeyIdx : platform === 'nvidia' ? nvidiaKeyIdx : platform === 'huggingface' ? hfKeyIdx : platform === 'githubmodels' ? ghKeyIdx : geminiKeyIdx;
             if (!keys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
             list.innerHTML = keys.map((k, i) =>
                 '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
@@ -2310,7 +2410,7 @@
             const key = input.value.trim();
             if (!key) { showToast('Paste a key first'); return; }
             // Enforce single-key limit when cookies not accepted
-            const currentKeys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : geminiKeys;
+            const currentKeys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'openai' ? openaiKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : geminiKeys;
             if (cookiesAccepted !== 'true' && currentKeys.length >= 1) {
                 showToast('Accept cookies to save multiple API keys');
                 return;
@@ -2327,13 +2427,25 @@
             } else if (platform === 'mistral') {
                 if (mistralKeys.includes(key)) { showToast('Key already added'); return; }
                 mistralKeys.push(key); localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys)); mistralApiKey = mistralKeys[mistralKeyIdx];
+            } else if (platform === 'openai') {
+                if (openaiKeys.includes(key)) { showToast('Key already added'); return; }
+                openaiKeys.push(key); localStorage.setItem('snoah_openai_keys', JSON.stringify(openaiKeys)); openaiApiKey = openaiKeys[openaiKeyIdx];
+            } else if (platform === 'nvidia') {
+                if (nvidiaKeys.includes(key)) { showToast('Key already added'); return; }
+                nvidiaKeys.push(key); localStorage.setItem('snoah_nvidia_keys', JSON.stringify(nvidiaKeys)); nvidiaApiKey = nvidiaKeys[nvidiaKeyIdx];
+            } else if (platform === 'huggingface') {
+                if (hfKeys.includes(key)) { showToast('Key already added'); return; }
+                hfKeys.push(key); localStorage.setItem('snoah_hf_keys', JSON.stringify(hfKeys)); hfApiKey = hfKeys[hfKeyIdx];
+            } else if (platform === 'githubmodels') {
+                if (ghKeys.includes(key)) { showToast('Key already added'); return; }
+                ghKeys.push(key); localStorage.setItem('snoah_gh_keys', JSON.stringify(ghKeys)); ghApiKey = ghKeys[ghKeyIdx];
             } else {
                 if (geminiKeys.includes(key)) { showToast('Key already added'); return; }
                 geminiKeys.push(key); localStorage.setItem('snoah_gemini_keys', JSON.stringify(geminiKeys)); apiKey = geminiKeys[geminiKeyIdx];
             }
             input.value = '';
             renderKeysList();
-            const kCount = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : geminiKeys.length;
+            const kCount = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : platform === 'openai' ? openaiKeys.length : platform === 'nvidia' ? nvidiaKeys.length : platform === 'huggingface' ? hfKeys.length : platform === 'githubmodels' ? ghKeys.length : geminiKeys.length;
             showToast('Key added ✓ (' + kCount + ' total)');
         }
 
@@ -2354,6 +2466,22 @@
                 if (mistralKeys.length <= 1) { showToast('Need at least 1 key'); return; }
                 mistralKeys.splice(idx, 1); mistralKeyIdx = Math.min(mistralKeyIdx, mistralKeys.length-1); mistralApiKey = mistralKeys[mistralKeyIdx];
                 localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys));
+            } else if (platform === 'openai') {
+                if (openaiKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                openaiKeys.splice(idx, 1); openaiKeyIdx = Math.min(openaiKeyIdx, openaiKeys.length-1); openaiApiKey = openaiKeys[openaiKeyIdx];
+                localStorage.setItem('snoah_openai_keys', JSON.stringify(openaiKeys));
+            } else if (platform === 'nvidia') {
+                if (nvidiaKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                nvidiaKeys.splice(idx, 1); nvidiaKeyIdx = Math.min(nvidiaKeyIdx, nvidiaKeys.length-1); nvidiaApiKey = nvidiaKeys[nvidiaKeyIdx];
+                localStorage.setItem('snoah_nvidia_keys', JSON.stringify(nvidiaKeys));
+            } else if (platform === 'huggingface') {
+                if (hfKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                hfKeys.splice(idx, 1); hfKeyIdx = Math.min(hfKeyIdx, hfKeys.length-1); hfApiKey = hfKeys[hfKeyIdx];
+                localStorage.setItem('snoah_hf_keys', JSON.stringify(hfKeys));
+            } else if (platform === 'githubmodels') {
+                if (ghKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                ghKeys.splice(idx, 1); ghKeyIdx = Math.min(ghKeyIdx, ghKeys.length-1); ghApiKey = ghKeys[ghKeyIdx];
+                localStorage.setItem('snoah_gh_keys', JSON.stringify(ghKeys));
             } else {
                 if (geminiKeys.length <= 1) { showToast('Need at least 1 key'); return; }
                 geminiKeys.splice(idx, 1); geminiKeyIdx = Math.min(geminiKeyIdx, geminiKeys.length-1); apiKey = geminiKeys[geminiKeyIdx];
@@ -2375,6 +2503,18 @@
             } else if (platform === 'mistral') {
                 if (mistralKeys.length <= 1) return false;
                 mistralKeyIdx = (mistralKeyIdx + 1) % mistralKeys.length; mistralApiKey = mistralKeys[mistralKeyIdx]; return true;
+            } else if (platform === 'openai') {
+                if (openaiKeys.length <= 1) return false;
+                openaiKeyIdx = (openaiKeyIdx + 1) % openaiKeys.length; openaiApiKey = openaiKeys[openaiKeyIdx]; return true;
+            } else if (platform === 'nvidia') {
+                if (nvidiaKeys.length <= 1) return false;
+                nvidiaKeyIdx = (nvidiaKeyIdx + 1) % nvidiaKeys.length; nvidiaApiKey = nvidiaKeys[nvidiaKeyIdx]; return true;
+            } else if (platform === 'huggingface') {
+                if (hfKeys.length <= 1) return false;
+                hfKeyIdx = (hfKeyIdx + 1) % hfKeys.length; hfApiKey = hfKeys[hfKeyIdx]; return true;
+            } else if (platform === 'githubmodels') {
+                if (ghKeys.length <= 1) return false;
+                ghKeyIdx = (ghKeyIdx + 1) % ghKeys.length; ghApiKey = ghKeys[ghKeyIdx]; return true;
             } else {
                 if (geminiKeys.length <= 1) return false;
                 geminiKeyIdx = (geminiKeyIdx + 1) % geminiKeys.length; apiKey = geminiKeys[geminiKeyIdx]; return true;
@@ -2407,6 +2547,45 @@
                 el.innerHTML = '<div class="flex items-center gap-1.5 text-[11px] text-green-600 font-semibold"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><polyline points=\'20 6 9 17 4 12\'></polyline></svg>Notion connected · ' + notionKey.substring(0,8) + '••••</div>';
             } else {
                 el.innerHTML = '<div class="text-[11px] text-[#A3A095]">Not connected — paste your token above and save</div>';
+            }
+        }
+
+        function toggleNotionAutoSave() {
+            notionAutoSave = !notionAutoSave;
+            localStorage.setItem('snoah_notion_autosave', notionAutoSave);
+            updateNotionAutoSaveUI();
+        }
+
+        function updateNotionAutoSaveUI() {
+            const toggle = document.getElementById('notion-autosave-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (notionAutoSave) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        async function autoSaveToNotion(text) {
+            if (!notionAutoSave || !notionKey || !notionParentPageId || !text || !text.trim()) return;
+            try {
+                const title = 'SnoahAI · ' + new Date().toLocaleDateString() + ' · ' + new Date().toLocaleTimeString();
+                await notionAPICall('POST', 'pages', {
+                    parent: { type: 'page_id', page_id: notionParentPageId },
+                    properties: { title: [{ text: { content: title } }] },
+                    children: [{
+                        object: 'block', type: 'paragraph',
+                        paragraph: { rich_text: [{ text: { content: text.substring(0, 2000) } }] }
+                    }]
+                });
+                showToast('Auto-saved to Notion ✓');
+            } catch (e) {
+                console.error('Notion auto-save error:', e);
             }
         }
 
@@ -3668,10 +3847,10 @@
         }
 
         // ── MULTI-AI RESPONSE ──────────────────────────────────────────
-        const MULTI_AI_LABELS = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI' };
-        const MULTI_AI_URLS = { openrouter: 'https://openrouter.ai/api/v1/chat/completions', groq: 'https://api.groq.com/openai/v1/chat/completions', together: 'https://api.together.xyz/v1/chat/completions', mistral: 'https://api.mistral.ai/v1/chat/completions' };
-        function getMultiAIKey(p) { return p === 'gemini' ? (geminiKeys[0] || apiKey) : p === 'openrouter' ? (orKeys[0] || orApiKey) : p === 'groq' ? (groqKeys[0] || groqApiKey) : p === 'together' ? (togetherKeys[0] || togetherApiKey) : (mistralKeys[0] || mistralApiKey); }
-        function getMultiAIModel(p) { return p === 'gemini' ? modelId : p === 'openrouter' ? orModelId : p === 'groq' ? groqModelId : p === 'together' ? togetherModelId : mistralModelId; }
+        const MULTI_AI_LABELS = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', openai: 'OpenAI', nvidia: 'NVIDIA', huggingface: 'Hugging Face', githubmodels: 'GitHub Models' };
+        const MULTI_AI_URLS = { openrouter: 'https://openrouter.ai/api/v1/chat/completions', groq: 'https://api.groq.com/openai/v1/chat/completions', together: 'https://api.together.xyz/v1/chat/completions', mistral: 'https://api.mistral.ai/v1/chat/completions', openai: '/api/openai', nvidia: '/api/nvidia', huggingface: '/api/huggingface', githubmodels: '/api/github' };
+        function getMultiAIKey(p) { return p === 'gemini' ? (geminiKeys[0] || apiKey) : p === 'openrouter' ? (orKeys[0] || orApiKey) : p === 'groq' ? (groqKeys[0] || groqApiKey) : p === 'together' ? (togetherKeys[0] || togetherApiKey) : p === 'openai' ? (openaiKeys[0] || openaiApiKey) : p === 'nvidia' ? (nvidiaKeys[0] || nvidiaApiKey) : p === 'huggingface' ? (hfKeys[0] || hfApiKey) : p === 'githubmodels' ? (ghKeys[0] || ghApiKey) : (mistralKeys[0] || mistralApiKey); }
+        function getMultiAIModel(p) { return p === 'gemini' ? modelId : p === 'openrouter' ? orModelId : p === 'groq' ? groqModelId : p === 'together' ? togetherModelId : p === 'openai' ? openaiModelId : p === 'nvidia' ? nvidiaModelId : p === 'huggingface' ? hfModelId : p === 'githubmodels' ? ghModelId : mistralModelId; }
 
         async function multiAIFetchSingle(p, userText, sysInstruction) {
             const key = getMultiAIKey(p);
@@ -3685,8 +3864,11 @@
                     const d = await r.json();
                     return { platform: p, text: d.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '(empty response)' };
                 } else {
+                    const isProxied = p === 'openai' || p === 'nvidia' || p === 'huggingface' || p === 'githubmodels';
                     const url = MULTI_AI_URLS[p];
-                    const hdrs = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key };
+                    const hdrs = isProxied
+                        ? { 'Content-Type': 'application/json', 'x-api-key': key }
+                        : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key };
                     if (p === 'openrouter') { hdrs['HTTP-Referer'] = 'https://snoah.ai'; hdrs['X-Title'] = 'SnoahAI'; }
                     const r = await fetch(url, { method: 'POST', headers: hdrs, body: JSON.stringify({ model: mdl, messages: [{ role: 'system', content: sysInstruction }, { role: 'user', content: userText }], temperature: paramTemperature, top_p: paramTopP, max_tokens: paramMaxTokens }) });
                     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -3820,9 +4002,9 @@
             }
 
             // Pre-flight API key validation
-            const activeKey = platform === 'gemini' ? apiKey : platform === 'openrouter' ? orApiKey : platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : mistralApiKey;
+            const activeKey = platform === 'gemini' ? apiKey : platform === 'openrouter' ? orApiKey : platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : platform === 'openai' ? openaiApiKey : platform === 'nvidia' ? nvidiaApiKey : platform === 'huggingface' ? hfApiKey : platform === 'githubmodels' ? ghApiKey : mistralApiKey;
             if (!activeKey) {
-                const platformLabel = platform === 'gemini' ? 'Gemini (aistudio.google.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'together' ? 'Together AI (api.together.ai)' : 'Mistral AI (console.mistral.ai)';
+                const platformLabel = platform === 'gemini' ? 'Gemini (aistudio.google.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'openai' ? 'OpenAI (platform.openai.com/api-keys)' : platform === 'nvidia' ? 'NVIDIA (build.nvidia.com)' : platform === 'huggingface' ? 'Hugging Face (huggingface.co/settings/tokens)' : platform === 'githubmodels' ? 'GitHub Models (github.com/settings/tokens)' : 'Mistral AI (console.mistral.ai)';
                 showToast('🔑 Please add an API key for ' + platformLabel + ' in Settings first.');
                 return;
             }
@@ -3888,6 +4070,10 @@ PLATFORMS & MODELS (all configurable in Settings):
 - Groq: ultra-fast inference. Free models: llama-3.3-70b-versatile (default), llama-3.1-8b-instant, gemma2-9b-it. No web search.
 - Together AI: open-source models. Free models have -Free suffix e.g. meta-llama/Llama-3.3-70B-Instruct-Turbo-Free. No web search. Requires account verification at api.together.ai.
 - Mistral AI: free tier with phone verification only (no card). Default model: mistral-small-latest. Also: open-mistral-7b, open-mixtral-8x7b. No web search.
+- OpenAI: GPT models via backend proxy. Default model: gpt-4o-mini. Also: gpt-4o. Get key at platform.openai.com/api-keys. Uses /api/openai proxy for CORS protection.
+- NVIDIA: NVIDIA NIM API via backend proxy. Default model: meta/llama-3.1-8b-instruct. Get key at build.nvidia.com. Uses /api/nvidia proxy for CORS protection.
+- Hugging Face: Inference API via backend proxy. Default model: meta-llama/Llama-3.3-70B-Instruct. Get token at huggingface.co/settings/tokens. Uses /api/huggingface proxy for CORS protection.
+- GitHub Models: Azure-hosted models via backend proxy. Default model: gpt-4o-mini. Also: Phi-3.5-mini-instruct. Get token at github.com/settings/tokens. Uses /api/github proxy for CORS protection.
 - Switch platform via Settings → Platform dropdown. Each platform has its own API key pool and model setting.
 
 MULTI-KEY POOL: Add multiple API keys per platform. On rate limit (429), app silently rotates to next key and retries. Manage keys in Settings.
@@ -3929,6 +4115,9 @@ FEATURES:
 34. MULTI-MODAL OUTPUT (DIAGRAMS): When the AI generates a Mermaid code block (e.g. flowcharts, sequence diagrams, pie charts), it is automatically rendered as a visual diagram in the response. Use \`\`\`mermaid code blocks to generate visual diagrams, flowcharts, and charts.
 35. MULTI-AI RESPONSE: Settings → Multi-AI Response toggle. When enabled, the user's message is sent to multiple AI platforms simultaneously. Each AI's response is shown in a dropdown selector so the user can compare answers. Thinking Mode and Web Search are automatically disabled when Multi-AI is active. Platforms must have valid API keys configured.
 36. NOTION INTEGRATION: Settings → Notion Integration. Users can connect their Notion workspace by pasting a Notion Integration Token (get from notion.so/profile/integrations). Set a Default Save Page URL (must be a Notion page shared with the integration). Once connected: (a) Every AI response has a "Notion" button (next to Copy/Read/Pin) to save it to Notion. (b) Natural language commands work — type "add X to Notion", "save this to Notion", or "create a Notion page called X" and an action card appears in chat with a Save button. Tapping it opens a confirmation modal showing the title and content preview before saving. Tasks are saved as to-do checkboxes; responses are saved as sub-pages inside the configured parent page.
+37. NOTION AUTO-SAVE: Settings → Notion Integration → Auto-Save AI Responses toggle. When enabled and Notion is connected (token + default page configured), every AI response is automatically saved to the configured Notion page without any manual action. A toast notification confirms each auto-save. Useful for automatically logging all AI conversations to Notion.
+38. BACKEND PROXIED PLATFORMS: OpenAI, NVIDIA, Hugging Face, and GitHub Models use backend serverless proxies (/api/openai, /api/nvidia, /api/huggingface, /api/github) to avoid CORS errors and browser blocks. The user's API key is sent via x-api-key header to the proxy, which forwards requests to the real API. Streaming is fully supported through the proxy.
+39. 9 AI PLATFORMS TOTAL: The app now supports 9 AI platforms: Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA, Hugging Face, GitHub Models. All platforms support Multi-AI Response mode.
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
@@ -4091,7 +4280,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 }
                 rafId = requestAnimationFrame(rafRender);
 
-                const totalKeys = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : geminiKeys.length;
+                const totalKeys = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : platform === 'openai' ? openaiKeys.length : platform === 'nvidia' ? nvidiaKeys.length : platform === 'huggingface' ? hfKeys.length : platform === 'githubmodels' ? ghKeys.length : geminiKeys.length;
                 let attempts = 0;
                 while (attempts <= totalKeys) {
                     try {
@@ -4163,10 +4352,15 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                         }
 
                         // When web search is ON, always use Gemini regardless of selected platform
-                        if ((platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral') && !useAgent) {
+                        if ((platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral' || platform === 'openai' || platform === 'nvidia' || platform === 'huggingface' || platform === 'githubmodels') && !useAgent) {
                             const isGroq = platform === 'groq';
                             const isTogether = platform === 'together';
                             const isMistral = platform === 'mistral';
+                            const isOpenAI = platform === 'openai';
+                            const isNvidia = platform === 'nvidia';
+                            const isHF = platform === 'huggingface';
+                            const isGH = platform === 'githubmodels';
+                            const isProxied = isOpenAI || isNvidia || isHF || isGH;
 
                             const chatMessages = [{ role: 'system', content: systemInstruction }];
                             for (const msg of messages) {
@@ -4182,7 +4376,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                         }
                                     });
                                 }
-                                if (msg.images && msg.images.length > 0 && msg === messages[messages.length - 1] && !isGroq && !isTogether && !isMistral) {
+                                if (msg.images && msg.images.length > 0 && msg === messages[messages.length - 1] && !isGroq && !isTogether && !isMistral && !isNvidia) {
                                     const imgParts = msg.images.filter(img => img.isImage !== false && img.data).map(img => ({ type: 'image_url', image_url: { url: 'data:' + img.mimeType + ';base64,' + img.data } }));
                                     if (imgParts.length > 0) {
                                         if (content) imgParts.push({ type: 'text', text: content });
@@ -4200,10 +4394,20 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                 ? 'https://api.together.xyz/v1/chat/completions'
                                 : isMistral
                                 ? 'https://api.mistral.ai/v1/chat/completions'
+                                : isOpenAI
+                                ? '/api/openai'
+                                : isNvidia
+                                ? '/api/nvidia'
+                                : isHF
+                                ? '/api/huggingface'
+                                : isGH
+                                ? '/api/github'
                                 : 'https://openrouter.ai/api/v1/chat/completions';
-                            const chatKey = isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : orApiKey;
-                            const chatModel = isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : orModelId;
-                            const chatHeaders = (isGroq || isTogether || isMistral)
+                            const chatKey = isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : isOpenAI ? openaiApiKey : isNvidia ? nvidiaApiKey : isHF ? hfApiKey : isGH ? ghApiKey : orApiKey;
+                            const chatModel = isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : isOpenAI ? openaiModelId : isNvidia ? nvidiaModelId : isHF ? hfModelId : isGH ? ghModelId : orModelId;
+                            const chatHeaders = isProxied
+                                ? { 'Content-Type': 'application/json', 'x-api-key': chatKey }
+                                : (isGroq || isTogether || isMistral)
                                 ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey }
                                 : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey, 'HTTP-Referer': 'https://snoah.ai', 'X-Title': 'SnoahAI' };
                             abortController = new AbortController();
@@ -4415,6 +4619,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 const aiMsg = { role: 'model', text: mainText, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries };
                 messages.push(aiMsg);
                 saveCurrentChat();
+                autoSaveToNotion(mainText);
                 if (messages.filter(m=>m.role==='user').length === 1) autoTitleChat();
 
             } catch (error) {
@@ -4451,7 +4656,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                     : isCredit
                     ? '⚠️ Credit limit exceeded. Use a -Free model (e.g. Llama-3.3-70B-Instruct-Turbo-Free). Check your account at api.together.ai'
                     : isAuth
-                    ? '⚠️ Invalid API key. Go to Settings and check your key for ' + (platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : 'Gemini (aistudio.google.com)') + '.'
+                    ? '⚠️ Invalid API key. Go to Settings and check your key for ' + (platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'openai' ? 'OpenAI (platform.openai.com)' : platform === 'nvidia' ? 'NVIDIA (build.nvidia.com)' : platform === 'huggingface' ? 'Hugging Face (huggingface.co)' : platform === 'githubmodels' ? 'GitHub Models (github.com)' : 'Gemini (aistudio.google.com)') + '.'
                     : '⚠️ ' + errText.substring(0, 140);
                 const errDiv = document.createElement('div');
                 errDiv.className = "flex w-full justify-start animate-slide-up";
