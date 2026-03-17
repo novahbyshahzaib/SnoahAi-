@@ -656,6 +656,34 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Divider -->
+                <div class="border-t border-[#EAE8E0] mx-5"></div>
+
+                <!-- Auto Memory -->
+                <div class="px-5 py-4">
+                    <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">🧠 Auto Memory</label>
+                    <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">SnoahAI automatically remembers important facts about you from each conversation and uses them as context in every future chat. Up to 10,000 words. Requires a Gemini API key.</p>
+                    <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB] mb-3">
+                        <div>
+                            <p class="text-[12px] font-semibold text-[#2C2B29]">Enable Auto Memory</p>
+                            <p class="text-[11px] text-[#A3A095]">Save important facts automatically</p>
+                        </div>
+                        <button id="auto-memory-toggle" onclick="toggleAutoMemory()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                            <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                        </button>
+                    </div>
+                    <div id="memory-preview-section">
+                        <div class="bg-white border border-[#E5E3DB] rounded-xl p-3 mb-2">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest">Saved Memory</span>
+                                <span id="memory-word-count" class="text-[11px] text-[#A3A095]">0 / 10,000 words</span>
+                            </div>
+                            <div id="memory-preview-text" class="text-[12px] text-[#5B5951] max-h-[130px] overflow-y-auto leading-relaxed whitespace-pre-wrap break-words">No memory saved yet.</div>
+                        </div>
+                        <button onclick="clearAutoMemory()" class="w-full py-2 rounded-xl border border-[#E5E3DB] text-[12px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors font-medium">Clear Memory</button>
+                    </div>
+                </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] flex gap-3 shrink-0 bg-[#FAF9F6]">
                     <button onclick="confirmResetSettings()" class="px-3 py-2.5 rounded-xl border border-[#E5E3DB] text-[13px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors font-medium shrink-0">Reset</button>
                     <button onclick="closeSettings()" class="flex-1 py-2.5 rounded-xl border border-[#E5E3DB] text-[14px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">Cancel</button>
@@ -1215,6 +1243,8 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Auto Memory 🧠</strong> — SnoahAI now automatically remembers important facts about you from each chat (name, goals, preferences, projects). Saved memory (up to 10,000 words) is used as context in every future conversation for more personalized responses. Enable in Settings → Auto Memory. Requires a Gemini key. View or clear your memory anytime.</li>
+                            <li><strong>Code Streaming Fixed 💻</strong> — Code blocks now stream in real-time just like regular text. You can watch code appear line by line as the AI generates it. Previously, code blocks were hidden until the entire block was complete.</li>
                             <li><strong>3 New Free Platforms</strong> — Cerebras AI, SambaNova, and Fireworks AI added. All offer free tier access! Get keys at cloud.cerebras.ai, cloud.sambanova.ai, and fireworks.ai/api-keys.</li>
                             <li><strong>Token Management Updated</strong> — All 19 platforms now shown in Token Management tab. Set per-platform token limits for full control over usage.</li>
                             <li><strong>Reset Settings Button</strong> — New "Reset" button in Settings footer. Resets all settings to defaults without deleting your API keys or chat data.</li>
@@ -1232,7 +1262,7 @@
                             <li><strong>Floating Loading Indicator</strong> — The "SnoahAI is typing..." indicator now appears above the input bar, always visible during AI response generation.</li>
                             <li><strong>Haptic Feedback</strong> — Subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.</li>
                             <li><strong>Stream Timeout Protection</strong> — Automatic timeout after 45 seconds of no data, preventing infinite loading states. Clear error message displayed.</li>
-                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 41 features of the app and can answer any question about how to use them.</li>
+                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 43 features of the app and can answer any question about how to use them.</li>
                             <li><strong>Advanced Model Parameters</strong> — Fine-tune AI responses with Temperature, Top P, Top K, and Max Tokens sliders in Settings.</li>
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — AI can now generate Mermaid diagrams (flowcharts, sequence diagrams, etc.) rendered visually in responses.</li>
                             <li><strong>Multi-AI Response</strong> — Enable in Settings to query multiple AI platforms simultaneously. View each AI's response from a dropdown selector.</li>
@@ -1242,6 +1272,8 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">📋 All Features</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Auto Memory 🧠</strong> — Enable in Settings → Auto Memory. SnoahAI automatically saves important facts about you from each chat (up to 10,000 words) and uses them as context in every future conversation. Requires Gemini API key. View and clear memory in settings.</li>
+                            <li><strong>Code Streaming</strong> — Code blocks render in real-time as the AI generates them. Watch code stream line by line with a live cursor indicator.</li>
                             <li><strong>19 AI Platforms</strong> — Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA, Hugging Face, GitHub Models, Claude, Copilot, Google AI Studio, Ollama, Cohere, Puter.js, DeepInfra, Cerebras AI, SambaNova, Fireworks AI. Switch in Settings.</li>
                             <li><strong>Reset Settings</strong> — One-tap reset of all settings to defaults in Settings footer. Keeps API keys and chat data intact.</li>
                             <li><strong>Full Token Management</strong> — Track usage and set limits for all 19 platforms in Settings → Token Management.</li>
@@ -1514,6 +1546,9 @@
         let notionKey = localStorage.getItem('snoah_notion_key') || '';
         let notionParentPageId = localStorage.getItem('snoah_notion_parent') || '';
         let notionAutoSave = localStorage.getItem('snoah_notion_autosave') === 'true';
+        // Auto Memory
+        let autoMemoryEnabled = localStorage.getItem('snoah_auto_memory_enabled') === 'true';
+        let autoMemoryContent = localStorage.getItem('snoah_auto_memory') || '';
         const NOTION_PROXY = '/api/notion';
         let uploadedImage = null; // { data, mimeType, previewUrl }
         let messages = [];
@@ -2291,6 +2326,7 @@
             if (notionParentInput) notionParentInput.value = notionParentPageId || '';
             renderNotionKeyStatus();
             updateNotionAutoSaveUI();
+            updateAutoMemoryUI();
             // Load advanced model parameters
             const tempSlider = document.getElementById('param-temperature');
             const topPSlider = document.getElementById('param-top-p');
@@ -2964,6 +3000,91 @@
                 showToast('Auto-saved to Notion ✓');
             } catch (e) {
                 console.error('Notion auto-save error:', e);
+            }
+        }
+
+        // ── AUTO MEMORY ────────────────────────────────────────────────
+        function toggleAutoMemory() {
+            autoMemoryEnabled = !autoMemoryEnabled;
+            localStorage.setItem('snoah_auto_memory_enabled', autoMemoryEnabled);
+            updateAutoMemoryUI();
+            showToast(autoMemoryEnabled ? 'Auto Memory enabled ✓' : 'Auto Memory disabled');
+        }
+
+        function updateAutoMemoryUI() {
+            const toggle = document.getElementById('auto-memory-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (autoMemoryEnabled) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+            // Update memory preview
+            const trimmedMemory = autoMemoryContent.trim();
+            const previewEl = document.getElementById('memory-preview-text');
+            const wordCountEl = document.getElementById('memory-word-count');
+            if (previewEl) {
+                previewEl.textContent = trimmedMemory || 'No memory saved yet.';
+            }
+            if (wordCountEl) {
+                const count = trimmedMemory ? trimmedMemory.split(/\s+/).length : 0;
+                wordCountEl.textContent = count.toLocaleString() + ' / 10,000 words';
+            }
+        }
+
+        function clearAutoMemory() {
+            if (!confirm('Clear all saved memory? This cannot be undone.')) return;
+            autoMemoryContent = '';
+            localStorage.removeItem('snoah_auto_memory');
+            updateAutoMemoryUI();
+            showToast('Memory cleared ✓');
+        }
+
+        async function extractAndSaveMemory(userText, aiText) {
+            if (!autoMemoryEnabled) return;
+            // Requires at least one Gemini key
+            const firstKey = geminiKeys[0];
+            if (!firstKey) return;
+            // Sanitize snippets: strip control characters that could interfere with prompt structure
+            const sanitize = s => (s || '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').substring(0, 600);
+            const uSnip = sanitize(userText);
+            const aSnip = sanitize(aiText).substring(0, 1200);
+            // Use structured JSON body so user content stays in its own part, not mixed with instructions
+            const instructionText = 'You are a memory extraction assistant. Given the conversation snippet below, extract ONLY genuinely important personal facts about the USER: their name, profession, goals, preferences, ongoing projects, constraints, or important context they shared. Do NOT extract general knowledge questions. If nothing important, respond exactly: NOTHING_TO_SAVE\n\nExtracted facts (brief bullet points, or NOTHING_TO_SAVE):';
+            const conversationText = 'User said:\n' + uSnip + '\n\nAI replied:\n' + aSnip;
+            try {
+                const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + firstKey;
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: 'user', parts: [{ text: conversationText }] }],
+                        systemInstruction: { parts: [{ text: instructionText }] },
+                        generationConfig: { maxOutputTokens: 250, temperature: 0.2 }
+                    })
+                });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const extracted = (data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                if (!extracted || extracted.toUpperCase().includes('NOTHING_TO_SAVE')) return;
+                // Append with timestamp
+                const ts = new Date().toLocaleDateString();
+                autoMemoryContent = (autoMemoryContent ? autoMemoryContent + '\n' : '') + '[' + ts + ']\n' + extracted;
+                // Cap at ~10,000 words by trimming oldest entries from the front
+                const MAX_WORDS = 10000;
+                const words = autoMemoryContent.split(/\s+/);
+                if (words.length > MAX_WORDS) {
+                    autoMemoryContent = words.slice(words.length - MAX_WORDS).join(' ');
+                }
+                localStorage.setItem('snoah_auto_memory', autoMemoryContent);
+                showToast('Memory updated 🧠');
+            } catch(e) {
+                // Silent fail — memory extraction is a background task
             }
         }
 
@@ -4159,6 +4280,28 @@
             }
             flushList();
             flushTable();
+            // Flush unclosed code block — happens during streaming when the closing ``` hasn't arrived yet
+            if (inCode) {
+                const codeText = codeLines.join('\n');
+                if (codeLang === 'mermaid') {
+                    const mermaidId = 'mermaid_partial_' + Date.now();
+                    html += '<div class="my-3 rounded-xl overflow-hidden border border-[#E5E3DB] bg-white p-4">' +
+                        '<div class="flex items-center gap-2 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><span class="text-[11px] font-bold text-[#A3A095] uppercase tracking-wider">Diagram</span></div>' +
+                        '<div class="mermaid" id="' + mermaidId + '">' + escapeHTML(codeText) + '</div></div>';
+                } else {
+                    const b64 = codeText ? btoa(unescape(encodeURIComponent(codeText))) : '';
+                    const canRun = ['javascript','js','html','python','py'].includes(codeLang);
+                    html += '<div class="code-block-wrap my-3 rounded-xl overflow-hidden border border-[#3A3835] shadow-md">' +
+                        '<div class="flex items-center justify-between px-3 py-2 bg-[#2C2B29]">' +
+                        '<span class="text-[11px] font-mono font-bold text-[#A3A095] uppercase tracking-wider">' + escapeHTML(codeLang || 'text') + '</span>' +
+                        '<div class="flex items-center gap-2">' +
+                        (codeText && canRun ? '<button onclick="runCode(this,\'' + b64 + '\',\'' + codeLang + '\')" class="text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors flex items-center gap-1"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><polygon points=\'5 3 19 12 5 21 5 3\'/></svg>Run</button>' : '') +
+                        (codeText ? '<button onclick="copyCode(this,\'' + b64 + '\')" class="flex items-center gap-1 text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy</span></button>' : '') +
+                        '<span class="streaming-cursor text-[#A3A095]"></span>' +
+                        '</div></div>' +
+                        '<pre class="overflow-x-auto p-4 bg-[#1E1D1B] text-[#E8E6DF] text-[13px] font-mono leading-relaxed"><code>' + escapeHTML(codeText) + '</code></pre></div>';
+                }
+            }
             return html;
         }
 
@@ -4535,6 +4678,8 @@ FEATURES:
 39. 19 AI PLATFORMS TOTAL: The app now supports 19 AI platforms: Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA, Hugging Face, GitHub Models, Claude (Anthropic), Microsoft Copilot, Google AI Studio, Ollama (Local), Cohere, Puter.js (Free), DeepInfra, Cerebras AI (Free tier), SambaNova (Free tier), Fireworks AI (Free tier). All platforms support Multi-AI Response mode. Puter.js and Ollama require no API key.
 40. INTERACTIVE TO-DO LISTS: When AI generates a to-do list using markdown checkbox syntax (- [ ] task or - [x] done), items are rendered as interactive checkboxes in the chat. Users can click to check/uncheck items. Checked items get a strikethrough style. AI automatically generates proper to-do format when asked for a task list, checklist, or to-do list.
 41. RESET SETTINGS: Settings footer has a "Reset Settings" button. Clicking it (after confirmation) resets all settings to their defaults: platform → Gemini, models to defaults, model parameters (temperature, top_p, top_k, max_tokens) to defaults, custom instructions cleared, persona cleared, Multi-AI disabled. API keys and chat data are NOT deleted.
+42. CODE STREAMING FIX: AI responses now show code blocks streaming in real-time. Partial/in-progress code blocks are rendered live as the AI generates them — you can watch the code appear line by line instead of waiting for the full block to finish. A streaming cursor is shown inside the code block header while it is still being written.
+43. AUTO MEMORY: Settings → Auto Memory toggle. When enabled, SnoahAI automatically extracts and saves important facts about the user from each conversation (name, profession, goals, preferences, ongoing projects, etc.) into a local memory bank (up to 10,000 words). This memory is injected as context into every future chat so the AI can give more personalized, context-aware responses. Requires a Gemini API key for extraction. Memory can be viewed, and cleared in Settings → Auto Memory. Toggle it off anytime to disable automatic extraction and context injection.
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
@@ -4568,6 +4713,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                     systemInstruction += "Web search is currently OFF. If the user asks about real-time info (today's date, current events, live data), answer from your training knowledge and suggest they tap the Web (🔍) button to enable real-time search. ";
                 }
                 if (customInstructions) systemInstruction += '\n\nUser custom instructions: ' + customInstructions;
+                // Inject auto memory context if enabled and there is saved memory
+                if (autoMemoryEnabled && autoMemoryContent && autoMemoryContent.trim()) {
+                    systemInstruction += '\n\nUSER MEMORY (important facts about this user, automatically saved from previous conversations — use as context):\n' + autoMemoryContent.trim();
+                }
 
                 const formattedContents = [];
                 let lastRole = null;
@@ -5104,6 +5253,9 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 messages.push(aiMsg);
                 saveCurrentChat();
                 autoSaveToNotion(mainText);
+                // Extract and save memory in the background (does not block)
+                const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+                if (lastUserMsg) extractAndSaveMemory(lastUserMsg.text || '', mainText);
                 if (messages.filter(m=>m.role==='user').length === 1) autoTitleChat();
 
             } catch (error) {
