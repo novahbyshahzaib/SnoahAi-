@@ -667,7 +667,7 @@
                     <!-- Auto Memory -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">🧠 Auto Memory</label>
-                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">SnoahAI automatically remembers important facts about you from each conversation and uses them as context in every future chat. Up to 10,000 words. Requires a Gemini API key.</p>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">SnoahAI automatically remembers important facts about you from each conversation and uses them as context in every future chat. New facts are deduplicated — the same fact is never saved twice. Requires a Gemini API key.</p>
                         <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB] mb-3">
                             <div>
                                 <p class="text-[12px] font-semibold text-[#2C2B29]">Enable Auto Memory</p>
@@ -681,7 +681,7 @@
                             <div class="bg-white border border-[#E5E3DB] rounded-xl p-3 mb-2">
                                 <div class="flex items-center justify-between mb-1.5">
                                     <span class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest">Saved Memory</span>
-                                    <span id="memory-word-count" class="text-[11px] text-[#A3A095]">0 / 10,000 words</span>
+                                    <span id="memory-word-count" class="text-[11px] text-[#A3A095]">0 words saved</span>
                                 </div>
                                 <div id="memory-preview-text" class="text-[12px] text-[#5B5951] max-h-[130px] overflow-y-auto leading-relaxed whitespace-pre-wrap break-words">No memory saved yet.</div>
                             </div>
@@ -3230,7 +3230,7 @@
             }
             if (wordCountEl) {
                 const count = trimmedMemory ? trimmedMemory.split(/\s+/).length : 0;
-                wordCountEl.textContent = count.toLocaleString() + ' / 10,000 words';
+                wordCountEl.textContent = count.toLocaleString() + ' words saved';
             }
         }
 
@@ -3266,7 +3266,7 @@
                 '- Relationships: family members, colleagues, people they mentioned',
                 '- Important context: decisions made, problems they face, follow-up items',
                 '',
-                existingMemory ? ('EXISTING MEMORY (DO NOT repeat or rephrase facts already here):\n' + existingMemory.substring(0, 1500)) : '',
+                existingMemory ? ('EXISTING MEMORY (DO NOT repeat or rephrase facts already here):\n' + (existingMemory.length > 1500 ? existingMemory.slice(-1500) : existingMemory)) : '',
                 '',
                 'Rules:',
                 '- ONLY output NEW facts not already captured in existing memory.',
