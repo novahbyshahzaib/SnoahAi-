@@ -397,6 +397,11 @@
                                 <option value="cerebras">Cerebras AI (Free)</option>
                                 <option value="sambanova">SambaNova (Free)</option>
                                 <option value="fireworks">Fireworks AI (Free)</option>
+                                <option value="xai">xAI (Grok)</option>
+                                <option value="perplexity">Perplexity</option>
+                                <option value="nanogpt">NanoGPT</option>
+                                <option value="unify">Unify</option>
+                                <option value="kluster">Kluster.ai</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
@@ -638,6 +643,21 @@
                             <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
                                 <input type="checkbox" value="fireworks" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Fireworks AI (Free)</span>
                             </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="xai" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">xAI (Grok)</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="perplexity" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Perplexity</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="nanogpt" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">NanoGPT</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="unify" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Unify</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" value="kluster" class="multi-ai-cb accent-[#D25D38] w-4 h-4"> <span class="text-[13px] text-[#2C2B29] font-medium">Kluster.ai</span>
+                            </label>
                         </div>
                     </div>
 
@@ -647,7 +667,7 @@
                     <!-- Auto Memory -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">🧠 Auto Memory</label>
-                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">SnoahAI automatically remembers important facts about you from each conversation and uses them as context in every future chat. Up to 10,000 words. Requires a Gemini API key.</p>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">SnoahAI automatically remembers important facts about you from each conversation and uses them as context in every future chat. New facts are deduplicated — the same fact is never saved twice. Requires a Gemini API key.</p>
                         <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB] mb-3">
                             <div>
                                 <p class="text-[12px] font-semibold text-[#2C2B29]">Enable Auto Memory</p>
@@ -661,7 +681,7 @@
                             <div class="bg-white border border-[#E5E3DB] rounded-xl p-3 mb-2">
                                 <div class="flex items-center justify-between mb-1.5">
                                     <span class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest">Saved Memory</span>
-                                    <span id="memory-word-count" class="text-[11px] text-[#A3A095]">0 / 10,000 words</span>
+                                    <span id="memory-word-count" class="text-[11px] text-[#A3A095]">0 words saved</span>
                                 </div>
                                 <div id="memory-preview-text" class="text-[12px] text-[#5B5951] max-h-[130px] overflow-y-auto leading-relaxed whitespace-pre-wrap break-words">No memory saved yet.</div>
                             </div>
@@ -1253,15 +1273,18 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>5 New AI Platforms 🚀</strong> — xAI (Grok), Perplexity, NanoGPT, Unify, and Kluster.ai added. All use secure backend proxies — no CORS errors. Now <strong>24 platforms total</strong>!</li>
+                            <li><strong>Improved Auto Memory 🧠</strong> — Memory extraction is now smarter: it uses deduplication to avoid saving the same fact twice, captures more categories (identity, profession, goals, preferences, relationships, constraints, projects), and trims old entries by block instead of by word count.</li>
+                            <li><strong>Voice-to-Text Fixed 🎤</strong> — Fixed a critical bug where duplicate function definitions overrode the voice recognition logic. Voice input now uses continuous recognition with real-time text accumulation — speak naturally and watch words appear live in the input.</li>
                             <li><strong>Tabbed Settings Panel 🗂️</strong> — Settings are now organised into three focused tabs: <strong>API</strong> (platform, model, API keys, parameters, token management, Notion), <strong>AI</strong> (persona, custom instructions, multi-AI, memory), and <strong>App</strong> (font size, theme). Auto Memory is now inside the AI tab — no more hidden memory section at the bottom!</li>
-                            <li><strong>Auto Memory 🧠</strong> — SnoahAI now automatically remembers important facts about you from each chat (name, goals, preferences, projects). Saved memory (up to 10,000 words) is used as context in every future conversation for more personalized responses. Enable in Settings → AI tab → Auto Memory. Requires a Gemini key. View or clear your memory anytime.</li>
+                            <li><strong>Auto Memory 🧠</strong> — SnoahAI now automatically remembers important facts about you from each chat (name, goals, preferences, projects). Saved memory is used as context in every future conversation for more personalized responses. Enable in Settings → AI tab → Auto Memory. Requires a Gemini key. View or clear your memory anytime.</li>
                             <li><strong>Code Streaming Fixed 💻</strong> — Code blocks now stream in real-time just like regular text. You can watch code appear line by line as the AI generates it. Previously, code blocks were hidden until the entire block was complete.</li>
                             <li><strong>3 New Free Platforms</strong> — Cerebras AI, SambaNova, and Fireworks AI added. All offer free tier access! Get keys at cloud.cerebras.ai, cloud.sambanova.ai, and fireworks.ai/api-keys.</li>
-                            <li><strong>Token Management Updated</strong> — All 19 platforms now shown in Token Management tab. Set per-platform token limits for full control over usage.</li>
+                            <li><strong>Token Management Updated</strong> — All 24 platforms now shown in Token Management tab. Set per-platform token limits for full control over usage.</li>
                             <li><strong>Reset Settings Button</strong> — New "Reset" button in Settings footer. Resets all settings to defaults without deleting your API keys or chat data.</li>
                             <li><strong>Puter.js Fix</strong> — Fixed "stopFlag is not defined" error that broke Puter.js streaming responses.</li>
                             <li><strong>Ollama Fix</strong> — Improved error message when Ollama is not running or not reachable. Now shows helpful CORS instructions for web-based access.</li>
-                            <li><strong>7 More AI Platforms</strong> — Claude (Anthropic), Microsoft Copilot, Google AI Studio, Ollama (Local), Cohere, Puter.js (Free), DeepInfra added to the platform dropdown. Now 19 platforms total! Puter.js and Ollama require no API key.</li>
+                            <li><strong>7 More AI Platforms</strong> — Claude (Anthropic), Microsoft Copilot, Google AI Studio, Ollama (Local), Cohere, Puter.js (Free), DeepInfra added to the platform dropdown. Puter.js and Ollama require no API key.</li>
                             <li><strong>Interactive To-Do Lists ✅</strong> — When AI generates a to-do or checklist, each item renders as a real interactive checkbox. Click to check off tasks — checked items get a strikethrough. Ask: "give me a to-do list for..." to try it.</li>
                             <li><strong>Notion Auto-Save</strong> — Enable "Auto-Save AI Responses" toggle in Notion Integration settings. Every AI response is automatically saved to your configured Notion page — no manual tapping needed.</li>
                             <li><strong>4 New AI Platforms</strong> — OpenAI, NVIDIA, Hugging Face, and GitHub Models added. All use backend proxies for CORS protection. Switch in Settings → Platform dropdown.</li>
@@ -1273,7 +1296,7 @@
                             <li><strong>Floating Loading Indicator</strong> — The "SnoahAI is typing..." indicator now appears above the input bar, always visible during AI response generation.</li>
                             <li><strong>Haptic Feedback</strong> — Subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.</li>
                             <li><strong>Stream Timeout Protection</strong> — Automatic timeout after 45 seconds of no data, preventing infinite loading states. Clear error message displayed.</li>
-                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 43 features of the app and can answer any question about how to use them.</li>
+                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 44 features of the app and can answer any question about how to use them.</li>
                             <li><strong>Advanced Model Parameters</strong> — Fine-tune AI responses with Temperature, Top P, Top K, and Max Tokens sliders in Settings.</li>
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — AI can now generate Mermaid diagrams (flowcharts, sequence diagrams, etc.) rendered visually in responses.</li>
                             <li><strong>Multi-AI Response</strong> — Enable in Settings to query multiple AI platforms simultaneously. View each AI's response from a dropdown selector.</li>
@@ -1283,11 +1306,11 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">📋 All Features</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
-                            <li><strong>Auto Memory 🧠</strong> — Enable in Settings → Auto Memory. SnoahAI automatically saves important facts about you from each chat (up to 10,000 words) and uses them as context in every future conversation. Requires Gemini API key. View and clear memory in settings.</li>
+                            <li><strong>Auto Memory 🧠</strong> — Enable in Settings → Auto Memory. SnoahAI automatically saves important facts about you from each chat (name, goals, preferences, relationships, projects, constraints) and uses them as context in every future conversation. Smart deduplication prevents repeated facts. Requires Gemini API key. View and clear memory in settings.</li>
                             <li><strong>Code Streaming</strong> — Code blocks render in real-time as the AI generates them. Watch code stream line by line with a live cursor indicator.</li>
-                            <li><strong>19 AI Platforms</strong> — Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA, Hugging Face, GitHub Models, Claude, Copilot, Google AI Studio, Ollama, Cohere, Puter.js, DeepInfra, Cerebras AI, SambaNova, Fireworks AI. Switch in Settings.</li>
+                            <li><strong>24 AI Platforms</strong> — Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA, Hugging Face, GitHub Models, Claude, Copilot, Google AI Studio, Ollama, Cohere, Puter.js, DeepInfra, Cerebras AI, SambaNova, Fireworks AI, xAI (Grok), Perplexity, NanoGPT, Unify, Kluster.ai. Switch in Settings.</li>
                             <li><strong>Reset Settings</strong> — One-tap reset of all settings to defaults in Settings footer. Keeps API keys and chat data intact.</li>
-                            <li><strong>Full Token Management</strong> — Track usage and set limits for all 19 platforms in Settings → Token Management.</li>
+                            <li><strong>Full Token Management</strong> — Track usage and set limits for all 24 platforms in Settings → Token Management.</li>
                             <li><strong>Interactive To-Do Lists ✅</strong> — Ask AI for a checklist/to-do list and get real interactive checkboxes. Click to check off items with strikethrough styling.</li>
                             <li><strong>Thinking Mode</strong> — 🧠 AI reasons step-by-step with a live collapsible thinking block.</li>
                             <li><strong>Web Search</strong> — 🔍 Real-time Google Search grounding via Gemini. Works from any platform when enabled.</li>
@@ -1544,6 +1567,31 @@
         let fireworksKeyIdx = 0;
         let fireworksApiKey = fireworksKeys[0] || '';
         let fireworksModelId = localStorage.getItem('snoah_fireworks_model') || 'accounts/fireworks/models/llama-v3p1-70b-instruct';
+        // xAI (Grok) — backend proxy /api/xai
+        let xaiKeys = JSON.parse(localStorage.getItem('snoah_xai_keys') || '[]');
+        let xaiKeyIdx = 0;
+        let xaiApiKey = xaiKeys[0] || '';
+        let xaiModelId = localStorage.getItem('snoah_xai_model') || 'grok-3-mini';
+        // Perplexity — backend proxy /api/perplexity
+        let perplexityKeys = JSON.parse(localStorage.getItem('snoah_perplexity_keys') || '[]');
+        let perplexityKeyIdx = 0;
+        let perplexityApiKey = perplexityKeys[0] || '';
+        let perplexityModelId = localStorage.getItem('snoah_perplexity_model') || 'sonar';
+        // NanoGPT — backend proxy /api/nanogpt
+        let nanogptKeys = JSON.parse(localStorage.getItem('snoah_nanogpt_keys') || '[]');
+        let nanogptKeyIdx = 0;
+        let nanogptApiKey = nanogptKeys[0] || '';
+        let nanogptModelId = localStorage.getItem('snoah_nanogpt_model') || 'gpt-4o-mini';
+        // Unify — backend proxy /api/unify
+        let unifyKeys = JSON.parse(localStorage.getItem('snoah_unify_keys') || '[]');
+        let unifyKeyIdx = 0;
+        let unifyApiKey = unifyKeys[0] || '';
+        let unifyModelId = localStorage.getItem('snoah_unify_model') || 'llama-3.1-8b-instruct@fireworks-ai';
+        // Kluster.ai — backend proxy /api/kluster
+        let klusterKeys = JSON.parse(localStorage.getItem('snoah_kluster_keys') || '[]');
+        let klusterKeyIdx = 0;
+        let klusterApiKey = klusterKeys[0] || '';
+        let klusterModelId = localStorage.getItem('snoah_kluster_model') || 'klusterai/Meta-Llama-3.1-8B-Instruct-Turbo';
         let customInstructions = localStorage.getItem('snoah_instructions') || '';
         // Advanced Model Parameters
         let paramTemperature = parseFloat(localStorage.getItem('snoah_param_temp') || '0.7');
@@ -1610,9 +1658,9 @@
         let speechRecognition = null;
 
         // --- Token Management ---
-        const TOKEN_PLATFORMS = ['gemini','openrouter','groq','together','mistral','openai','nvidia','huggingface','githubmodels','claude','copilot','gais','ollama','cohere','puter','deepinfra','cerebras','sambanova','fireworks'];
-        const TOKEN_PLATFORM_LABELS = { gemini:'Gemini', openrouter:'OpenRouter', groq:'Groq', together:'Together AI', mistral:'Mistral AI', openai:'OpenAI', nvidia:'NVIDIA', huggingface:'Hugging Face', githubmodels:'GitHub Models', claude:'Claude', copilot:'Copilot', gais:'Google AI Studio', ollama:'Ollama', cohere:'Cohere', puter:'Puter.js', deepinfra:'DeepInfra', cerebras:'Cerebras AI', sambanova:'SambaNova', fireworks:'Fireworks AI' };
-        const TOKEN_PLATFORM_COLORS = { gemini:'#4285F4', openrouter:'#8B5CF6', groq:'#F97316', together:'#10B981', mistral:'#EF4444', openai:'#10A37F', nvidia:'#76B900', huggingface:'#FF9D00', githubmodels:'#24292F', claude:'#D97706', copilot:'#0078D4', gais:'#34A853', ollama:'#374151', cohere:'#39A3B1', puter:'#6366F1', deepinfra:'#7C3AED', cerebras:'#DC2626', sambanova:'#0EA5E9', fireworks:'#F59E0B' };
+        const TOKEN_PLATFORMS = ['gemini','openrouter','groq','together','mistral','openai','nvidia','huggingface','githubmodels','claude','copilot','gais','ollama','cohere','puter','deepinfra','cerebras','sambanova','fireworks','xai','perplexity','nanogpt','unify','kluster'];
+        const TOKEN_PLATFORM_LABELS = { gemini:'Gemini', openrouter:'OpenRouter', groq:'Groq', together:'Together AI', mistral:'Mistral AI', openai:'OpenAI', nvidia:'NVIDIA', huggingface:'Hugging Face', githubmodels:'GitHub Models', claude:'Claude', copilot:'Copilot', gais:'Google AI Studio', ollama:'Ollama', cohere:'Cohere', puter:'Puter.js', deepinfra:'DeepInfra', cerebras:'Cerebras AI', sambanova:'SambaNova', fireworks:'Fireworks AI', xai:'xAI (Grok)', perplexity:'Perplexity', nanogpt:'NanoGPT', unify:'Unify', kluster:'Kluster.ai' };
+        const TOKEN_PLATFORM_COLORS = { gemini:'#4285F4', openrouter:'#8B5CF6', groq:'#F97316', together:'#10B981', mistral:'#EF4444', openai:'#10A37F', nvidia:'#76B900', huggingface:'#FF9D00', githubmodels:'#24292F', claude:'#D97706', copilot:'#0078D4', gais:'#34A853', ollama:'#374151', cohere:'#39A3B1', puter:'#6366F1', deepinfra:'#7C3AED', cerebras:'#DC2626', sambanova:'#0EA5E9', fireworks:'#F59E0B', xai:'#000000', perplexity:'#20B2AA', nanogpt:'#FF6B6B', unify:'#9333EA', kluster:'#2563EB' };
         let tokenUsage = JSON.parse(localStorage.getItem('snoah_token_usage') || 'null') || {
             gemini:       { promptTokens:0, completionTokens:0, totalTokens:0, requestCount:0 },
             openrouter:   { promptTokens:0, completionTokens:0, totalTokens:0, requestCount:0 },
@@ -2277,8 +2325,8 @@
         function updateModelLabels() {
             const badge = document.getElementById('header-model-badge');
             const sidebarLabel = document.getElementById('sidebar-model-label');
-            const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : platform === 'together' ? 'Together AI' : platform === 'mistral' ? 'Mistral AI' : platform === 'openai' ? 'OpenAI' : platform === 'nvidia' ? 'NVIDIA' : platform === 'huggingface' ? 'Hugging Face' : platform === 'githubmodels' ? 'GitHub Models' : platform === 'claude' ? 'Claude' : platform === 'copilot' ? 'Copilot' : platform === 'gais' ? 'Google AI Studio' : platform === 'ollama' ? 'Ollama' : platform === 'cohere' ? 'Cohere' : platform === 'puter' ? 'Puter.js' : platform === 'deepinfra' ? 'DeepInfra' : platform === 'cerebras' ? 'Cerebras AI' : platform === 'sambanova' ? 'SambaNova' : platform === 'fireworks' ? 'Fireworks AI' : 'Gemini';
-            const activeModel = platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'openai' ? openaiModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'gais' ? gaisModelId : platform === 'ollama' ? ollamaModelId : platform === 'cohere' ? cohereModelId : platform === 'puter' ? puterModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : modelId;
+            const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : platform === 'together' ? 'Together AI' : platform === 'mistral' ? 'Mistral AI' : platform === 'openai' ? 'OpenAI' : platform === 'nvidia' ? 'NVIDIA' : platform === 'huggingface' ? 'Hugging Face' : platform === 'githubmodels' ? 'GitHub Models' : platform === 'claude' ? 'Claude' : platform === 'copilot' ? 'Copilot' : platform === 'gais' ? 'Google AI Studio' : platform === 'ollama' ? 'Ollama' : platform === 'cohere' ? 'Cohere' : platform === 'puter' ? 'Puter.js' : platform === 'deepinfra' ? 'DeepInfra' : platform === 'cerebras' ? 'Cerebras AI' : platform === 'sambanova' ? 'SambaNova' : platform === 'fireworks' ? 'Fireworks AI' : platform === 'xai' ? 'xAI (Grok)' : platform === 'perplexity' ? 'Perplexity' : platform === 'nanogpt' ? 'NanoGPT' : platform === 'unify' ? 'Unify' : platform === 'kluster' ? 'Kluster.ai' : 'Gemini';
+            const activeModel = platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'openai' ? openaiModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'gais' ? gaisModelId : platform === 'ollama' ? ollamaModelId : platform === 'cohere' ? cohereModelId : platform === 'puter' ? puterModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : platform === 'xai' ? xaiModelId : platform === 'perplexity' ? perplexityModelId : platform === 'nanogpt' ? nanogptModelId : platform === 'unify' ? unifyModelId : platform === 'kluster' ? klusterModelId : modelId;
             if (badge) badge.textContent = 'NOVAH GEM';
             if (sidebarLabel) sidebarLabel.textContent = platLabel + ' · ' + activeModel;
         }
@@ -2324,6 +2372,16 @@
                 document.getElementById('settings-model').value = sambanovaModelId;
             } else if (platform === 'fireworks') {
                 document.getElementById('settings-model').value = fireworksModelId;
+            } else if (platform === 'xai') {
+                document.getElementById('settings-model').value = xaiModelId;
+            } else if (platform === 'perplexity') {
+                document.getElementById('settings-model').value = perplexityModelId;
+            } else if (platform === 'nanogpt') {
+                document.getElementById('settings-model').value = nanogptModelId;
+            } else if (platform === 'unify') {
+                document.getElementById('settings-model').value = unifyModelId;
+            } else if (platform === 'kluster') {
+                document.getElementById('settings-model').value = klusterModelId;
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
@@ -2410,7 +2468,12 @@
             cerebrasModelId = 'llama-3.3-70b';
             sambanovaModelId = 'Meta-Llama-3.1-70B-Instruct';
             fireworksModelId = 'accounts/fireworks/models/llama-v3p1-70b-instruct';
-            ['snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_openai_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model'].forEach(k => localStorage.removeItem(k));
+            xaiModelId = 'grok-3-mini';
+            perplexityModelId = 'sonar';
+            nanogptModelId = 'gpt-4o-mini';
+            unifyModelId = 'llama-3.1-8b-instruct@fireworks-ai';
+            klusterModelId = 'klusterai/Meta-Llama-3.1-8B-Instruct-Turbo';
+            ['snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_openai_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_unify_model','snoah_kluster_model'].forEach(k => localStorage.removeItem(k));
             // Reset advanced parameters
             paramTemperature = 1.0; paramTopP = 0.95; paramTopK = 40; paramMaxTokens = 8192;
             ['snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens'].forEach(k => localStorage.removeItem(k));
@@ -2509,6 +2572,26 @@
                 if (newModel) fireworksModelId = newModel;
                 localStorage.setItem('snoah_fireworks_model', fireworksModelId);
                 localStorage.setItem('snoah_fireworks_keys', JSON.stringify(fireworksKeys));
+            } else if (platform === 'xai') {
+                if (newModel) xaiModelId = newModel;
+                localStorage.setItem('snoah_xai_model', xaiModelId);
+                localStorage.setItem('snoah_xai_keys', JSON.stringify(xaiKeys));
+            } else if (platform === 'perplexity') {
+                if (newModel) perplexityModelId = newModel;
+                localStorage.setItem('snoah_perplexity_model', perplexityModelId);
+                localStorage.setItem('snoah_perplexity_keys', JSON.stringify(perplexityKeys));
+            } else if (platform === 'nanogpt') {
+                if (newModel) nanogptModelId = newModel;
+                localStorage.setItem('snoah_nanogpt_model', nanogptModelId);
+                localStorage.setItem('snoah_nanogpt_keys', JSON.stringify(nanogptKeys));
+            } else if (platform === 'unify') {
+                if (newModel) unifyModelId = newModel;
+                localStorage.setItem('snoah_unify_model', unifyModelId);
+                localStorage.setItem('snoah_unify_keys', JSON.stringify(unifyKeys));
+            } else if (platform === 'kluster') {
+                if (newModel) klusterModelId = newModel;
+                localStorage.setItem('snoah_kluster_model', klusterModelId);
+                localStorage.setItem('snoah_kluster_keys', JSON.stringify(klusterKeys));
             } else {
                 if (newModel) modelId = newModel;
                 localStorage.setItem('snoah_model', modelId);
@@ -2631,6 +2714,16 @@
                 document.getElementById('settings-model').value = sambanovaModelId;
             } else if (p === 'fireworks') {
                 document.getElementById('settings-model').value = fireworksModelId;
+            } else if (p === 'xai') {
+                document.getElementById('settings-model').value = xaiModelId;
+            } else if (p === 'perplexity') {
+                document.getElementById('settings-model').value = perplexityModelId;
+            } else if (p === 'nanogpt') {
+                document.getElementById('settings-model').value = nanogptModelId;
+            } else if (p === 'unify') {
+                document.getElementById('settings-model').value = unifyModelId;
+            } else if (p === 'kluster') {
+                document.getElementById('settings-model').value = klusterModelId;
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
@@ -2657,6 +2750,11 @@
             const isCB = platform === 'cerebras';
             const isSN = platform === 'sambanova';
             const isFW = platform === 'fireworks';
+            const isXAI = platform === 'xai';
+            const isPPX = platform === 'perplexity';
+            const isNGPT = platform === 'nanogpt';
+            const isUnify = platform === 'unify';
+            const isKluster = platform === 'kluster';
             const noWeb = false; // Web uses Gemini when on non-Gemini platform
             const hint = document.getElementById('apikey-hint');
             const mhint = document.getElementById('model-hint');
@@ -2674,7 +2772,7 @@
                     btnAgent.style.pointerEvents = '';
                 }
             }
-            if (lbl) lbl.textContent = isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : isTG ? 'Together AI API Key' : isMT ? 'Mistral AI API Key' : isOA ? 'OpenAI API Key' : isNV ? 'NVIDIA API Key' : isHF ? 'Hugging Face Token' : isGH ? 'GitHub Token' : isCL ? 'Anthropic API Key' : isCO ? 'GitHub/Azure Token' : isGA ? 'Google AI Studio Key' : isOL ? 'Ollama (no key needed)' : isCR ? 'Cohere API Key' : isPT ? 'Puter.js (no key needed)' : isDI ? 'DeepInfra API Key' : isCB ? 'Cerebras API Key' : isSN ? 'SambaNova API Key' : isFW ? 'Fireworks API Key' : 'Gemini API Key';
+            if (lbl) lbl.textContent = isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : isTG ? 'Together AI API Key' : isMT ? 'Mistral AI API Key' : isOA ? 'OpenAI API Key' : isNV ? 'NVIDIA API Key' : isHF ? 'Hugging Face Token' : isGH ? 'GitHub Token' : isCL ? 'Anthropic API Key' : isCO ? 'GitHub/Azure Token' : isGA ? 'Google AI Studio Key' : isOL ? 'Ollama (no key needed)' : isCR ? 'Cohere API Key' : isPT ? 'Puter.js (no key needed)' : isDI ? 'DeepInfra API Key' : isCB ? 'Cerebras API Key' : isSN ? 'SambaNova API Key' : isFW ? 'Fireworks API Key' : isXAI ? 'xAI API Key' : isPPX ? 'Perplexity API Key' : isNGPT ? 'NanoGPT API Key' : isUnify ? 'Unify API Key' : isKluster ? 'Kluster.ai API Key' : 'Gemini API Key';
             if (hint) hint.innerHTML = isOR
                 ? 'Get your key at <a href="https://openrouter.ai/keys" target="_blank" class="underline">openrouter.ai/keys</a>'
                 : isGQ
@@ -2711,6 +2809,16 @@
                 ? 'Free tier — get your key at <a href="https://cloud.sambanova.ai" target="_blank" class="underline">cloud.sambanova.ai</a>'
                 : isFW
                 ? 'Free tier — get your key at <a href="https://fireworks.ai/api-keys" target="_blank" class="underline">fireworks.ai/api-keys</a>'
+                : isXAI
+                ? 'Get your key at <a href="https://console.x.ai" target="_blank" class="underline">console.x.ai</a>'
+                : isPPX
+                ? 'Get your key at <a href="https://www.perplexity.ai/settings/api" target="_blank" class="underline">perplexity.ai/settings/api</a>'
+                : isNGPT
+                ? 'Get your key at <a href="https://nano-gpt.com/api" target="_blank" class="underline">nano-gpt.com/api</a>'
+                : isUnify
+                ? 'Get your key at <a href="https://app.unify.ai/api-keys" target="_blank" class="underline">app.unify.ai/api-keys</a>'
+                : isKluster
+                ? 'Get your key at <a href="https://kluster.ai/api-keys" target="_blank" class="underline">kluster.ai/api-keys</a>'
                 : 'Get your key at <a href="https://aistudio.google.com" target="_blank" class="underline">aistudio.google.com</a>';
             if (mhint) mhint.innerHTML = isOR
                 ? 'Default: <span class="font-mono text-[#5B5951]">z-ai/glm-4.5-air:free</span>'
@@ -2748,14 +2856,24 @@
                 ? 'Default: <span class="font-mono text-[#5B5951]">Meta-Llama-3.1-70B-Instruct</span> · also: <span class="font-mono text-[#5B5951]">Meta-Llama-3.3-70B-Instruct</span>'
                 : isFW
                 ? 'Default: <span class="font-mono text-[#5B5951]">accounts/fireworks/models/llama-v3p1-70b-instruct</span>'
+                : isXAI
+                ? 'Default: <span class="font-mono text-[#5B5951]">grok-3-mini</span> · also: <span class="font-mono text-[#5B5951]">grok-3</span>, <span class="font-mono text-[#5B5951]">grok-beta</span>'
+                : isPPX
+                ? 'Default: <span class="font-mono text-[#5B5951]">sonar</span> · also: <span class="font-mono text-[#5B5951]">sonar-pro</span>, <span class="font-mono text-[#5B5951]">sonar-reasoning</span>'
+                : isNGPT
+                ? 'Default: <span class="font-mono text-[#5B5951]">gpt-4o-mini</span> · also: <span class="font-mono text-[#5B5951]">gpt-4o</span>, <span class="font-mono text-[#5B5951]">claude-3-5-sonnet</span>'
+                : isUnify
+                ? 'Default: <span class="font-mono text-[#5B5951]">llama-3.1-8b-instruct@fireworks-ai</span> · format: model@provider'
+                : isKluster
+                ? 'Default: <span class="font-mono text-[#5B5951]">klusterai/Meta-Llama-3.1-8B-Instruct-Turbo</span>'
                 : 'Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> · <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span>';
         }
 
         function renderKeysList() {
             const list = document.getElementById('keys-list');
             if (!list) return;
-            const keys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'openai' ? openaiKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : platform === 'claude' ? claudeKeys : platform === 'copilot' ? copilotKeys : platform === 'gais' ? gaisKeys : platform === 'cohere' ? cohereKeys : platform === 'deepinfra' ? deepinfraKeys : platform === 'cerebras' ? cerebrasKeys : platform === 'sambanova' ? sambanovaKeys : platform === 'fireworks' ? fireworksKeys : geminiKeys;
-            const activeIdx = platform === 'openrouter' ? orKeyIdx : platform === 'groq' ? groqKeyIdx : platform === 'together' ? togetherKeyIdx : platform === 'mistral' ? mistralKeyIdx : platform === 'openai' ? openaiKeyIdx : platform === 'nvidia' ? nvidiaKeyIdx : platform === 'huggingface' ? hfKeyIdx : platform === 'githubmodels' ? ghKeyIdx : platform === 'claude' ? claudeKeyIdx : platform === 'copilot' ? copilotKeyIdx : platform === 'gais' ? gaisKeyIdx : platform === 'cohere' ? cohereKeyIdx : platform === 'deepinfra' ? deepinfraKeyIdx : platform === 'cerebras' ? cerebrasKeyIdx : platform === 'sambanova' ? sambanovaKeyIdx : platform === 'fireworks' ? fireworksKeyIdx : geminiKeyIdx;
+            const keys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'openai' ? openaiKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : platform === 'claude' ? claudeKeys : platform === 'copilot' ? copilotKeys : platform === 'gais' ? gaisKeys : platform === 'cohere' ? cohereKeys : platform === 'deepinfra' ? deepinfraKeys : platform === 'cerebras' ? cerebrasKeys : platform === 'sambanova' ? sambanovaKeys : platform === 'fireworks' ? fireworksKeys : platform === 'xai' ? xaiKeys : platform === 'perplexity' ? perplexityKeys : platform === 'nanogpt' ? nanogptKeys : platform === 'unify' ? unifyKeys : platform === 'kluster' ? klusterKeys : geminiKeys;
+            const activeIdx = platform === 'openrouter' ? orKeyIdx : platform === 'groq' ? groqKeyIdx : platform === 'together' ? togetherKeyIdx : platform === 'mistral' ? mistralKeyIdx : platform === 'openai' ? openaiKeyIdx : platform === 'nvidia' ? nvidiaKeyIdx : platform === 'huggingface' ? hfKeyIdx : platform === 'githubmodels' ? ghKeyIdx : platform === 'claude' ? claudeKeyIdx : platform === 'copilot' ? copilotKeyIdx : platform === 'gais' ? gaisKeyIdx : platform === 'cohere' ? cohereKeyIdx : platform === 'deepinfra' ? deepinfraKeyIdx : platform === 'cerebras' ? cerebrasKeyIdx : platform === 'sambanova' ? sambanovaKeyIdx : platform === 'fireworks' ? fireworksKeyIdx : platform === 'xai' ? xaiKeyIdx : platform === 'perplexity' ? perplexityKeyIdx : platform === 'nanogpt' ? nanogptKeyIdx : platform === 'unify' ? unifyKeyIdx : platform === 'kluster' ? klusterKeyIdx : geminiKeyIdx;
             if (!keys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
             list.innerHTML = keys.map((k, i) =>
                 '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
@@ -2772,7 +2890,7 @@
             const key = input.value.trim();
             if (!key) { showToast('Paste a key first'); return; }
             // Enforce single-key limit when cookies not accepted
-            const currentKeys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'openai' ? openaiKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : platform === 'claude' ? claudeKeys : platform === 'copilot' ? copilotKeys : platform === 'gais' ? gaisKeys : platform === 'cohere' ? cohereKeys : platform === 'deepinfra' ? deepinfraKeys : platform === 'cerebras' ? cerebrasKeys : platform === 'sambanova' ? sambanovaKeys : platform === 'fireworks' ? fireworksKeys : geminiKeys;
+            const currentKeys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'openai' ? openaiKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : platform === 'claude' ? claudeKeys : platform === 'copilot' ? copilotKeys : platform === 'gais' ? gaisKeys : platform === 'cohere' ? cohereKeys : platform === 'deepinfra' ? deepinfraKeys : platform === 'cerebras' ? cerebrasKeys : platform === 'sambanova' ? sambanovaKeys : platform === 'fireworks' ? fireworksKeys : platform === 'xai' ? xaiKeys : platform === 'perplexity' ? perplexityKeys : platform === 'nanogpt' ? nanogptKeys : platform === 'unify' ? unifyKeys : platform === 'kluster' ? klusterKeys : geminiKeys;
             if (cookiesAccepted !== 'true' && currentKeys.length >= 1) {
                 showToast('Accept cookies to save multiple API keys');
                 return;
@@ -2825,13 +2943,28 @@
             } else if (platform === 'fireworks') {
                 if (fireworksKeys.includes(key)) { showToast('Key already added'); return; }
                 fireworksKeys.push(key); localStorage.setItem('snoah_fireworks_keys', JSON.stringify(fireworksKeys)); fireworksApiKey = fireworksKeys[fireworksKeyIdx];
+            } else if (platform === 'xai') {
+                if (xaiKeys.includes(key)) { showToast('Key already added'); return; }
+                xaiKeys.push(key); localStorage.setItem('snoah_xai_keys', JSON.stringify(xaiKeys)); xaiApiKey = xaiKeys[xaiKeyIdx];
+            } else if (platform === 'perplexity') {
+                if (perplexityKeys.includes(key)) { showToast('Key already added'); return; }
+                perplexityKeys.push(key); localStorage.setItem('snoah_perplexity_keys', JSON.stringify(perplexityKeys)); perplexityApiKey = perplexityKeys[perplexityKeyIdx];
+            } else if (platform === 'nanogpt') {
+                if (nanogptKeys.includes(key)) { showToast('Key already added'); return; }
+                nanogptKeys.push(key); localStorage.setItem('snoah_nanogpt_keys', JSON.stringify(nanogptKeys)); nanogptApiKey = nanogptKeys[nanogptKeyIdx];
+            } else if (platform === 'unify') {
+                if (unifyKeys.includes(key)) { showToast('Key already added'); return; }
+                unifyKeys.push(key); localStorage.setItem('snoah_unify_keys', JSON.stringify(unifyKeys)); unifyApiKey = unifyKeys[unifyKeyIdx];
+            } else if (platform === 'kluster') {
+                if (klusterKeys.includes(key)) { showToast('Key already added'); return; }
+                klusterKeys.push(key); localStorage.setItem('snoah_kluster_keys', JSON.stringify(klusterKeys)); klusterApiKey = klusterKeys[klusterKeyIdx];
             } else {
                 if (geminiKeys.includes(key)) { showToast('Key already added'); return; }
                 geminiKeys.push(key); localStorage.setItem('snoah_gemini_keys', JSON.stringify(geminiKeys)); apiKey = geminiKeys[geminiKeyIdx];
             }
             input.value = '';
             renderKeysList();
-            const kCount = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : platform === 'openai' ? openaiKeys.length : platform === 'nvidia' ? nvidiaKeys.length : platform === 'huggingface' ? hfKeys.length : platform === 'githubmodels' ? ghKeys.length : platform === 'claude' ? claudeKeys.length : platform === 'copilot' ? copilotKeys.length : platform === 'gais' ? gaisKeys.length : platform === 'cohere' ? cohereKeys.length : platform === 'deepinfra' ? deepinfraKeys.length : platform === 'cerebras' ? cerebrasKeys.length : platform === 'sambanova' ? sambanovaKeys.length : platform === 'fireworks' ? fireworksKeys.length : geminiKeys.length;
+            const kCount = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : platform === 'openai' ? openaiKeys.length : platform === 'nvidia' ? nvidiaKeys.length : platform === 'huggingface' ? hfKeys.length : platform === 'githubmodels' ? ghKeys.length : platform === 'claude' ? claudeKeys.length : platform === 'copilot' ? copilotKeys.length : platform === 'gais' ? gaisKeys.length : platform === 'cohere' ? cohereKeys.length : platform === 'deepinfra' ? deepinfraKeys.length : platform === 'cerebras' ? cerebrasKeys.length : platform === 'sambanova' ? sambanovaKeys.length : platform === 'fireworks' ? fireworksKeys.length : platform === 'xai' ? xaiKeys.length : platform === 'perplexity' ? perplexityKeys.length : platform === 'nanogpt' ? nanogptKeys.length : platform === 'unify' ? unifyKeys.length : platform === 'kluster' ? klusterKeys.length : geminiKeys.length;
             showToast('Key added ✓ (' + kCount + ' total)');
         }
 
@@ -2900,6 +3033,26 @@
                 if (fireworksKeys.length <= 1) { showToast('Need at least 1 key'); return; }
                 fireworksKeys.splice(idx, 1); fireworksKeyIdx = Math.min(fireworksKeyIdx, fireworksKeys.length-1); fireworksApiKey = fireworksKeys[fireworksKeyIdx];
                 localStorage.setItem('snoah_fireworks_keys', JSON.stringify(fireworksKeys));
+            } else if (platform === 'xai') {
+                if (xaiKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                xaiKeys.splice(idx, 1); xaiKeyIdx = Math.min(xaiKeyIdx, xaiKeys.length-1); xaiApiKey = xaiKeys[xaiKeyIdx];
+                localStorage.setItem('snoah_xai_keys', JSON.stringify(xaiKeys));
+            } else if (platform === 'perplexity') {
+                if (perplexityKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                perplexityKeys.splice(idx, 1); perplexityKeyIdx = Math.min(perplexityKeyIdx, perplexityKeys.length-1); perplexityApiKey = perplexityKeys[perplexityKeyIdx];
+                localStorage.setItem('snoah_perplexity_keys', JSON.stringify(perplexityKeys));
+            } else if (platform === 'nanogpt') {
+                if (nanogptKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                nanogptKeys.splice(idx, 1); nanogptKeyIdx = Math.min(nanogptKeyIdx, nanogptKeys.length-1); nanogptApiKey = nanogptKeys[nanogptKeyIdx];
+                localStorage.setItem('snoah_nanogpt_keys', JSON.stringify(nanogptKeys));
+            } else if (platform === 'unify') {
+                if (unifyKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                unifyKeys.splice(idx, 1); unifyKeyIdx = Math.min(unifyKeyIdx, unifyKeys.length-1); unifyApiKey = unifyKeys[unifyKeyIdx];
+                localStorage.setItem('snoah_unify_keys', JSON.stringify(unifyKeys));
+            } else if (platform === 'kluster') {
+                if (klusterKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                klusterKeys.splice(idx, 1); klusterKeyIdx = Math.min(klusterKeyIdx, klusterKeys.length-1); klusterApiKey = klusterKeys[klusterKeyIdx];
+                localStorage.setItem('snoah_kluster_keys', JSON.stringify(klusterKeys));
             } else {
                 if (geminiKeys.length <= 1) { showToast('Need at least 1 key'); return; }
                 geminiKeys.splice(idx, 1); geminiKeyIdx = Math.min(geminiKeyIdx, geminiKeys.length-1); apiKey = geminiKeys[geminiKeyIdx];
@@ -2957,6 +3110,21 @@
             } else if (platform === 'fireworks') {
                 if (fireworksKeys.length <= 1) return false;
                 fireworksKeyIdx = (fireworksKeyIdx + 1) % fireworksKeys.length; fireworksApiKey = fireworksKeys[fireworksKeyIdx]; return true;
+            } else if (platform === 'xai') {
+                if (xaiKeys.length <= 1) return false;
+                xaiKeyIdx = (xaiKeyIdx + 1) % xaiKeys.length; xaiApiKey = xaiKeys[xaiKeyIdx]; return true;
+            } else if (platform === 'perplexity') {
+                if (perplexityKeys.length <= 1) return false;
+                perplexityKeyIdx = (perplexityKeyIdx + 1) % perplexityKeys.length; perplexityApiKey = perplexityKeys[perplexityKeyIdx]; return true;
+            } else if (platform === 'nanogpt') {
+                if (nanogptKeys.length <= 1) return false;
+                nanogptKeyIdx = (nanogptKeyIdx + 1) % nanogptKeys.length; nanogptApiKey = nanogptKeys[nanogptKeyIdx]; return true;
+            } else if (platform === 'unify') {
+                if (unifyKeys.length <= 1) return false;
+                unifyKeyIdx = (unifyKeyIdx + 1) % unifyKeys.length; unifyApiKey = unifyKeys[unifyKeyIdx]; return true;
+            } else if (platform === 'kluster') {
+                if (klusterKeys.length <= 1) return false;
+                klusterKeyIdx = (klusterKeyIdx + 1) % klusterKeys.length; klusterApiKey = klusterKeys[klusterKeyIdx]; return true;
             } else {
                 if (geminiKeys.length <= 1) return false;
                 geminiKeyIdx = (geminiKeyIdx + 1) % geminiKeys.length; apiKey = geminiKeys[geminiKeyIdx]; return true;
@@ -3062,7 +3230,7 @@
             }
             if (wordCountEl) {
                 const count = trimmedMemory ? trimmedMemory.split(/\s+/).length : 0;
-                wordCountEl.textContent = count.toLocaleString() + ' / 10,000 words';
+                wordCountEl.textContent = count.toLocaleString() + ' words saved';
             }
         }
 
@@ -3080,11 +3248,34 @@
             const firstKey = geminiKeys[0];
             if (!firstKey) return;
             // Sanitize snippets: strip control characters that could interfere with prompt structure
-            const sanitize = s => (s || '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').substring(0, 600);
+            const sanitize = s => (s || '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').substring(0, 800);
             const uSnip = sanitize(userText);
-            const aSnip = sanitize(aiText).substring(0, 1200);
-            // Use structured JSON body so user content stays in its own part, not mixed with instructions
-            const instructionText = 'You are a memory extraction assistant. Given the conversation snippet below, extract ONLY genuinely important personal facts about the USER: their name, profession, goals, preferences, ongoing projects, constraints, or important context they shared. Do NOT extract general knowledge questions. If nothing important, respond exactly: NOTHING_TO_SAVE\n\nExtracted facts (brief bullet points, or NOTHING_TO_SAVE):';
+            const aSnip = sanitize(aiText).substring(0, 1500);
+            const existingMemory = autoMemoryContent.trim();
+            // Build instruction that includes existing memory for deduplication
+            const instructionText = [
+                'You are a memory extraction assistant for a personal AI assistant.',
+                'Your job: extract genuinely important facts about the USER from the conversation below.',
+                '',
+                'Extract facts in these categories (when present):',
+                '- Identity: name, age, location, nationality',
+                '- Profession: job title, employer, field, skills, experience',
+                '- Goals & projects: what the user is working on or wants to achieve',
+                '- Preferences & interests: hobbies, likes, dislikes, favorite tools/languages',
+                '- Constraints: time limits, budget, health, requirements they mentioned',
+                '- Relationships: family members, colleagues, people they mentioned',
+                '- Important context: decisions made, problems they face, follow-up items',
+                '',
+                existingMemory ? ('EXISTING MEMORY (DO NOT repeat or rephrase facts already here):\n' + (existingMemory.length > 1500 ? existingMemory.slice(-1500) : existingMemory)) : '',
+                '',
+                'Rules:',
+                '- ONLY output NEW facts not already captured in existing memory.',
+                '- Skip general knowledge questions with no personal information.',
+                '- Be concise: bullet points, one fact per line.',
+                '- If nothing new to save, respond EXACTLY: NOTHING_TO_SAVE',
+                '',
+                'New facts to save (or NOTHING_TO_SAVE):'
+            ].filter(Boolean).join('\n');
             const conversationText = 'User said:\n' + uSnip + '\n\nAI replied:\n' + aSnip;
             try {
                 const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + firstKey;
@@ -3094,7 +3285,7 @@
                     body: JSON.stringify({
                         contents: [{ role: 'user', parts: [{ text: conversationText }] }],
                         systemInstruction: { parts: [{ text: instructionText }] },
-                        generationConfig: { maxOutputTokens: 250, temperature: 0.2 }
+                        generationConfig: { maxOutputTokens: 350, temperature: 0.1 }
                     })
                 });
                 if (!resp.ok) return;
@@ -3104,11 +3295,20 @@
                 // Append with timestamp
                 const ts = new Date().toLocaleDateString();
                 autoMemoryContent = (autoMemoryContent ? autoMemoryContent + '\n' : '') + '[' + ts + ']\n' + extracted;
-                // Cap at ~10,000 words by trimming oldest entries from the front
-                const MAX_WORDS = 10000;
-                const words = autoMemoryContent.split(/\s+/);
-                if (words.length > MAX_WORDS) {
-                    autoMemoryContent = words.slice(words.length - MAX_WORDS).join(' ');
+                // Cap at ~12,000 chars by trimming the oldest timestamped entries from the front
+                const MAX_CHARS = 12000;
+                if (autoMemoryContent.length > MAX_CHARS) {
+                    // Find the second occurrence of a '[' date marker and trim everything before it
+                    const firstBracket = autoMemoryContent.indexOf('[');
+                    if (firstBracket !== -1) {
+                        const secondBracket = autoMemoryContent.indexOf('[', firstBracket + 1);
+                        if (secondBracket !== -1) {
+                            autoMemoryContent = autoMemoryContent.substring(secondBracket);
+                        } else {
+                            // Only one entry block, just cap it
+                            autoMemoryContent = autoMemoryContent.substring(autoMemoryContent.length - MAX_CHARS);
+                        }
+                    }
                 }
                 localStorage.setItem('snoah_auto_memory', autoMemoryContent);
                 showToast('Memory updated 🧠');
@@ -4413,10 +4613,10 @@
         }
 
         // ── MULTI-AI RESPONSE ──────────────────────────────────────────
-        const MULTI_AI_LABELS = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', openai: 'OpenAI', nvidia: 'NVIDIA', huggingface: 'Hugging Face', githubmodels: 'GitHub Models', claude: 'Claude', copilot: 'Copilot', gais: 'Google AI Studio', ollama: 'Ollama', cohere: 'Cohere', puter: 'Puter.js', deepinfra: 'DeepInfra', cerebras: 'Cerebras AI', sambanova: 'SambaNova', fireworks: 'Fireworks AI' };
-        const MULTI_AI_URLS = { openrouter: 'https://openrouter.ai/api/v1/chat/completions', groq: 'https://api.groq.com/openai/v1/chat/completions', together: 'https://api.together.xyz/v1/chat/completions', mistral: 'https://api.mistral.ai/v1/chat/completions', openai: '/api/openai', nvidia: '/api/nvidia', huggingface: '/api/huggingface', githubmodels: '/api/github', claude: '/api/claude', copilot: '/api/github', gais: null, ollama: null, cohere: '/api/cohere', deepinfra: '/api/deepinfra', cerebras: 'https://api.cerebras.ai/v1/chat/completions', sambanova: 'https://api.sambanova.ai/v1/chat/completions', fireworks: 'https://api.fireworks.ai/inference/v1/chat/completions' };
-        function getMultiAIKey(p) { if (p === 'puter' || p === 'ollama') return '__nokey__'; return p === 'gemini' ? (geminiKeys[0] || apiKey) : p === 'openrouter' ? (orKeys[0] || orApiKey) : p === 'groq' ? (groqKeys[0] || groqApiKey) : p === 'together' ? (togetherKeys[0] || togetherApiKey) : p === 'openai' ? (openaiKeys[0] || openaiApiKey) : p === 'nvidia' ? (nvidiaKeys[0] || nvidiaApiKey) : p === 'huggingface' ? (hfKeys[0] || hfApiKey) : p === 'githubmodels' ? (ghKeys[0] || ghApiKey) : p === 'claude' ? (claudeKeys[0] || claudeApiKey) : p === 'copilot' ? (copilotKeys[0] || copilotApiKey) : p === 'gais' ? (gaisKeys[0] || gaisApiKey) : p === 'cohere' ? (cohereKeys[0] || cohereApiKey) : p === 'deepinfra' ? (deepinfraKeys[0] || deepinfraApiKey) : p === 'cerebras' ? (cerebrasKeys[0] || cerebrasApiKey) : p === 'sambanova' ? (sambanovaKeys[0] || sambanovaApiKey) : p === 'fireworks' ? (fireworksKeys[0] || fireworksApiKey) : (mistralKeys[0] || mistralApiKey); }
-        function getMultiAIModel(p) { return p === 'gemini' ? modelId : p === 'openrouter' ? orModelId : p === 'groq' ? groqModelId : p === 'together' ? togetherModelId : p === 'openai' ? openaiModelId : p === 'nvidia' ? nvidiaModelId : p === 'huggingface' ? hfModelId : p === 'githubmodels' ? ghModelId : p === 'claude' ? claudeModelId : p === 'copilot' ? copilotModelId : p === 'gais' ? gaisModelId : p === 'ollama' ? ollamaModelId : p === 'cohere' ? cohereModelId : p === 'puter' ? puterModelId : p === 'deepinfra' ? deepinfraModelId : p === 'cerebras' ? cerebrasModelId : p === 'sambanova' ? sambanovaModelId : p === 'fireworks' ? fireworksModelId : mistralModelId; }
+        const MULTI_AI_LABELS = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', openai: 'OpenAI', nvidia: 'NVIDIA', huggingface: 'Hugging Face', githubmodels: 'GitHub Models', claude: 'Claude', copilot: 'Copilot', gais: 'Google AI Studio', ollama: 'Ollama', cohere: 'Cohere', puter: 'Puter.js', deepinfra: 'DeepInfra', cerebras: 'Cerebras AI', sambanova: 'SambaNova', fireworks: 'Fireworks AI', xai: 'xAI (Grok)', perplexity: 'Perplexity', nanogpt: 'NanoGPT', unify: 'Unify', kluster: 'Kluster.ai' };
+        const MULTI_AI_URLS = { openrouter: 'https://openrouter.ai/api/v1/chat/completions', groq: 'https://api.groq.com/openai/v1/chat/completions', together: 'https://api.together.xyz/v1/chat/completions', mistral: 'https://api.mistral.ai/v1/chat/completions', openai: '/api/openai', nvidia: '/api/nvidia', huggingface: '/api/huggingface', githubmodels: '/api/github', claude: '/api/claude', copilot: '/api/github', gais: null, ollama: null, cohere: '/api/cohere', deepinfra: '/api/deepinfra', cerebras: 'https://api.cerebras.ai/v1/chat/completions', sambanova: 'https://api.sambanova.ai/v1/chat/completions', fireworks: 'https://api.fireworks.ai/inference/v1/chat/completions', xai: '/api/xai', perplexity: '/api/perplexity', nanogpt: '/api/nanogpt', unify: '/api/unify', kluster: '/api/kluster' };
+        function getMultiAIKey(p) { if (p === 'puter' || p === 'ollama') return '__nokey__'; return p === 'gemini' ? (geminiKeys[0] || apiKey) : p === 'openrouter' ? (orKeys[0] || orApiKey) : p === 'groq' ? (groqKeys[0] || groqApiKey) : p === 'together' ? (togetherKeys[0] || togetherApiKey) : p === 'openai' ? (openaiKeys[0] || openaiApiKey) : p === 'nvidia' ? (nvidiaKeys[0] || nvidiaApiKey) : p === 'huggingface' ? (hfKeys[0] || hfApiKey) : p === 'githubmodels' ? (ghKeys[0] || ghApiKey) : p === 'claude' ? (claudeKeys[0] || claudeApiKey) : p === 'copilot' ? (copilotKeys[0] || copilotApiKey) : p === 'gais' ? (gaisKeys[0] || gaisApiKey) : p === 'cohere' ? (cohereKeys[0] || cohereApiKey) : p === 'deepinfra' ? (deepinfraKeys[0] || deepinfraApiKey) : p === 'cerebras' ? (cerebrasKeys[0] || cerebrasApiKey) : p === 'sambanova' ? (sambanovaKeys[0] || sambanovaApiKey) : p === 'fireworks' ? (fireworksKeys[0] || fireworksApiKey) : p === 'xai' ? (xaiKeys[0] || xaiApiKey) : p === 'perplexity' ? (perplexityKeys[0] || perplexityApiKey) : p === 'nanogpt' ? (nanogptKeys[0] || nanogptApiKey) : p === 'unify' ? (unifyKeys[0] || unifyApiKey) : p === 'kluster' ? (klusterKeys[0] || klusterApiKey) : (mistralKeys[0] || mistralApiKey); }
+        function getMultiAIModel(p) { return p === 'gemini' ? modelId : p === 'openrouter' ? orModelId : p === 'groq' ? groqModelId : p === 'together' ? togetherModelId : p === 'openai' ? openaiModelId : p === 'nvidia' ? nvidiaModelId : p === 'huggingface' ? hfModelId : p === 'githubmodels' ? ghModelId : p === 'claude' ? claudeModelId : p === 'copilot' ? copilotModelId : p === 'gais' ? gaisModelId : p === 'ollama' ? ollamaModelId : p === 'cohere' ? cohereModelId : p === 'puter' ? puterModelId : p === 'deepinfra' ? deepinfraModelId : p === 'cerebras' ? cerebrasModelId : p === 'sambanova' ? sambanovaModelId : p === 'fireworks' ? fireworksModelId : p === 'xai' ? xaiModelId : p === 'perplexity' ? perplexityModelId : p === 'nanogpt' ? nanogptModelId : p === 'unify' ? unifyModelId : p === 'kluster' ? klusterModelId : mistralModelId; }
 
         async function multiAIFetchSingle(p, userText, sysInstruction) {
             const key = getMultiAIKey(p);
@@ -4450,7 +4650,7 @@
                     const d = await r.json();
                     return { platform: p, text: d.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '(empty response)' };
                 } else {
-                    const isProxied = p === 'openai' || p === 'nvidia' || p === 'huggingface' || p === 'githubmodels' || p === 'claude' || p === 'copilot' || p === 'cohere' || p === 'deepinfra';
+                    const isProxied = p === 'openai' || p === 'nvidia' || p === 'huggingface' || p === 'githubmodels' || p === 'claude' || p === 'copilot' || p === 'cohere' || p === 'deepinfra' || p === 'xai' || p === 'perplexity' || p === 'nanogpt' || p === 'unify' || p === 'kluster';
                     const url = MULTI_AI_URLS[p];
                     const hdrs = isProxied
                         ? { 'Content-Type': 'application/json', 'x-api-key': key }
@@ -4589,9 +4789,9 @@
 
             // Pre-flight API key validation (skip for keyless platforms)
             const isKeylessPlatform = platform === 'puter' || platform === 'ollama';
-            const activeKey = isKeylessPlatform ? '__nokey__' : platform === 'gemini' ? apiKey : platform === 'openrouter' ? orApiKey : platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : platform === 'openai' ? openaiApiKey : platform === 'nvidia' ? nvidiaApiKey : platform === 'huggingface' ? hfApiKey : platform === 'githubmodels' ? ghApiKey : platform === 'claude' ? claudeApiKey : platform === 'copilot' ? copilotApiKey : platform === 'gais' ? gaisApiKey : platform === 'cohere' ? cohereApiKey : platform === 'deepinfra' ? deepinfraApiKey : platform === 'cerebras' ? cerebrasApiKey : platform === 'sambanova' ? sambanovaApiKey : platform === 'fireworks' ? fireworksApiKey : mistralApiKey;
+            const activeKey = isKeylessPlatform ? '__nokey__' : platform === 'gemini' ? apiKey : platform === 'openrouter' ? orApiKey : platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : platform === 'openai' ? openaiApiKey : platform === 'nvidia' ? nvidiaApiKey : platform === 'huggingface' ? hfApiKey : platform === 'githubmodels' ? ghApiKey : platform === 'claude' ? claudeApiKey : platform === 'copilot' ? copilotApiKey : platform === 'gais' ? gaisApiKey : platform === 'cohere' ? cohereApiKey : platform === 'deepinfra' ? deepinfraApiKey : platform === 'cerebras' ? cerebrasApiKey : platform === 'sambanova' ? sambanovaApiKey : platform === 'fireworks' ? fireworksApiKey : platform === 'xai' ? xaiApiKey : platform === 'perplexity' ? perplexityApiKey : platform === 'nanogpt' ? nanogptApiKey : platform === 'unify' ? unifyApiKey : platform === 'kluster' ? klusterApiKey : mistralApiKey;
             if (!activeKey) {
-                const platformLabel = platform === 'gemini' ? 'Gemini (aistudio.google.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'openai' ? 'OpenAI (platform.openai.com/api-keys)' : platform === 'nvidia' ? 'NVIDIA (build.nvidia.com)' : platform === 'huggingface' ? 'Hugging Face (huggingface.co/settings/tokens)' : platform === 'githubmodels' ? 'GitHub Models (github.com/settings/tokens)' : platform === 'claude' ? 'Claude (console.anthropic.com)' : platform === 'copilot' ? 'Microsoft Copilot (github.com/settings/tokens)' : platform === 'gais' ? 'Google AI Studio (aistudio.google.com/apikey)' : platform === 'cohere' ? 'Cohere (dashboard.cohere.com/api-keys)' : platform === 'deepinfra' ? 'DeepInfra (deepinfra.com/dash/api_keys)' : platform === 'cerebras' ? 'Cerebras AI (cloud.cerebras.ai)' : platform === 'sambanova' ? 'SambaNova (cloud.sambanova.ai)' : platform === 'fireworks' ? 'Fireworks AI (fireworks.ai/api-keys)' : 'Mistral AI (console.mistral.ai)';
+                const platformLabel = platform === 'gemini' ? 'Gemini (aistudio.google.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'openai' ? 'OpenAI (platform.openai.com/api-keys)' : platform === 'nvidia' ? 'NVIDIA (build.nvidia.com)' : platform === 'huggingface' ? 'Hugging Face (huggingface.co/settings/tokens)' : platform === 'githubmodels' ? 'GitHub Models (github.com/settings/tokens)' : platform === 'claude' ? 'Claude (console.anthropic.com)' : platform === 'copilot' ? 'Microsoft Copilot (github.com/settings/tokens)' : platform === 'gais' ? 'Google AI Studio (aistudio.google.com/apikey)' : platform === 'cohere' ? 'Cohere (dashboard.cohere.com/api-keys)' : platform === 'deepinfra' ? 'DeepInfra (deepinfra.com/dash/api_keys)' : platform === 'cerebras' ? 'Cerebras AI (cloud.cerebras.ai)' : platform === 'sambanova' ? 'SambaNova (cloud.sambanova.ai)' : platform === 'fireworks' ? 'Fireworks AI (fireworks.ai/api-keys)' : platform === 'xai' ? 'xAI (console.x.ai)' : platform === 'perplexity' ? 'Perplexity (perplexity.ai/settings/api)' : platform === 'nanogpt' ? 'NanoGPT (nano-gpt.com/api)' : platform === 'unify' ? 'Unify (app.unify.ai/api-keys)' : platform === 'kluster' ? 'Kluster.ai (kluster.ai/api-keys)' : 'Mistral AI (console.mistral.ai)';
                 showToast('🔑 Please add an API key for ' + platformLabel + ' in Settings first.');
                 return;
             }
@@ -4703,12 +4903,13 @@ FEATURES:
 35. MULTI-AI RESPONSE: Settings → Multi-AI Response toggle. When enabled, the user's message is sent to multiple AI platforms simultaneously. Each AI's response is shown in a dropdown selector so the user can compare answers. Thinking Mode and Web Search are automatically disabled when Multi-AI is active. Platforms must have valid API keys configured.
 36. NOTION INTEGRATION: Settings → Notion Integration. Users can connect their Notion workspace by pasting a Notion Integration Token (get from notion.so/profile/integrations). Set a Default Save Page URL (must be a Notion page shared with the integration). Once connected: (a) Every AI response has a "Notion" button (next to Copy/Read/Pin) to save it to Notion. (b) Natural language commands work — type "add X to Notion", "save this to Notion", or "create a Notion page called X" and an action card appears in chat with a Save button. Tapping it opens a confirmation modal showing the title and content preview before saving. Tasks are saved as to-do checkboxes; responses are saved as sub-pages inside the configured parent page.
 37. NOTION AUTO-SAVE: Settings → Notion Integration → Auto-Save AI Responses toggle. When enabled and Notion is connected (token + default page configured), every AI response is automatically saved to the configured Notion page without any manual action. A toast notification confirms each auto-save. Useful for automatically logging all AI conversations to Notion.
-38. BACKEND PROXIED PLATFORMS: OpenAI, NVIDIA, Hugging Face, GitHub Models, Claude (Anthropic), Microsoft Copilot, Cohere, and DeepInfra use backend serverless proxies to avoid CORS errors and browser blocks. The user's API key is sent via x-api-key header to the proxy, which forwards requests to the real API. Streaming is fully supported through the proxy.
-39. 19 AI PLATFORMS TOTAL: The app now supports 19 AI platforms: Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA, Hugging Face, GitHub Models, Claude (Anthropic), Microsoft Copilot, Google AI Studio, Ollama (Local), Cohere, Puter.js (Free), DeepInfra, Cerebras AI (Free tier), SambaNova (Free tier), Fireworks AI (Free tier). All platforms support Multi-AI Response mode. Puter.js and Ollama require no API key.
+38. BACKEND PROXIED PLATFORMS: OpenAI, NVIDIA, Hugging Face, GitHub Models, Claude (Anthropic), Microsoft Copilot, Cohere, DeepInfra, xAI (Grok), Perplexity, NanoGPT, Unify, and Kluster.ai use backend serverless proxies to avoid CORS errors and browser blocks. The user's API key is sent via x-api-key header to the proxy, which forwards requests to the real API. Streaming is fully supported through the proxy.
+39. 24 AI PLATFORMS TOTAL: The app now supports 24 AI platforms: Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA, Hugging Face, GitHub Models, Claude (Anthropic), Microsoft Copilot, Google AI Studio, Ollama (Local), Cohere, Puter.js (Free), DeepInfra, Cerebras AI (Free tier), SambaNova (Free tier), Fireworks AI (Free tier), xAI (Grok), Perplexity, NanoGPT, Unify, Kluster.ai. All platforms support Multi-AI Response mode. Puter.js and Ollama require no API key.
 40. INTERACTIVE TO-DO LISTS: When AI generates a to-do list using markdown checkbox syntax (- [ ] task or - [x] done), items are rendered as interactive checkboxes in the chat. Users can click to check/uncheck items. Checked items get a strikethrough style. AI automatically generates proper to-do format when asked for a task list, checklist, or to-do list.
 41. RESET SETTINGS: Settings footer has a "Reset Settings" button. Clicking it (after confirmation) resets all settings to their defaults: platform → Gemini, models to defaults, model parameters (temperature, top_p, top_k, max_tokens) to defaults, custom instructions cleared, persona cleared, Multi-AI disabled. API keys and chat data are NOT deleted.
 42. CODE STREAMING FIX: AI responses now show code blocks streaming in real-time. Partial/in-progress code blocks are rendered live as the AI generates them — you can watch the code appear line by line instead of waiting for the full block to finish. A streaming cursor is shown inside the code block header while it is still being written.
-43. AUTO MEMORY: Settings → Auto Memory toggle. When enabled, SnoahAI automatically extracts and saves important facts about the user from each conversation (name, profession, goals, preferences, ongoing projects, etc.) into a local memory bank (up to 10,000 words). This memory is injected as context into every future chat so the AI can give more personalized, context-aware responses. Requires a Gemini API key for extraction. Memory can be viewed, and cleared in Settings → Auto Memory. Toggle it off anytime to disable automatic extraction and context injection.
+43. AUTO MEMORY: Settings → Auto Memory toggle. When enabled, SnoahAI automatically extracts and saves important facts about the user from each conversation (name, profession, goals, preferences, ongoing projects, relationships, constraints, etc.) into a local memory bank. The memory extractor uses deduplication — it will never save the same fact twice. Memory is injected as context into every future chat so the AI can give more personalized, context-aware responses. Requires a Gemini API key for extraction. Memory can be viewed and cleared in Settings → Auto Memory.
+44. IMPROVED VOICE-TO-TEXT: Voice input uses continuous recognition with text accumulation. Tap the mic button to start (shows 🎤 Listening toast), speak, then tap again to stop. Interim and final results are accumulated progressively in the input field, so partial speech is visible in real-time. Works on Chrome, Safari, and other modern browsers.
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
@@ -4988,7 +5189,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             clearTimeout(connTimeoutGA);
                             await readStream(resGA);
                             abortController = null;
-                        } else if ((platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral' || platform === 'openai' || platform === 'nvidia' || platform === 'huggingface' || platform === 'githubmodels' || platform === 'claude' || platform === 'copilot' || platform === 'cohere' || platform === 'deepinfra' || platform === 'ollama' || platform === 'cerebras' || platform === 'sambanova' || platform === 'fireworks') && !useAgent) {
+                        } else if ((platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral' || platform === 'openai' || platform === 'nvidia' || platform === 'huggingface' || platform === 'githubmodels' || platform === 'claude' || platform === 'copilot' || platform === 'cohere' || platform === 'deepinfra' || platform === 'ollama' || platform === 'cerebras' || platform === 'sambanova' || platform === 'fireworks' || platform === 'xai' || platform === 'perplexity' || platform === 'nanogpt' || platform === 'unify' || platform === 'kluster') && !useAgent) {
                             const isGroq = platform === 'groq';
                             const isTogether = platform === 'together';
                             const isMistral = platform === 'mistral';
@@ -5004,7 +5205,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             const isCerebras = platform === 'cerebras';
                             const isSambaNova = platform === 'sambanova';
                             const isFireworks = platform === 'fireworks';
-                            const isProxied = isOpenAI || isNvidia || isHF || isGH || isClaude || isCopilot || isCohere || isDeepInfra;
+                            const isXAI = platform === 'xai';
+                            const isPPX = platform === 'perplexity';
+                            const isNGPT = platform === 'nanogpt';
+                            const isUnify = platform === 'unify';
+                            const isKluster = platform === 'kluster';
+                            const isProxied = isOpenAI || isNvidia || isHF || isGH || isClaude || isCopilot || isCohere || isDeepInfra || isXAI || isPPX || isNGPT || isUnify || isKluster;
 
                             const chatMessages = [{ role: 'system', content: systemInstruction }];
                             for (const msg of messages) {
@@ -5062,9 +5268,19 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                 ? 'https://api.sambanova.ai/v1/chat/completions'
                                 : isFireworks
                                 ? 'https://api.fireworks.ai/inference/v1/chat/completions'
+                                : isXAI
+                                ? '/api/xai'
+                                : isPPX
+                                ? '/api/perplexity'
+                                : isNGPT
+                                ? '/api/nanogpt'
+                                : isUnify
+                                ? '/api/unify'
+                                : isKluster
+                                ? '/api/kluster'
                                 : 'https://openrouter.ai/api/v1/chat/completions';
-                            const chatKey = isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : isOpenAI ? openaiApiKey : isNvidia ? nvidiaApiKey : isHF ? hfApiKey : isGH ? ghApiKey : isClaude ? claudeApiKey : isCopilot ? copilotApiKey : isCohere ? cohereApiKey : isDeepInfra ? deepinfraApiKey : isOllama ? 'ollama' : isCerebras ? cerebrasApiKey : isSambaNova ? sambanovaApiKey : isFireworks ? fireworksApiKey : orApiKey;
-                            const chatModel = isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : isOpenAI ? openaiModelId : isNvidia ? nvidiaModelId : isHF ? hfModelId : isGH ? ghModelId : isClaude ? claudeModelId : isCopilot ? copilotModelId : isCohere ? cohereModelId : isDeepInfra ? deepinfraModelId : isOllama ? ollamaModelId : isCerebras ? cerebrasModelId : isSambaNova ? sambanovaModelId : isFireworks ? fireworksModelId : orModelId;
+                            const chatKey = isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : isOpenAI ? openaiApiKey : isNvidia ? nvidiaApiKey : isHF ? hfApiKey : isGH ? ghApiKey : isClaude ? claudeApiKey : isCopilot ? copilotApiKey : isCohere ? cohereApiKey : isDeepInfra ? deepinfraApiKey : isOllama ? 'ollama' : isCerebras ? cerebrasApiKey : isSambaNova ? sambanovaApiKey : isFireworks ? fireworksApiKey : isXAI ? xaiApiKey : isPPX ? perplexityApiKey : isNGPT ? nanogptApiKey : isUnify ? unifyApiKey : isKluster ? klusterApiKey : orApiKey;
+                            const chatModel = isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : isOpenAI ? openaiModelId : isNvidia ? nvidiaModelId : isHF ? hfModelId : isGH ? ghModelId : isClaude ? claudeModelId : isCopilot ? copilotModelId : isCohere ? cohereModelId : isDeepInfra ? deepinfraModelId : isOllama ? ollamaModelId : isCerebras ? cerebrasModelId : isSambaNova ? sambanovaModelId : isFireworks ? fireworksModelId : isXAI ? xaiModelId : isPPX ? perplexityModelId : isNGPT ? nanogptModelId : isUnify ? unifyModelId : isKluster ? klusterModelId : orModelId;
                             const chatHeaders = isProxied
                                 ? { 'Content-Type': 'application/json', 'x-api-key': chatKey }
                                 : isOllama
@@ -5076,7 +5292,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                             // Connection timeout: abort if no response within 60s
                             const connTimeout1 = setTimeout(() => { if (abortController) { abortController._timedOut = true; abortController.abort(); } }, 60000);
                             const chatBody = { model: chatModel, messages: chatMessages, stream: true, temperature: paramTemperature, top_p: paramTopP, max_tokens: paramMaxTokens };
-                            if (!isMistral && !isNvidia && !isHF && !isClaude && !isOllama && !isCerebras && !isSambaNova && !isFireworks) chatBody.stream_options = { include_usage: true };
+                            if (!isMistral && !isNvidia && !isHF && !isClaude && !isOllama && !isCerebras && !isSambaNova && !isFireworks && !isXAI && !isPPX && !isNGPT && !isUnify && !isKluster) chatBody.stream_options = { include_usage: true };
                             const res = await fetch(chatUrl, {
                                 method: 'POST',
                                 headers: chatHeaders,
@@ -5522,76 +5738,6 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
             updatePinBadge();
             if (isSidebarOpen) toggleSidebar();
             scrollToBottom();
-        }
-
-        function toggleVoiceInput() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                showToast('Voice input not supported in this browser');
-                return;
-            }
-            if (isListening) {
-                if (speechRecognition) speechRecognition.stop();
-                resetMicBtn();
-                return;
-            }
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(() => startSpeechRecognition())
-                .catch(() => showToast('Mic permission denied'));
-        }
-
-        function startSpeechRecognition() {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            speechRecognition = new SR();
-            speechRecognition.continuous = false;
-            speechRecognition.interimResults = true;
-            speechRecognition.lang = 'en-US';
-            isListening = true;
-            const micBtn = document.getElementById('mic-btn');
-            if (micBtn) {
-                micBtn.classList.add('text-[#D25D38]');
-                const svg = micBtn.querySelector('svg');
-                if (svg) svg.innerHTML = lucide._svgs['mic-off'];
-            }
-            showToast('🎤 Listening...');
-            let lastTranscript = '';
-            speechRecognition.onresult = (e) => {
-                let interim = '', final = '';
-                for (let i = e.resultIndex; i < e.results.length; i++) {
-                    const t = e.results[i][0].transcript;
-                    if (e.results[i].isFinal) final += t;
-                    else interim += t;
-                }
-                lastTranscript = final || interim;
-                chatInput.value = lastTranscript;
-                chatInput.style.height = 'auto';
-                chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
-                updateSendButton();
-            };
-            speechRecognition.onend = () => {
-                resetMicBtn();
-                if (lastTranscript && !chatInput.value.trim()) {
-                    chatInput.value = lastTranscript;
-                    updateSendButton();
-                }
-            };
-            speechRecognition.onerror = (e) => {
-                resetMicBtn();
-                const msgs = { 'not-allowed': 'Mic blocked — allow microphone access', 'no-speech': 'No speech detected, try again', 'network': 'Network error during voice input', 'audio-capture': 'No microphone found', 'aborted': '' };
-                const msg = msgs[e.error] ?? 'Voice error: ' + e.error;
-                if (msg) showToast(msg);
-            };
-            try { speechRecognition.start(); }
-            catch(e) { resetMicBtn(); showToast('Could not start mic, try again'); }
-        }
-
-        function resetMicBtn() {
-            isListening = false;
-            const micBtn = document.getElementById('mic-btn');
-            if (micBtn) {
-                micBtn.classList.remove('text-[#D25D38]');
-                const svg = micBtn.querySelector('svg');
-                if (svg) svg.innerHTML = lucide._svgs['mic'];
-            }
         }
 
         // ── SLASH COMMANDS ─────────────────────────────────────────────
