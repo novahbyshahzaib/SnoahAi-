@@ -363,7 +363,15 @@
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
-                <div class="p-5 space-y-5 overflow-y-auto flex-1">
+                <!-- Settings Tabs Navigation -->
+                <div class="flex gap-1 px-5 pt-3 pb-2 border-b border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
+                    <button onclick="switchSettingsTab('api')" id="stab-api" class="flex-1 py-2 rounded-xl text-[12px] font-semibold transition-colors bg-[#D25D38] text-white">API</button>
+                    <button onclick="switchSettingsTab('ai')" id="stab-ai" class="flex-1 py-2 rounded-xl text-[12px] font-semibold transition-colors text-[#5B5951] hover:bg-[#F2F0E9]">AI</button>
+                    <button onclick="switchSettingsTab('app')" id="stab-app" class="flex-1 py-2 rounded-xl text-[12px] font-semibold transition-colors text-[#5B5951] hover:bg-[#F2F0E9]">App</button>
+                </div>
+
+                <!-- API Config Tab -->
+                <div id="stab-api-content" class="p-5 space-y-5 overflow-y-auto flex-1">
 
                     <!-- Platform Switcher -->
                     <div>
@@ -470,6 +478,68 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
+                    <!-- Token Management -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Token Management</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Monitor token usage across all AI platforms, set limits, and view usage history.</p>
+                        <button onclick="closeSettings(); openTokenModal();" class="w-full flex items-center justify-between px-4 py-3 bg-white border border-[#E5E3DB] rounded-xl hover:bg-[#F2F0E9] transition-colors group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] flex items-center justify-center group-hover:bg-[#EAE8E0]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                                </div>
+                                <div class="text-left">
+                                    <span class="text-[13px] font-semibold text-[#2C2B29] block">Token Usage Dashboard</span>
+                                    <span id="settings-token-summary" class="text-[11px] text-[#A3A095]">View usage &amp; set limits</span>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Notion Integration -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">
+                            Notion Integration
+                            <span class="ml-1.5 px-1.5 py-0.5 bg-[#FEF3C7] text-[#92400E] rounded text-[9px] font-bold border border-[#FDE68A]">NEW</span>
+                        </label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Connect your Notion workspace. Once set, you can say things like <span class="font-semibold text-[#2C2B29]">"save this to Notion"</span> or <span class="font-semibold text-[#2C2B29]">"add buy milk to my Notion to-do"</span> and it'll happen automatically.</p>
+                        <div class="flex gap-2 mb-2">
+                            <input type="password" id="settings-notionkey" placeholder="Paste your Notion Integration Token..."
+                                class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                            <button onclick="toggleNotionKeyVisibility()" class="px-3 py-2 bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl text-[#8C897D] hover:bg-[#EAE8E0] transition-colors shrink-0">
+                                <i id="notion-eye-icon" data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div id="notion-key-status" class="mb-2"></div>
+                        <p class="text-[11px] text-[#A3A095] leading-relaxed">
+                            Get your token:
+                            <a href="https://www.notion.so/profile/integrations" target="_blank" class="underline text-[#D25D38]">notion.so/profile/integrations</a>
+                            → New Integration → Copy "Internal Integration Secret"
+                        </p>
+                        <div class="mt-3">
+                            <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Default Save Page</label>
+                            <input type="text" id="settings-notionparent" placeholder="Paste Notion page URL to save into..."
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                            <p class="text-[11px] text-[#A3A095] mt-1 leading-relaxed">Open any Notion page → share it with your integration → paste its URL here. All saves will go into this page.</p>
+                        </div>
+                        <div class="mt-3 flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Auto-Save AI Responses</p>
+                                <p class="text-[11px] text-[#A3A095]">Automatically save every AI response to Notion</p>
+                            </div>
+                            <button id="notion-autosave-toggle" onclick="toggleNotionAutoSave()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Config Tab -->
+                <div id="stab-ai-content" class="p-5 space-y-5 overflow-y-auto flex-1 hidden">
+
                     <!-- System Prompt / Persona -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">AI Persona (System Prompt)</label>
@@ -482,30 +552,6 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
-                    <!-- Font Size -->
-                    <div>
-                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Font Size</label>
-                        <div class="flex gap-2">
-                            <button onclick="setFontSize('sm')" id="fs-sm" class="flex-1 py-2 rounded-xl border text-[13px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Small</button>
-                            <button onclick="setFontSize('md')" id="fs-md" class="flex-1 py-2 rounded-xl border text-[13px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Medium</button>
-                            <button onclick="setFontSize('lg')" id="fs-lg" class="flex-1 py-2 rounded-xl border text-[13px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Large</button>
-                        </div>
-                    </div>
-
-                    <!-- Theme -->
-                    <div>
-                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Theme</label>
-                        <div class="grid grid-cols-4 gap-2">
-                            <button onclick="setTheme('default')" title="Default" class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#D25D38] transition-colors" style="background:linear-gradient(135deg,#FAF9F6 50%,#D25D38 50%)"></button>
-                            <button onclick="setTheme('ocean')"   title="Ocean"   class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#1A6EBD] transition-colors" style="background:linear-gradient(135deg,#F4F7FB 50%,#1A6EBD 50%)"></button>
-                            <button onclick="setTheme('forest')"  title="Forest"  class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#2D7A4F] transition-colors" style="background:linear-gradient(135deg,#F2F7F4 50%,#2D7A4F 50%)"></button>
-                            <button onclick="setTheme('rose')"    title="Rose"    class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#C4396B] transition-colors" style="background:linear-gradient(135deg,#FBF4F6 50%,#C4396B 50%)"></button>
-                        </div>
-                    </div>
-
-                    <!-- Divider -->
-                    <div class="border-t border-[#EAE8E0]"></div>
-
                     <!-- Custom Instructions -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Custom Instructions</label>
@@ -513,27 +559,6 @@
                         <textarea id="settings-instructions" rows="5"
                             placeholder="e.g. I'm a 2nd year medical student. Always tie explanations to clinical relevance. Be concise but don't skip key mechanisms. When answering questions, consider pharmacology implications."
                             class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2.5 text-[14px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 resize-none leading-relaxed placeholder:text-[#C5C3BB]"></textarea>
-                    </div>
-
-                    <!-- Divider -->
-                    <div class="border-t border-[#EAE8E0]"></div>
-
-                    <!-- Token Management -->
-                    <div>
-                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Token Management</label>
-                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Monitor token usage across all AI platforms, set limits, and view usage history.</p>
-                        <button onclick="closeSettings(); openTokenModal();" class="w-full flex items-center justify-between px-4 py-3 bg-white border border-[#E5E3DB] rounded-xl hover:bg-[#F2F0E9] transition-colors group">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] flex items-center justify-center group-hover:bg-[#EAE8E0]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-                                </div>
-                                <div class="text-left">
-                                    <span class="text-[13px] font-semibold text-[#2C2B29] block">Token Usage Dashboard</span>
-                                    <span id="settings-token-summary" class="text-[11px] text-[#A3A095]">View usage & set limits</span>
-                                </div>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                        </button>
                     </div>
 
                     <!-- Divider -->
@@ -619,69 +644,54 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
-                    <!-- Notion Integration -->
+                    <!-- Auto Memory -->
                     <div>
-                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">
-                            Notion Integration
-                            <span class="ml-1.5 px-1.5 py-0.5 bg-[#FEF3C7] text-[#92400E] rounded text-[9px] font-bold border border-[#FDE68A]">NEW</span>
-                        </label>
-                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Connect your Notion workspace. Once set, you can say things like <span class="font-semibold text-[#2C2B29]">"save this to Notion"</span> or <span class="font-semibold text-[#2C2B29]">"add buy milk to my Notion to-do"</span> and it'll happen automatically.</p>
-                        <div class="flex gap-2 mb-2">
-                            <input type="password" id="settings-notionkey" placeholder="Paste your Notion Integration Token..."
-                                class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
-                            <button onclick="toggleNotionKeyVisibility()" class="px-3 py-2 bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl text-[#8C897D] hover:bg-[#EAE8E0] transition-colors shrink-0">
-                                <i id="notion-eye-icon" data-lucide="eye" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <div id="notion-key-status" class="mb-2"></div>
-                        <p class="text-[11px] text-[#A3A095] leading-relaxed">
-                            Get your token:
-                            <a href="https://www.notion.so/profile/integrations" target="_blank" class="underline text-[#D25D38]">notion.so/profile/integrations</a>
-                            → New Integration → Copy "Internal Integration Secret"
-                        </p>
-                        <div class="mt-3">
-                            <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Default Save Page</label>
-                            <input type="text" id="settings-notionparent" placeholder="Paste Notion page URL to save into..."
-                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                            <p class="text-[11px] text-[#A3A095] mt-1 leading-relaxed">Open any Notion page → share it with your integration → paste its URL here. All saves will go into this page.</p>
-                        </div>
-                        <div class="mt-3 flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">🧠 Auto Memory</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">SnoahAI automatically remembers important facts about you from each conversation and uses them as context in every future chat. Up to 10,000 words. Requires a Gemini API key.</p>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB] mb-3">
                             <div>
-                                <p class="text-[12px] font-semibold text-[#2C2B29]">Auto-Save AI Responses</p>
-                                <p class="text-[11px] text-[#A3A095]">Automatically save every AI response to Notion</p>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Enable Auto Memory</p>
+                                <p class="text-[11px] text-[#A3A095]">Save important facts automatically</p>
                             </div>
-                            <button id="notion-autosave-toggle" onclick="toggleNotionAutoSave()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                            <button id="auto-memory-toggle" onclick="toggleAutoMemory()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
                                 <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
                             </button>
+                        </div>
+                        <div id="memory-preview-section">
+                            <div class="bg-white border border-[#E5E3DB] rounded-xl p-3 mb-2">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest">Saved Memory</span>
+                                    <span id="memory-word-count" class="text-[11px] text-[#A3A095]">0 / 10,000 words</span>
+                                </div>
+                                <div id="memory-preview-text" class="text-[12px] text-[#5B5951] max-h-[130px] overflow-y-auto leading-relaxed whitespace-pre-wrap break-words">No memory saved yet.</div>
+                            </div>
+                            <button onclick="clearAutoMemory()" class="w-full py-2 rounded-xl border border-[#E5E3DB] text-[12px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors font-medium">Clear Memory</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Divider -->
-                <div class="border-t border-[#EAE8E0] mx-5"></div>
+                <!-- App Config Tab -->
+                <div id="stab-app-content" class="p-5 space-y-5 overflow-y-auto flex-1 hidden">
 
-                <!-- Auto Memory -->
-                <div class="px-5 py-4">
-                    <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">🧠 Auto Memory</label>
-                    <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">SnoahAI automatically remembers important facts about you from each conversation and uses them as context in every future chat. Up to 10,000 words. Requires a Gemini API key.</p>
-                    <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB] mb-3">
-                        <div>
-                            <p class="text-[12px] font-semibold text-[#2C2B29]">Enable Auto Memory</p>
-                            <p class="text-[11px] text-[#A3A095]">Save important facts automatically</p>
+                    <!-- Font Size -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Font Size</label>
+                        <div class="flex gap-2">
+                            <button onclick="setFontSize('sm')" id="fs-sm" class="flex-1 py-2 rounded-xl border text-[13px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Small</button>
+                            <button onclick="setFontSize('md')" id="fs-md" class="flex-1 py-2 rounded-xl border text-[13px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Medium</button>
+                            <button onclick="setFontSize('lg')" id="fs-lg" class="flex-1 py-2 rounded-xl border text-[13px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Large</button>
                         </div>
-                        <button id="auto-memory-toggle" onclick="toggleAutoMemory()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
-                            <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
-                        </button>
                     </div>
-                    <div id="memory-preview-section">
-                        <div class="bg-white border border-[#E5E3DB] rounded-xl p-3 mb-2">
-                            <div class="flex items-center justify-between mb-1.5">
-                                <span class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest">Saved Memory</span>
-                                <span id="memory-word-count" class="text-[11px] text-[#A3A095]">0 / 10,000 words</span>
-                            </div>
-                            <div id="memory-preview-text" class="text-[12px] text-[#5B5951] max-h-[130px] overflow-y-auto leading-relaxed whitespace-pre-wrap break-words">No memory saved yet.</div>
+
+                    <!-- Theme -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Theme</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="setTheme('default')" title="Default" class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#D25D38] transition-colors" style="background:linear-gradient(135deg,#FAF9F6 50%,#D25D38 50%)"></button>
+                            <button onclick="setTheme('ocean')"   title="Ocean"   class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#1A6EBD] transition-colors" style="background:linear-gradient(135deg,#F4F7FB 50%,#1A6EBD 50%)"></button>
+                            <button onclick="setTheme('forest')"  title="Forest"  class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#2D7A4F] transition-colors" style="background:linear-gradient(135deg,#F2F7F4 50%,#2D7A4F 50%)"></button>
+                            <button onclick="setTheme('rose')"    title="Rose"    class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#C4396B] transition-colors" style="background:linear-gradient(135deg,#FBF4F6 50%,#C4396B 50%)"></button>
                         </div>
-                        <button onclick="clearAutoMemory()" class="w-full py-2 rounded-xl border border-[#E5E3DB] text-[12px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors font-medium">Clear Memory</button>
                     </div>
                 </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] flex gap-3 shrink-0 bg-[#FAF9F6]">
@@ -1243,7 +1253,8 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
-                            <li><strong>Auto Memory 🧠</strong> — SnoahAI now automatically remembers important facts about you from each chat (name, goals, preferences, projects). Saved memory (up to 10,000 words) is used as context in every future conversation for more personalized responses. Enable in Settings → Auto Memory. Requires a Gemini key. View or clear your memory anytime.</li>
+                            <li><strong>Tabbed Settings Panel 🗂️</strong> — Settings are now organised into three focused tabs: <strong>API</strong> (platform, model, API keys, parameters, token management, Notion), <strong>AI</strong> (persona, custom instructions, multi-AI, memory), and <strong>App</strong> (font size, theme). Auto Memory is now inside the AI tab — no more hidden memory section at the bottom!</li>
+                            <li><strong>Auto Memory 🧠</strong> — SnoahAI now automatically remembers important facts about you from each chat (name, goals, preferences, projects). Saved memory (up to 10,000 words) is used as context in every future conversation for more personalized responses. Enable in Settings → AI tab → Auto Memory. Requires a Gemini key. View or clear your memory anytime.</li>
                             <li><strong>Code Streaming Fixed 💻</strong> — Code blocks now stream in real-time just like regular text. You can watch code appear line by line as the AI generates it. Previously, code blocks were hidden until the entire block was complete.</li>
                             <li><strong>3 New Free Platforms</strong> — Cerebras AI, SambaNova, and Fireworks AI added. All offer free tier access! Get keys at cloud.cerebras.ai, cloud.sambanova.ai, and fireworks.ai/api-keys.</li>
                             <li><strong>Token Management Updated</strong> — All 19 platforms now shown in Token Management tab. Set per-platform token limits for full control over usage.</li>
@@ -2343,6 +2354,7 @@
             updateFontSizeBtns();
             updatePlatformUI();
             renderKeysList();
+            switchSettingsTab('api');
             document.getElementById('settings-modal').classList.remove('hidden');
             if (isSidebarOpen) toggleSidebar();
             lucide.createIcons();
@@ -2350,6 +2362,23 @@
 
         function closeSettings() {
             document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function switchSettingsTab(tab) {
+            const tabs = ['api', 'ai', 'app'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('stab-' + t);
+                const content = document.getElementById('stab-' + t + '-content');
+                if (t === tab) {
+                    btn.classList.remove('text-[#5B5951]', 'hover:bg-[#F2F0E9]');
+                    btn.classList.add('bg-[#D25D38]', 'text-white');
+                    content.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('bg-[#D25D38]', 'text-white');
+                    btn.classList.add('text-[#5B5951]', 'hover:bg-[#F2F0E9]');
+                    content.classList.add('hidden');
+                }
+            });
         }
 
         function confirmResetSettings() {
