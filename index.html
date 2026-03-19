@@ -1269,7 +1269,9 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
-                            <li><strong>5 New AI Platforms 🚀</strong> — xAI (Grok), Perplexity, NanoGPT, Unify, and Kluster.ai added. All use secure backend proxies — no CORS errors. Now <strong>24 platforms total</strong>!</li>
+                            <li><strong>Universal Vision Support 🖼️</strong> — Image upload now works on ALL 24 platforms that use the OpenAI-compatible API (NVIDIA, Groq, Together AI, Mistral, Claude, Hugging Face, DeepInfra, Ollama, Cerebras, SambaNova, Fireworks, xAI, Perplexity, NanoGPT, Unify, Kluster.ai, OpenRouter, and more). Vision availability depends on the selected model — if the model doesn't support images the platform returns a clear error.</li>
+                            <li><strong>Templates Fixed 🔖</strong> — Tapping a saved or built-in template now correctly fills the input field. The previous version had a bug where templates with special characters (quotes, apostrophes) silently failed to load.</li>
+                            <li><strong>Multi-Key Stability Fix 🔑</strong> — Fixed a bug where adding multiple API keys for a platform could corrupt the key store and prevent the settings panel from opening on the next page load (requiring a browser data clear). Keys are now validated and sanitized on every load. Cookie-reject trimming now correctly covers all 24 platforms instead of just 5.</li>
                             <li><strong>Improved Auto Memory 🧠</strong> — Memory extraction is now smarter: it uses deduplication to avoid saving the same fact twice, captures more categories (identity, profession, goals, preferences, relationships, constraints, projects), and trims old entries by block instead of by word count.</li>
                             <li><strong>Voice-to-Text Fixed 🎤</strong> — Fixed a critical bug where duplicate function definitions overrode the voice recognition logic. Voice input now uses continuous recognition with real-time text accumulation — speak naturally and watch words appear live in the input.</li>
                             <li><strong>Tabbed Settings Panel 🗂️</strong> — Settings are now organised into three focused tabs: <strong>API</strong> (platform, model, API keys, parameters, token management, Notion), <strong>AI</strong> (persona, custom instructions, multi-AI, memory), and <strong>App</strong> (font size, theme). Auto Memory is now inside the AI tab — no more hidden memory section at the bottom!</li>
@@ -1310,7 +1312,7 @@
                             <li><strong>Interactive To-Do Lists ✅</strong> — Ask AI for a checklist/to-do list and get real interactive checkboxes. Click to check off items with strikethrough styling.</li>
                             <li><strong>Thinking Mode</strong> — 🧠 AI reasons step-by-step with a live collapsible thinking block.</li>
                             <li><strong>Web Search</strong> — 🔍 Real-time Google Search grounding via Gemini. Works from any platform when enabled.</li>
-                            <li><strong>File Attachments</strong> — 📎 Upload images, PDFs, text files, CSVs, JSON, Markdown, and more. Multi-file support with preview strip.</li>
+                            <li><strong>File Attachments &amp; Vision</strong> — 📎 Upload images (vision supported on all OpenAI-compatible platforms) or documents (PDFs, text files, CSVs, JSON, Markdown, and more). Multi-file support with preview strip. Vision requires a model that supports image input.</li>
                             <li><strong>Temp Chat</strong> — 🕐 Temporary conversations that won't be saved to history.</li>
                             <li><strong>Response Length</strong> — Cycle between Normal, Short, and Detailed response lengths.</li>
                             <li><strong>Templates</strong> — 🔖 Pre-saved prompt starters with custom template support.</li>
@@ -1477,55 +1479,64 @@
 
     <!-- ===== APPLICATION LOGIC ===== -->
     <script>
+        // Safe localStorage key-array loader — guards against null/corrupted entries
+        function _loadKeys(storageKey) {
+            try {
+                const raw = localStorage.getItem(storageKey);
+                const parsed = raw ? JSON.parse(raw) : [];
+                return Array.isArray(parsed) ? parsed.filter(k => typeof k === 'string' && k.length > 0) : [];
+            } catch(e) { console.warn('[SnoahAI] Failed to load keys for', storageKey, e); return []; }
+        }
+
         // --- State ---
         let cookiesAccepted = localStorage.getItem('snoah_cookies_accepted'); // 'true', 'false', or null
         let platform = localStorage.getItem('snoah_platform') || 'gemini';
         // Key pools — auto-rotate on rate limit
-        let geminiKeys = JSON.parse(localStorage.getItem('snoah_gemini_keys') || '[]');
+        let geminiKeys = _loadKeys('snoah_gemini_keys');
         let geminiKeyIdx = 0;
         let apiKey = geminiKeys[0]; // kept for compat
         let modelId = localStorage.getItem('snoah_model') || 'gemini-2.5-flash';
-        let orKeys = JSON.parse(localStorage.getItem('snoah_or_keys') || '[]');
+        let orKeys = _loadKeys('snoah_or_keys');
         let orKeyIdx = 0;
         let orApiKey = orKeys[0];
         let orModelId = localStorage.getItem('snoah_or_model') || 'z-ai/glm-4.5-air:free';
-        let groqKeys = JSON.parse(localStorage.getItem('snoah_groq_keys') || '[]');
+        let groqKeys = _loadKeys('snoah_groq_keys');
         let groqKeyIdx = 0;
         let groqApiKey = groqKeys[0] || '';
         let groqModelId = localStorage.getItem('snoah_groq_model') || 'llama-3.3-70b-versatile';
-        let togetherKeys = JSON.parse(localStorage.getItem('snoah_together_keys') || '[]');
+        let togetherKeys = _loadKeys('snoah_together_keys');
         let togetherKeyIdx = 0;
         let togetherApiKey = togetherKeys[0] || '';
         let togetherModelId = localStorage.getItem('snoah_together_model') || 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free';
-        let mistralKeys = JSON.parse(localStorage.getItem('snoah_mistral_keys') || '[]');
+        let mistralKeys = _loadKeys('snoah_mistral_keys');
         let mistralKeyIdx = 0;
         let mistralApiKey = mistralKeys[0] || '';
         let mistralModelId = localStorage.getItem('snoah_mistral_model') || 'mistral-small-latest';
         // New platforms
-        let nvidiaKeys = JSON.parse(localStorage.getItem('snoah_nvidia_keys') || '[]');
+        let nvidiaKeys = _loadKeys('snoah_nvidia_keys');
         let nvidiaKeyIdx = 0;
         let nvidiaApiKey = nvidiaKeys[0] || '';
         let nvidiaModelId = localStorage.getItem('snoah_nvidia_model') || 'meta/llama-3.1-8b-instruct';
-        let hfKeys = JSON.parse(localStorage.getItem('snoah_hf_keys') || '[]');
+        let hfKeys = _loadKeys('snoah_hf_keys');
         let hfKeyIdx = 0;
         let hfApiKey = hfKeys[0] || '';
         let hfModelId = localStorage.getItem('snoah_hf_model') || 'meta-llama/Llama-3.3-70B-Instruct';
-        let ghKeys = JSON.parse(localStorage.getItem('snoah_gh_keys') || '[]');
+        let ghKeys = _loadKeys('snoah_gh_keys');
         let ghKeyIdx = 0;
         let ghApiKey = ghKeys[0] || '';
         let ghModelId = localStorage.getItem('snoah_gh_model') || 'gpt-4o-mini';
         // Claude (Anthropic) — backend proxy /api/claude
-        let claudeKeys = JSON.parse(localStorage.getItem('snoah_claude_keys') || '[]');
+        let claudeKeys = _loadKeys('snoah_claude_keys');
         let claudeKeyIdx = 0;
         let claudeApiKey = claudeKeys[0] || '';
         let claudeModelId = localStorage.getItem('snoah_claude_model') || 'claude-3-5-haiku-20241022';
         // Microsoft Copilot — uses Azure AI Inference via /api/github proxy
-        let copilotKeys = JSON.parse(localStorage.getItem('snoah_copilot_keys') || '[]');
+        let copilotKeys = _loadKeys('snoah_copilot_keys');
         let copilotKeyIdx = 0;
         let copilotApiKey = copilotKeys[0] || '';
         let copilotModelId = localStorage.getItem('snoah_copilot_model') || 'gpt-4o';
         // Google AI Studio — same as Gemini API (separate key storage)
-        let gaisKeys = JSON.parse(localStorage.getItem('snoah_gais_keys') || '[]');
+        let gaisKeys = _loadKeys('snoah_gais_keys');
         let gaisKeyIdx = 0;
         let gaisApiKey = gaisKeys[0] || '';
         let gaisModelId = localStorage.getItem('snoah_gais_model') || 'gemini-2.0-flash';
@@ -1533,54 +1544,54 @@
         let ollamaModelId = localStorage.getItem('snoah_ollama_model') || 'llama3.2';
         let ollamaHost = localStorage.getItem('snoah_ollama_host') || 'http://localhost:11434';
         // Cohere — backend proxy /api/cohere
-        let cohereKeys = JSON.parse(localStorage.getItem('snoah_cohere_keys') || '[]');
+        let cohereKeys = _loadKeys('snoah_cohere_keys');
         let cohereKeyIdx = 0;
         let cohereApiKey = cohereKeys[0] || '';
         let cohereModelId = localStorage.getItem('snoah_cohere_model') || 'command-r-plus-08-2024';
         // Puter.js — free AI via puter.js library, no key needed
         let puterModelId = localStorage.getItem('snoah_puter_model') || 'gpt-4o-mini';
         // DeepInfra — backend proxy /api/deepinfra
-        let deepinfraKeys = JSON.parse(localStorage.getItem('snoah_deepinfra_keys') || '[]');
+        let deepinfraKeys = _loadKeys('snoah_deepinfra_keys');
         let deepinfraKeyIdx = 0;
         let deepinfraApiKey = deepinfraKeys[0] || '';
         let deepinfraModelId = localStorage.getItem('snoah_deepinfra_model') || 'meta-llama/Meta-Llama-3.1-70B-Instruct';
         // Cerebras AI — free tier, direct API
-        let cerebrasKeys = JSON.parse(localStorage.getItem('snoah_cerebras_keys') || '[]');
+        let cerebrasKeys = _loadKeys('snoah_cerebras_keys');
         let cerebrasKeyIdx = 0;
         let cerebrasApiKey = cerebrasKeys[0] || '';
         let cerebrasModelId = localStorage.getItem('snoah_cerebras_model') || 'llama-3.3-70b';
         // SambaNova — free tier, direct API
-        let sambanovaKeys = JSON.parse(localStorage.getItem('snoah_sambanova_keys') || '[]');
+        let sambanovaKeys = _loadKeys('snoah_sambanova_keys');
         let sambanovaKeyIdx = 0;
         let sambanovaApiKey = sambanovaKeys[0] || '';
         let sambanovaModelId = localStorage.getItem('snoah_sambanova_model') || 'Meta-Llama-3.1-70B-Instruct';
         // Fireworks AI — free tier, direct API
-        let fireworksKeys = JSON.parse(localStorage.getItem('snoah_fireworks_keys') || '[]');
+        let fireworksKeys = _loadKeys('snoah_fireworks_keys');
         let fireworksKeyIdx = 0;
         let fireworksApiKey = fireworksKeys[0] || '';
         let fireworksModelId = localStorage.getItem('snoah_fireworks_model') || 'accounts/fireworks/models/llama-v3p1-70b-instruct';
         // xAI (Grok) — backend proxy /api/xai
-        let xaiKeys = JSON.parse(localStorage.getItem('snoah_xai_keys') || '[]');
+        let xaiKeys = _loadKeys('snoah_xai_keys');
         let xaiKeyIdx = 0;
         let xaiApiKey = xaiKeys[0] || '';
         let xaiModelId = localStorage.getItem('snoah_xai_model') || 'grok-3-mini';
         // Perplexity — backend proxy /api/perplexity
-        let perplexityKeys = JSON.parse(localStorage.getItem('snoah_perplexity_keys') || '[]');
+        let perplexityKeys = _loadKeys('snoah_perplexity_keys');
         let perplexityKeyIdx = 0;
         let perplexityApiKey = perplexityKeys[0] || '';
         let perplexityModelId = localStorage.getItem('snoah_perplexity_model') || 'sonar';
         // NanoGPT — backend proxy /api/nanogpt
-        let nanogptKeys = JSON.parse(localStorage.getItem('snoah_nanogpt_keys') || '[]');
+        let nanogptKeys = _loadKeys('snoah_nanogpt_keys');
         let nanogptKeyIdx = 0;
         let nanogptApiKey = nanogptKeys[0] || '';
         let nanogptModelId = localStorage.getItem('snoah_nanogpt_model') || 'gpt-4o-mini';
         // Unify — backend proxy /api/unify
-        let unifyKeys = JSON.parse(localStorage.getItem('snoah_unify_keys') || '[]');
+        let unifyKeys = _loadKeys('snoah_unify_keys');
         let unifyKeyIdx = 0;
         let unifyApiKey = unifyKeys[0] || '';
         let unifyModelId = localStorage.getItem('snoah_unify_model') || 'llama-3.1-8b-instruct@fireworks-ai';
         // Kluster.ai — backend proxy /api/kluster
-        let klusterKeys = JSON.parse(localStorage.getItem('snoah_kluster_keys') || '[]');
+        let klusterKeys = _loadKeys('snoah_kluster_keys');
         let klusterKeyIdx = 0;
         let klusterApiKey = klusterKeys[0] || '';
         let klusterModelId = localStorage.getItem('snoah_kluster_model') || 'klusterai/Meta-Llama-3.1-8B-Instruct-Turbo';
@@ -1768,12 +1779,30 @@
             cookiesAccepted = 'false';
             localStorage.setItem('snoah_cookies_accepted', 'false');
             document.getElementById('cookie-banner').classList.add('hidden');
-            // Enforce single-key limit: trim existing keys to 1 per platform
-            if (geminiKeys.length > 1) { geminiKeys = [geminiKeys[0]]; localStorage.setItem('snoah_gemini_keys', JSON.stringify(geminiKeys)); geminiKeyIdx = 0; apiKey = geminiKeys[0]; }
-            if (orKeys.length > 1) { orKeys = [orKeys[0]]; localStorage.setItem('snoah_or_keys', JSON.stringify(orKeys)); orKeyIdx = 0; orApiKey = orKeys[0]; }
-            if (groqKeys.length > 1) { groqKeys = [groqKeys[0]]; localStorage.setItem('snoah_groq_keys', JSON.stringify(groqKeys)); groqKeyIdx = 0; groqApiKey = groqKeys[0]; }
-            if (togetherKeys.length > 1) { togetherKeys = [togetherKeys[0]]; localStorage.setItem('snoah_together_keys', JSON.stringify(togetherKeys)); togetherKeyIdx = 0; togetherApiKey = togetherKeys[0]; }
-            if (mistralKeys.length > 1) { mistralKeys = [mistralKeys[0]]; localStorage.setItem('snoah_mistral_keys', JSON.stringify(mistralKeys)); mistralKeyIdx = 0; mistralApiKey = mistralKeys[0]; }
+            // Enforce single-key limit: trim existing keys to 1 per platform (all platforms)
+            // _trimTo1 intentionally mutates the global array in-place so all references stay in sync
+            function _trimTo1(arr, storageKey) { if (arr.length > 1) { arr.splice(1); localStorage.setItem(storageKey, JSON.stringify(arr)); } }
+            _trimTo1(geminiKeys, 'snoah_gemini_keys'); geminiKeyIdx = 0; apiKey = geminiKeys[0] || '';
+            _trimTo1(orKeys, 'snoah_or_keys'); orKeyIdx = 0; orApiKey = orKeys[0] || '';
+            _trimTo1(groqKeys, 'snoah_groq_keys'); groqKeyIdx = 0; groqApiKey = groqKeys[0] || '';
+            _trimTo1(togetherKeys, 'snoah_together_keys'); togetherKeyIdx = 0; togetherApiKey = togetherKeys[0] || '';
+            _trimTo1(mistralKeys, 'snoah_mistral_keys'); mistralKeyIdx = 0; mistralApiKey = mistralKeys[0] || '';
+            _trimTo1(nvidiaKeys, 'snoah_nvidia_keys'); nvidiaKeyIdx = 0; nvidiaApiKey = nvidiaKeys[0] || '';
+            _trimTo1(hfKeys, 'snoah_hf_keys'); hfKeyIdx = 0; hfApiKey = hfKeys[0] || '';
+            _trimTo1(ghKeys, 'snoah_gh_keys'); ghKeyIdx = 0; ghApiKey = ghKeys[0] || '';
+            _trimTo1(claudeKeys, 'snoah_claude_keys'); claudeKeyIdx = 0; claudeApiKey = claudeKeys[0] || '';
+            _trimTo1(copilotKeys, 'snoah_copilot_keys'); copilotKeyIdx = 0; copilotApiKey = copilotKeys[0] || '';
+            _trimTo1(gaisKeys, 'snoah_gais_keys'); gaisKeyIdx = 0; gaisApiKey = gaisKeys[0] || '';
+            _trimTo1(cohereKeys, 'snoah_cohere_keys'); cohereKeyIdx = 0; cohereApiKey = cohereKeys[0] || '';
+            _trimTo1(deepinfraKeys, 'snoah_deepinfra_keys'); deepinfraKeyIdx = 0; deepinfraApiKey = deepinfraKeys[0] || '';
+            _trimTo1(cerebrasKeys, 'snoah_cerebras_keys'); cerebrasKeyIdx = 0; cerebrasApiKey = cerebrasKeys[0] || '';
+            _trimTo1(sambanovaKeys, 'snoah_sambanova_keys'); sambanovaKeyIdx = 0; sambanovaApiKey = sambanovaKeys[0] || '';
+            _trimTo1(fireworksKeys, 'snoah_fireworks_keys'); fireworksKeyIdx = 0; fireworksApiKey = fireworksKeys[0] || '';
+            _trimTo1(xaiKeys, 'snoah_xai_keys'); xaiKeyIdx = 0; xaiApiKey = xaiKeys[0] || '';
+            _trimTo1(perplexityKeys, 'snoah_perplexity_keys'); perplexityKeyIdx = 0; perplexityApiKey = perplexityKeys[0] || '';
+            _trimTo1(nanogptKeys, 'snoah_nanogpt_keys'); nanogptKeyIdx = 0; nanogptApiKey = nanogptKeys[0] || '';
+            _trimTo1(unifyKeys, 'snoah_unify_keys'); unifyKeyIdx = 0; unifyApiKey = unifyKeys[0] || '';
+            _trimTo1(klusterKeys, 'snoah_kluster_keys'); klusterKeyIdx = 0; klusterApiKey = klusterKeys[0] || '';
             renderKeysList();
             showToast('Cookies rejected — limited to 1 key per platform');
         }
@@ -2851,13 +2880,14 @@
             if (!list) return;
             const keys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : platform === 'claude' ? claudeKeys : platform === 'copilot' ? copilotKeys : platform === 'gais' ? gaisKeys : platform === 'cohere' ? cohereKeys : platform === 'deepinfra' ? deepinfraKeys : platform === 'cerebras' ? cerebrasKeys : platform === 'sambanova' ? sambanovaKeys : platform === 'fireworks' ? fireworksKeys : platform === 'xai' ? xaiKeys : platform === 'perplexity' ? perplexityKeys : platform === 'nanogpt' ? nanogptKeys : platform === 'unify' ? unifyKeys : platform === 'kluster' ? klusterKeys : geminiKeys;
             const activeIdx = platform === 'openrouter' ? orKeyIdx : platform === 'groq' ? groqKeyIdx : platform === 'together' ? togetherKeyIdx : platform === 'mistral' ? mistralKeyIdx : platform === 'nvidia' ? nvidiaKeyIdx : platform === 'huggingface' ? hfKeyIdx : platform === 'githubmodels' ? ghKeyIdx : platform === 'claude' ? claudeKeyIdx : platform === 'copilot' ? copilotKeyIdx : platform === 'gais' ? gaisKeyIdx : platform === 'cohere' ? cohereKeyIdx : platform === 'deepinfra' ? deepinfraKeyIdx : platform === 'cerebras' ? cerebrasKeyIdx : platform === 'sambanova' ? sambanovaKeyIdx : platform === 'fireworks' ? fireworksKeyIdx : platform === 'xai' ? xaiKeyIdx : platform === 'perplexity' ? perplexityKeyIdx : platform === 'nanogpt' ? nanogptKeyIdx : platform === 'unify' ? unifyKeyIdx : platform === 'kluster' ? klusterKeyIdx : geminiKeyIdx;
-            if (!keys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
-            list.innerHTML = keys.map((k, i) =>
+            const validKeys = keys.filter(k => typeof k === 'string' && k.length > 0);
+            if (!validKeys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
+            list.innerHTML = validKeys.map((k, i) =>
                 '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
                 '<span class="flex-1 font-mono text-[12px] text-[#5B5951] truncate">' +
                 (i === activeIdx ? '<span class="text-[10px] font-bold text-green-600 mr-1.5">ACTIVE</span>' : '') +
                 k.substring(0,8) + '••••••••' + k.slice(-4) + '</span>' +
-                (keys.length > 1 ? '<button onclick="removeApiKey(' + i + ')" class="text-[#A3A095] hover:text-[#D25D38] transition-colors shrink-0 text-[18px] leading-none">&times;</button>' : '') +
+                (validKeys.length > 1 ? '<button onclick="removeApiKey(' + i + ')" class="text-[#A3A095] hover:text-[#D25D38] transition-colors shrink-0 text-[18px] leading-none">&times;</button>' : '') +
                 '</div>'
             ).join('');
         }
@@ -3791,15 +3821,21 @@
                 { name: 'Step by Step', text: 'Walk me through this step by step, explaining the reasoning at each stage: ' },
             ];
             const custom = promptTemplates;
-            list.innerHTML = [...builtIn, ...custom].map((t, i) =>
+            const allTemplates = [...builtIn, ...custom];
+            list.innerHTML = allTemplates.map((t, i) =>
                 '<div class="flex items-center gap-2">' +
-                '<button onclick="useTemplate(' + JSON.stringify(t.text) + ')" class="flex-1 text-left px-3 py-2.5 bg-white border border-[#E5E3DB] rounded-xl text-[13px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors">' +
+                '<button data-tpl-idx="' + i + '" class="tpl-use-btn flex-1 text-left px-3 py-2.5 bg-white border border-[#E5E3DB] rounded-xl text-[13px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors">' +
                 '<span class="font-semibold block text-[#2C2B29]">' + escapeHTML(t.name) + '</span>' +
                 '<span class="text-[11px] text-[#A3A095] truncate block">' + escapeHTML(t.text.substring(0, 60)) + '</span>' +
                 '</button>' +
                 (i >= builtIn.length ? '<button onclick="deleteTemplate(' + (i - builtIn.length) + ')" class="p-2 text-[#A3A095] hover:text-[#D25D38] transition-colors"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><polyline points=\'3 6 5 6 21 6\'/><path d=\'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\'/></svg></button>' : '') +
                 '</div>'
             ).join('');
+            // Attach click handlers via event listeners to avoid quote-escaping issues with inline onclick
+            list.querySelectorAll('.tpl-use-btn').forEach(btn => {
+                const idx = parseInt(btn.dataset.tplIdx, 10);
+                btn.addEventListener('click', () => useTemplate(allTemplates[idx].text));
+            });
         }
         function useTemplate(text) {
             closeTemplatesModal();
@@ -4834,7 +4870,7 @@ MULTI-KEY POOL: Add multiple API keys per platform. On rate limit (429), app sil
 FEATURES:
 1. THINKING MODE (🧠 Thinking button): AI reasons step-by-step. A live collapsible "💭 Thinking…" block streams in real-time. Best for complex problems, math, logic. Available on all platforms.
 2. WEB SEARCH (🔍 Web button): When enabled, the app ALWAYS uses Gemini to handle the request — regardless of which platform is selected. Gemini uses Google Search grounding to fetch real-time results. When Web is OFF, the selected platform (Groq, Mistral, etc.) handles the request normally. This means Web Search always requires a valid Gemini API key in Settings.
-3. IMAGE UPLOAD (📎 Attach button / + button): Upload images for AI to analyze. Supported on Gemini and OpenRouter. Tap Attach button or the + button. Multi-image upload supported with preview strip.
+3. IMAGE UPLOAD (📎 Attach button / + button): Upload images for AI to analyze. Supported on ALL platforms that accept the OpenAI-compatible image_url format — including Gemini, OpenRouter, NVIDIA, Groq, Together AI, Mistral AI, Claude, Hugging Face, GitHub Models, Copilot, Google AI Studio, Cohere, DeepInfra, Ollama, Cerebras, SambaNova, Fireworks, xAI, Perplexity, NanoGPT, Unify, and Kluster.ai. Vision availability depends on whether the specific model selected supports image input; if not, the platform will return an error. Tap Attach button or the + button. Multi-image upload supported with preview strip.
 4. FILE ATTACHMENTS (📎 Attach button): Upload documents — PDFs, text files (.txt), CSVs, JSON, Markdown (.md), XML, .doc/.docx. Document content is extracted and sent as context to the AI. Combine with images in the same message.
 5. RESPONSE LENGTH (≡ Normal button): Cycles Normal → Short (2-4 sentences) → Detailed. Tap the button to cycle through lengths.
 6. TEMPLATES (🔖 Templates button): Pre-saved prompt starters. Built-in templates: Explain Simply, Clinical Summary, Compare & Contrast, Step by Step. Users can add custom templates with a name and text. Templates are saved to device storage.
@@ -5191,7 +5227,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                                         }
                                     });
                                 }
-                                if (msg.images && msg.images.length > 0 && msg === messages[messages.length - 1] && !isGroq && !isTogether && !isMistral && !isNvidia) {
+                                if (msg.images && msg.images.length > 0 && msg === messages[messages.length - 1]) {
                                     const imgParts = msg.images.filter(img => img.isImage !== false && img.data).map(img => ({ type: 'image_url', image_url: { url: 'data:' + img.mimeType + ';base64,' + img.data } }));
                                     if (imgParts.length > 0) {
                                         if (content) imgParts.push({ type: 'text', text: content });
