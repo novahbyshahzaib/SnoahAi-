@@ -1160,7 +1160,7 @@
                     <div class="text-center space-y-2">
                         <div class="w-14 h-14 rounded-2xl bg-[#D25D38] text-white flex items-center justify-center font-bold text-xl shadow-md mx-auto">S</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI</h3>
-                        <p class="text-[12px] text-[#A3A095]">Version 1.0 &middot; Built by Shahzaib Muzaffar</p>
+                        <p class="text-[12px] text-[#A3A095]">Version 3.1.0 &middot; Built by Shahzaib Muzaffar</p>
                     </div>
 
                     <div>
@@ -1263,12 +1263,18 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v2.0 Beta</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.1</span>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>User Message Editing ✏️</strong> — Edit any message you've already sent, just like ChatGPT. Tap the <em>Edit</em> button below any user message, modify the text, and tap <em>Save &amp; Send</em>. The chat is re-submitted from that point onwards.</li>
+                            <li><strong>Translate Response 🌐</strong> — Every AI response now has a <em>Translate</em> button. Tap it to pick a language (Spanish, French, German, Arabic, Chinese, Hindi, Japanese, Portuguese, Russian, Korean) and the AI instantly translates the response.</li>
+                            <li><strong>Share Response 📤</strong> — New <em>Share</em> button on every AI response. On mobile it opens the native share sheet; on desktop it copies the response to your clipboard.</li>
+                            <li><strong>Notion Button Always Visible 📝</strong> — The Notion save button now appears on every AI response regardless of whether a key is configured. If no key is set, it prompts you to add one in Settings.</li>
+                            <li><strong>Retry Button on Errors ↩️</strong> — When an API error occurs (rate limit, auth failure, etc.), a <em>Retry</em> button now appears directly in the error message so you can retry with one tap.</li>
+                            <li><strong>Smarter Error Messages 🔧</strong> — API errors now show the correct platform name and account URL. Rate limit, credit, and auth errors are all platform-aware — no more "go to api.together.ai" when you're using a different provider.</li>
                             <li><strong>Universal Vision Support 🖼️</strong> — Image upload now works on ALL 24 platforms that use the OpenAI-compatible API (NVIDIA, Groq, Together AI, Mistral, Claude, Hugging Face, DeepInfra, Ollama, Cerebras, SambaNova, Fireworks, xAI, Perplexity, NanoGPT, Unify, Kluster.ai, OpenRouter, and more). Vision availability depends on the selected model — if the model doesn't support images the platform returns a clear error.</li>
                             <li><strong>Templates Fixed 🔖</strong> — Tapping a saved or built-in template now correctly fills the input field. The previous version had a bug where templates with special characters (quotes, apostrophes) silently failed to load.</li>
                             <li><strong>Multi-Key Stability Fix 🔑</strong> — Fixed a bug where adding multiple API keys for a platform could corrupt the key store and prevent the settings panel from opening on the next page load (requiring a browser data clear). Keys are now validated and sanitized on every load. Cookie-reject trimming now correctly covers all 24 platforms instead of just 5.</li>
@@ -1338,6 +1344,9 @@
                             <li><strong>Notion Integration</strong> — 📝 Connect Notion in Settings. Save any AI response to Notion with one tap, or use natural language: "add X to Notion", "save this to Notion". Confirmation modal before every save.</li>
                             <li><strong>Notion Auto-Save</strong> — 🔄 Toggle "Auto-Save AI Responses" in Notion settings. Every AI response is automatically saved to your Notion page without manual action.</li>
                             <li><strong>Backend Proxied Platforms</strong> — 🔒 NVIDIA, Hugging Face, GitHub Models, Claude, Copilot, Cohere, and DeepInfra use backend proxies to avoid CORS and browser block errors.</li>
+                            <li><strong>User Message Editing ✏️</strong> — Edit any sent message. Tap the small <em>Edit</em> button below a user message, modify it, and tap <em>Save &amp; Send</em> to resubmit from that point.</li>
+                            <li><strong>Translate Response 🌐</strong> — Tap the Translate button on any AI response and pick a target language. Supports Spanish, French, German, Arabic, Chinese, Hindi, Japanese, Portuguese, Russian, Korean.</li>
+                            <li><strong>Share Response 📤</strong> — Tap the Share button to share any AI response via the device's native share sheet or copy to clipboard.</li>
                         </ul>
                     </div>
 
@@ -2299,11 +2308,9 @@
             messagesWrapper.innerHTML = '';
             welcomeScreen.classList.add('hidden');
             // Re-render all messages
-            messages.forEach(m => {
+            messages.forEach((m, idx) => {
                 if (m.role === 'user') {
-                    const userDiv = document.createElement('div');
-                    userDiv.className = "flex w-full justify-end animate-slide-up";
-                    userDiv.innerHTML = `<div class="bg-[#EFECE6] user-bubble text-[#2C2B29] max-w-[85%] rounded-[24px] rounded-br-md px-5 py-3 text-[15.5px] shadow-sm font-sans border border-[#E5E3DB]/50 break-words">${escapeHTML(m.text)}</div>`;
+                    const userDiv = buildUserMessageDiv(m.text || '', m.images || [], idx);
                     messagesWrapper.appendChild(userDiv);
                 } else {
                     renderAIResponse(m, true);
@@ -3463,6 +3470,14 @@
             actions.appendChild(btn);
         }
 
+        function saveToNotion(content, title) {
+            if (!notionKey) {
+                showToast('Add your Notion token in Settings first');
+                return;
+            }
+            openNotionModal(content, title || 'SnoahAI · ' + new Date().toLocaleDateString(), 'response');
+        }
+
         function toggleNotionKeyVisibility() {
             const input = document.getElementById('settings-notionkey');
             const icon = document.getElementById('notion-eye-icon');
@@ -4557,6 +4572,155 @@
             }, 2000);
         };
 
+        function buildUserMessageDiv(text, images, msgIdx) {
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex w-full justify-end animate-slide-up";
+            userDiv.dataset.msgIdx = msgIdx;
+            let bubbleContent = '';
+            if (images && images.length > 0) {
+                bubbleContent += '<div class="flex flex-wrap gap-1.5 mb-2">';
+                images.forEach(img => {
+                    if (img.isImage !== false && img.previewUrl) {
+                        bubbleContent += '<img src="' + img.previewUrl + '" alt="Attached" class="max-h-36 max-w-[120px] rounded-xl object-contain border border-[#E5E3DB]/50">';
+                    } else {
+                        const fname = escapeHTML(img.fileName || 'document');
+                        bubbleContent += '<div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#F2F0E9] border border-[#E5E3DB]">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+                            '<span class="text-[12px] text-[#5B5951] font-medium">' + fname + '</span></div>';
+                    }
+                });
+                bubbleContent += '</div>';
+            }
+            if (text) bubbleContent += escapeHTML(text);
+            userDiv.innerHTML =
+                '<div class="flex flex-col items-end gap-0.5 max-w-[85%]">' +
+                    '<div class="user-bubble-text bg-[#EFECE6] text-[#2C2B29] w-full rounded-[24px] rounded-br-md px-5 py-3 text-[15.5px] shadow-sm font-sans border border-[#E5E3DB]/50 break-words">' +
+                        bubbleContent +
+                    '</div>' +
+                    '<button onclick="editUserMessage(' + msgIdx + ')" class="flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#A3A095] hover:text-[#D25D38] transition-colors">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+                        'Edit' +
+                    '</button>' +
+                '</div>';
+            return userDiv;
+        }
+
+        function editUserMessage(msgIdx) {
+            if (isLoading || isStreaming) return;
+            const wrapper = messagesWrapper.querySelector('[data-msg-idx="' + msgIdx + '"]');
+            if (!wrapper) return;
+            const bubbleDiv = wrapper.querySelector('.user-bubble-text');
+            if (!bubbleDiv) return;
+            const originalText = messages[msgIdx] ? (messages[msgIdx].text || '') : '';
+            const editDiv = document.createElement('div');
+            editDiv.className = 'user-edit-area w-full rounded-[24px] rounded-br-md px-4 py-3 border-2 border-[#D25D38]/40 bg-[#EFECE6]';
+            editDiv.innerHTML =
+                '<textarea id="edit-ta-' + msgIdx + '" class="w-full bg-transparent text-[#2C2B29] text-[15px] font-sans resize-none focus:outline-none leading-relaxed" rows="3"></textarea>' +
+                '<div class="flex items-center gap-2 mt-2 justify-end">' +
+                    '<button onclick="cancelUserEdit(' + msgIdx + ')" class="px-3 py-1 text-[12px] text-[#8C897D] border border-[#E5E3DB] rounded-full bg-white hover:bg-[#EAE8E0] transition-colors">Cancel</button>' +
+                    '<button onclick="saveUserEdit(' + msgIdx + ')" class="px-3 py-1 text-[12px] bg-[#D25D38] text-white rounded-full hover:bg-[#B84E2E] transition-colors font-medium">Save & Send</button>' +
+                '</div>';
+            bubbleDiv.replaceWith(editDiv);
+            const ta = document.getElementById('edit-ta-' + msgIdx);
+            if (ta) {
+                ta.value = originalText;
+                ta.focus();
+                ta.setSelectionRange(ta.value.length, ta.value.length);
+            }
+        }
+
+        function cancelUserEdit(msgIdx) {
+            const wrapper = messagesWrapper.querySelector('[data-msg-idx="' + msgIdx + '"]');
+            if (!wrapper) return;
+            const editArea = wrapper.querySelector('.user-edit-area');
+            if (!editArea) return;
+            const originalText = messages[msgIdx] ? (messages[msgIdx].text || '') : '';
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'user-bubble-text bg-[#EFECE6] text-[#2C2B29] w-full rounded-[24px] rounded-br-md px-5 py-3 text-[15.5px] shadow-sm font-sans border border-[#E5E3DB]/50 break-words';
+            bubbleDiv.textContent = originalText;
+            editArea.replaceWith(bubbleDiv);
+        }
+
+        function saveUserEdit(msgIdx) {
+            if (isLoading || isStreaming) return;
+            const ta = document.getElementById('edit-ta-' + msgIdx);
+            if (!ta) return;
+            const newText = ta.value.trim();
+            if (!newText) { showToast('Message cannot be empty'); return; }
+            // Find the DOM wrapper and its index among children
+            const wrapper = messagesWrapper.querySelector('[data-msg-idx="' + msgIdx + '"]');
+            if (!wrapper) return;
+            const domChildren = Array.from(messagesWrapper.children);
+            const wrapperDomIdx = domChildren.indexOf(wrapper);
+            // Remove all DOM children from this wrapper onwards
+            while (messagesWrapper.children.length > wrapperDomIdx) {
+                messagesWrapper.removeChild(messagesWrapper.children[wrapperDomIdx]);
+            }
+            // Remove messages from msgIdx onwards
+            messages.splice(msgIdx);
+            // Submit with new text (submitMessage will add user div + AI response)
+            submitMessage(newText);
+        }
+
+        function translateMessage(text, btnEl) {
+            const langs = ['Spanish', 'French', 'German', 'Arabic', 'Chinese', 'Hindi', 'Japanese', 'Portuguese', 'Russian', 'Korean'];
+            let menu = document.getElementById('translate-lang-menu');
+            if (!menu) {
+                menu = document.createElement('div');
+                menu.id = 'translate-lang-menu';
+                menu.className = 'fixed z-[300] bg-white border border-[#E5E3DB] rounded-2xl shadow-xl p-2 flex flex-col gap-0.5';
+                document.body.appendChild(menu);
+            }
+            // Remove any previously attached close listener before attaching a new one
+            if (menu._closeHandler) {
+                document.removeEventListener('click', menu._closeHandler);
+                menu._closeHandler = null;
+            }
+            const rect = btnEl.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            if (spaceBelow > 180) {
+                menu.style.top = (rect.bottom + 6) + 'px';
+                menu.style.bottom = '';
+            } else {
+                menu.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
+                menu.style.top = '';
+            }
+            menu.style.left = Math.min(rect.left, window.innerWidth - 160) + 'px';
+            menu.style.maxWidth = '150px';
+            menu.innerHTML = langs.map(l =>
+                '<button data-lang="' + l + '" class="text-left w-full px-3 py-1.5 text-[13px] text-[#2C2B29] hover:bg-[#F2F0E9] rounded-xl transition-colors">' + l + '</button>'
+            ).join('');
+            menu.classList.remove('hidden');
+            menu.querySelectorAll('button').forEach(b => {
+                b.addEventListener('click', () => {
+                    menu.classList.add('hidden');
+                    const lang = b.dataset.lang;
+                    const prompt = 'Translate the following text to ' + lang + ':\n\n' + text;
+                    chatInput.value = prompt;
+                    submitMessage(prompt);
+                });
+            });
+            const closeMenu = e => {
+                if (!menu.contains(e.target) && e.target !== btnEl) {
+                    menu.classList.add('hidden');
+                    document.removeEventListener('click', closeMenu);
+                    menu._closeHandler = null;
+                }
+            };
+            menu._closeHandler = closeMenu;
+            setTimeout(() => document.addEventListener('click', closeMenu), 100);
+        }
+
+        function shareMessage(text) {
+            if (navigator.share) {
+                navigator.share({ title: 'SnoahAI Response', text: text }).catch(err => console.debug('Share cancelled or failed:', err));
+            } else {
+                navigator.clipboard.writeText(text)
+                    .then(() => showToast('Response copied to clipboard!'))
+                    .catch(() => showToast('Could not share — try copying manually'));
+            }
+        }
+
         // --- Regenerate Last Response ---
         function regenerateLastResponse() {
             if (isLoading || isStreaming) return;
@@ -4685,9 +4849,7 @@
             messages.push(userMsg);
             if (messages.length === 1) saveCurrentChat();
 
-            const userDiv = document.createElement('div');
-            userDiv.className = "flex w-full justify-end animate-slide-up";
-            userDiv.innerHTML = '<div class="bg-[#EFECE6] text-[#2C2B29] max-w-[85%] rounded-[24px] rounded-br-md px-5 py-3 text-[15.5px] shadow-sm font-sans border border-[#E5E3DB]/50 break-words">' + escapeHTML(textToSend) + '</div>';
+            const userDiv = buildUserMessageDiv(textToSend, [], messages.length - 1);
             messagesWrapper.appendChild(userDiv);
             scrollToBottom();
 
@@ -4814,26 +4976,7 @@
 
             if (messages.length === 1) saveCurrentChat();
 
-            const userDiv = document.createElement('div');
-            userDiv.className = "flex w-full justify-end animate-slide-up";
-            let bubble = '<div class="bg-[#EFECE6] text-[#2C2B29] max-w-[85%] rounded-[24px] rounded-br-md px-5 py-3 text-[15.5px] shadow-sm font-sans border border-[#E5E3DB]/50 break-words">';
-            if (imagesToSend.length > 0) {
-                bubble += '<div class="flex flex-wrap gap-1.5 mb-2">';
-                imagesToSend.forEach(img => {
-                    if (img.isImage !== false && img.previewUrl) {
-                        bubble += '<img src="' + img.previewUrl + '" alt="Attached" class="max-h-36 max-w-[120px] rounded-xl object-contain border border-[#E5E3DB]/50">';
-                    } else {
-                        const fname = escapeHTML(img.fileName || 'document');
-                        bubble += '<div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#F2F0E9] border border-[#E5E3DB]">' +
-                            '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>' +
-                            '<span class="text-[12px] text-[#5B5951] font-medium">' + fname + '</span></div>';
-                    }
-                });
-                bubble += '</div>';
-            }
-            if (textToSend) bubble += escapeHTML(textToSend);
-            bubble += '</div>';
-            userDiv.innerHTML = bubble;
+            const userDiv = buildUserMessageDiv(textToSend, imagesToSend, messages.length - 1);
             messagesWrapper.appendChild(userDiv);
             scrollToBottom();
 
@@ -4908,10 +5051,32 @@ FEATURES:
 38. BACKEND PROXIED PLATFORMS: NVIDIA, Hugging Face, GitHub Models, Claude (Anthropic), Microsoft Copilot, Cohere, DeepInfra, xAI (Grok), Perplexity, NanoGPT, Unify, and Kluster.ai use backend serverless proxies to avoid CORS errors and browser blocks. The user's API key is sent via x-api-key header to the proxy, which forwards requests to the real API. Streaming is fully supported through the proxy.
 39. 23 AI PLATFORMS TOTAL: The app now supports 23 AI platforms: Gemini, OpenRouter, Groq, Together AI, Mistral AI, NVIDIA, Hugging Face, GitHub Models, Claude (Anthropic), Microsoft Copilot, Google AI Studio, Ollama (Local), Cohere, Puter.js (Free), DeepInfra, Cerebras AI (Free tier), SambaNova (Free tier), Fireworks AI (Free tier), xAI (Grok), Perplexity, NanoGPT, Unify, Kluster.ai. All platforms support Multi-AI Response mode. Puter.js and Ollama require no API key.
 40. INTERACTIVE TO-DO LISTS: When AI generates a to-do list using markdown checkbox syntax (- [ ] task or - [x] done), items are rendered as interactive checkboxes in the chat. Users can click to check/uncheck items. Checked items get a strikethrough style. AI automatically generates proper to-do format when asked for a task list, checklist, or to-do list.
-41. RESET SETTINGS: Settings footer has a "Reset Settings" button. Clicking it (after confirmation) resets all settings to their defaults: platform → Gemini, models to defaults, model parameters (temperature, top_p, top_k, max_tokens) to defaults, custom instructions cleared, persona cleared, Multi-AI disabled. API keys and chat data are NOT deleted.
-42. CODE STREAMING FIX: AI responses now show code blocks streaming in real-time. Partial/in-progress code blocks are rendered live as the AI generates them — you can watch the code appear line by line instead of waiting for the full block to finish. A streaming cursor is shown inside the code block header while it is still being written.
-43. AUTO MEMORY: Settings → Auto Memory toggle. When enabled, SnoahAI automatically extracts and saves important facts about the user from each conversation (name, profession, goals, preferences, ongoing projects, relationships, constraints, etc.) into a local memory bank. The memory extractor uses deduplication — it will never save the same fact twice. Memory is injected as context into every future chat so the AI can give more personalized, context-aware responses. Requires a Gemini API key for extraction. Memory can be viewed and cleared in Settings → Auto Memory.
-44. IMPROVED VOICE-TO-TEXT: Voice input uses continuous recognition with text accumulation. Tap the mic button to start (shows 🎤 Listening toast), speak, then tap again to stop. Interim and final results are accumulated progressively in the input field, so partial speech is visible in real-time. Works on Chrome, Safari, and other modern browsers.
+41. USER MESSAGE EDITING: Users can edit any previously sent message. A small "Edit" button appears below every user message. Tapping it opens an inline text editor with the original text. Tapping "Save & Send" re-submits the message and replaces all subsequent conversation history from that point. Tapping "Cancel" restores the original message.
+42. TRANSLATE RESPONSE: Every AI response has a "Translate" button in the action bar. Tapping it shows a language picker with: Spanish, French, German, Arabic, Chinese, Hindi, Japanese, Portuguese, Russian, Korean. On selection, a translation request is automatically submitted to the AI.
+43. SHARE RESPONSE: Every AI response has a "Share" button. On mobile it opens the device's native share sheet (Web Share API). On desktop it copies the response text to the clipboard with a toast confirmation.
+44. NOTION BUTTON ALWAYS VISIBLE: The Notion save button now appears on every AI response regardless of whether a Notion API key is configured. If no key is set, clicking it shows a toast prompting the user to add their token in Settings.
+45. RETRY BUTTON ON ERRORS: When an API error occurs (rate limit, auth failure, timeout, credit limit, etc.), a Retry button appears directly in the error message. Tapping it calls regenerateLastResponse() to retry the last user message.
+46. RESET SETTINGS: Settings footer has a "Reset Settings" button. Clicking it (after confirmation) resets all settings to their defaults: platform → Gemini, models to defaults, model parameters (temperature, top_p, top_k, max_tokens) to defaults, custom instructions cleared, persona cleared, Multi-AI disabled. API keys and chat data are NOT deleted.
+47. CODE STREAMING FIX: AI responses now show code blocks streaming in real-time. Partial/in-progress code blocks are rendered live as the AI generates them — you can watch the code appear line by line instead of waiting for the full block to finish. A streaming cursor is shown inside the code block header while it is still being written.
+48. AUTO MEMORY: Settings → Auto Memory toggle. When enabled, SnoahAI automatically extracts and saves important facts about the user from each conversation (name, profession, goals, preferences, ongoing projects, relationships, constraints, etc.) into a local memory bank. The memory extractor uses deduplication — it will never save the same fact twice. Memory is injected as context into every future chat so the AI can give more personalized, context-aware responses. Requires a Gemini API key for extraction. Memory can be viewed and cleared in Settings → Auto Memory.
+49. IMPROVED VOICE-TO-TEXT: Voice input uses continuous recognition with text accumulation. Tap the mic button to start (shows 🎤 Listening toast), speak, then tap again to stop. Interim and final results are accumulated progressively in the input field, so partial speech is visible in real-time. Works on Chrome, Safari, and other modern browsers.
+APP STRUCTURE & LAYOUT:
+- Single HTML file (index.html) with all CSS (Tailwind CDN) and JavaScript inline — no separate files except backend Vercel serverless functions in /api/ folder.
+- Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
+- Main area: Scrollable message thread with welcome screen shown when no chat is active.
+- Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates, Temp Chat buttons, main text input, Send/Stop button.
+- Sidebar (slides in from left): User profile, chat history list with search, settings shortcut, About/Updates/Contact links, Dark mode toggle.
+- Modals: Settings (tabbed: API, AI, App), Updates, About Us, Contact Us, Notion Save confirmation, Pinned Messages, image/file preview.
+- AI messages: White/light background, left-aligned. Show Copy, Retry, Read, Pin, Notion, Translate, Share action buttons after response.
+- User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
+
+TERMS & CONDITIONS / PRIVACY POLICY / COOKIES:
+- SnoahAI is a personal AI chat assistant with no formal Terms of Service or Privacy Policy document.
+- All user data (chat history, API keys, settings, memory) is stored ONLY in the user's browser localStorage. Nothing is sent to or stored on SnoahAI's servers.
+- API keys are stored locally and sent directly to respective AI providers (Gemini, OpenRouter, etc.) from the user's browser. For backend-proxied platforms (NVIDIA, Claude, etc.), keys are sent via the app's Vercel serverless proxy, which forwards them to the target API without logging or storing them.
+- The app does not use cookies for tracking. localStorage is used exclusively for user preferences, chat history, and API keys.
+- No user analytics, advertising, or third-party tracking is present in the app.
+- Users are responsible for their own API key usage, costs, and adherence to each AI provider's terms of service.
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
@@ -5484,12 +5649,21 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                     '<button onclick="copyMsgText(this)" data-text="' + encodeURIComponent(mainText) + '" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="clipboard" class="w-3 h-3"></i> Copy</button>' +
                     '<button onclick="regenerateLastResponse()" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Retry</button>' +
                     '<button class="tts-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="volume-2" class="w-3 h-3"></i> Read</button>' +
-                    '<button class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="pin" class="w-3 h-3"></i> Pin</button>';
+                    '<button class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="pin" class="w-3 h-3"></i> Pin</button>' +
+                    '<button class="notion-save-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Save to Notion"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg> Notion</button>' +
+                    '<button class="translate-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Translate"><i data-lucide="languages" class="w-3 h-3"></i> Translate</button>' +
+                    '<button class="share-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Share"><i data-lucide="share-2" class="w-3 h-3"></i> Share</button>';
                 innerCol.appendChild(actionsDiv);
                 const ttsBtn = actionsDiv.querySelector('.tts-btn');
                 if (ttsBtn) ttsBtn.onclick = () => speakText(mainText, ttsBtn);
                 const pinBtn = actionsDiv.querySelectorAll('button')[3];
                 if (pinBtn) pinBtn.onclick = () => pinMessage(mainText, pinBtn);
+                const notionSaveBtn = actionsDiv.querySelector('.notion-save-btn');
+                if (notionSaveBtn) notionSaveBtn.onclick = () => saveToNotion(mainText, 'SnoahAI · ' + new Date().toLocaleDateString());
+                const translateBtnEl = actionsDiv.querySelector('.translate-btn');
+                if (translateBtnEl) translateBtnEl.onclick = () => translateMessage(mainText, translateBtnEl);
+                const shareBtnEl = actionsDiv.querySelector('.share-btn');
+                if (shareBtnEl) shareBtnEl.onclick = () => shareMessage(mainText);
                 lucide.createIcons();
                 scrollToBottom();
 
@@ -5530,20 +5704,25 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 const isAuth = /api.?key|unauthorized|invalid.?key|authentication/i.test(errText) || httpStatus === 401;
                 const isTimeout = /stream timeout|timed? ?out|no data received/i.test(errText);
                 const isOllamaFetch = platform === 'ollama' && /failed to fetch|network|ERR_CONNECTION_REFUSED/i.test(errText);
+                const _platErrLabel = platform === 'together' ? 'Together AI' : platform === 'groq' ? 'Groq' : platform === 'openrouter' ? 'OpenRouter' : platform === 'nvidia' ? 'NVIDIA' : platform === 'huggingface' ? 'Hugging Face' : platform === 'githubmodels' ? 'GitHub Models' : platform === 'claude' ? 'Claude (Anthropic)' : platform === 'copilot' ? 'Microsoft Copilot' : platform === 'gais' ? 'Google AI Studio' : platform === 'ollama' ? 'Ollama' : platform === 'cohere' ? 'Cohere' : platform === 'puter' ? 'Puter.js' : platform === 'deepinfra' ? 'DeepInfra' : platform === 'cerebras' ? 'Cerebras AI' : platform === 'sambanova' ? 'SambaNova' : platform === 'fireworks' ? 'Fireworks AI' : platform === 'xai' ? 'xAI (Grok)' : platform === 'perplexity' ? 'Perplexity' : platform === 'nanogpt' ? 'NanoGPT' : platform === 'unify' ? 'Unify' : platform === 'kluster' ? 'Kluster.ai' : platform === 'mistral' ? 'Mistral AI' : 'Gemini';
+                const _platErrUrl = platform === 'together' ? 'api.together.ai' : platform === 'groq' ? 'console.groq.com' : platform === 'openrouter' ? 'openrouter.ai/credits' : platform === 'nvidia' ? 'build.nvidia.com' : platform === 'huggingface' ? 'huggingface.co' : platform === 'githubmodels' ? 'github.com/settings/tokens' : platform === 'claude' ? 'console.anthropic.com' : platform === 'copilot' ? 'github.com/settings/tokens' : platform === 'gais' ? 'aistudio.google.com' : platform === 'cohere' ? 'dashboard.cohere.com' : platform === 'deepinfra' ? 'deepinfra.com/dash' : platform === 'cerebras' ? 'cloud.cerebras.ai' : platform === 'sambanova' ? 'cloud.sambanova.ai' : platform === 'fireworks' ? 'fireworks.ai' : platform === 'xai' ? 'console.x.ai' : platform === 'perplexity' ? 'perplexity.ai/settings/api' : platform === 'nanogpt' ? 'nano-gpt.com' : platform === 'unify' ? 'app.unify.ai' : platform === 'kluster' ? 'kluster.ai' : platform === 'mistral' ? 'console.mistral.ai' : 'aistudio.google.com';
                 const displayErr = isTimeout
                     ? '⚠️ Response timed out — the AI took too long to reply. Please try again.'
                     : isOllamaFetch
                     ? '⚠️ Could not connect to Ollama at ' + ollamaHost + '. Make sure Ollama is running. If accessing from a web page, start Ollama with: OLLAMA_ORIGINS=* ollama serve'
                     : isRateLimit
-                    ? '⚠️ Rate limit reached. Wait a moment or add more API keys in Settings.'
+                    ? '⚠️ Rate limit reached on ' + _platErrLabel + '. Wait a moment or add more API keys in Settings.'
                     : isCredit
-                    ? '⚠️ Credit limit exceeded. Use a -Free model (e.g. Llama-3.3-70B-Instruct-Turbo-Free). Check your account at api.together.ai'
+                    ? '⚠️ Credit/billing limit exceeded for ' + _platErrLabel + '. Check your account at ' + _platErrUrl + (platform === 'together' ? '. Try a -Free model (e.g. Llama-3.3-70B-Instruct-Turbo-Free)' : '') + '.'
                     : isAuth
-                    ? '⚠️ Invalid API key. Go to Settings and check your key for ' + (platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'nvidia' ? 'NVIDIA (build.nvidia.com)' : platform === 'huggingface' ? 'Hugging Face (huggingface.co)' : platform === 'githubmodels' ? 'GitHub Models (github.com)' : 'Gemini (aistudio.google.com)') + '.'
+                    ? '⚠️ Invalid API key for ' + _platErrLabel + '. Go to Settings and check your key. Get a key at ' + _platErrUrl + '.'
                     : '⚠️ ' + errText.substring(0, 140);
                 const errDiv = document.createElement('div');
                 errDiv.className = "flex w-full justify-start animate-slide-up";
-                errDiv.innerHTML = '<div class="text-[#D25D38] bg-[#FDF4F2] px-4 py-3 rounded-xl border border-[#F8E3DE] text-[15px] max-w-[95%]">' + escapeHTML(displayErr) + '</div>';
+                errDiv.innerHTML = '<div class="text-[#D25D38] bg-[#FDF4F2] px-4 py-3 rounded-xl border border-[#F8E3DE] text-[15px] max-w-[95%]">' +
+                    '<p>' + escapeHTML(displayErr) + '</p>' +
+                    '<div class="mt-2.5"><button onclick="regenerateLastResponse()" class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-white bg-[#D25D38] rounded-full hover:bg-[#B84E2E] active:scale-95 transition-all"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\'/><path d=\'M3 3v5h5\'/></svg> Retry</button></div>' +
+                    '</div>';
                 messagesWrapper.appendChild(errDiv);
                 scrollToBottom();
             } finally {
@@ -5623,7 +5802,9 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 '<button onclick="regenerateLastResponse()" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Retry</button>' +
                 '<button class="tts-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Read aloud"><i data-lucide="volume-2" class="w-3 h-3"></i> Read</button>' +
                 '<button class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="pin" class="w-3 h-3"></i> Pin</button>' +
-                (notionKey ? '<button class="notion-save-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Save to Notion"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg> Notion</button>' : '') +
+                '<button class="notion-save-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Save to Notion"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg> Notion</button>' +
+                '<button class="translate-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Translate"><i data-lucide="languages" class="w-3 h-3"></i> Translate</button>' +
+                '<button class="share-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Share"><i data-lucide="share-2" class="w-3 h-3"></i> Share</button>' +
                 '</div>';
 
             htmlContent += '</div>';
@@ -5652,6 +5833,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                     if (pinBtn) pinBtn.onclick = () => pinMessage(fullText, pinBtn);
                     const notionBtn = actionsDiv.querySelector('.notion-save-btn');
                     if (notionBtn) notionBtn.onclick = () => saveToNotion(fullText, 'SnoahAI · ' + new Date().toLocaleDateString());
+                    const translateBtnEl = actionsDiv.querySelector('.translate-btn');
+                    if (translateBtnEl) translateBtnEl.onclick = () => translateMessage(fullText, translateBtnEl);
+                    const shareBtnEl = actionsDiv.querySelector('.share-btn');
+                    if (shareBtnEl) shareBtnEl.onclick = () => shareMessage(fullText);
                 }
                 lucide.createIcons();
                 renderMermaidDiagrams();
@@ -5723,12 +5908,9 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
             messages = chat.messages.map(m => ({...m}));
             messagesWrapper.innerHTML = '';
             welcomeScreen.classList.add('hidden');
-            messages.forEach(m => {
+            messages.forEach((m, idx) => {
                 if (m.role === 'user') {
-                    const userDiv = document.createElement('div');
-                    userDiv.className = "flex w-full justify-end animate-slide-up";
-                    let bubble = '<div class="bg-[#EFECE6] text-[#2C2B29] max-w-[85%] rounded-[24px] rounded-br-md px-5 py-3 text-[15.5px] shadow-sm font-sans border border-[#E5E3DB]/50 break-words">' + escapeHTML(m.text || '') + '</div>';
-                    userDiv.innerHTML = bubble;
+                    const userDiv = buildUserMessageDiv(m.text || '', m.images || [], idx);
                     messagesWrapper.appendChild(userDiv);
                 } else {
                     renderAIResponse(m, true);
