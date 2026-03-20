@@ -4713,7 +4713,7 @@
 
         function shareMessage(text) {
             if (navigator.share) {
-                navigator.share({ title: 'SnoahAI Response', text: text }).catch(() => {});
+                navigator.share({ title: 'SnoahAI Response', text: text }).catch(err => console.debug('Share cancelled or failed:', err));
             } else {
                 navigator.clipboard.writeText(text)
                     .then(() => showToast('Response copied to clipboard!'))
@@ -5060,10 +5060,6 @@ FEATURES:
 47. CODE STREAMING FIX: AI responses now show code blocks streaming in real-time. Partial/in-progress code blocks are rendered live as the AI generates them — you can watch the code appear line by line instead of waiting for the full block to finish. A streaming cursor is shown inside the code block header while it is still being written.
 48. AUTO MEMORY: Settings → Auto Memory toggle. When enabled, SnoahAI automatically extracts and saves important facts about the user from each conversation (name, profession, goals, preferences, ongoing projects, relationships, constraints, etc.) into a local memory bank. The memory extractor uses deduplication — it will never save the same fact twice. Memory is injected as context into every future chat so the AI can give more personalized, context-aware responses. Requires a Gemini API key for extraction. Memory can be viewed and cleared in Settings → Auto Memory.
 49. IMPROVED VOICE-TO-TEXT: Voice input uses continuous recognition with text accumulation. Tap the mic button to start (shows 🎤 Listening toast), speak, then tap again to stop. Interim and final results are accumulated progressively in the input field, so partial speech is visible in real-time. Works on Chrome, Safari, and other modern browsers.
-50. USER MESSAGE EDITING: Users can edit any previously sent message. A small "Edit" button appears below every user message. Tapping it opens an inline text editor with the original text. Tapping "Save & Send" re-submits the message and replaces all subsequent conversation history from that point. Tapping "Cancel" restores the original message.
-51. TRANSLATE RESPONSE: Every AI response has a "Translate" button in the action bar. Tapping it shows a language picker with: Spanish, French, German, Arabic, Chinese, Hindi, Japanese, Portuguese, Russian, Korean. On selection, a translation request is automatically submitted to the AI.
-52. SHARE RESPONSE: Every AI response has a "Share" button. On mobile it opens the device's native share sheet (Web Share API). On desktop it copies the response text to the clipboard with a toast confirmation.
-
 APP STRUCTURE & LAYOUT:
 - Single HTML file (index.html) with all CSS (Tailwind CDN) and JavaScript inline — no separate files except backend Vercel serverless functions in /api/ folder.
 - Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
