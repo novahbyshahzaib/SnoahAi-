@@ -4919,8 +4919,7 @@
         }
 
         function summarizeResponse(text) {
-            const preview = text.slice(0, 300).trim();
-            submitMessage('Summarize the following AI response in 3-5 concise bullet points:\n\n' + preview + (text.length > 300 ? '...' : ''));
+            submitMessage('Summarize the following AI response in 3-5 concise bullet points:\n\n' + text);
         }
 
         function askFollowUp(text) {
