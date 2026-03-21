@@ -134,6 +134,12 @@
             100% { content: '●'; opacity: 0.4; }
         }
         .streaming-cursor { display: inline-block; width: 3px; height: 18px; margin-left: 2px; background-color: #D25D38; border-radius: 2px; animation: cursorPulse 0.8s ease-in-out infinite; vertical-align: text-bottom; }
+        /* Message timestamp */
+        .msg-timestamp { display: none; font-size: 10px; color: #A3A095; margin-top: 2px; padding-left: 2px; }
+        .show-timestamps .msg-timestamp { display: block; }
+        /* More-actions menu */
+        .msg-more-menu { animation: fadeInScale 0.15s ease-out; transform-origin: bottom left; }
+        @keyframes fadeInScale { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
         /* Streaming indicator bar above input */
         @keyframes streamingSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
         #streaming-bar-indicator { position: absolute; bottom: 100%; left: 0; right: 0; z-index: 25; pointer-events: none; transition: opacity 0.3s ease; overflow: hidden; }
@@ -539,6 +545,24 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Instant Response Display -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Response Display</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Choose how AI responses are displayed — animated character-by-character, or all at once.</p>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Instant Response Display</p>
+                                <p class="text-[11px] text-[#A3A095]">Show full response at once, skip animation</p>
+                            </div>
+                            <button id="instant-response-toggle" onclick="toggleInstantResponse()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- AI Config Tab -->
@@ -684,6 +708,34 @@
                             <button onclick="clearAutoMemory()" class="w-full py-2 rounded-xl border border-[#E5E3DB] text-[12px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors font-medium">Clear Memory</button>
                         </div>
                     </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Response Language -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Response Language</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Always respond in a specific language, regardless of the language you write in.</p>
+                        <div class="relative">
+                            <select id="settings-response-lang" class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
+                                <option value="">Auto (match user's language)</option>
+                                <option value="English">Always English</option>
+                                <option value="Spanish">Always Spanish</option>
+                                <option value="French">Always French</option>
+                                <option value="German">Always German</option>
+                                <option value="Arabic">Always Arabic</option>
+                                <option value="Chinese">Always Chinese</option>
+                                <option value="Hindi">Always Hindi</option>
+                                <option value="Japanese">Always Japanese</option>
+                                <option value="Portuguese">Always Portuguese</option>
+                                <option value="Russian">Always Russian</option>
+                                <option value="Korean">Always Korean</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- App Config Tab -->
@@ -707,6 +759,23 @@
                             <button onclick="setTheme('ocean')"   title="Ocean"   class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#1A6EBD] transition-colors" style="background:linear-gradient(135deg,#F4F7FB 50%,#1A6EBD 50%)"></button>
                             <button onclick="setTheme('forest')"  title="Forest"  class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#2D7A4F] transition-colors" style="background:linear-gradient(135deg,#F2F7F4 50%,#2D7A4F 50%)"></button>
                             <button onclick="setTheme('rose')"    title="Rose"    class="theme-swatch h-9 rounded-xl border-2 border-[#E5E3DB] hover:border-[#C4396B] transition-colors" style="background:linear-gradient(135deg,#FBF4F6 50%,#C4396B 50%)"></button>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Show Timestamps -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Message Timestamps</label>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Show Timestamps</p>
+                                <p class="text-[11px] text-[#A3A095]">Display time on each message bubble</p>
+                            </div>
+                            <button id="timestamps-toggle" onclick="toggleTimestamps()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -776,6 +845,10 @@
                     <button onclick="openPinsModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
                         <i data-lucide="pin" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
                         <span class="text-[14px] text-[#5B5951]">Pinned Messages <span id="pin-count-badge" class="text-[10px] text-[#A3A095]"></span></span>
+                    </button>
+                    <button onclick="openBookmarksModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
+                        <i data-lucide="bookmark" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
+                        <span class="text-[14px] text-[#5B5951]">Bookmarks <span id="bookmark-count-badge" class="text-[10px] text-[#A3A095]"></span></span>
                     </button>
                     <button onclick="confirmDeleteHistory()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#FDF4F2] text-left transition-colors group">
                         <i data-lucide="trash-2" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
@@ -970,6 +1043,25 @@
             </div>
             <div id="pins-list" class="flex-1 overflow-y-auto px-4 py-3 space-y-3">
                 <p class="text-[13px] text-[#A3A095] text-center mt-8">No pinned messages yet</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BOOKMARKS MODAL ===== -->
+    <div id="bookmarks-modal" class="absolute inset-0 z-50 flex flex-col hidden">
+        <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeBookmarksModal()"></div>
+        <div class="relative z-10 bg-[#FAF9F6] app-bg flex flex-col h-full">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="bookmark" class="w-4 h-4 text-[#D25D38]"></i>
+                    <h3 class="font-serif font-semibold text-[16px]">Bookmarks</h3>
+                </div>
+                <button onclick="closeBookmarksModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div id="bookmarks-list" class="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                <p class="text-[13px] text-[#A3A095] text-center mt-8">No bookmarks yet. Tap ⋮ → Bookmark on any AI response.</p>
             </div>
         </div>
     </div>
@@ -1263,12 +1355,21 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.1</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.2</span>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Compact Response Actions ⋮</strong> — AI response action buttons now show only 3 at a time (Copy, Retry, Read) plus a vertical three-dots (⋮) button. Tapping ⋮ opens a neat popup card with all available actions — no more layout-breaking button rows.</li>
+                            <li><strong>Copy as Markdown 📋</strong> — New option in the ⋮ menu. Copies the raw Markdown source of any AI response to your clipboard — great for pasting into editors, notes, or GitHub.</li>
+                            <li><strong>Download Response 💾</strong> — New option in the ⋮ menu. Downloads any AI response as a plain text (.txt) file instantly — no copy-paste needed.</li>
+                            <li><strong>Summarize Response 📝</strong> — New option in the ⋮ menu. Asks AI to summarize the current response in 3-5 bullet points with one tap.</li>
+                            <li><strong>Follow-up Shortcut ↩</strong> — New option in the ⋮ menu. Pre-fills the input with "Can you elaborate more on this?" so you can quickly ask for more detail.</li>
+                            <li><strong>Bookmark Responses 🔖</strong> — New option in the ⋮ menu. Bookmark any AI response and access them later from ☰ → Bookmarks. Bookmarks persist across sessions.</li>
+                            <li><strong>Instant Response Display ⚡</strong> — New toggle in Settings → API tab. When ON, AI responses appear all at once instantly instead of animating character-by-character.</li>
+                            <li><strong>Response Language 🌍</strong> — New setting in Settings → AI tab. Choose a language (English, Spanish, French, German, Arabic, Chinese, Hindi, Japanese, Portuguese, Russian, Korean) and the AI will always respond in that language, regardless of how you write.</li>
+                            <li><strong>Message Timestamps 🕐</strong> — New toggle in Settings → App tab. When ON, every message displays the time it was sent — useful for reviewing long conversations.</li>
                             <li><strong>User Message Editing ✏️</strong> — Edit any message you've already sent, just like ChatGPT. Tap the <em>Edit</em> button below any user message, modify the text, and tap <em>Save &amp; Send</em>. The chat is re-submitted from that point onwards.</li>
                             <li><strong>Translate Response 🌐</strong> — Every AI response now has a <em>Translate</em> button. Tap it to pick a language (Spanish, French, German, Arabic, Chinese, Hindi, Japanese, Portuguese, Russian, Korean) and the AI instantly translates the response.</li>
                             <li><strong>Share Response 📤</strong> — New <em>Share</em> button on every AI response. On mobile it opens the native share sheet; on desktop it copies the response to your clipboard.</li>
@@ -1300,7 +1401,7 @@
                             <li><strong>Floating Loading Indicator</strong> — The "SnoahAI is typing..." indicator now appears above the input bar, always visible during AI response generation.</li>
                             <li><strong>Haptic Feedback</strong> — Subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.</li>
                             <li><strong>Stream Timeout Protection</strong> — Automatic timeout after 45 seconds of no data, preventing infinite loading states. Clear error message displayed.</li>
-                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 44 features of the app and can answer any question about how to use them.</li>
+                            <li><strong>Updated AI Knowledge</strong> — SnoahAI now knows about all 58 features of the app and can answer any question about how to use them.</li>
                             <li><strong>Advanced Model Parameters</strong> — Fine-tune AI responses with Temperature, Top P, Top K, and Max Tokens sliders in Settings.</li>
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — AI can now generate Mermaid diagrams (flowcharts, sequence diagrams, etc.) rendered visually in responses.</li>
                             <li><strong>Multi-AI Response</strong> — Enable in Settings to query multiple AI platforms simultaneously. View each AI's response from a dropdown selector.</li>
@@ -1326,6 +1427,14 @@
                             <li><strong>Chat History</strong> — Auto-saved locally with auto-titling.</li>
                             <li><strong>Chat Tags</strong> — Organize chats by category (Biology, Medicine, Physics, Code, Math, Other).</li>
                             <li><strong>Pinned Messages</strong> — 📌 Pin important AI responses for quick access.</li>
+                            <li><strong>Bookmarks 🔖</strong> — Bookmark any AI response from the ⋮ menu. Access all bookmarks from ☰ → Bookmarks. Bookmarks persist across sessions.</li>
+                            <li><strong>Copy as Markdown 📋</strong> — Copy the raw Markdown of any AI response from the ⋮ menu.</li>
+                            <li><strong>Download Response 💾</strong> — Download any AI response as a .txt file from the ⋮ menu.</li>
+                            <li><strong>Summarize Response 📝</strong> — Instantly ask AI to summarize the current response in bullet points from the ⋮ menu.</li>
+                            <li><strong>Follow-up Shortcut ↩</strong> — Pre-fill the input with a follow-up prompt from the ⋮ menu.</li>
+                            <li><strong>Instant Response Display ⚡</strong> — Toggle in Settings → API. Show full AI responses instantly, skipping animation.</li>
+                            <li><strong>Response Language 🌍</strong> — Set a preferred response language in Settings → AI. AI always responds in that language.</li>
+                            <li><strong>Message Timestamps 🕐</strong> — Toggle in Settings → App. Show send-time on every message bubble.</li>
                             <li><strong>Summarize Chat</strong> — AI-generated 3-5 bullet summary of conversations.</li>
                             <li><strong>Search Chats</strong> — Search across all saved conversations.</li>
                             <li><strong>Custom Instructions &amp; AI Persona</strong> — Personalize AI behavior in Settings.</li>
@@ -1620,6 +1729,11 @@
         // Auto Memory
         let autoMemoryEnabled = localStorage.getItem('snoah_auto_memory_enabled') === 'true';
         let autoMemoryContent = localStorage.getItem('snoah_auto_memory') || '';
+        // New settings
+        let instantResponseMode = localStorage.getItem('snoah_instant_response') === 'true';
+        let responseLang = localStorage.getItem('snoah_response_lang') || '';
+        let showTimestamps = localStorage.getItem('snoah_show_timestamps') === 'true';
+        let bookmarks = JSON.parse(localStorage.getItem('snoah_bookmarks') || '[]');
         const NOTION_PROXY = '/api/notion';
         let uploadedImage = null; // { data, mimeType, previewUrl }
         let messages = [];
@@ -1766,6 +1880,8 @@
         applyFontSize(fontSize);
         applyTheme(currentTheme);
         updatePinBadge();
+        updateBookmarkBadge();
+        if (showTimestamps) document.getElementById('html-root').classList.add('show-timestamps');
         showCookieBannerIfNeeded();
         showNamePromptIfNeeded();
         updateSidebarUserName();
@@ -2437,6 +2553,11 @@
             updateFontSizeBtns();
             updatePlatformUI();
             renderKeysList();
+            // Load new settings
+            updateInstantResponseUI();
+            const responseLangSel = document.getElementById('settings-response-lang');
+            if (responseLangSel) responseLangSel.value = responseLang;
+            updateTimestampsUI();
             switchSettingsTab('api');
             document.getElementById('settings-modal').classList.remove('hidden');
             if (isSidebarOpen) toggleSidebar();
@@ -2656,6 +2777,13 @@
                     notionParentPageId = match ? match[0].replace(/-/g, '') : rawUrl;
                     localStorage.setItem('snoah_notion_parent', notionParentPageId);
                 }
+            }
+
+            // Save response language
+            const responseLangSel = document.getElementById('settings-response-lang');
+            if (responseLangSel) {
+                responseLang = responseLangSel.value;
+                localStorage.setItem('snoah_response_lang', responseLang);
             }
 
             closeSettings();
@@ -3175,6 +3303,54 @@
             if (!toggle) return;
             const knob = toggle.querySelector('span');
             if (notionAutoSave) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function toggleInstantResponse() {
+            instantResponseMode = !instantResponseMode;
+            localStorage.setItem('snoah_instant_response', instantResponseMode);
+            updateInstantResponseUI();
+        }
+
+        function updateInstantResponseUI() {
+            const toggle = document.getElementById('instant-response-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (instantResponseMode) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function toggleTimestamps() {
+            showTimestamps = !showTimestamps;
+            localStorage.setItem('snoah_show_timestamps', showTimestamps);
+            updateTimestampsUI();
+            const root = document.getElementById('html-root');
+            if (showTimestamps) {
+                root.classList.add('show-timestamps');
+            } else {
+                root.classList.remove('show-timestamps');
+            }
+        }
+
+        function updateTimestampsUI() {
+            const toggle = document.getElementById('timestamps-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (showTimestamps) {
                 toggle.classList.remove('bg-[#D9D6CE]');
                 toggle.classList.add('bg-[#D25D38]');
                 if (knob) knob.style.transform = 'translateX(20px)';
@@ -4597,6 +4773,7 @@
                     '<div class="user-bubble-text bg-[#EFECE6] text-[#2C2B29] w-full rounded-[24px] rounded-br-md px-5 py-3 text-[15.5px] shadow-sm font-sans border border-[#E5E3DB]/50 break-words">' +
                         bubbleContent +
                     '</div>' +
+                    '<span class="msg-timestamp text-right">' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</span>' +
                     '<button onclick="editUserMessage(' + msgIdx + ')" class="flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#A3A095] hover:text-[#D25D38] transition-colors">' +
                         '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
                         'Edit' +
@@ -4721,7 +4898,161 @@
             }
         }
 
-        // --- Regenerate Last Response ---
+        // --- New Response Action Features ---
+        function copyAsMarkdown(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => showToast('Markdown copied ✓'))
+                .catch(() => showToast('Copy failed'));
+        }
+
+        function downloadResponse(text) {
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'snoah-response-' + new Date().toISOString().slice(0, 10) + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Downloaded ✓');
+        }
+
+        function summarizeResponse(text) {
+            submitMessage('Summarize the following AI response in 3-5 concise bullet points:\n\n' + text);
+        }
+
+        function askFollowUp(text) {
+            const inputEl = document.getElementById('chat-input');
+            if (inputEl) {
+                inputEl.value = 'Can you elaborate more on this?';
+                inputEl.focus();
+                inputEl.dispatchEvent(new Event('input'));
+            }
+        }
+
+        function bookmarkResponse(text, btn) {
+            bookmarks = JSON.parse(localStorage.getItem('snoah_bookmarks') || '[]');
+            const entry = { text: text, date: new Date().toLocaleString() };
+            bookmarks.push(entry);
+            localStorage.setItem('snoah_bookmarks', JSON.stringify(bookmarks));
+            updateBookmarkBadge();
+            if (btn) {
+                const icon = btn.querySelector('[data-lucide]');
+                if (icon) { icon.setAttribute('data-lucide', 'bookmark-check'); lucide.createIcons({ nodes: [btn] }); }
+                btn.classList.add('text-[#D25D38]');
+            }
+            showToast('Bookmarked! View in ☰ → Bookmarks');
+        }
+
+        function updateBookmarkBadge() {
+            const badge = document.getElementById('bookmark-count-badge');
+            const count = JSON.parse(localStorage.getItem('snoah_bookmarks') || '[]').length;
+            if (badge) badge.textContent = count > 0 ? '(' + count + ')' : '';
+        }
+
+        function openBookmarksModal() {
+            const modal = document.getElementById('bookmarks-modal');
+            if (!modal) return;
+            const list = document.getElementById('bookmarks-list');
+            bookmarks = JSON.parse(localStorage.getItem('snoah_bookmarks') || '[]');
+            if (bookmarks.length === 0) {
+                list.innerHTML = '<p class="text-[13px] text-[#A3A095] text-center mt-8">No bookmarks yet.<br>Tap ⋮ → Bookmark on any AI response.</p>';
+            } else {
+                list.innerHTML = bookmarks.slice().reverse().map((b, i) =>
+                    '<div class="bg-white border border-[#E5E3DB] rounded-xl p-3">' +
+                    '<p class="text-[10px] text-[#A3A095] mb-1">' + escapeHTML(b.date) + '</p>' +
+                    '<p class="text-[13px] text-[#2C2B29] leading-relaxed line-clamp-4">' + escapeHTML(b.text.slice(0, 300)) + (b.text.length > 300 ? '…' : '') + '</p>' +
+                    '<button onclick="removeBookmark(' + (bookmarks.length - 1 - i) + ')" class="mt-2 text-[11px] text-[#D25D38] hover:underline font-medium">Remove</button>' +
+                    '</div>'
+                ).join('');
+            }
+            modal.classList.remove('hidden');
+            if (isSidebarOpen) toggleSidebar();
+            lucide.createIcons();
+        }
+
+        function closeBookmarksModal() {
+            const modal = document.getElementById('bookmarks-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function removeBookmark(idx) {
+            bookmarks = JSON.parse(localStorage.getItem('snoah_bookmarks') || '[]');
+            bookmarks.splice(idx, 1);
+            localStorage.setItem('snoah_bookmarks', JSON.stringify(bookmarks));
+            updateBookmarkBadge();
+            openBookmarksModal();
+        }
+
+        // --- Action buttons HTML builder ---
+        function buildActionsDivHTML(id, hidden) {
+            const idAttr = id ? ' id="' + id + '"' : '';
+            const hiddenCls = hidden ? ' hidden' : '';
+            const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+            const btnCls = 'flex items-center gap-1.5 px-2.5 py-2 text-[11px] font-medium text-[#5B5951] hover:bg-[#F2F0E9] rounded-xl transition-colors';
+            const notionSvg = '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg>';
+            return '<div class="msg-actions flex items-center gap-1.5 mt-2.5' + hiddenCls + '"' + idAttr + '>' +
+                '<button onclick="copyMsgText(this)" data-text="" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="clipboard" class="w-3 h-3"></i> Copy</button>' +
+                '<button onclick="regenerateLastResponse()" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Retry</button>' +
+                '<button class="tts-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Read aloud"><i data-lucide="volume-2" class="w-3 h-3"></i> Read</button>' +
+                '<div class="relative">' +
+                '<button class="more-actions-btn flex items-center justify-center w-[30px] h-[30px] text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="More actions"><i data-lucide="more-vertical" class="w-3.5 h-3.5"></i></button>' +
+                '<div class="msg-more-menu hidden absolute bottom-full left-0 mb-2 bg-white border border-[#E5E3DB] rounded-2xl shadow-xl overflow-hidden z-50 w-[192px]">' +
+                '<div class="grid grid-cols-2 gap-px p-2">' +
+                '<button class="pin-btn ' + btnCls + '"><i data-lucide="pin" class="w-3 h-3 text-[#8C897D]"></i> Pin</button>' +
+                '<button class="notion-save-btn ' + btnCls + '">' + notionSvg + ' Notion</button>' +
+                '<button class="translate-btn ' + btnCls + '"><i data-lucide="languages" class="w-3 h-3 text-[#8C897D]"></i> Translate</button>' +
+                '<button class="share-btn ' + btnCls + '"><i data-lucide="share-2" class="w-3 h-3 text-[#8C897D]"></i> Share</button>' +
+                '<button class="copy-md-btn ' + btnCls + '"><i data-lucide="code-2" class="w-3 h-3 text-[#8C897D]"></i> Copy MD</button>' +
+                '<button class="download-btn ' + btnCls + '"><i data-lucide="download" class="w-3 h-3 text-[#8C897D]"></i> Download</button>' +
+                '<button class="summarize-btn ' + btnCls + '"><i data-lucide="list" class="w-3 h-3 text-[#8C897D]"></i> Summarize</button>' +
+                '<button class="followup-btn ' + btnCls + '"><i data-lucide="corner-down-right" class="w-3 h-3 text-[#8C897D]"></i> Follow-up</button>' +
+                '<button class="bookmark-btn ' + btnCls + ' col-span-2"><i data-lucide="bookmark" class="w-3 h-3 text-[#8C897D]"></i> Bookmark</button>' +
+                '</div></div></div>' +
+                '<span class="msg-timestamp ml-auto">' + ts + '</span>' +
+                '</div>';
+        }
+
+        function wireActionsDiv(actionsDiv, text) {
+            const copyBtn = actionsDiv.querySelector('[data-text]');
+            if (copyBtn) copyBtn.dataset.text = encodeURIComponent(text);
+            const ttsBtn = actionsDiv.querySelector('.tts-btn');
+            if (ttsBtn) ttsBtn.onclick = () => speakText(text, ttsBtn);
+            const moreBtn = actionsDiv.querySelector('.more-actions-btn');
+            const moreMenu = actionsDiv.querySelector('.msg-more-menu');
+            if (moreBtn && moreMenu) {
+                moreBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.msg-more-menu').forEach(m => { if (m !== moreMenu) m.classList.add('hidden'); });
+                    moreMenu.classList.toggle('hidden');
+                };
+            }
+            const close = () => { if (moreMenu) moreMenu.classList.add('hidden'); };
+            const pinBtn = actionsDiv.querySelector('.pin-btn');
+            if (pinBtn) pinBtn.onclick = () => { pinMessage(text, pinBtn); close(); };
+            const notionBtn = actionsDiv.querySelector('.notion-save-btn');
+            if (notionBtn) notionBtn.onclick = () => { saveToNotion(text, 'SnoahAI · ' + new Date().toLocaleDateString()); close(); };
+            const translateBtnEl = actionsDiv.querySelector('.translate-btn');
+            if (translateBtnEl) translateBtnEl.onclick = () => { translateMessage(text, translateBtnEl); close(); };
+            const shareBtnEl = actionsDiv.querySelector('.share-btn');
+            if (shareBtnEl) shareBtnEl.onclick = () => { shareMessage(text); close(); };
+            const copyMdBtn = actionsDiv.querySelector('.copy-md-btn');
+            if (copyMdBtn) copyMdBtn.onclick = () => { copyAsMarkdown(text); close(); };
+            const downloadBtn = actionsDiv.querySelector('.download-btn');
+            if (downloadBtn) downloadBtn.onclick = () => { downloadResponse(text); close(); };
+            const summarizeBtn = actionsDiv.querySelector('.summarize-btn');
+            if (summarizeBtn) summarizeBtn.onclick = () => { summarizeResponse(text); close(); };
+            const followupBtn = actionsDiv.querySelector('.followup-btn');
+            if (followupBtn) followupBtn.onclick = () => { askFollowUp(text); close(); };
+            const bookmarkBtn = actionsDiv.querySelector('.bookmark-btn');
+            if (bookmarkBtn) bookmarkBtn.onclick = () => { bookmarkResponse(text, bookmarkBtn); close(); };
+        }
+
+        // Close all more menus on outside click
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.msg-more-menu').forEach(m => m.classList.add('hidden'));
+        });
         function regenerateLastResponse() {
             if (isLoading || isStreaming) return;
             const lastAiIdx = messages.map(m=>m.role).lastIndexOf('model');
@@ -4856,7 +5187,7 @@
             setIsLoading(true);
 
             const lengthDirective = responseLength === 'short' ? 'Be brief and concise — 2-4 sentences max. ' : responseLength === 'detailed' ? 'Be thorough and detailed. ' : '';
-            const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + lengthDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '');
+            const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + lengthDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '') + (responseLang ? '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language.' : '');
 
             try {
                 const results = await Promise.all(platforms.map(p => multiAIFetchSingle(p, textToSend, sysInstruction)));
@@ -5060,14 +5391,23 @@ FEATURES:
 47. CODE STREAMING FIX: AI responses now show code blocks streaming in real-time. Partial/in-progress code blocks are rendered live as the AI generates them — you can watch the code appear line by line instead of waiting for the full block to finish. A streaming cursor is shown inside the code block header while it is still being written.
 48. AUTO MEMORY: Settings → Auto Memory toggle. When enabled, SnoahAI automatically extracts and saves important facts about the user from each conversation (name, profession, goals, preferences, ongoing projects, relationships, constraints, etc.) into a local memory bank. The memory extractor uses deduplication — it will never save the same fact twice. Memory is injected as context into every future chat so the AI can give more personalized, context-aware responses. Requires a Gemini API key for extraction. Memory can be viewed and cleared in Settings → Auto Memory.
 49. IMPROVED VOICE-TO-TEXT: Voice input uses continuous recognition with text accumulation. Tap the mic button to start (shows 🎤 Listening toast), speak, then tap again to stop. Interim and final results are accumulated progressively in the input field, so partial speech is visible in real-time. Works on Chrome, Safari, and other modern browsers.
+50. COMPACT RESPONSE ACTIONS (⋮ MENU): AI response action buttons now show only 3 buttons (Copy, Retry, Read) plus a vertical three-dots (⋮) button. Tapping ⋮ opens a compact popup card with ALL available actions: Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark. This prevents layout-breaking when many buttons are present.
+51. COPY AS MARKDOWN: Available in the ⋮ action menu on every AI response. Copies the raw Markdown source text of the response to the clipboard — useful for pasting into Notion, GitHub, or Markdown editors.
+52. DOWNLOAD RESPONSE: Available in the ⋮ action menu on every AI response. Downloads the response as a plain text (.txt) file with a date-stamped filename.
+53. SUMMARIZE RESPONSE: Available in the ⋮ action menu on every AI response. Automatically submits a prompt asking the AI to summarize the response in 3-5 concise bullet points.
+54. FOLLOW-UP SHORTCUT: Available in the ⋮ action menu on every AI response. Pre-fills the chat input with "Can you elaborate more on this?" for quick follow-up questions.
+55. BOOKMARK RESPONSES: Available in the ⋮ action menu on every AI response. Saves the response to a persistent bookmarks list stored in localStorage. Access all bookmarks from ☰ → Bookmarks in the sidebar. Bookmarks can be removed individually.
+56. INSTANT RESPONSE DISPLAY: Settings → API tab → Response Display toggle. When ON, AI responses appear all at once without the character-by-character streaming animation. Useful for users who prefer immediate full responses.
+57. RESPONSE LANGUAGE: Settings → AI tab → Response Language dropdown. Choose from: Auto (default), English, Spanish, French, German, Arabic, Chinese, Hindi, Japanese, Portuguese, Russian, Korean. When set, a language directive is injected into the system prompt to make the AI always respond in the chosen language, regardless of the user's input language.
+58. MESSAGE TIMESTAMPS: Settings → App tab → Show Timestamps toggle. When ON, every message (both user and AI) displays the time it was sent. Timestamps are stored on the message element and toggled via CSS class 'show-timestamps' on the root element.
 APP STRUCTURE & LAYOUT:
 - Single HTML file (index.html) with all CSS (Tailwind CDN) and JavaScript inline — no separate files except backend Vercel serverless functions in /api/ folder.
 - Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
 - Main area: Scrollable message thread with welcome screen shown when no chat is active.
 - Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates, Temp Chat buttons, main text input, Send/Stop button.
 - Sidebar (slides in from left): User profile, chat history list with search, settings shortcut, About/Updates/Contact links, Dark mode toggle.
-- Modals: Settings (tabbed: API, AI, App), Updates, About Us, Contact Us, Notion Save confirmation, Pinned Messages, image/file preview.
-- AI messages: White/light background, left-aligned. Show Copy, Retry, Read, Pin, Notion, Translate, Share action buttons after response.
+- Modals: Settings (tabbed: API, AI, App), Updates, About Us, Contact Us, Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
+- AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
 
 TERMS & CONDITIONS / PRIVACY POLICY / COOKIES:
@@ -5113,6 +5453,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 // Inject auto memory context if enabled and there is saved memory
                 if (autoMemoryEnabled && autoMemoryContent && autoMemoryContent.trim()) {
                     systemInstruction += '\n\nUSER MEMORY (important facts about this user, automatically saved from previous conversations — use as context):\n' + autoMemoryContent.trim();
+                }
+                // Inject response language directive if set
+                if (responseLang) {
+                    systemInstruction += '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language, regardless of the language the user writes in. This is a mandatory user preference.';
                 }
 
                 const formattedContents = [];
@@ -5643,28 +5987,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 }
 
                 // Add action buttons
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'msg-actions flex items-center gap-1.5 mt-2.5';
-                actionsDiv.innerHTML =
-                    '<button onclick="copyMsgText(this)" data-text="' + encodeURIComponent(mainText) + '" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="clipboard" class="w-3 h-3"></i> Copy</button>' +
-                    '<button onclick="regenerateLastResponse()" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Retry</button>' +
-                    '<button class="tts-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="volume-2" class="w-3 h-3"></i> Read</button>' +
-                    '<button class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="pin" class="w-3 h-3"></i> Pin</button>' +
-                    '<button class="notion-save-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Save to Notion"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg> Notion</button>' +
-                    '<button class="translate-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Translate"><i data-lucide="languages" class="w-3 h-3"></i> Translate</button>' +
-                    '<button class="share-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Share"><i data-lucide="share-2" class="w-3 h-3"></i> Share</button>';
+                const tempActionsDiv = document.createElement('div');
+                tempActionsDiv.innerHTML = buildActionsDivHTML('', false);
+                const actionsDiv = tempActionsDiv.firstElementChild;
                 innerCol.appendChild(actionsDiv);
-                const ttsBtn = actionsDiv.querySelector('.tts-btn');
-                if (ttsBtn) ttsBtn.onclick = () => speakText(mainText, ttsBtn);
-                const pinBtn = actionsDiv.querySelectorAll('button')[3];
-                if (pinBtn) pinBtn.onclick = () => pinMessage(mainText, pinBtn);
-                const notionSaveBtn = actionsDiv.querySelector('.notion-save-btn');
-                if (notionSaveBtn) notionSaveBtn.onclick = () => saveToNotion(mainText, 'SnoahAI · ' + new Date().toLocaleDateString());
-                const translateBtnEl = actionsDiv.querySelector('.translate-btn');
-                if (translateBtnEl) translateBtnEl.onclick = () => translateMessage(mainText, translateBtnEl);
-                const shareBtnEl = actionsDiv.querySelector('.share-btn');
-                if (shareBtnEl) shareBtnEl.onclick = () => shareMessage(mainText);
-                lucide.createIcons();
+                wireActionsDiv(actionsDiv, mainText);
+                lucide.createIcons({ nodes: [actionsDiv] });
                 scrollToBottom();
 
                 const aiMsg = { role: 'model', text: mainText, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries };
@@ -5797,15 +6125,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
             htmlContent += '<div id="text-content-' + uniqueId + '" class="md-content prose-custom text-[#2C2B29] leading-relaxed"></div>' +
                 '<span id="cursor-' + uniqueId + '" class="streaming-cursor"></span>';
 
-            htmlContent += '<div class="msg-actions flex items-center gap-1.5 mt-2.5 hidden" id="actions-' + uniqueId + '">' +
-                '<button onclick="copyMsgText(this)" data-text="" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="clipboard" class="w-3 h-3"></i> Copy</button>' +
-                '<button onclick="regenerateLastResponse()" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Retry</button>' +
-                '<button class="tts-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Read aloud"><i data-lucide="volume-2" class="w-3 h-3"></i> Read</button>' +
-                '<button class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="pin" class="w-3 h-3"></i> Pin</button>' +
-                '<button class="notion-save-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Save to Notion"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg> Notion</button>' +
-                '<button class="translate-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Translate"><i data-lucide="languages" class="w-3 h-3"></i> Translate</button>' +
-                '<button class="share-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Share"><i data-lucide="share-2" class="w-3 h-3"></i> Share</button>' +
-                '</div>';
+            htmlContent += buildActionsDivHTML('actions-' + uniqueId, true);
 
             htmlContent += '</div>';
 
@@ -5825,25 +6145,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ displa
                 updateSendButton();
                 if (actionsDiv) {
                     actionsDiv.classList.remove('hidden');
-                    const copyBtn = actionsDiv.querySelector('[data-text]');
-                    if (copyBtn) copyBtn.dataset.text = encodeURIComponent(fullText);
-                    const ttsBtn = actionsDiv.querySelector('.tts-btn');
-                    if (ttsBtn) ttsBtn.onclick = () => speakText(fullText, ttsBtn);
-                    const pinBtn = actionsDiv.querySelectorAll('button')[3];
-                    if (pinBtn) pinBtn.onclick = () => pinMessage(fullText, pinBtn);
-                    const notionBtn = actionsDiv.querySelector('.notion-save-btn');
-                    if (notionBtn) notionBtn.onclick = () => saveToNotion(fullText, 'SnoahAI · ' + new Date().toLocaleDateString());
-                    const translateBtnEl = actionsDiv.querySelector('.translate-btn');
-                    if (translateBtnEl) translateBtnEl.onclick = () => translateMessage(fullText, translateBtnEl);
-                    const shareBtnEl = actionsDiv.querySelector('.share-btn');
-                    if (shareBtnEl) shareBtnEl.onclick = () => shareMessage(fullText);
+                    wireActionsDiv(actionsDiv, fullText);
                 }
                 lucide.createIcons();
                 renderMermaidDiagrams();
                 scrollToBottom();
             }
 
-            if (instant) {
+            if (instant || instantResponseMode) {
                 finishRender();
             } else {
                 let currentIndex = 0;
