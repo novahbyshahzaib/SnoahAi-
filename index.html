@@ -72,6 +72,13 @@
             'mail': '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
             'clock': '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
             'filter': '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+            'more-vertical': '<circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>',
+            'chevron-up': '<path d="m18 15-6-6-6 6"/>',
+            'code-2': '<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
+            'corner-down-right': '<polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/>',
+            'info': '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+            'languages': '<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+            'list': '<line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>',
         },
         createIcons() {
             document.querySelectorAll('i[data-lucide]').forEach(el => {
@@ -321,6 +328,52 @@
         .theme-forest { --accent:#2D7A4F; --accent-light:#E6F4EC; --bg:#F2F7F4; --surface:#FFFFFF; --border:#C5DFCE; }
         .theme-rose   { --accent:#C4396B; --accent-light:#FDE8F0; --bg:#FBF4F6; --surface:#FFFFFF; --border:#F0C8D8; }
     </style>
+    <!-- Firebase SDK for visit tracking & admin features -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getFirestore, doc, getDoc, setDoc, increment, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        const _fbCfg = { apiKey: "AIzaSyBjPEh5Dq_OYiQduLXakDod_huPyQQMk0E", authDomain: "novah-pub.firebaseapp.com", projectId: "novah-pub", storageBucket: "novah-pub.firebasestorage.app", messagingSenderId: "609580159558", appId: "1:609580159558:web:1823d4dd939e470e0df047", measurementId: "G-VNWM5G0X2Z" };
+        const _fbApp = initializeApp(_fbCfg, 'snoahVisit');
+        const _db = getFirestore(_fbApp);
+        // Track visit: increment total and daily counter atomically
+        (async () => {
+            try {
+                const today = new Date().toISOString().slice(0, 10);
+                const statsRef = doc(_db, 'admin_stats', 'visits');
+                // Use increment() for both total and daily to avoid race conditions
+                await setDoc(statsRef, {
+                    total: increment(1),
+                    ['daily.' + today]: increment(1),
+                    lastSeen: serverTimestamp()
+                }, { merge: true });
+            } catch(e) { /* silent */ }
+        })();
+        // Fetch admin-controlled dynamic content
+        (async () => {
+            try {
+                const settingsRef = doc(_db, 'admin_stats', 'settings');
+                const snap = await getDoc(settingsRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    // Override app name if admin set it
+                    if (data.appName) {
+                        document.title = data.appName;
+                        document.querySelectorAll('.snoah-app-name').forEach(el => { el.textContent = data.appName; });
+                    }
+                    // Override "What's New" content if admin set it
+                    if (data.whatsNew) {
+                        const el = document.getElementById('admin-whats-new');
+                        if (el) el.innerHTML = data.whatsNew;
+                    }
+                    // Announcement banner
+                    if (data.announcement) {
+                        const el = document.getElementById('admin-announcement');
+                        if (el) { el.textContent = data.announcement; el.closest('[data-admin-banner]').classList.remove('hidden'); }
+                    }
+                }
+            } catch(e) { /* silent */ }
+        })();
+    </script>
 </head>
 <div id="pwa-banner" class="hidden fixed top-0 left-0 right-0 z-[9999] bg-[#D25D38] text-white px-4 py-2.5 flex items-center justify-between shadow-lg">
         <div class="flex items-center gap-2.5">
@@ -349,6 +402,12 @@
         <div id="drag-overlay">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
             <p style="color:#D25D38;font-weight:600;font-size:14px;">Drop file to attach</p>
+        </div>
+
+        <!-- Admin Announcement Banner (hidden by default, shown when admin sets one) -->
+        <div data-admin-banner class="hidden bg-[#D25D38] text-white text-[12px] font-medium px-4 py-2 text-center relative shrink-0 z-10">
+            <span id="admin-announcement"></span>
+            <button onclick="this.closest('[data-admin-banner]').classList.add('hidden')" class="absolute right-3 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 leading-none">✕</button>
         </div>
 
         <!-- Sidebar Overlay -->
@@ -885,7 +944,7 @@
                 <i data-lucide="menu" class="w-5 h-5"></i>
             </button>
             <div class="flex flex-col items-center">
-                <h1 class="text-[18px] font-serif font-semibold text-[#2C2B29] tracking-tight">SnoahAI</h1>
+                <h1 class="text-[18px] font-serif font-semibold text-[#2C2B29] tracking-tight snoah-app-name">SnoahAI</h1>
                 <span id="header-model-badge" class="text-[10px] font-bold text-[#A3A095] tracking-widest uppercase mt-0.5">NOVAH GEM</span>
             </div>
             <button onclick="startNewChat()" class="p-2 -mr-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
@@ -1360,7 +1419,7 @@
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
-                        <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                        <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
                             <li><strong>Compact Response Actions ⋮</strong> — AI response action buttons now show only 3 at a time (Copy, Retry, Read) plus a vertical three-dots (⋮) button. Tapping ⋮ opens a neat popup card with all available actions — no more layout-breaking button rows.</li>
                             <li><strong>Copy as Markdown 📋</strong> — New option in the ⋮ menu. Copies the raw Markdown source of any AI response to your clipboard — great for pasting into editors, notes, or GitHub.</li>
                             <li><strong>Download Response 💾</strong> — New option in the ⋮ menu. Downloads any AI response as a plain text (.txt) file instantly — no copy-paste needed.</li>
@@ -3427,10 +3486,11 @@
             // Requires at least one Gemini key
             const firstKey = geminiKeys[0];
             if (!firstKey) return;
-            // Sanitize snippets: strip control characters that could interfere with prompt structure
-            const sanitize = s => (s || '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').substring(0, 800);
+            // Sanitize text: strip control characters that could interfere with prompt structure
+            // Use larger limits so full sentences and context are preserved
+            const sanitize = s => (s || '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').substring(0, 4000);
             const uSnip = sanitize(userText);
-            const aSnip = sanitize(aiText).substring(0, 1500);
+            const aSnip = sanitize(aiText).substring(0, 6000);
             const existingMemory = autoMemoryContent.trim();
             // Build instruction that includes existing memory for deduplication
             const instructionText = [
@@ -3441,17 +3501,20 @@
                 '- Identity: name, age, location, nationality',
                 '- Profession: job title, employer, field, skills, experience',
                 '- Goals & projects: what the user is working on or wants to achieve',
-                '- Preferences & interests: hobbies, likes, dislikes, favorite tools/languages',
+                '- Preferences & interests: hobbies, likes, dislikes, favorite tools/languages/frameworks',
                 '- Constraints: time limits, budget, health, requirements they mentioned',
                 '- Relationships: family members, colleagues, people they mentioned',
-                '- Important context: decisions made, problems they face, follow-up items',
+                '- Important context: decisions made, problems they face, follow-up items, ongoing tasks',
+                '- Opinions & feedback: what the user liked or disliked about something',
                 '',
-                existingMemory ? ('EXISTING MEMORY (DO NOT repeat or rephrase facts already here):\n' + (existingMemory.length > 1500 ? existingMemory.slice(-1500) : existingMemory)) : '',
+                existingMemory ? ('EXISTING MEMORY (DO NOT repeat or rephrase facts already here):\n' + (existingMemory.length > 3000 ? existingMemory.slice(-3000) : existingMemory)) : '',
                 '',
                 'Rules:',
                 '- ONLY output NEW facts not already captured in existing memory.',
-                '- Skip general knowledge questions with no personal information.',
-                '- Be concise: bullet points, one fact per line.',
+                '- You MAY save multiple facts from a single message — capture everything relevant.',
+                '- Save complete, meaningful sentences — not just keywords. E.g. "User is learning React for a freelance project" not just "React".',
+                '- Skip pure general knowledge questions with zero personal information.',
+                '- Format: bullet points, one fact per line.',
                 '- If nothing new to save, respond EXACTLY: NOTHING_TO_SAVE',
                 '',
                 'New facts to save (or NOTHING_TO_SAVE):'
@@ -3465,7 +3528,7 @@
                     body: JSON.stringify({
                         contents: [{ role: 'user', parts: [{ text: conversationText }] }],
                         systemInstruction: { parts: [{ text: instructionText }] },
-                        generationConfig: { maxOutputTokens: 350, temperature: 0.1 }
+                        generationConfig: { maxOutputTokens: 1000, temperature: 0.1 }
                     })
                 });
                 if (!resp.ok) return;
@@ -3475,8 +3538,8 @@
                 // Append with timestamp
                 const ts = new Date().toLocaleDateString();
                 autoMemoryContent = (autoMemoryContent ? autoMemoryContent + '\n' : '') + '[' + ts + ']\n' + extracted;
-                // Cap at ~12,000 chars by trimming the oldest timestamped entries from the front
-                const MAX_CHARS = 12000;
+                // Cap at ~20,000 chars by trimming the oldest timestamped entries from the front
+                const MAX_CHARS = 20000;
                 if (autoMemoryContent.length > MAX_CHARS) {
                     // Find the second occurrence of a '[' date marker and trim everything before it
                     const firstBracket = autoMemoryContent.indexOf('[');
