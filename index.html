@@ -2137,6 +2137,8 @@
         }
 
         let _commLastSendTime = 0;
+        const COMM_SEND_COOLDOWN_MS = 3000;
+        const MAX_SENDER_NAME_LENGTH = 24;
         function startCommunityChat() {
             if (!window._commSubscribe) {
                 setTimeout(() => {
@@ -2168,7 +2170,7 @@
                     if (!isMe) {
                         const nameEl = document.createElement('p');
                         nameEl.className = 'text-[10px] font-semibold text-[#A3A095] px-1';
-                        nameEl.textContent = (msg.senderName || 'User').slice(0, 24);
+                        nameEl.textContent = (msg.senderName || 'User').slice(0, MAX_SENDER_NAME_LENGTH);
                         bubble.appendChild(nameEl);
                     }
                     const msgEl = document.createElement('div');
@@ -2196,7 +2198,7 @@
             if (!text) return;
             if (text.length > 500) { showToast('Message too long (max 500 chars)'); return; }
             const now = Date.now();
-            if (now - _commLastSendTime < 3000) { showToast('Please wait a moment before sending again'); return; }
+            if (now - _commLastSendTime < COMM_SEND_COOLDOWN_MS) { showToast('Please wait a moment before sending again'); return; }
             if (!window._commSend) { showToast('Community chat not ready yet'); return; }
             _commLastSendTime = now;
             const name = localStorage.getItem('snoah_user_name') || 'User';
