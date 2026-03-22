@@ -107,6 +107,8 @@
     <!-- KaTeX for Math/Physics Rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <!-- KaTeX mhchem extension for chemistry equations (\ce{H2O}, \ce{2H2 + O2 -> 2H2O}) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/mhchem.js"></script>
     <style>
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
@@ -328,16 +330,24 @@
         .theme-forest { --accent:#2D7A4F; --accent-light:#E6F4EC; --bg:#F2F7F4; --surface:#FFFFFF; --border:#C5DFCE; }
         .theme-rose   { --accent:#C4396B; --accent-light:#FDE8F0; --bg:#FBF4F6; --surface:#FFFFFF; --border:#F0C8D8; }
     </style>
-    <!-- Firebase SDK for visit tracking & admin features -->
+    <!-- Firebase SDK for visit tracking, admin features & community chat -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getFirestore, doc, getDoc, setDoc, increment, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, setDoc, increment, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
         const _fbCfg = { apiKey: "AIzaSyBjPEh5Dq_OYiQduLXakDod_huPyQQMk0E", authDomain: "novah-pub.firebaseapp.com", projectId: "novah-pub", storageBucket: "novah-pub.firebasestorage.app", messagingSenderId: "609580159558", appId: "1:609580159558:web:1823d4dd939e470e0df047", measurementId: "G-VNWM5G0X2Z" };
         const _fbApp = initializeApp(_fbCfg, 'snoahVisit');
         const _db = getFirestore(_fbApp);
+        const _auth = getAuth(_fbApp);
+        // Sign in anonymously so Firestore auth-required rules work
+        let _authReady = signInAnonymously(_auth).catch(() => {});
+        let _currentUid = null;
+        _auth.onAuthStateChanged(u => { if (u) _currentUid = u.uid; });
+        async function _ensureAuth() { await _authReady; if (!_auth.currentUser) { _authReady = signInAnonymously(_auth).catch(()=>{}); await _authReady; } }
         // Track visit: increment total and daily counter atomically
         (async () => {
             try {
+                await _ensureAuth();
                 const today = new Date().toISOString().slice(0, 10);
                 const statsRef = doc(_db, 'admin_stats', 'visits');
                 // Use increment() for both total and daily to avoid race conditions
@@ -373,6 +383,30 @@
                 }
             } catch(e) { /* silent */ }
         })();
+        // ── Community Chat API (exposed on window for use in main script) ──
+        let _commUnsubFn = null;
+        window._commGetUid = () => _currentUid;
+        window._commSend = async function(text, senderName) {
+            await _ensureAuth();
+            return addDoc(collection(_db, 'community_chat'), {
+                text,
+                senderName: senderName || 'User',
+                uid: _currentUid || 'anon',
+                ts: serverTimestamp()
+            });
+        };
+        window._commSubscribe = function(callback) {
+            if (_commUnsubFn) { _commUnsubFn(); _commUnsubFn = null; }
+            const q = query(collection(_db, 'community_chat'), orderBy('ts', 'desc'), limit(80));
+            _commUnsubFn = onSnapshot(q, snap => {
+                const msgs = [];
+                snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
+                callback(msgs.reverse());
+            }, () => {});
+        };
+        window._commUnsubscribe = function() {
+            if (_commUnsubFn) { _commUnsubFn(); _commUnsubFn = null; }
+        };
     </script>
 </head>
 <div id="pwa-banner" class="hidden fixed top-0 left-0 right-0 z-[9999] bg-[#D25D38] text-white px-4 py-2.5 flex items-center justify-between shadow-lg">
@@ -922,8 +956,8 @@
                         <span class="text-[14px] text-[#5B5951]">Updates</span>
                     </button>
                     <button onclick="openContactModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
-                        <i data-lucide="mail" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
-                        <span class="text-[14px] text-[#5B5951]">Contact Us</span>
+                        <i data-lucide="globe" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
+                        <span class="text-[14px] text-[#5B5951]">Community</span>
                     </button>
                 </div>
             </div>
@@ -1414,12 +1448,16 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.2</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.3</span>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Global Community Chat 🌍</strong> — Tap "Community" in the sidebar to join a live global chat room shared by all SnoahAI users worldwide. Messages are stored in Firebase and appear in real-time for everyone. Full-screen experience with 💬 Live Chat and 📬 Contact Dev tabs.</li>
+                            <li><strong>Chemistry Rendering ⚗️</strong> — KaTeX mhchem extension added. Chemistry equations using <code>\ce{"{"}...{"}"}</code> notation now render beautifully: e.g. <code>\ce{"{"}H2O{"}"}</code>, <code>\ce{"{"}2H2 + O2 -&gt; 2H2O{"}"}</code>. Works in inline ($) and display ($$) math blocks.</li>
+                            <li><strong>Math &amp; Markdown Rendering Fix 🔧</strong> — Fixed a bug where chemistry/physics expressions and raw <code>$$...$$</code> could display as raw text instead of rendered math. Surrounding inline Markdown (bold, italic, code) now also renders correctly in the same line as math.</li>
+                            <li><strong>Admin Panel Fixed 🔒</strong> — Resolved "Missing or insufficient permissions" errors in the admin panel by adding Firebase Anonymous Authentication. All admin Firestore operations are now properly authenticated. Firebase Rules setup guide added to the Security tab.</li>
                             <li><strong>Compact Response Actions ⋮</strong> — AI response action buttons now show only 3 at a time (Copy, Retry, Read) plus a vertical three-dots (⋮) button. Tapping ⋮ opens a neat popup card with all available actions — no more layout-breaking button rows.</li>
                             <li><strong>Copy as Markdown 📋</strong> — New option in the ⋮ menu. Copies the raw Markdown source of any AI response to your clipboard — great for pasting into editors, notes, or GitHub.</li>
                             <li><strong>Download Response 💾</strong> — New option in the ⋮ menu. Downloads any AI response as a plain text (.txt) file instantly — no copy-paste needed.</li>
@@ -1504,7 +1542,8 @@
                             <li><strong>Multi-Key Pool</strong> — Add multiple API keys per platform with auto-rotation on rate limits.</li>
                             <li><strong>Token Usage Tracking</strong> — Monitor your token usage per platform in Settings.</li>
                             <li><strong>PWA Install</strong> — Install as a native-like app on Android home screen.</li>
-                            <li><strong>Contact Us</strong> — Reach the developer via Telegram or Instagram from the sidebar.</li>
+                            <li><strong>Global Community Chat 🌍</strong> — Join a live global chat room with all SnoahAI users. Tap "Community" in the sidebar. Real-time Firebase messages, full-screen, with a Contact Dev tab.</li>
+                            <li><strong>Chemistry Rendering ⚗️</strong> — KaTeX mhchem extension renders chemical equations beautifully. Use \ce{"{"}H2O{"}"}, \ce{"{"}2H2 + O2 -&gt; 2H2O{"}"} etc. in math blocks.</li>
                             <li><strong>User Name Personalization</strong> — Your name is shown in the sidebar and saved locally on your device.</li>
                             <li><strong>Advanced Model Parameters</strong> — ⚙️ Tune Temperature, Top P, Top K, and Max Tokens in Settings for fine-grained control over AI responses.</li>
                             <li><strong>Multi-Modal Output (Diagrams)</strong> — 📊 AI responses with Mermaid code blocks are automatically rendered as visual diagrams (flowcharts, sequence diagrams, pie charts, etc.).</li>
@@ -1567,63 +1606,79 @@
             </div>
         </div>
 
-        <!-- ===== CONTACT US MODAL ===== -->
-        <div id="contact-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
-            <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeContactModal()"></div>
-            <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height: 88%;">
-                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
-                    <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-lg bg-[#F2F0E9] flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                        </div>
-                        <h2 class="font-serif font-semibold text-[17px]">Contact Us</h2>
+        <!-- ===== COMMUNITY CHAT MODAL (replaces old Contact Us modal) ===== -->
+        <div id="contact-modal" class="absolute inset-0 z-[70] flex flex-col hidden bg-[#FAF9F6]">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0 bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 text-xl" style="background:linear-gradient(135deg,#D25D38,#E8834E);">🌍</div>
+                    <div>
+                        <h2 class="font-serif font-bold text-[17px] text-[#2C2B29] leading-tight">Global Community</h2>
+                        <p class="text-[11px] text-[#A3A095] leading-none mt-0.5">Live chat with SnoahAI users worldwide</p>
                     </div>
-                    <button onclick="closeContactModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
                 </div>
-                <div class="p-5 overflow-y-auto flex-1 text-[13px] text-[#5B5951] leading-relaxed space-y-5">
-                    <div class="text-center space-y-2 mb-2">
-                        <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">Get in Touch</h3>
-                        <p class="text-[12px] text-[#A3A095]">Reach out to Shahzaib Muzaffar through any of the channels below</p>
+                <button onclick="closeContactModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <!-- Tabs -->
+            <div class="flex gap-1.5 px-4 py-2.5 border-b border-[#EAE8E0] bg-white shrink-0">
+                <button id="comm-tab-btn-chat" onclick="switchCommTab('chat')" class="flex-1 py-1.5 rounded-xl text-[13px] font-semibold transition-colors bg-[#D25D38] text-white">💬 Live Chat</button>
+                <button id="comm-tab-btn-contact" onclick="switchCommTab('contact')" class="flex-1 py-1.5 rounded-xl text-[13px] font-semibold transition-colors text-[#8C897D] hover:bg-[#F2F0E9]">📬 Contact Dev</button>
+            </div>
+            <!-- Live Chat Panel -->
+            <div id="comm-panel-chat" class="flex-1 flex flex-col overflow-hidden">
+                <div id="community-messages" class="flex-1 overflow-y-auto px-4 py-3 space-y-2.5">
+                    <p id="community-loading" class="text-center text-[13px] text-[#A3A095] py-10">Connecting to community…</p>
+                </div>
+                <div class="px-4 py-3 border-t border-[#EAE8E0] bg-white shrink-0">
+                    <div class="flex gap-2 items-center">
+                        <input id="community-input" type="text" placeholder="Say something to the world… 👋" maxlength="500"
+                            class="flex-1 bg-[#F2F0E9] rounded-2xl px-4 py-2.5 text-[14px] text-[#2C2B29] outline-none border border-transparent focus:border-[#D25D38] transition-colors placeholder:text-[#A3A095]"
+                            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCommunityMessage();}">
+                        <button onclick="sendCommunityMessage()" class="w-10 h-10 rounded-full bg-[#D25D38] flex items-center justify-center text-white hover:bg-[#B84E2E] transition-colors active:scale-95 shrink-0 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                        </button>
                     </div>
-
-                    <a href="https://t.me/Owner_Of_Crypton" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
-                        <div class="w-10 h-10 rounded-xl bg-[#E3F2FD] flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A6EBD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">Telegram</p>
-                            <p class="text-[12px] text-[#A3A095]">@Owner_Of_Crypton</p>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                    </a>
-
-                    <a href="https://instagram.com/shahzaib_muzaffar_7" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
-                        <div class="w-10 h-10 rounded-xl bg-[#FCE4EC] flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C4396B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">Instagram</p>
-                            <p class="text-[12px] text-[#A3A095]">@shahzaib_muzaffar_7</p>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                    </a>
-
-                    <a href="https://github.com/novahbyshahzaib" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
-                        <div class="w-10 h-10 rounded-xl bg-[#F3F0FF] flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">GitHub</p>
-                            <p class="text-[12px] text-[#A3A095]">@novahbyshahzaib</p>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                    </a>
+                    <p class="text-[10px] text-[#A3A095] mt-1.5 text-center">Be respectful · No spam · Max 500 chars · Messages are public</p>
                 </div>
-                <div class="px-5 py-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
-                    <button onclick="closeContactModal()" class="w-full py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Close</button>
+            </div>
+            <!-- Contact Dev Panel (hidden by default) -->
+            <div id="comm-panel-contact" class="flex-1 overflow-y-auto p-5 space-y-4 hidden">
+                <div class="text-center space-y-2 mb-1">
+                    <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">Get in Touch</h3>
+                    <p class="text-[12px] text-[#A3A095]">Reach out to Shahzaib Muzaffar through any of the channels below</p>
                 </div>
+                <a href="https://t.me/Owner_Of_Crypton" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-[#E3F2FD] flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A6EBD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">Telegram</p>
+                        <p class="text-[12px] text-[#A3A095]">@Owner_Of_Crypton</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                </a>
+                <a href="https://instagram.com/shahzaib_muzaffar_7" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-[#FCE4EC] flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C4396B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">Instagram</p>
+                        <p class="text-[12px] text-[#A3A095]">@shahzaib_muzaffar_7</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                </a>
+                <a href="https://github.com/novahbyshahzaib" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-[#F3F0FF] flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">GitHub</p>
+                        <p class="text-[12px] text-[#A3A095]">@novahbyshahzaib</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                </a>
             </div>
         </div>
 
@@ -2060,10 +2115,100 @@
         function openContactModal() {
             if (isSidebarOpen) toggleSidebar();
             document.getElementById('contact-modal').classList.remove('hidden');
+            switchCommTab('chat');
+            startCommunityChat();
         }
 
         function closeContactModal() {
             document.getElementById('contact-modal').classList.add('hidden');
+            if (window._commUnsubscribe) window._commUnsubscribe();
+        }
+
+        function switchCommTab(tab) {
+            const isChat = tab === 'chat';
+            document.getElementById('comm-panel-chat').classList.toggle('hidden', !isChat);
+            document.getElementById('comm-panel-contact').classList.toggle('hidden', isChat);
+            const btnChat = document.getElementById('comm-tab-btn-chat');
+            const btnContact = document.getElementById('comm-tab-btn-contact');
+            if (btnChat) {
+                btnChat.className = 'flex-1 py-1.5 rounded-xl text-[13px] font-semibold transition-colors ' + (isChat ? 'bg-[#D25D38] text-white' : 'text-[#8C897D] hover:bg-[#F2F0E9]');
+                btnContact.className = 'flex-1 py-1.5 rounded-xl text-[13px] font-semibold transition-colors ' + (!isChat ? 'bg-[#D25D38] text-white' : 'text-[#8C897D] hover:bg-[#F2F0E9]');
+            }
+        }
+
+        let _commLastSendTime = 0;
+        function startCommunityChat() {
+            if (!window._commSubscribe) {
+                setTimeout(() => {
+                    if (window._commSubscribe) startCommunityChat();
+                    else {
+                        const l = document.getElementById('community-loading');
+                        if (l) l.textContent = 'Community chat unavailable. Check your connection.';
+                    }
+                }, 1500);
+                return;
+            }
+            window._commSubscribe(function(msgs) {
+                const container = document.getElementById('community-messages');
+                if (!container) return;
+                const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 60;
+                const myUid = window._commGetUid ? window._commGetUid() : null;
+                container.innerHTML = '';
+                if (msgs.length === 0) {
+                    container.innerHTML = '<p class="text-center text-[13px] text-[#A3A095] py-10">No messages yet. Be the first to say hello! 👋</p>';
+                    return;
+                }
+                msgs.forEach(function(msg) {
+                    const isMe = myUid && msg.uid === myUid;
+                    const time = msg.ts && msg.ts.toDate ? msg.ts.toDate().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+                    const wrap = document.createElement('div');
+                    wrap.className = 'flex ' + (isMe ? 'justify-end' : 'justify-start');
+                    const bubble = document.createElement('div');
+                    bubble.className = 'max-w-[78%] ' + (isMe ? 'items-end' : 'items-start') + ' flex flex-col gap-0.5';
+                    if (!isMe) {
+                        const nameEl = document.createElement('p');
+                        nameEl.className = 'text-[10px] font-semibold text-[#A3A095] px-1';
+                        nameEl.textContent = (msg.senderName || 'User').slice(0, 24);
+                        bubble.appendChild(nameEl);
+                    }
+                    const msgEl = document.createElement('div');
+                    msgEl.className = 'px-3.5 py-2 rounded-2xl text-[14px] leading-snug break-words ' +
+                        (isMe ? 'bg-[#D25D38] text-white rounded-br-sm' : 'bg-white border border-[#E5E3DB] text-[#2C2B29] rounded-bl-sm');
+                    msgEl.textContent = msg.text || '';
+                    bubble.appendChild(msgEl);
+                    if (time) {
+                        const timeEl = document.createElement('p');
+                        timeEl.className = 'text-[10px] text-[#A3A095] px-1';
+                        timeEl.textContent = time;
+                        bubble.appendChild(timeEl);
+                    }
+                    wrap.appendChild(bubble);
+                    container.appendChild(wrap);
+                });
+                if (wasAtBottom || msgs.length <= 5) container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        function sendCommunityMessage() {
+            const input = document.getElementById('community-input');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+            if (text.length > 500) { showToast('Message too long (max 500 chars)'); return; }
+            const now = Date.now();
+            if (now - _commLastSendTime < 3000) { showToast('Please wait a moment before sending again'); return; }
+            if (!window._commSend) { showToast('Community chat not ready yet'); return; }
+            _commLastSendTime = now;
+            const name = localStorage.getItem('snoah_user_name') || 'User';
+            input.value = '';
+            input.disabled = true;
+            window._commSend(text, name).then(function() {
+                input.disabled = false;
+                input.focus();
+            }).catch(function(e) {
+                showToast('Failed to send: ' + (e.message || 'unknown error'));
+                input.disabled = false;
+            });
         }
 
         function toggleTempChat() {
@@ -4754,14 +4899,11 @@
                     html += '<div class="h-2"></div>';
                 } else {
                     flushList();
-                    let processed = line;
-                    processed = processed.replace(/\$\$(.+?)\$\$/g, (_, l) => renderMath(l, true));
-                    processed = processed.replace(/\$([^$\n]+)\$/g, (_, l) => renderMath(l, false));
-                    if (processed === line) {
-                        html += '<p class="md-content text-[15px] leading-relaxed my-0.5 text-[#2C2B29]">' + processInlineRaw(line) + '</p>';
-                    } else {
-                        html += '<p class="md-content text-[15px] leading-relaxed my-0.5 text-[#2C2B29]">' + processed + '</p>';
-                    }
+                    // Use processInlineRaw for all lines — it handles $$...$$ math, $...$
+                    // inline math, chemistry \ce{}, HTML-escaping, and inline Markdown formatting
+                    // in the correct order. The old separate math-then-rawHTML path was unsafe
+                    // (unescaped surrounding text) and missed inline Markdown formatting.
+                    html += '<p class="md-content text-[15px] leading-relaxed my-0.5 text-[#2C2B29]">' + processInlineRaw(line) + '</p>';
                 }
             }
             flushList();
@@ -5463,13 +5605,16 @@ FEATURES:
 56. INSTANT RESPONSE DISPLAY: Settings → API tab → Response Display toggle. When ON, AI responses appear all at once without the character-by-character streaming animation. Useful for users who prefer immediate full responses.
 57. RESPONSE LANGUAGE: Settings → AI tab → Response Language dropdown. Choose from: Auto (default), English, Spanish, French, German, Arabic, Chinese, Hindi, Japanese, Portuguese, Russian, Korean. When set, a language directive is injected into the system prompt to make the AI always respond in the chosen language, regardless of the user's input language.
 58. MESSAGE TIMESTAMPS: Settings → App tab → Show Timestamps toggle. When ON, every message (both user and AI) displays the time it was sent. Timestamps are stored on the message element and toggled via CSS class 'show-timestamps' on the root element.
+59. GLOBAL COMMUNITY CHAT: ☰ → Community — opens a full-screen live chat room shared by ALL SnoahAI users worldwide in real time. Powered by Firebase Firestore with onSnapshot for instant message delivery. Messages include sender name, time, and are stored in the 'community_chat' Firestore collection. The modal has two tabs: 💬 Live Chat (the global chat room) and 📬 Contact Dev (Telegram, Instagram, GitHub links to reach Shahzaib Muzaffar). Max 500 chars per message, 3-second cooldown to prevent spam. The user's saved name from Settings is shown as their display name.
+60. CHEMISTRY RENDERING: KaTeX mhchem extension is loaded alongside KaTeX. Chemistry equations using \\ce{...} notation render beautifully in both inline ($...$) and display ($$...$$) math blocks. Examples: $\\ce{H2O}$ renders as water, $\\ce{2H2 + O2 -> 2H2O}$ renders a balanced equation with arrow. Use \\ce{} for any chemical formula or reaction equation.
+61. MATH & MARKDOWN RENDERING: All lines in the AI response go through processInlineRaw() which handles: display math ($$...$$), inline math ($...$), chemistry (\\ce{}), HTML escaping, bold/italic/code/link Markdown in the correct order. Previously, lines containing math could display with unformatted surrounding text — this is now fixed.
 APP STRUCTURE & LAYOUT:
 - Single HTML file (index.html) with all CSS (Tailwind CDN) and JavaScript inline — no separate files except backend Vercel serverless functions in /api/ folder.
 - Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
 - Main area: Scrollable message thread with welcome screen shown when no chat is active.
 - Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates, Temp Chat buttons, main text input, Send/Stop button.
-- Sidebar (slides in from left): User profile, chat history list with search, settings shortcut, About/Updates/Contact links, Dark mode toggle.
-- Modals: Settings (tabbed: API, AI, App), Updates, About Us, Contact Us, Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
+- Sidebar (slides in from left): User profile, chat history list with search, settings shortcut, About/Updates/Community links, Dark mode toggle.
+- Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
 
@@ -5491,7 +5636,7 @@ DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mo
 
 Always answer questions about the app based on the above. If asked "what can you do" or "how do I use X feature", explain it clearly based on this documentation.
 
-FORMATTING RULES: (1) Always use LaTeX for math/physics — inline: $...$ display: $$...$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. ` + lengthDirective;
+FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $...$ display: $$...$$. For chemistry equations use KaTeX mhchem: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$, $$\\ce{CuSO4 + 2NaOH -> Cu(OH)2 + Na2SO4}$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. (6) DEVELOPER NOTE: Telegram username is @Owner_Of_Crypton and Instagram username is @shahzaib_muzaffar_7 — preserve underscores exactly as written. ` + lengthDirective;
                 if (useThinking) systemInstruction += "The user has enabled THINKING MODE. Wrap your detailed step-by-step internal reasoning inside <think> and </think> tags at the very beginning of your response, then give the final answer. ";
                 if (platform === 'mistral') {
                     systemInstruction += 'You are running on Mistral AI. ';
