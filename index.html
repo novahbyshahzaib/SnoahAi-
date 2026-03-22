@@ -959,6 +959,10 @@
                         <i data-lucide="globe" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
                         <span class="text-[14px] text-[#5B5951]">Community</span>
                     </button>
+                    <button onclick="openContactUsModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
+                        <i data-lucide="mail" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
+                        <span class="text-[14px] text-[#5B5951]">Contact Us</span>
+                    </button>
                 </div>
             </div>
             <div class="p-5 border-t border-[#EAE8E0] bg-[#F2F0E9]">
@@ -2116,6 +2120,13 @@
             if (isSidebarOpen) toggleSidebar();
             document.getElementById('contact-modal').classList.remove('hidden');
             switchCommTab('chat');
+            startCommunityChat();
+        }
+
+        function openContactUsModal() {
+            if (isSidebarOpen) toggleSidebar();
+            document.getElementById('contact-modal').classList.remove('hidden');
+            switchCommTab('contact');
             startCommunityChat();
         }
 
