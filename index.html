@@ -1461,7 +1461,6 @@
                             <li><strong>Global Community Chat 🌍</strong> — Tap "Community" in the sidebar to join a live global chat room shared by all SnoahAI users worldwide. Messages are stored in Firebase and appear in real-time for everyone. Full-screen experience with 💬 Live Chat and 📬 Contact Dev tabs.</li>
                             <li><strong>Chemistry Rendering ⚗️</strong> — KaTeX mhchem extension added. Chemistry equations using <code>\ce{"{"}...{"}"}</code> notation now render beautifully: e.g. <code>\ce{"{"}H2O{"}"}</code>, <code>\ce{"{"}2H2 + O2 -&gt; 2H2O{"}"}</code>. Works in inline ($) and display ($$) math blocks.</li>
                             <li><strong>Math &amp; Markdown Rendering Fix 🔧</strong> — Fixed a bug where chemistry/physics expressions and raw <code>$$...$$</code> could display as raw text instead of rendered math. Surrounding inline Markdown (bold, italic, code) now also renders correctly in the same line as math.</li>
-                            <li><strong>Admin Panel Fixed 🔒</strong> — Resolved "Missing or insufficient permissions" errors in the admin panel by adding Firebase Anonymous Authentication. All admin Firestore operations are now properly authenticated. Firebase Rules setup guide added to the Security tab.</li>
                             <li><strong>Compact Response Actions ⋮</strong> — AI response action buttons now show only 3 at a time (Copy, Retry, Read) plus a vertical three-dots (⋮) button. Tapping ⋮ opens a neat popup card with all available actions — no more layout-breaking button rows.</li>
                             <li><strong>Copy as Markdown 📋</strong> — New option in the ⋮ menu. Copies the raw Markdown source of any AI response to your clipboard — great for pasting into editors, notes, or GitHub.</li>
                             <li><strong>Download Response 💾</strong> — New option in the ⋮ menu. Downloads any AI response as a plain text (.txt) file instantly — no copy-paste needed.</li>
@@ -5894,16 +5893,6 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 if (!isStreaming) break;
                                 const chunk = part?.text ?? part?.delta?.content ?? '';
                                 if (chunk) { fullRaw += chunk; renderDirty = true; }
-                                if (renderDirty && !liveAppended) {
-                                    messagesWrapper.appendChild(liveWrapper);
-                                    liveAppended = true;
-                                    messagesWrapper.scrollTop = messagesWrapper.scrollHeight;
-                                }
-                                if (renderDirty) {
-                                    liveTextEl.innerHTML = formatMarkdown(fullRaw);
-                                    liveCursor.style.display = '';
-                                    renderDirty = false;
-                                }
                             }
                         } else if (platform === 'gais' && !useAgent) {
                             // Google AI Studio — same as Gemini API but with separate key
@@ -6321,13 +6310,25 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
             let htmlContent = '<div class="flex flex-col w-full max-w-[95%]">';
             const uniqueId = Date.now();
 
-            if (msg.thinking) {
+            // Resolve thinking content — use stored thinking field, or extract from text for legacy messages
+            const THINK_RE = /<think>([\s\S]*?)(?:<\/think>|$)/i;
+            let thinkingContent = msg.thinking || null;
+            let displayText = msg.text || '';
+            if (!thinkingContent) {
+                const legacyMatch = displayText.match(THINK_RE);
+                if (legacyMatch) {
+                    thinkingContent = legacyMatch[1].trim();
+                    displayText = displayText.replace(THINK_RE, '').trim();
+                }
+            }
+
+            if (thinkingContent) {
                 htmlContent += '<div class="mb-4 rounded-xl border border-[#E5E3DB] bg-[#F2F0E9] overflow-hidden transition-all">' +
                     '<button id="btn-think-' + uniqueId + '" onclick="toggleExpand(\'btn-think-' + uniqueId + '\',\'content-think-' + uniqueId + '\')" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-[#5B5951] hover:bg-[#EAE8E0] transition-colors">' +
                     '<div class="flex items-center gap-2"><i data-lucide="brain" class="w-4 h-4 text-[#8C897D]"></i><span>Thought Process</span></div>' +
                     '<i id="btn-think-' + uniqueId + '-icon" data-lucide="chevron-down" class="w-4 h-4 text-[#8C897D] transition-transform duration-200"></i></button>' +
                     '<div id="content-think-' + uniqueId + '" class="hidden px-4 pb-4 pt-2 text-[13px] text-[#737166] leading-relaxed italic border-t border-[#E5E3DB]">' +
-                    escapeHTML(msg.thinking).replace(/\n/g,'<br>') + '</div></div>';
+                    escapeHTML(thinkingContent).replace(/\n/g,'<br>') + '</div></div>';
             }
 
             if (msg.sources && msg.sources.length > 0) {
@@ -6357,7 +6358,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
             const textContainer = wrapper.querySelector('#text-content-' + uniqueId);
             const cursor = wrapper.querySelector('#cursor-' + uniqueId);
             const actionsDiv = wrapper.querySelector('#actions-' + uniqueId);
-            const fullText = msg.text || '';
+            const fullText = displayText;
 
             function finishRender() {
                 isStreaming = false;
