@@ -333,7 +333,7 @@
     <!-- Firebase SDK for visit tracking, admin features & community chat -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getFirestore, doc, getDoc, setDoc, increment, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, getDocs, where, increment, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
         import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
         const _fbCfg = { apiKey: "AIzaSyBjPEh5Dq_OYiQduLXakDod_huPyQQMk0E", authDomain: "novah-pub.firebaseapp.com", projectId: "novah-pub", storageBucket: "novah-pub.firebasestorage.app", messagingSenderId: "609580159558", appId: "1:609580159558:web:1823d4dd939e470e0df047", measurementId: "G-VNWM5G0X2Z" };
         const _fbApp = initializeApp(_fbCfg, 'snoahVisit');
@@ -406,6 +406,37 @@
         };
         window._commUnsubscribe = function() {
             if (_commUnsubFn) { _commUnsubFn(); _commUnsubFn = null; }
+        };
+        window._commDelete = async function(msgId) {
+            await _ensureAuth();
+            return deleteDoc(doc(_db, 'community_chat', msgId));
+        };
+        window._commCheckUsername = async function(username) {
+            const clean = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+            if (!clean || clean.length < 3) return { ok: false, reason: 'Username must be at least 3 characters (letters, numbers, underscores only).' };
+            if (clean.length > 20) return { ok: false, reason: 'Username must be 20 characters or fewer.' };
+            await _ensureAuth();
+            const snap = await getDoc(doc(_db, 'community_usernames', clean));
+            if (snap.exists() && snap.data().uid !== _currentUid) return { ok: false, reason: 'This username is already taken. Please choose another.' };
+            return { ok: true, clean };
+        };
+        window._commSetUsername = async function(username) {
+            await _ensureAuth();
+            const clean = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+            const old = localStorage.getItem('snoah_comm_username');
+            if (old && old !== clean) {
+                try { await deleteDoc(doc(_db, 'community_usernames', old)); } catch(e) {}
+            }
+            await setDoc(doc(_db, 'community_usernames', clean), { uid: _currentUid || 'anon', displayName: username.trim(), ts: serverTimestamp() });
+            return clean;
+        };
+        window._commGetBanned = async function() {
+            await _ensureAuth();
+            if (!_currentUid) return false;
+            const username = localStorage.getItem('snoah_comm_username');
+            if (!username) return false;
+            const snap = await getDoc(doc(_db, 'community_usernames', username));
+            return snap.exists() && snap.data().banned === true;
         };
     </script>
 </head>
@@ -930,9 +961,9 @@
                         <i data-lucide="globe" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
                         <span class="text-[14px] text-[#5B5951]">Community</span>
                     </button>
-                    <button onclick="openContactUsModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
-                        <i data-lucide="mail" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
-                        <span class="text-[14px] text-[#5B5951]">Contact Us</span>
+                    <button onclick="openUpdatesModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
+                        <i data-lucide="bell" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
+                        <span class="text-[14px] text-[#5B5951]">Updates</span>
                     </button>
                 </div>
             </div>
@@ -1511,6 +1542,15 @@
                                     <span class="text-[11px] text-[#A3A095]">What's new in SnoahAI</span>
                                 </div>
                             </button>
+                            <button onclick="closePreferencesModal();openContactUsModal();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F2F0E9] text-left transition-colors group">
+                                <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] group-hover:bg-[#EAE8E0] flex items-center justify-center shrink-0 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C897D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                </div>
+                                <div>
+                                    <span class="text-[14px] text-[#2C2B29] font-medium block">Contact Us</span>
+                                    <span class="text-[11px] text-[#A3A095]">Reach the developer</span>
+                                </div>
+                            </button>
                             <button onclick="closePreferencesModal();confirmDeleteHistory();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#FDF4F2] text-left transition-colors group">
                                 <div class="w-8 h-8 rounded-lg bg-[#FDF4F2] group-hover:bg-[#FDEAE5] flex items-center justify-center shrink-0 transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C5A09A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -1555,7 +1595,9 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
-                            <li><strong>Sidebar Polish &amp; Preferences ✨</strong> — Sidebar now shows only 4 clean action buttons: Settings, Preferences, Community, and Contact Us. All other features (Export, Share, Summarize, Pinned Messages, Bookmarks, Dark Mode, About, Updates, Delete History) are now neatly organised inside a new <em>Preferences</em> panel with three categories: Chat Tools, Saved Items, and App &amp; Info.</li>
+                            <li><strong>Community Chat Upgrades 🌍</strong> — Community chat now requires a unique username visible to all users. First-time entrants see Community Rules &amp; Privacy Policy (with a confirmation checkbox). Users can delete their own messages for everyone. Anti-spam cooldown increased to 10 seconds with a live countdown timer.</li>
+                            <li><strong>Sidebar Redesign 🗂️</strong> — "Contact Us" removed from sidebar and added inside Preferences. A new "Updates" button now lives in the sidebar below Community for quick access to What's New.</li>
+                            <li><strong>Sidebar Polish &amp; Preferences ✨</strong> — Sidebar now shows only 4 clean action buttons: Settings, Preferences, Community, and Updates. All other features (Export, Share, Summarize, Pinned Messages, Bookmarks, Dark Mode, About, Updates, Contact Us, Delete History) are neatly organised inside the <em>Preferences</em> panel.</li>
                             <li><strong>Chat History Pagination 📋</strong> — The sidebar chat list now shows your 4 most recent chats. Tap the "X more chats" button to expand the full history, and "Show less" to collapse it again — keeping the sidebar clean and compact.</li>
                             <li><strong>Global Community Chat 🌍</strong> — Tap "Community" in the sidebar to join a live global chat room shared by all SnoahAI users worldwide. Messages are stored in Firebase and appear in real-time for everyone. Full-screen experience with 💬 Live Chat and 📬 Contact Dev tabs.</li>
                             <li><strong>Chemistry Rendering ⚗️</strong> — KaTeX mhchem extension added. Chemistry equations using <code>\ce{"{"}...{"}"}</code> notation now render beautifully: e.g. <code>\ce{"{"}H2O{"}"}</code>, <code>\ce{"{"}2H2 + O2 -&gt; 2H2O{"}"}</code>. Works in inline ($) and display ($$) math blocks.</li>
@@ -1742,6 +1784,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                         </button>
                     </div>
+                    <p id="comm-cooldown-msg" class="text-[10px] text-[#D25D38] mt-1.5 text-center hidden"></p>
                     <p class="text-[10px] text-[#A3A095] mt-1.5 text-center">Be respectful · No spam · Max 500 chars · Messages are public</p>
                 </div>
             </div>
@@ -1783,8 +1826,66 @@
                 </a>
             </div>
         </div>
-
-        <!-- ===== TOKEN MANAGEMENT MODAL ===== -->
+            <!-- ── Username Setup Overlay ── -->
+            <div id="comm-username-overlay" class="absolute inset-0 z-10 bg-[#FAF9F6] flex flex-col hidden">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0 bg-white">
+                    <h2 class="font-serif font-bold text-[17px] text-[#2C2B29]">Choose a Username</h2>
+                    <button onclick="closeContactModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-5 space-y-4">
+                    <div class="text-center space-y-2 mb-2">
+                        <div class="w-16 h-16 rounded-full bg-[#FEF3EC] flex items-center justify-center mx-auto text-3xl">👤</div>
+                        <p class="text-[13px] text-[#5B5951]">Your username will be visible to everyone in the community chat. Choose wisely — it must be unique!</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[12px] font-semibold text-[#8C897D] uppercase tracking-wider">Username</label>
+                        <input id="comm-username-input" type="text" maxlength="20" placeholder="e.g. cooluser123"
+                            class="w-full bg-[#F2F0E9] rounded-2xl px-4 py-3 text-[14px] text-[#2C2B29] outline-none border border-transparent focus:border-[#D25D38] transition-colors placeholder:text-[#A3A095]"
+                            oninput="checkCommUsernameAvailability()"
+                            onkeydown="if(event.key==='Enter') saveCommUsername()">
+                        <p id="comm-username-status" class="text-[12px] text-[#A3A095] px-1">3–20 characters: letters, numbers, underscores only.</p>
+                    </div>
+                    <button id="comm-username-save-btn" onclick="saveCommUsername()" disabled
+                        class="w-full py-3 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold transition-colors shadow-sm active:scale-95 opacity-50 cursor-not-allowed">
+                        Save Username &amp; Continue
+                    </button>
+                </div>
+            </div>
+            <!-- ── Privacy Policy Overlay ── -->
+            <div id="comm-privacy-overlay" class="absolute inset-0 z-10 bg-[#FAF9F6] flex flex-col hidden">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0 bg-white">
+                    <h2 class="font-serif font-bold text-[17px] text-[#2C2B29]">Community Rules &amp; Privacy</h2>
+                    <button onclick="closeContactModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-5 space-y-4">
+                    <div class="bg-[#FEF3EC] border border-[#FDDCCC] rounded-2xl p-4 space-y-2">
+                        <h3 class="font-semibold text-[14px] text-[#92400E]">📋 Terms &amp; Conditions</h3>
+                        <ul class="text-[13px] text-[#78350F] space-y-1.5 list-disc list-inside">
+                            <li>Be respectful — no hate speech, harassment, or spam.</li>
+                            <li>No sharing of personal information or harmful content.</li>
+                            <li>Messages must be relevant and constructive.</li>
+                            <li>Violation may result in a ban from community chat.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl p-4 space-y-2">
+                        <h3 class="font-semibold text-[14px] text-[#166534]">🔒 Privacy Notice</h3>
+                        <p class="text-[13px] text-[#15803D] leading-relaxed"><strong>Only community chat messages are stored in the database.</strong> Your username, message text, and send time are saved in Firebase Firestore and visible to all SnoahAI users. Your AI conversations, API keys, and all other app data remain stored only on your device and are never uploaded.</p>
+                    </div>
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" id="comm-privacy-checkbox" onchange="onCommPrivacyCheck()" class="mt-0.5 w-4 h-4 accent-[#D25D38] shrink-0">
+                        <span class="text-[13px] text-[#5B5951]">I have read and agree to the Community Terms &amp; Conditions and Privacy Notice.</span>
+                    </label>
+                    <button id="comm-privacy-enter-btn" onclick="acceptCommPrivacy()" disabled
+                        class="w-full py-3 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold transition-colors shadow-sm active:scale-95 opacity-50 cursor-not-allowed">
+                        Enter Community Chat
+                    </button>
+                </div>
+            </div>
+        </div>
         <div id="token-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
             <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeTokenModal()"></div>
             <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height: 90%;">
@@ -2228,14 +2329,14 @@
             if (isSidebarOpen) toggleSidebar();
             document.getElementById('contact-modal').classList.remove('hidden');
             switchCommTab('chat');
-            startCommunityChat();
+            checkCommEntry();
         }
 
         function openContactUsModal() {
             if (isSidebarOpen) toggleSidebar();
             document.getElementById('contact-modal').classList.remove('hidden');
             switchCommTab('contact');
-            startCommunityChat();
+            checkCommEntry();
         }
 
         function closeContactModal() {
@@ -2256,8 +2357,10 @@
         }
 
         let _commLastSendTime = 0;
-        const COMM_SEND_COOLDOWN_MS = 3000;
+        const COMM_SEND_COOLDOWN_MS = 10000;
         const MAX_SENDER_NAME_LENGTH = 24;
+        let _commCooldownTimer = null;
+        let _commUsernameCheckTimer = null;
         function startCommunityChat() {
             if (!window._commSubscribe) {
                 setTimeout(() => {
@@ -2297,12 +2400,24 @@
                         (isMe ? 'bg-[#D25D38] text-white rounded-br-sm' : 'bg-white border border-[#E5E3DB] text-[#2C2B29] rounded-bl-sm');
                     msgEl.textContent = msg.text || '';
                     bubble.appendChild(msgEl);
+                    const bottomRow = document.createElement('div');
+                    bottomRow.className = 'flex items-center gap-1.5 px-1 ' + (isMe ? 'justify-end' : 'justify-start');
                     if (time) {
-                        const timeEl = document.createElement('p');
-                        timeEl.className = 'text-[10px] text-[#A3A095] px-1';
+                        const timeEl = document.createElement('span');
+                        timeEl.className = 'text-[10px] text-[#A3A095]';
                         timeEl.textContent = time;
-                        bubble.appendChild(timeEl);
+                        bottomRow.appendChild(timeEl);
                     }
+                    if (isMe) {
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'text-[10px] text-[#A3A095] hover:text-[#D25D38] transition-colors leading-none';
+                        delBtn.title = 'Delete message';
+                        delBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+                        const msgId = msg.id;
+                        delBtn.addEventListener('click', function() { deleteCommunityMessage(msgId); });
+                        bottomRow.appendChild(delBtn);
+                    }
+                    if (bottomRow.children.length > 0) bubble.appendChild(bottomRow);
                     wrap.appendChild(bubble);
                     container.appendChild(wrap);
                 });
@@ -2317,13 +2432,15 @@
             if (!text) return;
             if (text.length > 500) { showToast('Message too long (max 500 chars)'); return; }
             const now = Date.now();
-            if (now - _commLastSendTime < COMM_SEND_COOLDOWN_MS) { showToast('Please wait a moment before sending again'); return; }
+            const remaining = COMM_SEND_COOLDOWN_MS - (now - _commLastSendTime);
+            if (remaining > 0) { showToast('Please wait ' + Math.ceil(remaining / 1000) + 's before sending again'); return; }
             if (!window._commSend) { showToast('Community chat not ready yet'); return; }
             _commLastSendTime = now;
-            const name = localStorage.getItem('snoah_user_name') || 'User';
+            const commUsername = localStorage.getItem('snoah_comm_username') || localStorage.getItem('snoah_user_name') || 'User';
             input.value = '';
             input.disabled = true;
-            window._commSend(text, name).then(function() {
+            startCommCooldownDisplay();
+            window._commSend(text, commUsername).then(function() {
                 input.disabled = false;
                 input.focus();
             }).catch(function(e) {
@@ -2332,7 +2449,154 @@
             });
         }
 
-        function toggleTempChat() {
+        function deleteCommunityMessage(msgId) {
+            if (!window._commDelete) { showToast('Delete not available'); return; }
+            window._commDelete(msgId).catch(function(e) {
+                showToast('Could not delete: ' + (e.message || 'error'));
+            });
+        }
+
+        function startCommCooldownDisplay() {
+            const msgEl = document.getElementById('comm-cooldown-msg');
+            const sendBtn = document.querySelector('#comm-panel-chat button[onclick="sendCommunityMessage()"]');
+            if (_commCooldownTimer) clearInterval(_commCooldownTimer);
+            function update() {
+                const left = Math.ceil((COMM_SEND_COOLDOWN_MS - (Date.now() - _commLastSendTime)) / 1000);
+                if (left <= 0) {
+                    clearInterval(_commCooldownTimer);
+                    _commCooldownTimer = null;
+                    if (msgEl) { msgEl.textContent = ''; msgEl.classList.add('hidden'); }
+                    if (sendBtn) sendBtn.style.opacity = '';
+                    return;
+                }
+                if (msgEl) { msgEl.textContent = 'Please wait ' + left + 's before sending again'; msgEl.classList.remove('hidden'); }
+                if (sendBtn) sendBtn.style.opacity = '0.5';
+            }
+            update();
+            _commCooldownTimer = setInterval(update, 500);
+        }
+
+        function checkCommEntry() {
+            const privacyAccepted = localStorage.getItem('snoah_comm_privacy_accepted') === 'true';
+            const username = localStorage.getItem('snoah_comm_username');
+            if (!privacyAccepted) {
+                showCommPrivacyPolicy();
+            } else if (!username) {
+                showCommUsernameSetup();
+            } else {
+                startCommunityChat();
+            }
+        }
+
+        function showCommPrivacyPolicy() {
+            const ol = document.getElementById('comm-privacy-overlay');
+            const ul = document.getElementById('comm-username-overlay');
+            if (ul) ul.classList.add('hidden');
+            if (ol) ol.classList.remove('hidden');
+            const cb = document.getElementById('comm-privacy-checkbox');
+            if (cb) cb.checked = false;
+            onCommPrivacyCheck();
+        }
+
+        function onCommPrivacyCheck() {
+            const cb = document.getElementById('comm-privacy-checkbox');
+            const btn = document.getElementById('comm-privacy-enter-btn');
+            if (!cb || !btn) return;
+            if (cb.checked) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function acceptCommPrivacy() {
+            localStorage.setItem('snoah_comm_privacy_accepted', 'true');
+            const ol = document.getElementById('comm-privacy-overlay');
+            if (ol) ol.classList.add('hidden');
+            const username = localStorage.getItem('snoah_comm_username');
+            if (!username) {
+                showCommUsernameSetup();
+            } else {
+                startCommunityChat();
+            }
+        }
+
+        function showCommUsernameSetup() {
+            const ul = document.getElementById('comm-username-overlay');
+            if (ul) ul.classList.remove('hidden');
+            const input = document.getElementById('comm-username-input');
+            if (input) {
+                const existing = localStorage.getItem('snoah_comm_username') || '';
+                input.value = existing;
+                setTimeout(() => input.focus(), 100);
+            }
+            document.getElementById('comm-username-status').textContent = '3–20 characters: letters, numbers, underscores only.';
+            const btn = document.getElementById('comm-username-save-btn');
+            if (btn) { btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed'); }
+        }
+
+        function checkCommUsernameAvailability() {
+            const input = document.getElementById('comm-username-input');
+            const statusEl = document.getElementById('comm-username-status');
+            const btn = document.getElementById('comm-username-save-btn');
+            if (!input || !statusEl || !btn) return;
+            const val = input.value.trim();
+            const clean = val.toLowerCase().replace(/[^a-z0-9_]/g, '');
+            if (clean.length < 3) {
+                statusEl.textContent = clean.length === 0 ? '3–20 characters: letters, numbers, underscores only.' : 'Too short — at least 3 characters required.';
+                statusEl.className = 'text-[12px] text-[#A3A095] px-1';
+                btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed');
+                return;
+            }
+            if (clean.length > 20) {
+                statusEl.textContent = 'Too long — max 20 characters.';
+                statusEl.className = 'text-[12px] text-[#D25D38] px-1';
+                btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed');
+                return;
+            }
+            statusEl.textContent = 'Checking…';
+            statusEl.className = 'text-[12px] text-[#A3A095] px-1';
+            btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed');
+            if (_commUsernameCheckTimer) clearTimeout(_commUsernameCheckTimer);
+            _commUsernameCheckTimer = setTimeout(function() {
+                if (!window._commCheckUsername) { statusEl.textContent = 'Checking unavailable offline.'; return; }
+                window._commCheckUsername(val).then(function(result) {
+                    if (result.ok) {
+                        statusEl.textContent = '✓ "' + result.clean + '" is available!';
+                        statusEl.className = 'text-[12px] text-[#16A34A] px-1';
+                        btn.disabled = false; btn.classList.remove('opacity-50','cursor-not-allowed');
+                    } else {
+                        statusEl.textContent = result.reason;
+                        statusEl.className = 'text-[12px] text-[#D25D38] px-1';
+                        btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed');
+                    }
+                }).catch(function() {
+                    statusEl.textContent = 'Could not check — try again.';
+                    statusEl.className = 'text-[12px] text-[#D25D38] px-1';
+                });
+            }, 600);
+        }
+
+        function saveCommUsername() {
+            const input = document.getElementById('comm-username-input');
+            const statusEl = document.getElementById('comm-username-status');
+            const btn = document.getElementById('comm-username-save-btn');
+            if (!input || btn.disabled) return;
+            const val = input.value.trim();
+            if (!window._commSetUsername) { showToast('Username service not ready'); return; }
+            btn.disabled = true; btn.textContent = 'Saving…';
+            window._commSetUsername(val).then(function(clean) {
+                localStorage.setItem('snoah_comm_username', clean);
+                const ul = document.getElementById('comm-username-overlay');
+                if (ul) ul.classList.add('hidden');
+                startCommunityChat();
+            }).catch(function(e) {
+                showToast('Could not save username: ' + (e.message || 'error'));
+                btn.disabled = false; btn.textContent = 'Save Username & Continue';
+            });
+        }
             isTempChat = !isTempChat;
             updateTempChatUI();
         }
@@ -5761,7 +6025,7 @@ APP STRUCTURE & LAYOUT:
 - Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
 - Main area: Scrollable message thread with welcome screen shown when no chat is active.
 - Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates, Temp Chat buttons, main text input, Send/Stop button.
-- Sidebar (slides in from left): User profile at bottom, chat history list (shows 4 most recent; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Delete History), Community (global live chat), Contact Us.
+- Sidebar (slides in from left): User profile at bottom, chat history list (shows 4 most recent; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us/Delete History), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
