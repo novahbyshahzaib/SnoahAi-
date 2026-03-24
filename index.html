@@ -1825,7 +1825,6 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
                 </a>
             </div>
-        </div>
             <!-- ── Username Setup Overlay ── -->
             <div id="comm-username-overlay" class="absolute inset-0 z-10 bg-[#FAF9F6] flex flex-col hidden">
                 <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0 bg-white">
@@ -2425,7 +2424,7 @@
             });
         }
 
-        function sendCommunityMessage() {
+        async function sendCommunityMessage() {
             const input = document.getElementById('community-input');
             if (!input) return;
             const text = input.value.trim();
@@ -2435,6 +2434,10 @@
             const remaining = COMM_SEND_COOLDOWN_MS - (now - _commLastSendTime);
             if (remaining > 0) { showToast('Please wait ' + Math.ceil(remaining / 1000) + 's before sending again'); return; }
             if (!window._commSend) { showToast('Community chat not ready yet'); return; }
+            if (window._commGetBanned) {
+                const isBanned = await window._commGetBanned().catch(() => false);
+                if (isBanned) { showToast('You have been banned from community chat.'); return; }
+            }
             _commLastSendTime = now;
             const commUsername = localStorage.getItem('snoah_comm_username') || localStorage.getItem('snoah_user_name') || 'User';
             input.value = '';
