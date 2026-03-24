@@ -561,6 +561,34 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
+                    <!-- ElevenLabs TTS -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">
+                            ElevenLabs TTS
+                            <span class="ml-1.5 px-1.5 py-0.5 bg-[#FEF3C7] text-[#92400E] rounded text-[9px] font-bold border border-[#FDE68A]">NEW</span>
+                        </label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Use ElevenLabs high-quality AI voices for text-to-speech. Falls back to device TTS if not configured.</p>
+                        <div class="space-y-2">
+                            <input type="password" id="settings-elevenlabs-key" placeholder="Paste your ElevenLabs API key"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                            <select id="settings-elevenlabs-voice"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>
+                                <option value="IKne3meq5aSn9XLyUdCD">Charlie</option>
+                                <option value="9BWtsMINqrJLrRacOk9x">Aria</option>
+                                <option value="JBFqnCBsd6RMkjVDRZzb">George</option>
+                                <option value="TX3LPaxmHKxFdv7VOQHJ">Liam</option>
+                                <option value="XB0fDUnXU5powFXDhCwa">Charlotte</option>
+                                <option value="Xb7hH8MSUJpSbSDYk0k2">Alice</option>
+                                <option value="nPczCjzI2devNBz1zQrb">Brian</option>
+                            </select>
+                        </div>
+                        <p class="text-[11px] text-[#A3A095] mt-1.5">Get your key at <a href="https://elevenlabs.io" target="_blank" class="underline text-[#D25D38]">elevenlabs.io</a></p>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
                     <!-- Advanced Model Parameters -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Advanced Model Parameters</label>
@@ -1595,6 +1623,7 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>ElevenLabs TTS 🔊</strong> — Add your ElevenLabs API key in Settings → ElevenLabs TTS to use high-quality AI voices (Rachel, Charlie, Aria, George, Liam, Charlotte, Alice, Brian). Falls back to your device's default TTS if not configured. Shows a toast if the key is invalid or quota is reached.</li>
                             <li><strong>Community Chat Upgrades 🌍</strong> — Community chat now requires a unique username visible to all users. First-time entrants see Community Rules &amp; Privacy Policy (with a confirmation checkbox). Users can delete their own messages for everyone. Anti-spam cooldown increased to 10 seconds with a live countdown timer.</li>
                             <li><strong>Sidebar Redesign 🗂️</strong> — "Contact Us" removed from sidebar and added inside Preferences. A new "Updates" button now lives in the sidebar below Community for quick access to What's New.</li>
                             <li><strong>Sidebar Polish &amp; Preferences ✨</strong> — Sidebar now shows only 4 clean action buttons: Settings, Preferences, Community, and Updates. All other features (Export, Share, Summarize, Pinned Messages, Bookmarks, Dark Mode, About, Contact Us, Delete History) are neatly organised inside the <em>Preferences</em> panel.</li>
@@ -3155,6 +3184,12 @@
             if (notionInput) notionInput.value = notionKey ? notionKey.substring(0,8) + '••••••••' : '';
             const notionParentInput = document.getElementById('settings-notionparent');
             if (notionParentInput) notionParentInput.value = notionParentPageId || '';
+            // Load ElevenLabs settings
+            const elKeyInput = document.getElementById('settings-elevenlabs-key');
+            const elVoiceSel = document.getElementById('settings-elevenlabs-voice');
+            const savedElKey = localStorage.getItem('elevenLabsApiKey') || '';
+            if (elKeyInput) elKeyInput.value = savedElKey ? savedElKey.substring(0,8) + '••••••••' : '';
+            if (elVoiceSel) elVoiceSel.value = localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM';
             renderNotionKeyStatus();
             updateNotionAutoSaveUI();
             updateAutoMemoryUI();
@@ -3387,6 +3422,15 @@
             if (nkInput && nkInput.value && !nkInput.value.includes('••')) {
                 notionKey = nkInput.value.trim();
                 localStorage.setItem('snoah_notion_key', notionKey);
+            }
+            // Save ElevenLabs settings
+            const elKeyInput = document.getElementById('settings-elevenlabs-key');
+            const elVoiceSel = document.getElementById('settings-elevenlabs-voice');
+            if (elKeyInput && elKeyInput.value && !elKeyInput.value.includes('••')) {
+                localStorage.setItem('elevenLabsApiKey', elKeyInput.value.trim());
+            }
+            if (elVoiceSel) {
+                localStorage.setItem('elevenLabsVoiceId', elVoiceSel.value);
             }
             // Save Notion parent page
             const npInput = document.getElementById('settings-notionparent');
@@ -4925,9 +4969,16 @@
         }
 
         function speakText(text, btn) {
-            if (!('speechSynthesis' in window)) { showToast('TTS not supported in this browser'); return; }
+            const clean = text
+                .replace(/```[\s\S]*?```/g, 'code block')
+                .replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*(.*?)\*/g,'$1')
+                .replace(/#{1,4} /g,'').replace(/\$\$[\s\S]*?\$\$/g,'math expression')
+                .replace(/\$([^$]+)\$/g,'$1').replace(/[\r\n]+/g,' ').trim();
+
+            // Stop any current TTS
             if (ttsActive) {
                 window.speechSynthesis.cancel();
+                if (btn._elAudio) { try { btn._elAudio.pause(); } catch(e){} btn._elAudio = null; }
                 ttsActive = false;
                 document.querySelectorAll('.tts-btn').forEach(b => {
                     b.classList.remove('tts-active','text-[#D25D38]');
@@ -4935,11 +4986,65 @@
                 });
                 if (btn._wasSpeaking) return;
             }
-            const clean = text
-                .replace(/```[\s\S]*?```/g, 'code block')
-                .replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*(.*?)\*/g,'$1')
-                .replace(/#{1,4} /g,'').replace(/\$\$[\s\S]*?\$\$/g,'math expression')
-                .replace(/\$([^$]+)\$/g,'$1').replace(/[\r\n]+/g,' ').trim();
+
+            const elApiKey = localStorage.getItem('elevenLabsApiKey') || '';
+            if (elApiKey) {
+                const voiceId = localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM';
+                ttsActive = true;
+                btn.classList.add('tts-active','text-[#D25D38]');
+                btn._wasSpeaking = true;
+                fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
+                    method: 'POST',
+                    headers: { 'xi-api-key': elApiKey, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: clean, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
+                }).then(res => {
+                    if (res.status === 401) { showToast('ElevenLabs API key invalid, using default TTS'); throw new Error('401'); }
+                    if (res.status === 429) { showToast('ElevenLabs limit reached, using default TTS'); throw new Error('429'); }
+                    if (!res.ok) { throw new Error('elevenlabs_err_' + res.status); }
+                    return res.blob();
+                }).then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const audio = new Audio(url);
+                    btn._elAudio = audio;
+                    audio.onended = () => {
+                        ttsActive = false;
+                        btn.classList.remove('tts-active','text-[#D25D38]');
+                        btn._wasSpeaking = false;
+                        btn._elAudio = null;
+                        URL.revokeObjectURL(url);
+                    };
+                    audio.onerror = () => {
+                        ttsActive = false;
+                        btn.classList.remove('tts-active','text-[#D25D38]');
+                        btn._wasSpeaking = false;
+                        btn._elAudio = null;
+                        URL.revokeObjectURL(url);
+                        _speakWithWebSpeech(clean, btn);
+                    };
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(() => {
+                            URL.revokeObjectURL(url);
+                            btn._elAudio = null;
+                            ttsActive = false;
+                            btn.classList.remove('tts-active','text-[#D25D38]');
+                            btn._wasSpeaking = false;
+                            _speakWithWebSpeech(clean, btn);
+                        });
+                    }
+                }).catch(() => {
+                    ttsActive = false;
+                    btn.classList.remove('tts-active','text-[#D25D38]');
+                    btn._wasSpeaking = false;
+                    _speakWithWebSpeech(clean, btn);
+                });
+                return;
+            }
+            _speakWithWebSpeech(clean, btn);
+        }
+
+        function _speakWithWebSpeech(clean, btn) {
+            if (!('speechSynthesis' in window)) { showToast('TTS not supported in this browser'); return; }
             window.speechSynthesis.cancel();
             ttsUtterance = new SpeechSynthesisUtterance(clean);
             ttsUtterance.rate = 0.95;
@@ -5384,7 +5489,7 @@
                         const fname = escapeHTML(img.fileName || 'document');
                         bubbleContent += '<div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#F2F0E9] border border-[#E5E3DB]">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>' +
-                            '<span class="text-[12px] text-[#5B5951] font-medium">' + fname + '</span></div>';
+                            '<span class="text-[12px] text-[#5B5951] font-medium max-w-[180px] break-all">' + fname + '</span></div>';
                     }
                 });
                 bubbleContent += '</div>';
@@ -5983,7 +6088,7 @@ FEATURES:
 17. FONT SIZE: Settings → Small / Medium / Large text size adjustment.
 18. SLASH COMMANDS: Type / in the input box for quick shortcuts: /explain, /summarize, /translate, /shorter, /longer, /bullets, /code, /compare. These insert prompt templates instantly.
 19. CODE RUNNER: Code blocks in AI responses have a ▶ Run button (supports JavaScript and HTML). Output displays inline below the code block.
-20. TTS (Text-to-Speech): Every AI response has a 🔊 Read button to read the response aloud using the device's speech synthesis. Uses a high-quality voice (e.g., Google UK English Female) when available. TTS automatically stops at the end — no repeat playback.
+20. TTS (Text-to-Speech): Every AI response has a 🔊 Read button to read the response aloud. If an ElevenLabs API key is configured in Settings → ElevenLabs TTS, it uses ElevenLabs high-quality AI voices (Rachel, Charlie, Aria, George, Liam, Charlotte, Alice, Brian). Falls back to device speech synthesis (preferring Google UK English Female) if ElevenLabs is not configured or fails. TTS automatically stops at the end — no repeat playback.
 21. VOICE INPUT: Mic 🎤 button next to the input for speech-to-text input. Speaks your message and converts to text.
 22. SHARE/EXPORT: ☰ → Export or Share conversation as text.
 23. STOP STREAMING: Send button turns into a ■ stop button during AI response generation. Tap to cancel the current response.
@@ -6025,6 +6130,7 @@ FEATURES:
 59. GLOBAL COMMUNITY CHAT: ☰ → Community — opens a full-screen live chat room shared by ALL SnoahAI users worldwide in real time. Powered by Firebase Firestore with onSnapshot for instant message delivery. Messages include sender name, time, and are stored in the 'community_chat' Firestore collection. The modal has two tabs: 💬 Live Chat (the global chat room) and 📬 Contact Dev (Telegram, Instagram, GitHub links to reach Shahzaib Muzaffar). Max 500 chars per message, 3-second cooldown to prevent spam. The user's saved name from Settings is shown as their display name.
 60. CHEMISTRY RENDERING: KaTeX mhchem extension is loaded alongside KaTeX. Chemistry equations using \\ce{...} notation render beautifully in both inline ($...$) and display ($$...$$) math blocks. Examples: $\\ce{H2O}$ renders as water, $\\ce{2H2 + O2 -> 2H2O}$ renders a balanced equation with arrow. Use \\ce{} for any chemical formula or reaction equation.
 61. MATH & MARKDOWN RENDERING: All lines in the AI response go through processInlineRaw() which handles: display math ($$...$$), inline math ($...$), chemistry (\\ce{}), HTML escaping, bold/italic/code/link Markdown in the correct order. Previously, lines containing math could display with unformatted surrounding text — this is now fixed.
+62. ELEVENLABS TTS: Settings → API tab → ElevenLabs TTS section. Paste an ElevenLabs API key and choose a voice (Rachel, Charlie, Aria, George, Liam, Charlotte, Alice, Brian). When configured, the Read button on AI responses uses ElevenLabs high-quality AI voices instead of the device's speech synthesis. Falls back to device TTS silently on any error. Shows a toast notification if the key is invalid (401) or quota is exceeded (429). Key and selected voice are saved to localStorage as elevenLabsApiKey and elevenLabsVoiceId.
 APP STRUCTURE & LAYOUT:
 - Single HTML file (index.html) with all CSS (Tailwind CDN) and JavaScript inline — no separate files except backend Vercel serverless functions in /api/ folder.
 - Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
