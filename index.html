@@ -597,32 +597,47 @@
                             Image Generation
                             <span class="ml-1.5 px-1.5 py-0.5 bg-[#FEF3C7] text-[#92400E] rounded text-[9px] font-bold border border-[#FDE68A]">NEW</span>
                         </label>
-                        <p class="text-[12px] text-[#737166] mb-3 leading-relaxed">Generate images directly in chat. Use <code class="bg-[#F2F0E9] px-1 rounded">/image</code> or say "generate image / create image / draw". Pollinations is tried first if a key is set; falls back to Gemini Imagen.</p>
+                        <p class="text-[12px] text-[#737166] mb-3 leading-relaxed">Generate images directly in chat. Use <code class="bg-[#F2F0E9] px-1 rounded">/image</code>, say "generate image / create image / draw / make a picture", or just ask the AI to include an image in its response.</p>
 
-                        <!-- Pollinations AI -->
-                        <p class="text-[11px] font-semibold text-[#5B5951] mb-1.5 uppercase tracking-wide">Pollinations AI</p>
-                        <div class="space-y-2 mb-3">
-                            <input type="password" id="settings-pollinations-key" placeholder="Paste Pollinations API key (from enter.pollinations.ai)"
-                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                        <!-- Image Platform Selector -->
+                        <label class="text-[11px] font-semibold text-[#5B5951] mb-1.5 uppercase tracking-wide block">Image Platform</label>
+                        <div class="relative mb-4">
+                            <select id="settings-img-platform" onchange="switchImgPlatform(this.value)"
+                                class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
+                                <option value="pollinations">Pollinations AI</option>
+                                <option value="gemini">Gemini Imagen</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                            </div>
+                        </div>
+
+                        <!-- Pollinations AI Section -->
+                        <div id="img-section-pollinations">
+                            <p class="text-[11px] font-semibold text-[#5B5951] mb-1.5 uppercase tracking-wide">Pollinations AI Keys</p>
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Add multiple keys for auto-rotation. A key is optional — Pollinations works without one.</p>
+                            <div id="pol-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2 mb-3">
+                                <input type="password" id="settings-pol-newkey" placeholder="Add Pollinations API key (optional)…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addPolKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
                             <select id="settings-pollinations-model"
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                                <option value="flux">Flux</option>
-                                <option value="flux-pro">Flux Pro</option>
-                                <option value="flux-realism">Flux Realism</option>
-                                <option value="flux-anime">Flux Anime</option>
-                                <option value="flux-3d">Flux 3D</option>
-                                <option value="turbo">Turbo</option>
+                                <option value="flux">Flux (Recommended)</option>
                             </select>
                         </div>
 
-                        <!-- Gemini Imagen -->
-                        <p class="text-[11px] font-semibold text-[#5B5951] mb-1 uppercase tracking-wide">Gemini Imagen</p>
-                        <p class="text-[11px] text-[#A3A095] mb-1.5">Reuses your existing Gemini API key — no extra key needed.</p>
-                        <select id="settings-imagen-model"
-                            class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                            <option value="imagen-3.0-generate-002">Imagen 3</option>
-                            <option value="imagen-3.0-fast-generate-001">Imagen 3 Fast</option>
-                        </select>
+                        <!-- Gemini Imagen Section -->
+                        <div id="img-section-gemini" class="hidden">
+                            <p class="text-[11px] font-semibold text-[#5B5951] mb-1 uppercase tracking-wide">Gemini Imagen</p>
+                            <p class="text-[11px] text-[#A3A095] mb-2">Reuses your Gemini API key from the key pool above — no extra key needed. Requires billing enabled on your Google Cloud project.</p>
+                            <select id="settings-imagen-model"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                                <option value="imagen-3.0-generate-002">Imagen 3 (Best quality)</option>
+                                <option value="imagen-3.0-fast-generate-001">Imagen 3 Fast (Faster)</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Divider -->
@@ -2117,9 +2132,15 @@
         let elevenLabsKeyIdx = Math.max(0, parseInt(localStorage.getItem('elevenLabsKeyIndex') || '0'));
         if (elevenLabsKeyIdx >= elevenLabsKeys.length) elevenLabsKeyIdx = 0;
         // Image Generation settings
-        let pollinationsApiKey = localStorage.getItem('pollinationsApiKey') || '';
+        let imgPlatform = localStorage.getItem('snoah_img_platform') || 'pollinations';
+        let pollinationsKeys = _loadKeys('pollinationsApiKeys');
+        if (!pollinationsKeys.length) {
+            const _oldPolKey = localStorage.getItem('pollinationsApiKey');
+            if (_oldPolKey) { pollinationsKeys = [_oldPolKey]; localStorage.setItem('pollinationsApiKeys', JSON.stringify(pollinationsKeys)); }
+        }
+        let pollinationsKeyIdx = 0;
         let pollinationsModel = localStorage.getItem('pollinationsModel') || 'flux';
-        let imagenModel = localStorage.getItem('imagenModel') || 'imagen-3.0-fast-generate-001';
+        let imagenModel = localStorage.getItem('imagenModel') || 'imagen-3.0-generate-002';
         // Advanced Model Parameters
         let paramTemperature = parseFloat(localStorage.getItem('snoah_param_temp') || '0.7');
         let paramTopP = parseFloat(localStorage.getItem('snoah_param_topp') || '0.9');
@@ -3250,8 +3271,9 @@
             if (elVoiceSel) elVoiceSel.value = localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM';
             renderElevenLabsKeysList();
             // Load Image Generation settings
-            const polKeyInput = document.getElementById('settings-pollinations-key');
-            if (polKeyInput) polKeyInput.value = pollinationsApiKey ? pollinationsApiKey.substring(0,8) + '••••••••' : '';
+            const imgPlatSel = document.getElementById('settings-img-platform');
+            if (imgPlatSel) { imgPlatSel.value = imgPlatform; switchImgPlatform(imgPlatform, true); }
+            renderPollinationsKeysList();
             const polModelSel = document.getElementById('settings-pollinations-model');
             if (polModelSel) polModelSel.value = pollinationsModel;
             const imgModelSel = document.getElementById('settings-imagen-model');
@@ -3494,12 +3516,7 @@
             if (elVoiceSel) {
                 localStorage.setItem('elevenLabsVoiceId', elVoiceSel.value);
             }
-            // Save Image Generation settings
-            const polKeyInput = document.getElementById('settings-pollinations-key');
-            if (polKeyInput && polKeyInput.value && !polKeyInput.value.includes('••')) {
-                pollinationsApiKey = polKeyInput.value.trim();
-                localStorage.setItem('pollinationsApiKey', pollinationsApiKey);
-            }
+            // Save Image Generation settings (keys saved immediately via addPolKey/removePolKey)
             const polModelSel = document.getElementById('settings-pollinations-model');
             if (polModelSel) {
                 pollinationsModel = polModelSel.value;
@@ -3786,6 +3803,47 @@
             localStorage.setItem('elevenLabsApiKeys', JSON.stringify(elevenLabsKeys));
             localStorage.setItem('elevenLabsKeyIndex', String(elevenLabsKeyIdx));
             renderElevenLabsKeysList();
+        }
+
+        function renderPollinationsKeysList() {
+            const list = document.getElementById('pol-keys-list');
+            if (!list) return;
+            const validKeys = pollinationsKeys.filter(k => typeof k === 'string' && k.length > 0);
+            if (!validKeys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added (works without key)</p>'; return; }
+            list.innerHTML = validKeys.map((k, i) =>
+                '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
+                '<span class="flex-1 font-mono text-[12px] text-[#5B5951] truncate">' +
+                k.substring(0,8) + '••••••••' + k.slice(-4) + '</span>' +
+                '<button onclick="removePolKey(' + i + ')" class="text-[#A3A095] hover:text-[#D25D38] transition-colors shrink-0 text-[18px] leading-none">&times;</button>' +
+                '</div>'
+            ).join('');
+        }
+
+        function addPolKey() {
+            const input = document.getElementById('settings-pol-newkey');
+            const key = (input && input.value || '').trim();
+            if (!key) { showToast('Paste a key first'); return; }
+            if (pollinationsKeys.includes(key)) { showToast('Key already added'); return; }
+            pollinationsKeys.push(key);
+            localStorage.setItem('pollinationsApiKeys', JSON.stringify(pollinationsKeys));
+            input.value = '';
+            renderPollinationsKeysList();
+            showToast('Pollinations key added ✓ (' + pollinationsKeys.length + ' total)');
+        }
+
+        function removePolKey(idx) {
+            pollinationsKeys.splice(idx, 1);
+            localStorage.setItem('pollinationsApiKeys', JSON.stringify(pollinationsKeys));
+            renderPollinationsKeysList();
+        }
+
+        function switchImgPlatform(val, silent) {
+            imgPlatform = val;
+            if (!silent) localStorage.setItem('snoah_img_platform', val);
+            const polSec = document.getElementById('img-section-pollinations');
+            const gemSec = document.getElementById('img-section-gemini');
+            if (polSec) polSec.classList.toggle('hidden', val !== 'pollinations');
+            if (gemSec) gemSec.classList.toggle('hidden', val !== 'gemini');
         }
 
         function renderKeysList() {
@@ -6122,7 +6180,7 @@
                 const prompt = t.replace(/^\/image\s*/i, '').trim();
                 return prompt || null; // require an actual prompt after /image
             }
-            if (/\b(generate image|create image|draw)\b/i.test(t)) return t;
+            if (/\b(generate image|create image|draw|make (an?|me an?) (image|picture|photo|illustration|drawing)|show me (an?|a) (image|picture|photo)|paint|illustrate|render (an?|a) (image|picture|photo))\b/i.test(t)) return t;
             return null;
         }
 
@@ -6143,54 +6201,72 @@
                 '</div>';
         }
 
-        function buildImageErrorCard() {
-            return '<div class="bg-[#FDF4F2] border border-[#F8E3DE] rounded-[20px] px-4 py-4 text-[14px] text-[#D25D38] max-w-full">' +
-                '🖼️ Image generation unavailable. Please add a Pollinations or Gemini API key in Settings.' +
-                '</div>';
+        function buildImageErrorCard(platform) {
+            const msg = platform === 'gemini'
+                ? '🖼️ Gemini Imagen failed. Make sure your Gemini API key is added in Settings and billing is enabled on your Google Cloud project.'
+                : '🖼️ Pollinations image generation failed. Check your internet connection or add a Pollinations API key in Settings → Image Generation.';
+            return '<div class="bg-[#FDF4F2] border border-[#F8E3DE] rounded-[20px] px-4 py-4 text-[14px] text-[#D25D38] max-w-full">' + msg + '</div>';
         }
 
         async function generateImage(prompt, cardDiv) {
-            const polKey = pollinationsApiKey;
-            const polMdl = pollinationsModel || 'flux';
-            const gemKey = apiKey || geminiKeys[0] || '';
-            const imgMdl = imagenModel || 'imagen-3.0-fast-generate-001';
-
+            const usePlatform = imgPlatform || 'pollinations';
             let imgSrc = null;
             let provider = '';
 
-            if (polKey) {
-                try {
-                    const encoded = encodeURIComponent(prompt);
-                    const url = 'https://image.pollinations.ai/prompt/' + encoded + '?model=' + encodeURIComponent(polMdl) + '&key=' + encodeURIComponent(polKey) + '&nologo=true';
-                    const res = await fetch(url);
-                    if (res.ok) {
-                        const blob = await res.blob();
-                        imgSrc = URL.createObjectURL(blob);
-                        provider = 'Pollinations AI';
-                    }
-                } catch(e) { /* fall through to Gemini */ }
-            }
-
-            if (!imgSrc && gemKey) {
-                try {
-                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + imgMdl + ':generateImages?key=' + gemKey, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: { text: prompt }, number_of_images: 1 })
-                    });
-                    if (!res.ok) throw new Error('imagen_' + res.status);
-                    const data = await res.json();
-                    const b64 = data.predictions && data.predictions[0] && data.predictions[0].bytesBase64Encoded;
-                    if (!b64) throw new Error('no_image_data');
-                    imgSrc = 'data:image/png;base64,' + b64;
-                    provider = 'Gemini Imagen';
-                } catch(e) { /* both failed */ }
+            if (usePlatform === 'pollinations') {
+                const polMdl = pollinationsModel || 'flux';
+                // Try keys in rotation order; also try without key as last resort
+                const keysToTry = pollinationsKeys.length > 0
+                    ? [...pollinationsKeys.slice(pollinationsKeyIdx), ...pollinationsKeys.slice(0, pollinationsKeyIdx), '']
+                    : [''];
+                for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
+                    const polKey = keysToTry[ki];
+                    try {
+                        const encoded = encodeURIComponent(prompt);
+                        let url = 'https://image.pollinations.ai/prompt/' + encoded + '?model=' + encodeURIComponent(polMdl) + '&nologo=true';
+                        if (polKey) url += '&key=' + encodeURIComponent(polKey);
+                        const res = await fetch(url);
+                        if (res.ok) {
+                            const blob = await res.blob();
+                            imgSrc = URL.createObjectURL(blob);
+                            provider = 'Pollinations AI';
+                            // Advance key index on success so next request uses next key (round-robin)
+                            if (pollinationsKeys.length > 0) pollinationsKeyIdx = (pollinationsKeyIdx + 1) % pollinationsKeys.length;
+                        } else if ((res.status === 401 || res.status === 429) && polKey && ki < keysToTry.length - 1) {
+                            // Rate-limited or auth failed — rotate to next key
+                            pollinationsKeyIdx = (pollinationsKeyIdx + 1) % pollinationsKeys.length;
+                        } else {
+                            throw new Error('HTTP ' + res.status);
+                        }
+                    } catch(e) { /* try next key */ }
+                }
+            } else if (usePlatform === 'gemini') {
+                const gemKey = geminiKeys[0] || apiKey || '';
+                const imgMdl = imagenModel || 'imagen-3.0-generate-002';
+                if (gemKey) {
+                    try {
+                        const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + imgMdl + ':generateImages?key=' + gemKey, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prompt: { text: prompt }, number_of_images: 1, safetyFilterLevel: 'block_some' })
+                        });
+                        if (!res.ok) {
+                            const errBody = await res.text().catch(() => '');
+                            throw new Error('HTTP ' + res.status + (errBody ? ': ' + errBody : ''));
+                        }
+                        const data = await res.json();
+                        const b64 = data.predictions && data.predictions[0] && data.predictions[0].bytesBase64Encoded;
+                        if (!b64) throw new Error('no_image_data');
+                        imgSrc = 'data:image/png;base64,' + b64;
+                        provider = 'Gemini Imagen';
+                    } catch(e) { console.error('[SnoahAI] Gemini Imagen error:', e); }
+                }
             }
 
             if (imgSrc) {
                 cardDiv.innerHTML = buildImageCard(imgSrc, prompt, provider);
             } else {
-                cardDiv.innerHTML = buildImageErrorCard();
+                cardDiv.innerHTML = buildImageErrorCard(usePlatform);
             }
             scrollToBottom();
         }
@@ -6402,7 +6478,7 @@ DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mo
 
 Always answer questions about the app based on the above. If asked "what can you do" or "how do I use X feature", explain it clearly based on this documentation.
 
-FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $...$ display: $$...$$. For chemistry equations use KaTeX mhchem: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$, $$\\ce{CuSO4 + 2NaOH -> Cu(OH)2 + Na2SO4}$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. (6) DEVELOPER NOTE: Telegram username is @Owner_Of_Crypton and Instagram username is @shahzaib_muzaffar_7 — preserve underscores exactly as written. ` + lengthDirective;
+FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $...$ display: $$...$$. For chemistry equations use KaTeX mhchem: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$, $$\\ce{CuSO4 + 2NaOH -> Cu(OH)2 + Na2SO4}$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. (6) DEVELOPER NOTE: Telegram username is @Owner_Of_Crypton and Instagram username is @shahzaib_muzaffar_7 — preserve underscores exactly as written. (7) IMAGE GENERATION: When the user asks you to include, generate, or show an image as part of your response, place an [IMG: detailed image description] marker exactly where the image should appear. The app will automatically generate the image and display it inline. You can mix text and images freely — e.g., explain something in text then place [IMG: ...] to show a visual. ` + lengthDirective;
                 if (useThinking) systemInstruction += "The user has enabled THINKING MODE. Wrap your detailed step-by-step internal reasoning inside <think> and </think> tags at the very beginning of your response, then give the final answer. ";
                 if (platform === 'mistral') {
                     systemInstruction += 'You are running on Mistral AI. ';
@@ -6538,13 +6614,15 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         // Main text — render markdown+math (throttled) so LaTeX shows live
                         if (displayMain) {
                             const now = ts || performance.now();
+                            // Hide [IMG: ...] markers during live streaming
+                            const displayMainFiltered = displayMain.replace(/\[IMG:[^\]]*\]/gi, '[🖼️ image]');
                             if (now - lastMdRender > MD_INTERVAL || !streamActive) {
                                 lastMdRender = now;
-                                liveTextEl.innerHTML = formatMarkdown(displayMain);
+                                liveTextEl.innerHTML = formatMarkdown(displayMainFiltered);
                                 liveTextEl.style.whiteSpace = '';
                             } else if (!liveTextEl.innerHTML) {
                                 // First frame — always render immediately
-                                liveTextEl.innerHTML = formatMarkdown(displayMain);
+                                liveTextEl.innerHTML = formatMarkdown(displayMainFiltered);
                                 liveTextEl.style.whiteSpace = '';
                             }
                         } else {
@@ -6906,8 +6984,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 updateSendButton();
 
                 // Final markdown render (RAF may have done this already, but force it clean)
+                // Extract [IMG: prompt] markers from mainText before rendering
+                const imgMarkerRe = /\[IMG:([^\]]*)\]/gi;
+                const inlineImagePrompts = [];
+                let mainTextClean = mainText.replace(imgMarkerRe, (_, p) => { inlineImagePrompts.push(p.trim()); return ''; }).trim();
                 liveTextEl.className = 'md-content text-[#2C2B29] leading-relaxed';
-                liveTextEl.innerHTML = formatMarkdown(mainText);
+                liveTextEl.innerHTML = formatMarkdown(mainTextClean);
                 liveTextEl.style.whiteSpace = '';
                 renderMermaidDiagrams();
 
@@ -6955,17 +7037,32 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 tempActionsDiv.innerHTML = buildActionsDivHTML('', false);
                 const actionsDiv = tempActionsDiv.firstElementChild;
                 innerCol.appendChild(actionsDiv);
-                wireActionsDiv(actionsDiv, mainText);
+                wireActionsDiv(actionsDiv, mainTextClean);
                 lucide.createIcons({ nodes: [actionsDiv] });
                 scrollToBottom();
 
-                const aiMsg = { role: 'model', text: mainText, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries };
+                // Process inline [IMG: prompt] markers from AI response
+                if (inlineImagePrompts.length > 0) {
+                    for (const imgPrompt of inlineImagePrompts) {
+                        const inlineCard = document.createElement('div');
+                        inlineCard.className = 'flex w-full justify-start mt-2';
+                        inlineCard.innerHTML = '<div class="bg-white rounded-[20px] border border-[#E5E3DB] px-5 py-5 flex items-center gap-3 max-w-[90%] shadow-sm">' +
+                            '<div class="w-5 h-5 border-2 border-[#D25D38] border-t-transparent rounded-full animate-spin shrink-0"></div>' +
+                            '<span class="text-[13px] text-[#737166]">Generating image…</span>' +
+                            '</div>';
+                        innerCol.insertBefore(inlineCard, actionsDiv);
+                        scrollToBottom();
+                        generateImage(imgPrompt, inlineCard);
+                    }
+                }
+
+                const aiMsg = { role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries };
                 messages.push(aiMsg);
                 saveCurrentChat();
-                autoSaveToNotion(mainText);
+                autoSaveToNotion(mainTextClean);
                 // Extract and save memory in the background (does not block)
                 const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
-                if (lastUserMsg) extractAndSaveMemory(lastUserMsg.text || '', mainText);
+                if (lastUserMsg) extractAndSaveMemory(lastUserMsg.text || '', mainTextClean);
                 if (messages.filter(m=>m.role==='user').length === 1) autoTitleChat();
 
             } catch (error) {
