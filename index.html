@@ -2138,6 +2138,7 @@
             const _oldPolKey = localStorage.getItem('pollinationsApiKey');
             if (_oldPolKey) { pollinationsKeys = [_oldPolKey]; localStorage.setItem('pollinationsApiKeys', JSON.stringify(pollinationsKeys)); }
         }
+        let pollinationsKeyIdx = 0;
         let pollinationsModel = localStorage.getItem('pollinationsModel') || 'flux';
         let imagenModel = localStorage.getItem('imagenModel') || 'imagen-3.0-generate-002';
         // Advanced Model Parameters
@@ -6179,7 +6180,7 @@
                 const prompt = t.replace(/^\/image\s*/i, '').trim();
                 return prompt || null; // require an actual prompt after /image
             }
-            if (/\b(generate image|create image|draw|make (an?|me a|me an) (image|picture|photo|illustration|drawing)|show me (an?|a) (image|picture|photo)|paint|illustrate|render (an?|a) (image|picture|photo))\b/i.test(t)) return t;
+            if (/\b(generate image|create image|draw|make (an?|me an?) (image|picture|photo|illustration|drawing)|show me (an?|a) (image|picture|photo)|paint|illustrate|render (an?|a) (image|picture|photo))\b/i.test(t)) return t;
             return null;
         }
 
@@ -6213,21 +6214,32 @@
             let provider = '';
 
             if (usePlatform === 'pollinations') {
-                const polKey = pollinationsKeys.length > 0 ? pollinationsKeys[0] : '';
                 const polMdl = pollinationsModel || 'flux';
-                try {
-                    const encoded = encodeURIComponent(prompt);
-                    let url = 'https://image.pollinations.ai/prompt/' + encoded + '?model=' + encodeURIComponent(polMdl) + '&nologo=true';
-                    if (polKey) url += '&key=' + encodeURIComponent(polKey);
-                    const res = await fetch(url);
-                    if (res.ok) {
-                        const blob = await res.blob();
-                        imgSrc = URL.createObjectURL(blob);
-                        provider = 'Pollinations AI';
-                    } else {
-                        throw new Error('HTTP ' + res.status);
-                    }
-                } catch(e) { /* fall through to error */ }
+                // Try keys in rotation order; also try without key as last resort
+                const keysToTry = pollinationsKeys.length > 0
+                    ? [...pollinationsKeys.slice(pollinationsKeyIdx), ...pollinationsKeys.slice(0, pollinationsKeyIdx), '']
+                    : [''];
+                for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
+                    const polKey = keysToTry[ki];
+                    try {
+                        const encoded = encodeURIComponent(prompt);
+                        let url = 'https://image.pollinations.ai/prompt/' + encoded + '?model=' + encodeURIComponent(polMdl) + '&nologo=true';
+                        if (polKey) url += '&key=' + encodeURIComponent(polKey);
+                        const res = await fetch(url);
+                        if (res.ok) {
+                            const blob = await res.blob();
+                            imgSrc = URL.createObjectURL(blob);
+                            provider = 'Pollinations AI';
+                            // Advance key index on success so next request uses next key (round-robin)
+                            if (pollinationsKeys.length > 0) pollinationsKeyIdx = (pollinationsKeyIdx + 1) % pollinationsKeys.length;
+                        } else if ((res.status === 401 || res.status === 429) && polKey && ki < keysToTry.length - 1) {
+                            // Rate-limited or auth failed — rotate to next key
+                            pollinationsKeyIdx = (pollinationsKeyIdx + 1) % pollinationsKeys.length;
+                        } else {
+                            throw new Error('HTTP ' + res.status);
+                        }
+                    } catch(e) { /* try next key */ }
+                }
             } else if (usePlatform === 'gemini') {
                 const gemKey = geminiKeys[0] || apiKey || '';
                 const imgMdl = imagenModel || 'imagen-3.0-generate-002';
@@ -6603,7 +6615,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         if (displayMain) {
                             const now = ts || performance.now();
                             // Hide [IMG: ...] markers during live streaming
-                            const displayMainFiltered = displayMain.replace(/\[IMG:\s*[\s\S]*?\]/gi, '[🖼️ image]');
+                            const displayMainFiltered = displayMain.replace(/\[IMG:[^\]]*\]/gi, '[🖼️ image]');
                             if (now - lastMdRender > MD_INTERVAL || !streamActive) {
                                 lastMdRender = now;
                                 liveTextEl.innerHTML = formatMarkdown(displayMainFiltered);
@@ -6973,7 +6985,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
                 // Final markdown render (RAF may have done this already, but force it clean)
                 // Extract [IMG: prompt] markers from mainText before rendering
-                const imgMarkerRe = /\[IMG:\s*([\s\S]*?)\]/gi;
+                const imgMarkerRe = /\[IMG:([^\]]*)\]/gi;
                 const inlineImagePrompts = [];
                 let mainTextClean = mainText.replace(imgMarkerRe, (_, p) => { inlineImagePrompts.push(p.trim()); return ''; }).trim();
                 liveTextEl.className = 'md-content text-[#2C2B29] leading-relaxed';
@@ -7047,10 +7059,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const aiMsg = { role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries };
                 messages.push(aiMsg);
                 saveCurrentChat();
-                autoSaveToNotion(mainText);
+                autoSaveToNotion(mainTextClean);
                 // Extract and save memory in the background (does not block)
                 const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
-                if (lastUserMsg) extractAndSaveMemory(lastUserMsg.text || '', mainText);
+                if (lastUserMsg) extractAndSaveMemory(lastUserMsg.text || '', mainTextClean);
                 if (messages.filter(m=>m.role==='user').length === 1) autoTitleChat();
 
             } catch (error) {
