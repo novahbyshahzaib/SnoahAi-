@@ -561,29 +561,68 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
-                    <!-- ElevenLabs TTS -->
+                    <!-- ElevenLabs TTS (multi-key pool) -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">
                             ElevenLabs TTS
+                            <span class="text-[10px] font-normal normal-case tracking-normal text-[#A3A095]">— auto-rotates on rate limit</span>
+                        </label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Use ElevenLabs high-quality AI voices for text-to-speech. Add multiple keys for auto-rotation. Falls back to device TTS if all keys fail.</p>
+                        <div id="el-keys-list" class="space-y-2 mb-2"></div>
+                        <div class="flex gap-2 mb-2">
+                            <input type="password" id="settings-el-newkey" placeholder="Add ElevenLabs API key..."
+                                class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                            <button onclick="addElKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                        </div>
+                        <select id="settings-elevenlabs-voice"
+                            class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                            <option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>
+                            <option value="IKne3meq5aSn9XLyUdCD">Charlie</option>
+                            <option value="9BWtsMINqrJLrRacOk9x">Aria</option>
+                            <option value="JBFqnCBsd6RMkjVDRZzb">George</option>
+                            <option value="TX3LPaxmHKxFdv7VOQHJ">Liam</option>
+                            <option value="XB0fDUnXU5powFXDhCwa">Charlotte</option>
+                            <option value="Xb7hH8MSUJpSbSDYk0k2">Alice</option>
+                            <option value="nPczCjzI2devNBz1zQrb">Brian</option>
+                        </select>
+                        <p class="text-[11px] text-[#A3A095] mt-1.5">Get your key at <a href="https://elevenlabs.io" target="_blank" class="underline text-[#D25D38]">elevenlabs.io</a></p>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Image Generation -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">
+                            Image Generation
                             <span class="ml-1.5 px-1.5 py-0.5 bg-[#FEF3C7] text-[#92400E] rounded text-[9px] font-bold border border-[#FDE68A]">NEW</span>
                         </label>
-                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Use ElevenLabs high-quality AI voices for text-to-speech. Falls back to device TTS if not configured.</p>
-                        <div class="space-y-2">
-                            <input type="password" id="settings-elevenlabs-key" placeholder="Paste your ElevenLabs API key"
+                        <p class="text-[12px] text-[#737166] mb-3 leading-relaxed">Generate images directly in chat. Use <code class="bg-[#F2F0E9] px-1 rounded">/image</code> or say "generate image / create image / draw". Pollinations is tried first if a key is set; falls back to Gemini Imagen.</p>
+
+                        <!-- Pollinations AI -->
+                        <p class="text-[11px] font-semibold text-[#5B5951] mb-1.5 uppercase tracking-wide">Pollinations AI</p>
+                        <div class="space-y-2 mb-3">
+                            <input type="password" id="settings-pollinations-key" placeholder="Paste Pollinations API key (from enter.pollinations.ai)"
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
-                            <select id="settings-elevenlabs-voice"
+                            <select id="settings-pollinations-model"
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>
-                                <option value="IKne3meq5aSn9XLyUdCD">Charlie</option>
-                                <option value="9BWtsMINqrJLrRacOk9x">Aria</option>
-                                <option value="JBFqnCBsd6RMkjVDRZzb">George</option>
-                                <option value="TX3LPaxmHKxFdv7VOQHJ">Liam</option>
-                                <option value="XB0fDUnXU5powFXDhCwa">Charlotte</option>
-                                <option value="Xb7hH8MSUJpSbSDYk0k2">Alice</option>
-                                <option value="nPczCjzI2devNBz1zQrb">Brian</option>
+                                <option value="flux">Flux</option>
+                                <option value="flux-pro">Flux Pro</option>
+                                <option value="flux-realism">Flux Realism</option>
+                                <option value="flux-anime">Flux Anime</option>
+                                <option value="flux-3d">Flux 3D</option>
+                                <option value="turbo">Turbo</option>
                             </select>
                         </div>
-                        <p class="text-[11px] text-[#A3A095] mt-1.5">Get your key at <a href="https://elevenlabs.io" target="_blank" class="underline text-[#D25D38]">elevenlabs.io</a></p>
+
+                        <!-- Gemini Imagen -->
+                        <p class="text-[11px] font-semibold text-[#5B5951] mb-1 uppercase tracking-wide">Gemini Imagen</p>
+                        <p class="text-[11px] text-[#A3A095] mb-1.5">Reuses your existing Gemini API key — no extra key needed.</p>
+                        <select id="settings-imagen-model"
+                            class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                            <option value="imagen-3.0-generate-002">Imagen 3</option>
+                            <option value="imagen-3.0-fast-generate-001">Imagen 3 Fast</option>
+                        </select>
                     </div>
 
                     <!-- Divider -->
@@ -1617,12 +1656,14 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.3</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.4</span>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Image Generation 🖼️</strong> — Generate images directly in chat! Type <code>/image &lt;prompt&gt;</code> or say "generate image", "create image", or "draw". Supports two providers: Pollinations AI (add your key in Settings → Image Generation) and Gemini Imagen (reuses your Gemini key). Priority: Pollinations first if a key is set, then Gemini Imagen. Generated images appear as styled cards with a download button and provider label. A loading spinner is shown while generating.</li>
+                            <li><strong>Multi-Key ElevenLabs TTS 🔊</strong> — ElevenLabs TTS now supports multiple API keys with auto-rotation, just like LLM key pools. Add multiple keys in Settings → ElevenLabs TTS. On each request, if the current key returns 401 or 429, the app silently rotates to the next key. When all keys are exhausted it falls back to Web Speech API with a toast notification. Rotation index is persisted. Old single-key users are migrated automatically.</li>
                             <li><strong>ElevenLabs TTS 🔊</strong> — Add your ElevenLabs API key in Settings → ElevenLabs TTS to use high-quality AI voices (Rachel, Charlie, Aria, George, Liam, Charlotte, Alice, Brian). Falls back to your device's default TTS if not configured. Shows a toast if the key is invalid or quota is reached.</li>
                             <li><strong>Community Chat Upgrades 🌍</strong> — Community chat now requires a unique username visible to all users. First-time entrants see Community Rules &amp; Privacy Policy (with a confirmation checkbox). Users can delete their own messages for everyone. Anti-spam cooldown increased to 10 seconds with a live countdown timer.</li>
                             <li><strong>Sidebar Redesign 🗂️</strong> — "Contact Us" removed from sidebar and added inside Preferences. A new "Updates" button now lives in the sidebar below Community for quick access to What's New.</li>
@@ -1681,6 +1722,8 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">📋 All Features</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Image Generation 🖼️</strong> — Type /image &lt;prompt&gt; or say "generate image / create image / draw" to generate images. Supports Pollinations AI (add key in Settings) and Gemini Imagen (uses Gemini key). Images shown in cards with download button and provider label.</li>
+                            <li><strong>Multi-Key ElevenLabs TTS 🔑</strong> — Add multiple ElevenLabs API keys with auto-rotation on rate limits. Falls back to Web Speech API when all keys fail.</li>
                             <li><strong>Auto Memory 🧠</strong> — Enable in Settings → Auto Memory. SnoahAI automatically saves important facts about you from each chat (name, goals, preferences, relationships, projects, constraints) and uses them as context in every future conversation. Smart deduplication prevents repeated facts. Requires Gemini API key. View and clear memory in settings.</li>
                             <li><strong>Code Streaming</strong> — Code blocks render in real-time as the AI generates them. Watch code stream line by line with a live cursor indicator.</li>
                             <li><strong>23 AI Platforms</strong> — Gemini, OpenRouter, Groq, Together AI, Mistral AI, NVIDIA, Hugging Face, GitHub Models, Claude, Copilot, Google AI Studio, Ollama, Cohere, Puter.js, DeepInfra, Cerebras AI, SambaNova, Fireworks AI, xAI (Grok), Perplexity, NanoGPT, Unify, Kluster.ai. Switch in Settings.</li>
@@ -2059,6 +2102,24 @@
         let klusterApiKey = klusterKeys[0] || '';
         let klusterModelId = localStorage.getItem('snoah_kluster_model') || 'klusterai/Meta-Llama-3.1-8B-Instruct-Turbo';
         let customInstructions = localStorage.getItem('snoah_instructions') || '';
+        // ElevenLabs multi-key TTS — migrate old single key if present
+        (function() {
+            const oldKey = localStorage.getItem('elevenLabsApiKey');
+            if (oldKey) {
+                try {
+                    const arr = JSON.parse(localStorage.getItem('elevenLabsApiKeys') || '[]');
+                    if (!Array.isArray(arr) || !arr.includes(oldKey)) { arr.push(oldKey); localStorage.setItem('elevenLabsApiKeys', JSON.stringify(arr)); }
+                } catch(e) { localStorage.setItem('elevenLabsApiKeys', JSON.stringify([oldKey])); }
+                localStorage.removeItem('elevenLabsApiKey');
+            }
+        })();
+        let elevenLabsKeys = _loadKeys('elevenLabsApiKeys');
+        let elevenLabsKeyIdx = Math.max(0, parseInt(localStorage.getItem('elevenLabsKeyIndex') || '0'));
+        if (elevenLabsKeyIdx >= elevenLabsKeys.length) elevenLabsKeyIdx = 0;
+        // Image Generation settings
+        let pollinationsApiKey = localStorage.getItem('pollinationsApiKey') || '';
+        let pollinationsModel = localStorage.getItem('pollinationsModel') || 'flux';
+        let imagenModel = localStorage.getItem('imagenModel') || 'imagen-3.0-fast-generate-001';
         // Advanced Model Parameters
         let paramTemperature = parseFloat(localStorage.getItem('snoah_param_temp') || '0.7');
         let paramTopP = parseFloat(localStorage.getItem('snoah_param_topp') || '0.9');
@@ -3185,11 +3246,16 @@
             const notionParentInput = document.getElementById('settings-notionparent');
             if (notionParentInput) notionParentInput.value = notionParentPageId || '';
             // Load ElevenLabs settings
-            const elKeyInput = document.getElementById('settings-elevenlabs-key');
             const elVoiceSel = document.getElementById('settings-elevenlabs-voice');
-            const savedElKey = localStorage.getItem('elevenLabsApiKey') || '';
-            if (elKeyInput) elKeyInput.value = savedElKey ? savedElKey.substring(0,8) + '••••••••' : '';
             if (elVoiceSel) elVoiceSel.value = localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM';
+            renderElevenLabsKeysList();
+            // Load Image Generation settings
+            const polKeyInput = document.getElementById('settings-pollinations-key');
+            if (polKeyInput) polKeyInput.value = pollinationsApiKey ? pollinationsApiKey.substring(0,8) + '••••••••' : '';
+            const polModelSel = document.getElementById('settings-pollinations-model');
+            if (polModelSel) polModelSel.value = pollinationsModel;
+            const imgModelSel = document.getElementById('settings-imagen-model');
+            if (imgModelSel) imgModelSel.value = imagenModel;
             renderNotionKeyStatus();
             updateNotionAutoSaveUI();
             updateAutoMemoryUI();
@@ -3423,14 +3489,26 @@
                 notionKey = nkInput.value.trim();
                 localStorage.setItem('snoah_notion_key', notionKey);
             }
-            // Save ElevenLabs settings
-            const elKeyInput = document.getElementById('settings-elevenlabs-key');
+            // Save ElevenLabs voice selection (keys are saved immediately via addElKey)
             const elVoiceSel = document.getElementById('settings-elevenlabs-voice');
-            if (elKeyInput && elKeyInput.value && !elKeyInput.value.includes('••')) {
-                localStorage.setItem('elevenLabsApiKey', elKeyInput.value.trim());
-            }
             if (elVoiceSel) {
                 localStorage.setItem('elevenLabsVoiceId', elVoiceSel.value);
+            }
+            // Save Image Generation settings
+            const polKeyInput = document.getElementById('settings-pollinations-key');
+            if (polKeyInput && polKeyInput.value && !polKeyInput.value.includes('••')) {
+                pollinationsApiKey = polKeyInput.value.trim();
+                localStorage.setItem('pollinationsApiKey', pollinationsApiKey);
+            }
+            const polModelSel = document.getElementById('settings-pollinations-model');
+            if (polModelSel) {
+                pollinationsModel = polModelSel.value;
+                localStorage.setItem('pollinationsModel', pollinationsModel);
+            }
+            const imgModelSel = document.getElementById('settings-imagen-model');
+            if (imgModelSel) {
+                imagenModel = imgModelSel.value;
+                localStorage.setItem('imagenModel', imagenModel);
             }
             // Save Notion parent page
             const npInput = document.getElementById('settings-notionparent');
@@ -3673,6 +3751,41 @@
                 : isKluster
                 ? 'Default: <span class="font-mono text-[#5B5951]">klusterai/Meta-Llama-3.1-8B-Instruct-Turbo</span>'
                 : 'Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> · <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span>';
+        }
+
+        function renderElevenLabsKeysList() {
+            const list = document.getElementById('el-keys-list');
+            if (!list) return;
+            const validKeys = elevenLabsKeys.filter(k => typeof k === 'string' && k.length > 0);
+            if (!validKeys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
+            list.innerHTML = validKeys.map((k, i) =>
+                '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
+                '<span class="flex-1 font-mono text-[12px] text-[#5B5951] truncate">' +
+                (i === elevenLabsKeyIdx ? '<span class="text-[10px] font-bold text-green-600 mr-1.5">ACTIVE</span>' : '') +
+                k.substring(0,8) + '••••••••' + k.slice(-4) + '</span>' +
+                (validKeys.length > 1 ? '<button onclick="removeElKey(' + i + ')" class="text-[#A3A095] hover:text-[#D25D38] transition-colors shrink-0 text-[18px] leading-none">&times;</button>' : '') +
+                '</div>'
+            ).join('');
+        }
+
+        function addElKey() {
+            const input = document.getElementById('settings-el-newkey');
+            const key = (input && input.value || '').trim();
+            if (!key) { showToast('Paste a key first'); return; }
+            if (elevenLabsKeys.includes(key)) { showToast('Key already added'); return; }
+            elevenLabsKeys.push(key);
+            localStorage.setItem('elevenLabsApiKeys', JSON.stringify(elevenLabsKeys));
+            input.value = '';
+            renderElevenLabsKeysList();
+            showToast('ElevenLabs key added \u2713 (' + elevenLabsKeys.length + ' total)');
+        }
+
+        function removeElKey(idx) {
+            elevenLabsKeys.splice(idx, 1);
+            elevenLabsKeyIdx = elevenLabsKeys.length ? Math.min(elevenLabsKeyIdx, elevenLabsKeys.length - 1) : 0;
+            localStorage.setItem('elevenLabsApiKeys', JSON.stringify(elevenLabsKeys));
+            localStorage.setItem('elevenLabsKeyIndex', String(elevenLabsKeyIdx));
+            renderElevenLabsKeysList();
         }
 
         function renderKeysList() {
@@ -4987,57 +5100,76 @@
                 if (btn._wasSpeaking) return;
             }
 
-            const elApiKey = localStorage.getItem('elevenLabsApiKey') || '';
-            if (elApiKey) {
+            if (elevenLabsKeys.length > 0) {
                 const voiceId = localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM';
                 ttsActive = true;
                 btn.classList.add('tts-active','text-[#D25D38]');
                 btn._wasSpeaking = true;
-                fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
-                    method: 'POST',
-                    headers: { 'xi-api-key': elApiKey, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: clean, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
-                }).then(res => {
-                    if (res.status === 401) { showToast('ElevenLabs API key invalid, using default TTS'); throw new Error('401'); }
-                    if (res.status === 429) { showToast('ElevenLabs limit reached, using default TTS'); throw new Error('429'); }
-                    if (!res.ok) { throw new Error('elevenlabs_err_' + res.status); }
-                    return res.blob();
-                }).then(blob => {
-                    const url = URL.createObjectURL(blob);
-                    const audio = new Audio(url);
-                    btn._elAudio = audio;
-                    audio.onended = () => {
+                let triedCount = 0;
+                const startIdx = elevenLabsKeyIdx;
+                const tryNextKey = () => {
+                    if (triedCount >= elevenLabsKeys.length) {
+                        showToast('All ElevenLabs keys exhausted, using default TTS');
                         ttsActive = false;
                         btn.classList.remove('tts-active','text-[#D25D38]');
                         btn._wasSpeaking = false;
-                        btn._elAudio = null;
-                        URL.revokeObjectURL(url);
-                    };
-                    audio.onerror = () => {
-                        ttsActive = false;
-                        btn.classList.remove('tts-active','text-[#D25D38]');
-                        btn._wasSpeaking = false;
-                        btn._elAudio = null;
-                        URL.revokeObjectURL(url);
                         _speakWithWebSpeech(clean, btn);
-                    };
-                    const playPromise = audio.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(() => {
-                            URL.revokeObjectURL(url);
-                            btn._elAudio = null;
+                        return;
+                    }
+                    const key = elevenLabsKeys[elevenLabsKeyIdx];
+                    triedCount++;
+                    fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
+                        method: 'POST',
+                        headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: clean, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
+                    }).then(res => {
+                        if (res.status === 401 || res.status === 429) {
+                            elevenLabsKeyIdx = (elevenLabsKeyIdx + 1) % elevenLabsKeys.length;
+                            localStorage.setItem('elevenLabsKeyIndex', String(elevenLabsKeyIdx));
+                            tryNextKey();
+                            return null;
+                        }
+                        if (!res.ok) { throw new Error('elevenlabs_err_' + res.status); }
+                        return res.blob();
+                    }).then(blob => {
+                        if (!blob) return;
+                        const url = URL.createObjectURL(blob);
+                        const audio = new Audio(url);
+                        btn._elAudio = audio;
+                        audio.onended = () => {
                             ttsActive = false;
                             btn.classList.remove('tts-active','text-[#D25D38]');
                             btn._wasSpeaking = false;
+                            btn._elAudio = null;
+                            URL.revokeObjectURL(url);
+                        };
+                        audio.onerror = () => {
+                            ttsActive = false;
+                            btn.classList.remove('tts-active','text-[#D25D38]');
+                            btn._wasSpeaking = false;
+                            btn._elAudio = null;
+                            URL.revokeObjectURL(url);
                             _speakWithWebSpeech(clean, btn);
-                        });
-                    }
-                }).catch(() => {
-                    ttsActive = false;
-                    btn.classList.remove('tts-active','text-[#D25D38]');
-                    btn._wasSpeaking = false;
-                    _speakWithWebSpeech(clean, btn);
-                });
+                        };
+                        const playPromise = audio.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(() => {
+                                URL.revokeObjectURL(url);
+                                btn._elAudio = null;
+                                ttsActive = false;
+                                btn.classList.remove('tts-active','text-[#D25D38]');
+                                btn._wasSpeaking = false;
+                                _speakWithWebSpeech(clean, btn);
+                            });
+                        }
+                    }).catch(() => {
+                        ttsActive = false;
+                        btn.classList.remove('tts-active','text-[#D25D38]');
+                        btn._wasSpeaking = false;
+                        _speakWithWebSpeech(clean, btn);
+                    });
+                };
+                tryNextKey();
                 return;
             }
             _speakWithWebSpeech(clean, btn);
@@ -5983,6 +6115,86 @@
             }
         };
 
+        // ── IMAGE GENERATION ──────────────────────────────────────────
+        function detectImageRequest(text) {
+            const t = text.trim();
+            if (/^\/image\b/i.test(t)) {
+                const prompt = t.replace(/^\/image\s*/i, '').trim();
+                return prompt || null; // require an actual prompt after /image
+            }
+            if (/\b(generate image|create image|draw)\b/i.test(t)) return t;
+            return null;
+        }
+
+        function buildImageCard(src, prompt, provider) {
+            const safePrompt = escapeHTML(prompt);
+            const safeProvider = escapeHTML(provider);
+            return '<div class="bg-white rounded-[20px] border border-[#E5E3DB] overflow-hidden shadow-sm max-w-full">' +
+                '<div class="relative">' +
+                '<img src="' + src + '" alt="' + safePrompt + '" class="w-full rounded-t-[20px] object-cover" style="max-height:400px;display:block;" crossorigin="anonymous">' +
+                '<a download="snoah-image.png" href="' + src + '" class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-sm hover:bg-white transition-colors" title="Download image">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B5951" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+                '</a>' +
+                '</div>' +
+                '<div class="px-3 py-2 flex items-center gap-2">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
+                '<span class="text-[11px] font-semibold text-[#A3A095] uppercase tracking-widest">' + safeProvider + '</span>' +
+                '</div>' +
+                '</div>';
+        }
+
+        function buildImageErrorCard() {
+            return '<div class="bg-[#FDF4F2] border border-[#F8E3DE] rounded-[20px] px-4 py-4 text-[14px] text-[#D25D38] max-w-full">' +
+                '🖼️ Image generation unavailable. Please add a Pollinations or Gemini API key in Settings.' +
+                '</div>';
+        }
+
+        async function generateImage(prompt, cardDiv) {
+            const polKey = pollinationsApiKey;
+            const polMdl = pollinationsModel || 'flux';
+            const gemKey = apiKey || geminiKeys[0] || '';
+            const imgMdl = imagenModel || 'imagen-3.0-fast-generate-001';
+
+            let imgSrc = null;
+            let provider = '';
+
+            if (polKey) {
+                try {
+                    const encoded = encodeURIComponent(prompt);
+                    const url = 'https://image.pollinations.ai/prompt/' + encoded + '?model=' + encodeURIComponent(polMdl) + '&key=' + encodeURIComponent(polKey) + '&nologo=true';
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        imgSrc = URL.createObjectURL(blob);
+                        provider = 'Pollinations AI';
+                    }
+                } catch(e) { /* fall through to Gemini */ }
+            }
+
+            if (!imgSrc && gemKey) {
+                try {
+                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + imgMdl + ':generateImages?key=' + gemKey, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: { text: prompt }, number_of_images: 1 })
+                    });
+                    if (!res.ok) throw new Error('imagen_' + res.status);
+                    const data = await res.json();
+                    const b64 = data.predictions && data.predictions[0] && data.predictions[0].bytesBase64Encoded;
+                    if (!b64) throw new Error('no_image_data');
+                    imgSrc = 'data:image/png;base64,' + b64;
+                    provider = 'Gemini Imagen';
+                } catch(e) { /* both failed */ }
+            }
+
+            if (imgSrc) {
+                cardDiv.innerHTML = buildImageCard(imgSrc, prompt, provider);
+            } else {
+                cardDiv.innerHTML = buildImageErrorCard();
+            }
+            scrollToBottom();
+        }
+
         async function submitMessage(textToSubmit) {
             // Delegate to multi-AI if enabled
             if (multiAIEnabled && multiAIPlatforms.length > 0) {
@@ -5991,6 +6203,35 @@
             const hasText = textToSubmit && textToSubmit.trim() !== '';
             const hasImage = uploadedImages.length > 0 || uploadedImage !== null;
             if ((!hasText && !hasImage) || isLoading || isStreaming) return;
+
+            // Detect image generation request — handle before normal LLM flow
+            if (hasText && !hasImage) {
+                const imgPrompt = detectImageRequest(textToSubmit.trim());
+                if (imgPrompt !== null) {
+                    welcomeScreen.classList.add('hidden');
+                    chatInput.value = '';
+                    chatInput.style.height = 'auto';
+                    updateSendButton();
+                    const userMsg = { role: 'user', text: textToSubmit.trim(), images: [] };
+                    messages.push(userMsg);
+                    if (messages.length === 1) saveCurrentChat();
+                    const userDiv = buildUserMessageDiv(textToSubmit.trim(), [], messages.length - 1);
+                    messagesWrapper.appendChild(userDiv);
+                    // Show loading spinner card
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'flex w-full justify-start animate-slide-up';
+                    cardDiv.innerHTML = '<div class="bg-white rounded-[20px] border border-[#E5E3DB] px-5 py-5 flex items-center gap-3 max-w-[90%] shadow-sm">' +
+                        '<div class="w-5 h-5 border-2 border-[#D25D38] border-t-transparent rounded-full animate-spin shrink-0"></div>' +
+                        '<span class="text-[13px] text-[#737166]">Generating image…</span>' +
+                        '</div>';
+                    messagesWrapper.appendChild(cardDiv);
+                    scrollToBottom();
+                    await generateImage(imgPrompt, cardDiv);
+                    saveCurrentChat();
+                    if (messages.filter(m => m.role === 'user').length === 1) autoTitleChat();
+                    return;
+                }
+            }
 
             // Detect Notion natural language commands — show action card instead of executing silently
             if (hasText && notionKey) {
@@ -6130,13 +6371,15 @@ FEATURES:
 59. GLOBAL COMMUNITY CHAT: ☰ → Community — opens a full-screen live chat room shared by ALL SnoahAI users worldwide in real time. Powered by Firebase Firestore with onSnapshot for instant message delivery. Messages include sender name, time, and are stored in the 'community_chat' Firestore collection. The modal has two tabs: 💬 Live Chat (the global chat room) and 📬 Contact Dev (Telegram, Instagram, GitHub links to reach Shahzaib Muzaffar). Max 500 chars per message, 3-second cooldown to prevent spam. The user's saved name from Settings is shown as their display name.
 60. CHEMISTRY RENDERING: KaTeX mhchem extension is loaded alongside KaTeX. Chemistry equations using \\ce{...} notation render beautifully in both inline ($...$) and display ($$...$$) math blocks. Examples: $\\ce{H2O}$ renders as water, $\\ce{2H2 + O2 -> 2H2O}$ renders a balanced equation with arrow. Use \\ce{} for any chemical formula or reaction equation.
 61. MATH & MARKDOWN RENDERING: All lines in the AI response go through processInlineRaw() which handles: display math ($$...$$), inline math ($...$), chemistry (\\ce{}), HTML escaping, bold/italic/code/link Markdown in the correct order. Previously, lines containing math could display with unformatted surrounding text — this is now fixed.
-62. ELEVENLABS TTS: Settings → API tab → ElevenLabs TTS section. Paste an ElevenLabs API key and choose a voice (Rachel, Charlie, Aria, George, Liam, Charlotte, Alice, Brian). When configured, the Read button on AI responses uses ElevenLabs high-quality AI voices instead of the device's speech synthesis. Falls back to device TTS silently on any error. Shows a toast notification if the key is invalid (401) or quota is exceeded (429). Key and selected voice are saved to localStorage as elevenLabsApiKey and elevenLabsVoiceId.
+62. ELEVENLABS TTS (MULTI-KEY): Settings → API tab → ElevenLabs TTS section. Add multiple ElevenLabs API keys (stored as an array in localStorage: elevenLabsApiKeys). Keys auto-rotate on 401 or 429 errors — if all keys fail, falls back to device speech synthesis with a toast: "All ElevenLabs keys exhausted, using default TTS". Key rotation index is persisted in elevenLabsKeyIndex. Old single-key users are migrated automatically on app load. Choose a voice (Rachel, Charlie, Aria, George, Liam, Charlotte, Alice, Brian) saved as elevenLabsVoiceId.
+63. IMAGE GENERATION: Type /image <prompt> or include "generate image", "create image", or "draw" in your message to generate an image directly in chat. Provider priority: (1) Pollinations AI if a Pollinations API key is set (Settings → Image Generation → Pollinations API Key). Model options: Flux, Flux Pro, Flux Realism, Flux Anime, Flux 3D, Turbo. (2) Gemini Imagen if a Gemini API key is set — reuses the existing Gemini key. Model options: Imagen 3, Imagen 3 Fast (default). If both fail: shows an error card prompting to add a key in Settings. Generated image is shown in a card with a download button and provider label. A loading spinner is shown while generating.
 APP STRUCTURE & LAYOUT:
 - Single HTML file (index.html) with all CSS (Tailwind CDN) and JavaScript inline — no separate files except backend Vercel serverless functions in /api/ folder.
 - Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
-- Main area: Scrollable message thread with welcome screen shown when no chat is active.
+- Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons.
 - Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates, Temp Chat buttons, main text input, Send/Stop button.
 - Sidebar (slides in from left): User profile at bottom, chat history list (shows 4 most recent; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us/Delete History), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
+- Settings → API tab sections: Platform & Model, API Keys pool (multi-key, auto-rotate), ElevenLabs TTS (multi-key pool + voice selector), Image Generation (Pollinations AI key + model, Gemini Imagen model), Advanced Model Parameters, Token Management, Notion Integration, Response Display.
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
