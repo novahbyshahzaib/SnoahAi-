@@ -6120,7 +6120,7 @@
             const t = text.trim();
             if (/^\/image\b/i.test(t)) {
                 const prompt = t.replace(/^\/image\s*/i, '').trim();
-                return prompt || t;
+                return prompt || null; // require an actual prompt after /image
             }
             if (/\b(generate image|create image|draw)\b/i.test(t)) return t;
             return null;
@@ -6132,7 +6132,7 @@
             return '<div class="bg-white rounded-[20px] border border-[#E5E3DB] overflow-hidden shadow-sm max-w-full">' +
                 '<div class="relative">' +
                 '<img src="' + src + '" alt="' + safePrompt + '" class="w-full rounded-t-[20px] object-cover" style="max-height:400px;display:block;" crossorigin="anonymous">' +
-                '<a id="img-dl-' + Date.now() + '" download="snoah-image.png" href="' + src + '" class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-sm hover:bg-white transition-colors" title="Download image">' +
+                '<a download="snoah-image.png" href="' + src + '" class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-sm hover:bg-white transition-colors" title="Download image">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B5951" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
                 '</a>' +
                 '</div>' +
