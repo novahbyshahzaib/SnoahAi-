@@ -561,31 +561,112 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
-                    <!-- ElevenLabs TTS (multi-key pool) -->
+                    <!-- TTS Platform -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">
-                            ElevenLabs TTS
-                            <span class="text-[10px] font-normal normal-case tracking-normal text-[#A3A095]">— auto-rotates on rate limit</span>
+                            TTS Platform
+                            <span class="text-[10px] font-normal normal-case tracking-normal text-[#A3A095]">— text-to-speech provider</span>
                         </label>
-                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Use ElevenLabs high-quality AI voices for text-to-speech. Add multiple keys for auto-rotation. Falls back to device TTS if all keys fail.</p>
-                        <div id="el-keys-list" class="space-y-2 mb-2"></div>
-                        <div class="flex gap-2 mb-2">
-                            <input type="password" id="settings-el-newkey" placeholder="Add ElevenLabs API key..."
-                                class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
-                            <button onclick="addElKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Choose your text-to-speech provider. Falls back to built-in Web Speech API if the selected platform fails.</p>
+                        <div class="relative mb-3">
+                            <select id="settings-tts-platform" onchange="switchTtsPlatform(this.value)"
+                                class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
+                                <option value="webspeech">Built-in (Free, No Key)</option>
+                                <option value="elevenlabs">ElevenLabs (10K chars/month free)</option>
+                                <option value="openai_tts">OpenAI TTS (Paid)</option>
+                                <option value="groq_tts">Groq TTS (Free Tier)</option>
+                                <option value="gemini_tts">Gemini TTS (Free)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                            </div>
                         </div>
-                        <select id="settings-elevenlabs-voice"
-                            class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                            <option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>
-                            <option value="IKne3meq5aSn9XLyUdCD">Charlie</option>
-                            <option value="9BWtsMINqrJLrRacOk9x">Aria</option>
-                            <option value="JBFqnCBsd6RMkjVDRZzb">George</option>
-                            <option value="TX3LPaxmHKxFdv7VOQHJ">Liam</option>
-                            <option value="XB0fDUnXU5powFXDhCwa">Charlotte</option>
-                            <option value="Xb7hH8MSUJpSbSDYk0k2">Alice</option>
-                            <option value="nPczCjzI2devNBz1zQrb">Brian</option>
-                        </select>
-                        <p class="text-[11px] text-[#A3A095] mt-1.5">Get your key at <a href="https://elevenlabs.io" target="_blank" class="underline text-[#D25D38]">elevenlabs.io</a></p>
+
+                        <!-- Web Speech section (no key needed) -->
+                        <div id="tts-section-webspeech">
+                            <p class="text-[12px] text-[#737166] leading-relaxed">Uses your device's built-in speech synthesis. No API key needed. Works completely offline.</p>
+                        </div>
+
+                        <!-- ElevenLabs section -->
+                        <div id="tts-section-elevenlabs" class="hidden">
+                            <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Use ElevenLabs high-quality AI voices for text-to-speech. Add multiple keys for auto-rotation. Falls back to device TTS if all keys fail.</p>
+                            <div id="el-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2 mb-2">
+                                <input type="password" id="settings-el-newkey" placeholder="Add ElevenLabs API key..."
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addElKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                            <select id="settings-elevenlabs-voice"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>
+                                <option value="IKne3meq5aSn9XLyUdCD">Charlie</option>
+                                <option value="9BWtsMINqrJLrRacOk9x">Aria</option>
+                                <option value="JBFqnCBsd6RMkjVDRZzb">George</option>
+                                <option value="TX3LPaxmHKxFdv7VOQHJ">Liam</option>
+                                <option value="XB0fDUnXU5powFXDhCwa">Charlotte</option>
+                                <option value="Xb7hH8MSUJpSbSDYk0k2">Alice</option>
+                                <option value="nPczCjzI2devNBz1zQrb">Brian</option>
+                            </select>
+                            <p class="text-[11px] text-[#A3A095] mt-1.5">Get your key at <a href="https://elevenlabs.io" target="_blank" class="underline text-[#D25D38]">elevenlabs.io</a></p>
+                        </div>
+
+                        <!-- OpenAI TTS section -->
+                        <div id="tts-section-openai_tts" class="hidden">
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">High-quality neural voices. Add multiple keys for auto-rotation. Get a key at <a href="https://platform.openai.com/api-keys" target="_blank" class="underline text-[#D25D38]">platform.openai.com/api-keys</a>.</p>
+                            <div id="openai-tts-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2 mb-3">
+                                <input type="password" id="settings-openai-tts-newkey" placeholder="Add OpenAI API key…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addOpenaiTtsKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                            <select id="settings-openai-tts-voice"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 mb-2">
+                                <option value="alloy">Alloy</option>
+                                <option value="echo">Echo</option>
+                                <option value="fable">Fable</option>
+                                <option value="onyx">Onyx</option>
+                                <option value="nova">Nova</option>
+                                <option value="shimmer">Shimmer</option>
+                            </select>
+                            <select id="settings-openai-tts-model"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                                <option value="tts-1">TTS-1 (Standard)</option>
+                                <option value="tts-1-hd">TTS-1 HD (High Quality)</option>
+                            </select>
+                        </div>
+
+                        <!-- Groq TTS section -->
+                        <div id="tts-section-groq_tts" class="hidden">
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Free tier TTS via Groq. Add multiple keys for auto-rotation. Get a free key at <a href="https://console.groq.com" target="_blank" class="underline text-[#D25D38]">console.groq.com</a> (same key as chat).</p>
+                            <div id="groq-tts-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2 mb-3">
+                                <input type="password" id="settings-groq-tts-newkey" placeholder="Add Groq API key…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addGroqTtsKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                            <select id="settings-groq-tts-voice"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                                <option value="Arista-PlayAI">Arista-PlayAI</option>
+                                <option value="Atlas-PlayAI">Atlas-PlayAI</option>
+                                <option value="Fritz-PlayAI">Fritz-PlayAI</option>
+                            </select>
+                        </div>
+
+                        <!-- Gemini TTS section -->
+                        <div id="tts-section-gemini_tts" class="hidden">
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Free TTS powered by Gemini. Reuses your Gemini API key pool — no extra key needed.</p>
+                            <select id="settings-gemini-tts-voice"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                                <option value="Aoede">Aoede</option>
+                                <option value="Kore">Kore</option>
+                                <option value="Fenrir">Fenrir</option>
+                                <option value="Charon">Charon</option>
+                                <option value="Puck">Puck</option>
+                                <option value="Leda">Leda</option>
+                                <option value="Orus">Orus</option>
+                                <option value="Zephyr">Zephyr</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Divider -->
@@ -606,6 +687,9 @@
                                 class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
                                 <option value="pollinations">Pollinations AI</option>
                                 <option value="gemini">Gemini Imagen</option>
+                                <option value="nvidia_img">NVIDIA NIM (Free)</option>
+                                <option value="together_img">Together AI (Free Tier)</option>
+                                <option value="hf_img">Hugging Face (Free)</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
@@ -636,6 +720,60 @@
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
                                 <option value="imagen-3.0-generate-002">Imagen 3 (Best quality)</option>
                                 <option value="imagen-3.0-fast-generate-001">Imagen 3 Fast (Faster)</option>
+                            </select>
+                        </div>
+
+                        <!-- NVIDIA NIM Section -->
+                        <div id="img-section-nvidia_img" class="hidden">
+                            <p class="text-[11px] font-semibold text-[#5B5951] mb-1.5 uppercase tracking-wide">NVIDIA NIM Keys</p>
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Add multiple keys for auto-rotation. Get a free key at <a href="https://build.nvidia.com" target="_blank" class="underline text-[#D25D38]">build.nvidia.com</a> (no billing required).</p>
+                            <div id="nvidia-img-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2 mb-3">
+                                <input type="password" id="settings-nvidia-img-newkey" placeholder="Add NVIDIA API key…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addNvidiaImgKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                            <select id="settings-nvidia-img-model"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                                <option value="black-forest-labs/flux.1-schnell">FLUX.1 Schnell (Free)</option>
+                                <option value="black-forest-labs/flux.1-dev">FLUX.1 Dev (Free)</option>
+                                <option value="stabilityai/sdxl-turbo">Stable Diffusion XL (Free)</option>
+                            </select>
+                        </div>
+
+                        <!-- Together AI Section -->
+                        <div id="img-section-together_img" class="hidden">
+                            <p class="text-[11px] font-semibold text-[#5B5951] mb-1.5 uppercase tracking-wide">Together AI Keys</p>
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Add multiple keys for auto-rotation. Get a free key at <a href="https://api.together.ai" target="_blank" class="underline text-[#D25D38]">api.together.ai</a> (free tier available).</p>
+                            <div id="together-img-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2 mb-3">
+                                <input type="password" id="settings-together-img-newkey" placeholder="Add Together AI API key…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addTogetherImgKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                            <select id="settings-together-img-model"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                                <option value="black-forest-labs/FLUX.1-schnell-Free">FLUX.1 Schnell (Free)</option>
+                                <option value="black-forest-labs/FLUX.1-dev">FLUX.1 Dev (Paid)</option>
+                                <option value="stabilityai/stable-diffusion-xl-base-1.0">Stable Diffusion XL (Paid)</option>
+                            </select>
+                        </div>
+
+                        <!-- Hugging Face Section -->
+                        <div id="img-section-hf_img" class="hidden">
+                            <p class="text-[11px] font-semibold text-[#5B5951] mb-1.5 uppercase tracking-wide">Hugging Face Keys</p>
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Add multiple keys for auto-rotation. Get a free key at <a href="https://huggingface.co/settings/tokens" target="_blank" class="underline text-[#D25D38]">huggingface.co/settings/tokens</a>.</p>
+                            <div id="hf-img-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2 mb-3">
+                                <input type="password" id="settings-hf-img-newkey" placeholder="Add Hugging Face token…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addHfImgKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                            <select id="settings-hf-img-model"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                                <option value="black-forest-labs/FLUX.1-schnell">FLUX.1 Schnell (Free Tier)</option>
+                                <option value="stabilityai/stable-diffusion-3.5-large">Stable Diffusion 3.5 (Free Tier)</option>
+                                <option value="stabilityai/sdxl-turbo">SDXL Turbo (Free Tier)</option>
                             </select>
                         </div>
                     </div>
@@ -1677,6 +1815,9 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>5 TTS Platforms 🔊</strong> — Settings → TTS Platform dropdown now offers: Built-in Web Speech (free, no key), ElevenLabs (existing, freemium), OpenAI TTS (paid, multi-key), Groq TTS (free tier, multi-key), and Gemini TTS (free, reuses Gemini key). Falls back to built-in if selected platform fails.</li>
+                            <li><strong>5 Image Generation Platforms 🖼️</strong> — Settings → Image Platform dropdown now includes NVIDIA NIM (free, FLUX.1/SDXL), Together AI (free+paid tier, FLUX.1/SDXL), and Hugging Face (free tier, FLUX.1/SD3.5). All support multi-key auto-rotation.</li>
+                            <li><strong>Image &amp; TTS Usage Tracking 📊</strong> — Token Management dashboard now shows Images Generated per platform and TTS Characters Used per provider. Resets together with token usage.</li>
                             <li><strong>Image Generation 🖼️</strong> — Generate images directly in chat! Type <code>/image &lt;prompt&gt;</code> or say "generate image", "create image", or "draw". Supports two providers: Pollinations AI (add your key in Settings → Image Generation) and Gemini Imagen (reuses your Gemini key). Priority: Pollinations first if a key is set, then Gemini Imagen. Generated images appear as styled cards with a download button and provider label. A loading spinner is shown while generating.</li>
                             <li><strong>Multi-Key ElevenLabs TTS 🔊</strong> — ElevenLabs TTS now supports multiple API keys with auto-rotation, just like LLM key pools. Add multiple keys in Settings → ElevenLabs TTS. On each request, if the current key returns 401 or 429, the app silently rotates to the next key. When all keys are exhausted it falls back to Web Speech API with a toast notification. Rotation index is persisted. Old single-key users are migrated automatically.</li>
                             <li><strong>ElevenLabs TTS 🔊</strong> — Add your ElevenLabs API key in Settings → ElevenLabs TTS to use high-quality AI voices (Rachel, Charlie, Aria, George, Liam, Charlotte, Alice, Brian). Falls back to your device's default TTS if not configured. Shows a toast if the key is invalid or quota is reached.</li>
@@ -2141,6 +2282,48 @@
         let pollinationsKeyIdx = 0;
         let pollinationsModel = localStorage.getItem('pollinationsModel') || 'flux';
         let imagenModel = localStorage.getItem('imagenModel') || 'imagen-3.0-generate-002';
+        // New image platform keys
+        let nvidiaImageKeys = _loadKeys('nvidiaImageApiKeys');
+        let nvidiaImageKeyIdx = Math.max(0, parseInt(localStorage.getItem('nvidiaImageKeyIndex') || '0'));
+        if (nvidiaImageKeyIdx >= nvidiaImageKeys.length) nvidiaImageKeyIdx = 0;
+        let nvidiaImageModel = localStorage.getItem('nvidiaImageModel') || 'black-forest-labs/flux.1-schnell';
+
+        let togetherImageKeys = _loadKeys('togetherImageApiKeys');
+        let togetherImageKeyIdx = Math.max(0, parseInt(localStorage.getItem('togetherImageKeyIndex') || '0'));
+        if (togetherImageKeyIdx >= togetherImageKeys.length) togetherImageKeyIdx = 0;
+        let togetherImageModel = localStorage.getItem('togetherImageModel') || 'black-forest-labs/FLUX.1-schnell-Free';
+
+        let hfImageKeys = _loadKeys('hfImageApiKeys');
+        let hfImageKeyIdx = Math.max(0, parseInt(localStorage.getItem('hfImageKeyIndex') || '0'));
+        if (hfImageKeyIdx >= hfImageKeys.length) hfImageKeyIdx = 0;
+        let hfImageModel = localStorage.getItem('hfImageModel') || 'black-forest-labs/FLUX.1-schnell';
+
+        // TTS platform
+        let ttsPlatform = localStorage.getItem('ttsPlatform') || 'webspeech';
+        // OpenAI TTS
+        let openaiTtsKeys = _loadKeys('openaiTtsApiKeys');
+        let openaiTtsKeyIdx = Math.max(0, parseInt(localStorage.getItem('openaiTtsKeyIndex') || '0'));
+        if (openaiTtsKeyIdx >= openaiTtsKeys.length) openaiTtsKeyIdx = 0;
+        // Groq TTS
+        let groqTtsKeys = _loadKeys('groqTtsApiKeys');
+        let groqTtsKeyIdx = Math.max(0, parseInt(localStorage.getItem('groqTtsKeyIndex') || '0'));
+        if (groqTtsKeyIdx >= groqTtsKeys.length) groqTtsKeyIdx = 0;
+
+        // Usage counters for image generation and TTS (session-based, stored in localStorage)
+        let usageCounters = JSON.parse(localStorage.getItem('snoah_usage_counters') || 'null') || {
+            pollinationsImagesCount: 0,
+            geminiImagesCount: 0,
+            nvidiaImagesCount: 0,
+            togetherImagesCount: 0,
+            hfImagesCount: 0,
+            elevenLabsCharsUsed: 0,
+            openaiTtsCharsUsed: 0,
+            groqTtsCharsUsed: 0,
+            geminiTtsCharsUsed: 0
+        };
+        function saveUsageCounters() {
+            try { localStorage.setItem('snoah_usage_counters', JSON.stringify(usageCounters)); } catch(e) {}
+        }
         // Advanced Model Parameters
         let paramTemperature = parseFloat(localStorage.getItem('snoah_param_temp') || '0.7');
         let paramTopP = parseFloat(localStorage.getItem('snoah_param_topp') || '0.9');
@@ -2807,6 +2990,47 @@
             });
             html += '</div>';
 
+            // Image Generation Counters
+            html += '<div>';
+            html += '<h3 class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest mb-3">Image Generation</h3>';
+            html += '<div class="bg-white rounded-2xl border border-[#E5E3DB] p-4 space-y-2">';
+            const imgCounters = [
+                { key: 'pollinationsImagesCount', label: 'Pollinations AI', color: '#FF6B6B' },
+                { key: 'geminiImagesCount', label: 'Gemini Imagen', color: '#4285F4' },
+                { key: 'nvidiaImagesCount', label: 'NVIDIA NIM', color: '#76B900' },
+                { key: 'togetherImagesCount', label: 'Together AI', color: '#10B981' },
+                { key: 'hfImagesCount', label: 'Hugging Face', color: '#FF9D00' }
+            ];
+            imgCounters.forEach(c => {
+                const count = usageCounters[c.key] || 0;
+                html += '<div class="flex items-center justify-between px-3 py-2 bg-[#F2F0E9] rounded-xl">';
+                html += '<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full" style="background:' + c.color + '"></div>';
+                html += '<span class="text-[13px] font-medium text-[#2C2B29]">' + c.label + '</span></div>';
+                html += '<span class="text-[13px] font-bold text-[#2C2B29]">' + count + ' image' + (count !== 1 ? 's' : '') + '</span>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+
+            // TTS Usage Counters
+            html += '<div>';
+            html += '<h3 class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest mb-3">TTS Usage</h3>';
+            html += '<div class="bg-white rounded-2xl border border-[#E5E3DB] p-4 space-y-2">';
+            const ttsCounters = [
+                { key: 'elevenLabsCharsUsed', label: 'ElevenLabs TTS', color: '#F97316' },
+                { key: 'openaiTtsCharsUsed', label: 'OpenAI TTS', color: '#10A37F' },
+                { key: 'groqTtsCharsUsed', label: 'Groq TTS', color: '#F97316' },
+                { key: 'geminiTtsCharsUsed', label: 'Gemini TTS', color: '#4285F4' }
+            ];
+            ttsCounters.forEach(c => {
+                const count = usageCounters[c.key] || 0;
+                html += '<div class="flex items-center justify-between px-3 py-2 bg-[#F2F0E9] rounded-xl">';
+                html += '<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full" style="background:' + c.color + '"></div>';
+                html += '<span class="text-[13px] font-medium text-[#2C2B29]">' + c.label + '</span></div>';
+                html += '<span class="text-[13px] font-bold text-[#2C2B29]">' + count.toLocaleString() + ' chars</span>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+
             // Recent History
             html += '<div>';
             html += '<h3 class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest mb-3">Recent Usage History</h3>';
@@ -2850,6 +3074,8 @@
                 tokenUsage[p] = { promptTokens:0, completionTokens:0, totalTokens:0, requestCount:0 };
             });
             tokenUsage.history = [];
+            usageCounters = { pollinationsImagesCount:0, geminiImagesCount:0, nvidiaImagesCount:0, togetherImagesCount:0, hfImagesCount:0, elevenLabsCharsUsed:0, openaiTtsCharsUsed:0, groqTtsCharsUsed:0, geminiTtsCharsUsed:0 };
+            saveUsageCounters();
             saveTokenUsage();
             renderTokenModal();
             showToast('Token usage reset');
@@ -3270,6 +3496,9 @@
             const elVoiceSel = document.getElementById('settings-elevenlabs-voice');
             if (elVoiceSel) elVoiceSel.value = localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM';
             renderElevenLabsKeysList();
+            // Load TTS platform settings
+            const ttsPlatSel = document.getElementById('settings-tts-platform');
+            if (ttsPlatSel) { ttsPlatSel.value = ttsPlatform; switchTtsPlatform(ttsPlatform, true); }
             // Load Image Generation settings
             const imgPlatSel = document.getElementById('settings-img-platform');
             if (imgPlatSel) { imgPlatSel.value = imgPlatform; switchImgPlatform(imgPlatform, true); }
@@ -3278,6 +3507,25 @@
             if (polModelSel) polModelSel.value = pollinationsModel;
             const imgModelSel = document.getElementById('settings-imagen-model');
             if (imgModelSel) imgModelSel.value = imagenModel;
+            renderNvidiaImgKeysList();
+            renderTogetherImgKeysList();
+            renderHfImgKeysList();
+            const nvidiaImgModelSel = document.getElementById('settings-nvidia-img-model');
+            if (nvidiaImgModelSel) nvidiaImgModelSel.value = nvidiaImageModel;
+            const togetherImgModelSel = document.getElementById('settings-together-img-model');
+            if (togetherImgModelSel) togetherImgModelSel.value = togetherImageModel;
+            const hfImgModelSel = document.getElementById('settings-hf-img-model');
+            if (hfImgModelSel) hfImgModelSel.value = hfImageModel;
+            renderOpenaiTtsKeysList();
+            renderGroqTtsKeysList();
+            const openaiTtsVoiceSel = document.getElementById('settings-openai-tts-voice');
+            if (openaiTtsVoiceSel) openaiTtsVoiceSel.value = localStorage.getItem('openaiTtsVoice') || 'alloy';
+            const openaiTtsModelSel = document.getElementById('settings-openai-tts-model');
+            if (openaiTtsModelSel) openaiTtsModelSel.value = localStorage.getItem('openaiTtsModel') || 'tts-1';
+            const groqTtsVoiceSel = document.getElementById('settings-groq-tts-voice');
+            if (groqTtsVoiceSel) groqTtsVoiceSel.value = localStorage.getItem('groqTtsVoice') || 'Arista-PlayAI';
+            const geminiTtsVoiceSel = document.getElementById('settings-gemini-tts-voice');
+            if (geminiTtsVoiceSel) geminiTtsVoiceSel.value = localStorage.getItem('geminiTtsVoice') || 'Aoede';
             renderNotionKeyStatus();
             updateNotionAutoSaveUI();
             updateAutoMemoryUI();
@@ -3516,6 +3764,17 @@
             if (elVoiceSel) {
                 localStorage.setItem('elevenLabsVoiceId', elVoiceSel.value);
             }
+            // Save TTS platform
+            const ttsPlatSel2 = document.getElementById('settings-tts-platform');
+            if (ttsPlatSel2) { ttsPlatform = ttsPlatSel2.value; localStorage.setItem('ttsPlatform', ttsPlatform); }
+            const openaiTtsVoiceSel2 = document.getElementById('settings-openai-tts-voice');
+            if (openaiTtsVoiceSel2) localStorage.setItem('openaiTtsVoice', openaiTtsVoiceSel2.value);
+            const openaiTtsModelSel2 = document.getElementById('settings-openai-tts-model');
+            if (openaiTtsModelSel2) localStorage.setItem('openaiTtsModel', openaiTtsModelSel2.value);
+            const groqTtsVoiceSel2 = document.getElementById('settings-groq-tts-voice');
+            if (groqTtsVoiceSel2) localStorage.setItem('groqTtsVoice', groqTtsVoiceSel2.value);
+            const geminiTtsVoiceSel2 = document.getElementById('settings-gemini-tts-voice');
+            if (geminiTtsVoiceSel2) localStorage.setItem('geminiTtsVoice', geminiTtsVoiceSel2.value);
             // Save Image Generation settings (keys saved immediately via addPolKey/removePolKey)
             const polModelSel = document.getElementById('settings-pollinations-model');
             if (polModelSel) {
@@ -3527,6 +3786,12 @@
                 imagenModel = imgModelSel.value;
                 localStorage.setItem('imagenModel', imagenModel);
             }
+            const nvidiaImgMdlSel = document.getElementById('settings-nvidia-img-model');
+            if (nvidiaImgMdlSel) { nvidiaImageModel = nvidiaImgMdlSel.value; localStorage.setItem('nvidiaImageModel', nvidiaImageModel); }
+            const togetherImgMdlSel = document.getElementById('settings-together-img-model');
+            if (togetherImgMdlSel) { togetherImageModel = togetherImgMdlSel.value; localStorage.setItem('togetherImageModel', togetherImageModel); }
+            const hfImgMdlSel = document.getElementById('settings-hf-img-model');
+            if (hfImgMdlSel) { hfImageModel = hfImgMdlSel.value; localStorage.setItem('hfImageModel', hfImageModel); }
             // Save Notion parent page
             const npInput = document.getElementById('settings-notionparent');
             if (npInput) {
@@ -3840,10 +4105,184 @@
         function switchImgPlatform(val, silent) {
             imgPlatform = val;
             if (!silent) localStorage.setItem('snoah_img_platform', val);
-            const polSec = document.getElementById('img-section-pollinations');
-            const gemSec = document.getElementById('img-section-gemini');
-            if (polSec) polSec.classList.toggle('hidden', val !== 'pollinations');
-            if (gemSec) gemSec.classList.toggle('hidden', val !== 'gemini');
+            ['pollinations','gemini','nvidia_img','together_img','hf_img'].forEach(p => {
+                const sec = document.getElementById('img-section-' + p);
+                if (sec) sec.classList.toggle('hidden', val !== p);
+            });
+        }
+
+        function renderNvidiaImgKeysList() {
+            const list = document.getElementById('nvidia-img-keys-list');
+            if (!list) return;
+            const validKeys = nvidiaImageKeys.filter(k => typeof k === 'string' && k.length > 0);
+            if (!validKeys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
+            list.innerHTML = validKeys.map((k, i) =>
+                '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
+                '<span class="flex-1 font-mono text-[12px] text-[#5B5951] truncate">' +
+                (i === nvidiaImageKeyIdx ? '<span class="text-[10px] font-bold text-green-600 mr-1.5">ACTIVE</span>' : '') +
+                k.substring(0,8) + '••••••••' + k.slice(-4) + '</span>' +
+                '<button onclick="removeNvidiaImgKey(' + i + ')" class="text-[#A3A095] hover:text-[#D25D38] transition-colors shrink-0 text-[18px] leading-none">&times;</button>' +
+                '</div>'
+            ).join('');
+        }
+        function addNvidiaImgKey() {
+            const input = document.getElementById('settings-nvidia-img-newkey');
+            const key = (input && input.value || '').trim();
+            if (!key) { showToast('Paste a key first'); return; }
+            if (nvidiaImageKeys.includes(key)) { showToast('Key already added'); return; }
+            nvidiaImageKeys.push(key);
+            localStorage.setItem('nvidiaImageApiKeys', JSON.stringify(nvidiaImageKeys));
+            input.value = '';
+            renderNvidiaImgKeysList();
+            showToast('NVIDIA key added ✓ (' + nvidiaImageKeys.length + ' total)');
+        }
+        function removeNvidiaImgKey(idx) {
+            nvidiaImageKeys.splice(idx, 1);
+            nvidiaImageKeyIdx = nvidiaImageKeys.length ? Math.min(nvidiaImageKeyIdx, nvidiaImageKeys.length - 1) : 0;
+            localStorage.setItem('nvidiaImageApiKeys', JSON.stringify(nvidiaImageKeys));
+            localStorage.setItem('nvidiaImageKeyIndex', String(nvidiaImageKeyIdx));
+            renderNvidiaImgKeysList();
+        }
+
+        function renderTogetherImgKeysList() {
+            const list = document.getElementById('together-img-keys-list');
+            if (!list) return;
+            const validKeys = togetherImageKeys.filter(k => typeof k === 'string' && k.length > 0);
+            if (!validKeys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
+            list.innerHTML = validKeys.map((k, i) =>
+                '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
+                '<span class="flex-1 font-mono text-[12px] text-[#5B5951] truncate">' +
+                (i === togetherImageKeyIdx ? '<span class="text-[10px] font-bold text-green-600 mr-1.5">ACTIVE</span>' : '') +
+                k.substring(0,8) + '••••••••' + k.slice(-4) + '</span>' +
+                '<button onclick="removeTogetherImgKey(' + i + ')" class="text-[#A3A095] hover:text-[#D25D38] transition-colors shrink-0 text-[18px] leading-none">&times;</button>' +
+                '</div>'
+            ).join('');
+        }
+        function addTogetherImgKey() {
+            const input = document.getElementById('settings-together-img-newkey');
+            const key = (input && input.value || '').trim();
+            if (!key) { showToast('Paste a key first'); return; }
+            if (togetherImageKeys.includes(key)) { showToast('Key already added'); return; }
+            togetherImageKeys.push(key);
+            localStorage.setItem('togetherImageApiKeys', JSON.stringify(togetherImageKeys));
+            input.value = '';
+            renderTogetherImgKeysList();
+            showToast('Together AI key added ✓ (' + togetherImageKeys.length + ' total)');
+        }
+        function removeTogetherImgKey(idx) {
+            togetherImageKeys.splice(idx, 1);
+            togetherImageKeyIdx = togetherImageKeys.length ? Math.min(togetherImageKeyIdx, togetherImageKeys.length - 1) : 0;
+            localStorage.setItem('togetherImageApiKeys', JSON.stringify(togetherImageKeys));
+            localStorage.setItem('togetherImageKeyIndex', String(togetherImageKeyIdx));
+            renderTogetherImgKeysList();
+        }
+
+        function renderHfImgKeysList() {
+            const list = document.getElementById('hf-img-keys-list');
+            if (!list) return;
+            const validKeys = hfImageKeys.filter(k => typeof k === 'string' && k.length > 0);
+            if (!validKeys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
+            list.innerHTML = validKeys.map((k, i) =>
+                '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
+                '<span class="flex-1 font-mono text-[12px] text-[#5B5951] truncate">' +
+                (i === hfImageKeyIdx ? '<span class="text-[10px] font-bold text-green-600 mr-1.5">ACTIVE</span>' : '') +
+                k.substring(0,8) + '••••••••' + k.slice(-4) + '</span>' +
+                '<button onclick="removeHfImgKey(' + i + ')" class="text-[#A3A095] hover:text-[#D25D38] transition-colors shrink-0 text-[18px] leading-none">&times;</button>' +
+                '</div>'
+            ).join('');
+        }
+        function addHfImgKey() {
+            const input = document.getElementById('settings-hf-img-newkey');
+            const key = (input && input.value || '').trim();
+            if (!key) { showToast('Paste a key first'); return; }
+            if (hfImageKeys.includes(key)) { showToast('Key already added'); return; }
+            hfImageKeys.push(key);
+            localStorage.setItem('hfImageApiKeys', JSON.stringify(hfImageKeys));
+            input.value = '';
+            renderHfImgKeysList();
+            showToast('Hugging Face key added ✓ (' + hfImageKeys.length + ' total)');
+        }
+        function removeHfImgKey(idx) {
+            hfImageKeys.splice(idx, 1);
+            hfImageKeyIdx = hfImageKeys.length ? Math.min(hfImageKeyIdx, hfImageKeys.length - 1) : 0;
+            localStorage.setItem('hfImageApiKeys', JSON.stringify(hfImageKeys));
+            localStorage.setItem('hfImageKeyIndex', String(hfImageKeyIdx));
+            renderHfImgKeysList();
+        }
+
+        function renderOpenaiTtsKeysList() {
+            const list = document.getElementById('openai-tts-keys-list');
+            if (!list) return;
+            const validKeys = openaiTtsKeys.filter(k => typeof k === 'string' && k.length > 0);
+            if (!validKeys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
+            list.innerHTML = validKeys.map((k, i) =>
+                '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
+                '<span class="flex-1 font-mono text-[12px] text-[#5B5951] truncate">' +
+                (i === openaiTtsKeyIdx ? '<span class="text-[10px] font-bold text-green-600 mr-1.5">ACTIVE</span>' : '') +
+                k.substring(0,8) + '••••••••' + k.slice(-4) + '</span>' +
+                '<button onclick="removeOpenaiTtsKey(' + i + ')" class="text-[#A3A095] hover:text-[#D25D38] transition-colors shrink-0 text-[18px] leading-none">&times;</button>' +
+                '</div>'
+            ).join('');
+        }
+        function addOpenaiTtsKey() {
+            const input = document.getElementById('settings-openai-tts-newkey');
+            const key = (input && input.value || '').trim();
+            if (!key) { showToast('Paste a key first'); return; }
+            if (openaiTtsKeys.includes(key)) { showToast('Key already added'); return; }
+            openaiTtsKeys.push(key);
+            localStorage.setItem('openaiTtsApiKeys', JSON.stringify(openaiTtsKeys));
+            input.value = '';
+            renderOpenaiTtsKeysList();
+            showToast('OpenAI TTS key added ✓ (' + openaiTtsKeys.length + ' total)');
+        }
+        function removeOpenaiTtsKey(idx) {
+            openaiTtsKeys.splice(idx, 1);
+            openaiTtsKeyIdx = openaiTtsKeys.length ? Math.min(openaiTtsKeyIdx, openaiTtsKeys.length - 1) : 0;
+            localStorage.setItem('openaiTtsApiKeys', JSON.stringify(openaiTtsKeys));
+            localStorage.setItem('openaiTtsKeyIndex', String(openaiTtsKeyIdx));
+            renderOpenaiTtsKeysList();
+        }
+
+        function renderGroqTtsKeysList() {
+            const list = document.getElementById('groq-tts-keys-list');
+            if (!list) return;
+            const validKeys = groqTtsKeys.filter(k => typeof k === 'string' && k.length > 0);
+            if (!validKeys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
+            list.innerHTML = validKeys.map((k, i) =>
+                '<div class="flex items-center gap-2 bg-[#F2F0E9] rounded-xl px-3 py-2">' +
+                '<span class="flex-1 font-mono text-[12px] text-[#5B5951] truncate">' +
+                (i === groqTtsKeyIdx ? '<span class="text-[10px] font-bold text-green-600 mr-1.5">ACTIVE</span>' : '') +
+                k.substring(0,8) + '••••••••' + k.slice(-4) + '</span>' +
+                '<button onclick="removeGroqTtsKey(' + i + ')" class="text-[#A3A095] hover:text-[#D25D38] transition-colors shrink-0 text-[18px] leading-none">&times;</button>' +
+                '</div>'
+            ).join('');
+        }
+        function addGroqTtsKey() {
+            const input = document.getElementById('settings-groq-tts-newkey');
+            const key = (input && input.value || '').trim();
+            if (!key) { showToast('Paste a key first'); return; }
+            if (groqTtsKeys.includes(key)) { showToast('Key already added'); return; }
+            groqTtsKeys.push(key);
+            localStorage.setItem('groqTtsApiKeys', JSON.stringify(groqTtsKeys));
+            input.value = '';
+            renderGroqTtsKeysList();
+            showToast('Groq TTS key added ✓ (' + groqTtsKeys.length + ' total)');
+        }
+        function removeGroqTtsKey(idx) {
+            groqTtsKeys.splice(idx, 1);
+            groqTtsKeyIdx = groqTtsKeys.length ? Math.min(groqTtsKeyIdx, groqTtsKeys.length - 1) : 0;
+            localStorage.setItem('groqTtsApiKeys', JSON.stringify(groqTtsKeys));
+            localStorage.setItem('groqTtsKeyIndex', String(groqTtsKeyIdx));
+            renderGroqTtsKeysList();
+        }
+
+        function switchTtsPlatform(val, silent) {
+            ttsPlatform = val;
+            if (!silent) localStorage.setItem('ttsPlatform', val);
+            ['webspeech','elevenlabs','openai_tts','groq_tts','gemini_tts'].forEach(p => {
+                const sec = document.getElementById('tts-section-' + p);
+                if (sec) sec.classList.toggle('hidden', val !== p);
+            });
         }
 
         function renderKeysList() {
@@ -5140,97 +5579,252 @@
         }
 
         function speakText(text, btn) {
-            const clean = text
-                .replace(/```[\s\S]*?```/g, 'code block')
-                .replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*(.*?)\*/g,'$1')
-                .replace(/#{1,4} /g,'').replace(/\$\$[\s\S]*?\$\$/g,'math expression')
-                .replace(/\$([^$]+)\$/g,'$1').replace(/[\r\n]+/g,' ').trim();
+            const clean = text.replace(/<[^>]+>/g,'').replace(/```[\s\S]*?```/g,'').replace(/\*\*/g,'').replace(/\*/g,'').replace(/#+ /g,'').trim();
 
             // Stop any current TTS
             if (ttsActive) {
                 window.speechSynthesis.cancel();
-                if (btn._elAudio) { try { btn._elAudio.pause(); } catch(e){} btn._elAudio = null; }
+                if (btn._elAudio) { try { btn._elAudio.pause(); btn._elAudio = null; } catch(e){} }
                 ttsActive = false;
                 document.querySelectorAll('.tts-btn').forEach(b => {
                     b.classList.remove('tts-active','text-[#D25D38]');
                     b.setAttribute('title','Read aloud');
                 });
-                if (btn._wasSpeaking) return;
+                if (btn._wasSpeaking) { btn._wasSpeaking = false; return; }
             }
 
-            if (elevenLabsKeys.length > 0) {
-                const voiceId = localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM';
-                ttsActive = true;
-                btn.classList.add('tts-active','text-[#D25D38]');
-                btn._wasSpeaking = true;
-                let triedCount = 0;
-                const startIdx = elevenLabsKeyIdx;
-                const tryNextKey = () => {
-                    if (triedCount >= elevenLabsKeys.length) {
-                        showToast('All ElevenLabs keys exhausted, using default TTS');
-                        ttsActive = false;
-                        btn.classList.remove('tts-active','text-[#D25D38]');
-                        btn._wasSpeaking = false;
-                        _speakWithWebSpeech(clean, btn);
-                        return;
+            const platform = ttsPlatform || 'webspeech';
+
+            if (platform === 'elevenlabs' && elevenLabsKeys.length > 0) {
+                _speakWithElevenLabs(clean, btn);
+            } else if (platform === 'openai_tts' && openaiTtsKeys.length > 0) {
+                _speakWithOpenAITts(clean, btn);
+            } else if (platform === 'groq_tts' && groqTtsKeys.length > 0) {
+                _speakWithGroqTts(clean, btn);
+            } else if (platform === 'gemini_tts') {
+                _speakWithGeminiTts(clean, btn);
+            } else {
+                if (platform !== 'webspeech' && platform !== 'elevenlabs') {
+                    showToast(({'openai_tts':'OpenAI TTS','groq_tts':'Groq TTS','gemini_tts':'Gemini TTS'}[platform] || platform) + ' TTS failed, using built-in');
+                }
+                _speakWithWebSpeech(clean, btn);
+            }
+        }
+
+        function _speakWithElevenLabs(clean, btn) {
+            const voiceId = localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM';
+            ttsActive = true;
+            btn.classList.add('tts-active','text-[#D25D38]');
+            btn._wasSpeaking = true;
+            let triedCount = 0;
+            const tryNextKey = () => {
+                if (triedCount >= elevenLabsKeys.length) {
+                    showToast('All ElevenLabs keys exhausted, using default TTS');
+                    ttsActive = false;
+                    btn.classList.remove('tts-active','text-[#D25D38]');
+                    btn._wasSpeaking = false;
+                    _speakWithWebSpeech(clean, btn);
+                    return;
+                }
+                const key = elevenLabsKeys[elevenLabsKeyIdx];
+                triedCount++;
+                fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
+                    method: 'POST',
+                    headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: clean, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
+                }).then(res => {
+                    if (res.status === 401 || res.status === 429) {
+                        elevenLabsKeyIdx = (elevenLabsKeyIdx + 1) % elevenLabsKeys.length;
+                        localStorage.setItem('elevenLabsKeyIndex', String(elevenLabsKeyIdx));
+                        showToast('ElevenLabs key rotated');
+                        tryNextKey();
+                        return null;
                     }
-                    const key = elevenLabsKeys[elevenLabsKeyIdx];
-                    triedCount++;
-                    fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
-                        method: 'POST',
-                        headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: clean, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
-                    }).then(res => {
-                        if (res.status === 401 || res.status === 429) {
-                            elevenLabsKeyIdx = (elevenLabsKeyIdx + 1) % elevenLabsKeys.length;
-                            localStorage.setItem('elevenLabsKeyIndex', String(elevenLabsKeyIdx));
-                            tryNextKey();
-                            return null;
-                        }
-                        if (!res.ok) { throw new Error('elevenlabs_err_' + res.status); }
-                        return res.blob();
-                    }).then(blob => {
-                        if (!blob) return;
-                        const url = URL.createObjectURL(blob);
-                        const audio = new Audio(url);
-                        btn._elAudio = audio;
-                        audio.onended = () => {
-                            ttsActive = false;
-                            btn.classList.remove('tts-active','text-[#D25D38]');
-                            btn._wasSpeaking = false;
-                            btn._elAudio = null;
-                            URL.revokeObjectURL(url);
-                        };
-                        audio.onerror = () => {
-                            ttsActive = false;
-                            btn.classList.remove('tts-active','text-[#D25D38]');
-                            btn._wasSpeaking = false;
-                            btn._elAudio = null;
-                            URL.revokeObjectURL(url);
-                            _speakWithWebSpeech(clean, btn);
-                        };
-                        const playPromise = audio.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(() => {
-                                URL.revokeObjectURL(url);
-                                btn._elAudio = null;
-                                ttsActive = false;
-                                btn.classList.remove('tts-active','text-[#D25D38]');
-                                btn._wasSpeaking = false;
-                                _speakWithWebSpeech(clean, btn);
-                            });
-                        }
-                    }).catch(() => {
+                    if (!res.ok) { throw new Error('elevenlabs_err_' + res.status); }
+                    return res.blob();
+                }).then(blob => {
+                    if (!blob) return;
+                    usageCounters.elevenLabsCharsUsed += clean.length;
+                    saveUsageCounters();
+                    const url = URL.createObjectURL(blob);
+                    const audio = new Audio(url);
+                    btn._elAudio = audio;
+                    audio.onended = () => {
                         ttsActive = false;
                         btn.classList.remove('tts-active','text-[#D25D38]');
                         btn._wasSpeaking = false;
+                        btn._elAudio = null;
+                        URL.revokeObjectURL(url);
+                    };
+                    audio.onerror = () => {
+                        ttsActive = false;
+                        btn.classList.remove('tts-active','text-[#D25D38]');
+                        btn._wasSpeaking = false;
+                        btn._elAudio = null;
+                        URL.revokeObjectURL(url);
                         _speakWithWebSpeech(clean, btn);
-                    });
-                };
-                tryNextKey();
+                    };
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(() => {
+                            URL.revokeObjectURL(url);
+                            btn._elAudio = null;
+                            ttsActive = false;
+                            btn.classList.remove('tts-active','text-[#D25D38]');
+                            btn._wasSpeaking = false;
+                            _speakWithWebSpeech(clean, btn);
+                        });
+                    }
+                }).catch(() => {
+                    ttsActive = false;
+                    btn.classList.remove('tts-active','text-[#D25D38]');
+                    btn._wasSpeaking = false;
+                    _speakWithWebSpeech(clean, btn);
+                });
+            };
+            tryNextKey();
+        }
+
+        function _speakWithOpenAITts(clean, btn) {
+            const voice = localStorage.getItem('openaiTtsVoice') || 'alloy';
+            const model = localStorage.getItem('openaiTtsModel') || 'tts-1';
+            ttsActive = true;
+            btn.classList.add('tts-active','text-[#D25D38]');
+            btn._wasSpeaking = true;
+            let triedCount = 0;
+            const tryNextKey = () => {
+                if (triedCount >= openaiTtsKeys.length) {
+                    showToast('All OpenAI TTS keys failed, using built-in');
+                    ttsActive = false;
+                    btn.classList.remove('tts-active','text-[#D25D38]');
+                    btn._wasSpeaking = false;
+                    _speakWithWebSpeech(clean, btn);
+                    return;
+                }
+                const key = openaiTtsKeys[openaiTtsKeyIdx];
+                triedCount++;
+                fetch('https://api.openai.com/v1/audio/speech', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: model, voice: voice, input: clean })
+                }).then(res => {
+                    if (res.status === 401 || res.status === 429) {
+                        showToast('OpenAI TTS key rotated');
+                        openaiTtsKeyIdx = (openaiTtsKeyIdx + 1) % openaiTtsKeys.length;
+                        localStorage.setItem('openaiTtsKeyIndex', String(openaiTtsKeyIdx));
+                        tryNextKey();
+                        return null;
+                    }
+                    if (!res.ok) throw new Error('openai_tts_err_' + res.status);
+                    return res.blob();
+                }).then(blob => {
+                    if (!blob) return;
+                    usageCounters.openaiTtsCharsUsed += clean.length;
+                    saveUsageCounters();
+                    const url = URL.createObjectURL(blob);
+                    const audio = new Audio(url);
+                    btn._elAudio = audio;
+                    audio.onended = () => { ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; btn._elAudio = null; URL.revokeObjectURL(url); };
+                    audio.onerror = () => { ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; btn._elAudio = null; URL.revokeObjectURL(url); _speakWithWebSpeech(clean, btn); };
+                    const p = audio.play();
+                    if (p) p.catch(() => { URL.revokeObjectURL(url); btn._elAudio = null; ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; _speakWithWebSpeech(clean, btn); });
+                }).catch(() => { ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; showToast('OpenAI TTS failed, using built-in'); _speakWithWebSpeech(clean, btn); });
+            };
+            tryNextKey();
+        }
+
+        function _speakWithGroqTts(clean, btn) {
+            const voice = localStorage.getItem('groqTtsVoice') || 'Arista-PlayAI';
+            ttsActive = true;
+            btn.classList.add('tts-active','text-[#D25D38]');
+            btn._wasSpeaking = true;
+            let triedCount = 0;
+            const tryNextKey = () => {
+                if (triedCount >= groqTtsKeys.length) {
+                    showToast('All Groq TTS keys failed, using built-in');
+                    ttsActive = false;
+                    btn.classList.remove('tts-active','text-[#D25D38]');
+                    btn._wasSpeaking = false;
+                    _speakWithWebSpeech(clean, btn);
+                    return;
+                }
+                const key = groqTtsKeys[groqTtsKeyIdx];
+                triedCount++;
+                fetch('https://api.groq.com/openai/v1/audio/speech', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: 'playai-tts', voice: voice, input: clean, response_format: 'mp3' })
+                }).then(res => {
+                    if (res.status === 401 || res.status === 429) {
+                        showToast('Groq TTS key rotated');
+                        groqTtsKeyIdx = (groqTtsKeyIdx + 1) % groqTtsKeys.length;
+                        localStorage.setItem('groqTtsKeyIndex', String(groqTtsKeyIdx));
+                        tryNextKey();
+                        return null;
+                    }
+                    if (!res.ok) throw new Error('groq_tts_err_' + res.status);
+                    return res.blob();
+                }).then(blob => {
+                    if (!blob) return;
+                    usageCounters.groqTtsCharsUsed += clean.length;
+                    saveUsageCounters();
+                    const url = URL.createObjectURL(blob);
+                    const audio = new Audio(url);
+                    btn._elAudio = audio;
+                    audio.onended = () => { ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; btn._elAudio = null; URL.revokeObjectURL(url); };
+                    audio.onerror = () => { ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; btn._elAudio = null; URL.revokeObjectURL(url); _speakWithWebSpeech(clean, btn); };
+                    const p = audio.play();
+                    if (p) p.catch(() => { URL.revokeObjectURL(url); btn._elAudio = null; ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; _speakWithWebSpeech(clean, btn); });
+                }).catch(() => { ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; showToast('Groq TTS failed, using built-in'); _speakWithWebSpeech(clean, btn); });
+            };
+            tryNextKey();
+        }
+
+        async function _speakWithGeminiTts(clean, btn) {
+            const voice = localStorage.getItem('geminiTtsVoice') || 'Aoede';
+            const gemKey = geminiKeys[0] || apiKey || '';
+            if (!gemKey) {
+                showToast('Gemini TTS failed, using built-in');
+                _speakWithWebSpeech(clean, btn);
                 return;
             }
-            _speakWithWebSpeech(clean, btn);
+            ttsActive = true;
+            btn.classList.add('tts-active','text-[#D25D38]');
+            btn._wasSpeaking = true;
+            try {
+                const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=' + gemKey, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: clean }] }],
+                        generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } }
+                    })
+                });
+                if (!res.ok) throw new Error('gemini_tts_err_' + res.status);
+                const data = await res.json();
+                const b64 = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].inlineData && data.candidates[0].content.parts[0].inlineData.data;
+                if (!b64) throw new Error('no_audio_data');
+                usageCounters.geminiTtsCharsUsed += clean.length;
+                saveUsageCounters();
+                const byteChars = atob(b64);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+                const blob = new Blob([byteArr], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                btn._elAudio = audio;
+                audio.onended = () => { ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; btn._elAudio = null; URL.revokeObjectURL(url); };
+                audio.onerror = () => { ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; btn._elAudio = null; URL.revokeObjectURL(url); _speakWithWebSpeech(clean, btn); };
+                const p = audio.play();
+                if (p) p.catch(() => { URL.revokeObjectURL(url); btn._elAudio = null; ttsActive = false; btn.classList.remove('tts-active','text-[#D25D38]'); btn._wasSpeaking = false; _speakWithWebSpeech(clean, btn); });
+            } catch(e) {
+                console.error('[SnoahAI] Gemini TTS error:', e);
+                ttsActive = false;
+                btn.classList.remove('tts-active','text-[#D25D38]');
+                btn._wasSpeaking = false;
+                showToast('Gemini TTS failed, using built-in');
+                _speakWithWebSpeech(clean, btn);
+            }
         }
 
         function _speakWithWebSpeech(clean, btn) {
@@ -6202,9 +6796,13 @@
         }
 
         function buildImageErrorCard(platform) {
-            const msg = platform === 'gemini'
-                ? '🖼️ Gemini Imagen failed. Make sure your Gemini API key is added in Settings and billing is enabled on your Google Cloud project.'
-                : '🖼️ Pollinations image generation failed. Check your internet connection or add a Pollinations API key in Settings → Image Generation.';
+            const msgs = {
+                gemini: '🖼️ Gemini Imagen failed. Make sure your Gemini API key is added in Settings and billing is enabled on your Google Cloud project.',
+                nvidia_img: '🖼️ NVIDIA NIM image generation failed. Check your NVIDIA API key in Settings → Image Generation.',
+                together_img: '🖼️ Together AI image generation failed. Check your Together AI API key in Settings → Image Generation.',
+                hf_img: '🖼️ Hugging Face image generation failed. Check your Hugging Face token in Settings → Image Generation.'
+            };
+            const msg = msgs[platform] || '🖼️ Pollinations image generation failed. Check your internet connection or add a Pollinations API key in Settings → Image Generation.';
             return '<div class="bg-[#FDF4F2] border border-[#F8E3DE] rounded-[20px] px-4 py-4 text-[14px] text-[#D25D38] max-w-full">' + msg + '</div>';
         }
 
@@ -6215,7 +6813,6 @@
 
             if (usePlatform === 'pollinations') {
                 const polMdl = pollinationsModel || 'flux';
-                // Try keys in rotation order; also try without key as last resort
                 const keysToTry = pollinationsKeys.length > 0
                     ? [...pollinationsKeys.slice(pollinationsKeyIdx), ...pollinationsKeys.slice(0, pollinationsKeyIdx), '']
                     : [''];
@@ -6230,16 +6827,16 @@
                             const blob = await res.blob();
                             imgSrc = URL.createObjectURL(blob);
                             provider = 'Pollinations AI';
-                            // Advance key index on success so next request uses next key (round-robin)
                             if (pollinationsKeys.length > 0) pollinationsKeyIdx = (pollinationsKeyIdx + 1) % pollinationsKeys.length;
                         } else if ((res.status === 401 || res.status === 429) && polKey && ki < keysToTry.length - 1) {
-                            // Rate-limited or auth failed — rotate to next key
+                            showToast('Pollinations key rotated');
                             pollinationsKeyIdx = (pollinationsKeyIdx + 1) % pollinationsKeys.length;
                         } else {
                             throw new Error('HTTP ' + res.status);
                         }
                     } catch(e) { /* try next key */ }
                 }
+                if (imgSrc) { usageCounters.pollinationsImagesCount++; saveUsageCounters(); }
             } else if (usePlatform === 'gemini') {
                 const gemKey = geminiKeys[0] || apiKey || '';
                 const imgMdl = imagenModel || 'imagen-3.0-generate-002';
@@ -6261,6 +6858,89 @@
                         provider = 'Gemini Imagen';
                     } catch(e) { console.error('[SnoahAI] Gemini Imagen error:', e); }
                 }
+                if (imgSrc) { usageCounters.geminiImagesCount++; saveUsageCounters(); }
+            } else if (usePlatform === 'nvidia_img') {
+                const keysToTry = nvidiaImageKeys.length > 0
+                    ? [...nvidiaImageKeys.slice(nvidiaImageKeyIdx), ...nvidiaImageKeys.slice(0, nvidiaImageKeyIdx)]
+                    : [];
+                const mdl = nvidiaImageModel || 'black-forest-labs/flux.1-schnell';
+                for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
+                    try {
+                        const res = await fetch('https://integrate.api.nvidia.com/v1/images/generations', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + keysToTry[ki], 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ model: mdl, prompt: prompt, n: 1, size: '1024x1024' })
+                        });
+                        if (res.status === 401 || res.status === 429) {
+                            showToast('NVIDIA key rotated');
+                            nvidiaImageKeyIdx = (nvidiaImageKeyIdx + 1) % nvidiaImageKeys.length;
+                            localStorage.setItem('nvidiaImageKeyIndex', String(nvidiaImageKeyIdx));
+                            continue;
+                        }
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        const data = await res.json();
+                        const b64 = data.data && data.data[0] && data.data[0].b64_json;
+                        if (!b64) throw new Error('no_image_data');
+                        imgSrc = 'data:image/png;base64,' + b64;
+                        provider = 'NVIDIA NIM';
+                    } catch(e) { console.error('[SnoahAI] NVIDIA image error:', e); }
+                }
+                if (!imgSrc && keysToTry.length > 0) showToast('All NVIDIA keys failed');
+                if (imgSrc) { usageCounters.nvidiaImagesCount++; saveUsageCounters(); }
+            } else if (usePlatform === 'together_img') {
+                const keysToTry = togetherImageKeys.length > 0
+                    ? [...togetherImageKeys.slice(togetherImageKeyIdx), ...togetherImageKeys.slice(0, togetherImageKeyIdx)]
+                    : [];
+                const mdl = togetherImageModel || 'black-forest-labs/FLUX.1-schnell-Free';
+                for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
+                    try {
+                        const res = await fetch('https://api.together.xyz/v1/images/generations', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + keysToTry[ki], 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ model: mdl, prompt: prompt, n: 1, width: 1024, height: 1024, steps: 4 })
+                        });
+                        if (res.status === 401 || res.status === 429) {
+                            showToast('Together AI key rotated');
+                            togetherImageKeyIdx = (togetherImageKeyIdx + 1) % togetherImageKeys.length;
+                            localStorage.setItem('togetherImageKeyIndex', String(togetherImageKeyIdx));
+                            continue;
+                        }
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        const data = await res.json();
+                        const b64 = data.data && data.data[0] && data.data[0].b64_json;
+                        if (!b64) throw new Error('no_image_data');
+                        imgSrc = 'data:image/png;base64,' + b64;
+                        provider = 'Together AI';
+                    } catch(e) { console.error('[SnoahAI] Together AI image error:', e); }
+                }
+                if (!imgSrc && keysToTry.length > 0) showToast('All Together AI keys failed');
+                if (imgSrc) { usageCounters.togetherImagesCount++; saveUsageCounters(); }
+            } else if (usePlatform === 'hf_img') {
+                const keysToTry = hfImageKeys.length > 0
+                    ? [...hfImageKeys.slice(hfImageKeyIdx), ...hfImageKeys.slice(0, hfImageKeyIdx)]
+                    : [];
+                const mdl = hfImageModel || 'black-forest-labs/FLUX.1-schnell';
+                for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
+                    try {
+                        const res = await fetch('https://api-inference.huggingface.co/models/' + mdl, {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + keysToTry[ki], 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ inputs: prompt })
+                        });
+                        if (res.status === 401 || res.status === 429) {
+                            showToast('Hugging Face key rotated');
+                            hfImageKeyIdx = (hfImageKeyIdx + 1) % hfImageKeys.length;
+                            localStorage.setItem('hfImageKeyIndex', String(hfImageKeyIdx));
+                            continue;
+                        }
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        const blob = await res.blob();
+                        imgSrc = URL.createObjectURL(blob);
+                        provider = 'Hugging Face';
+                    } catch(e) { console.error('[SnoahAI] Hugging Face image error:', e); }
+                }
+                if (!imgSrc && keysToTry.length > 0) showToast('All Hugging Face keys failed');
+                if (imgSrc) { usageCounters.hfImagesCount++; saveUsageCounters(); }
             }
 
             if (imgSrc) {
@@ -6447,15 +7127,16 @@ FEATURES:
 59. GLOBAL COMMUNITY CHAT: ☰ → Community — opens a full-screen live chat room shared by ALL SnoahAI users worldwide in real time. Powered by Firebase Firestore with onSnapshot for instant message delivery. Messages include sender name, time, and are stored in the 'community_chat' Firestore collection. The modal has two tabs: 💬 Live Chat (the global chat room) and 📬 Contact Dev (Telegram, Instagram, GitHub links to reach Shahzaib Muzaffar). Max 500 chars per message, 3-second cooldown to prevent spam. The user's saved name from Settings is shown as their display name.
 60. CHEMISTRY RENDERING: KaTeX mhchem extension is loaded alongside KaTeX. Chemistry equations using \\ce{...} notation render beautifully in both inline ($...$) and display ($$...$$) math blocks. Examples: $\\ce{H2O}$ renders as water, $\\ce{2H2 + O2 -> 2H2O}$ renders a balanced equation with arrow. Use \\ce{} for any chemical formula or reaction equation.
 61. MATH & MARKDOWN RENDERING: All lines in the AI response go through processInlineRaw() which handles: display math ($$...$$), inline math ($...$), chemistry (\\ce{}), HTML escaping, bold/italic/code/link Markdown in the correct order. Previously, lines containing math could display with unformatted surrounding text — this is now fixed.
-62. ELEVENLABS TTS (MULTI-KEY): Settings → API tab → ElevenLabs TTS section. Add multiple ElevenLabs API keys (stored as an array in localStorage: elevenLabsApiKeys). Keys auto-rotate on 401 or 429 errors — if all keys fail, falls back to device speech synthesis with a toast: "All ElevenLabs keys exhausted, using default TTS". Key rotation index is persisted in elevenLabsKeyIndex. Old single-key users are migrated automatically on app load. Choose a voice (Rachel, Charlie, Aria, George, Liam, Charlotte, Alice, Brian) saved as elevenLabsVoiceId.
-63. IMAGE GENERATION: Type /image <prompt> or include "generate image", "create image", or "draw" in your message to generate an image directly in chat. Provider priority: (1) Pollinations AI if a Pollinations API key is set (Settings → Image Generation → Pollinations API Key). Model options: Flux, Flux Pro, Flux Realism, Flux Anime, Flux 3D, Turbo. (2) Gemini Imagen if a Gemini API key is set — reuses the existing Gemini key. Model options: Imagen 3, Imagen 3 Fast (default). If both fail: shows an error card prompting to add a key in Settings. Generated image is shown in a card with a download button and provider label. A loading spinner is shown while generating.
+62. TTS PLATFORM (MULTI-KEY): Settings → API tab → TTS Platform section. Choose from: Built-in Web Speech (free, no key), ElevenLabs (freemium, multi-key pool stored as elevenLabsApiKeys), OpenAI TTS (paid, multi-key pool stored as openaiTtsApiKeys, voices: alloy/echo/fable/onyx/nova/shimmer, models: tts-1/tts-1-hd), Groq TTS (free tier, multi-key pool stored as groqTtsApiKeys, voices: Arista-PlayAI/Atlas-PlayAI/Fritz-PlayAI), Gemini TTS (free, reuses Gemini key pool, voices: Aoede/Kore/Fenrir/Charon/Puck/Leda/Orus/Zephyr). Active platform stored as ttsPlatform in localStorage. Keys auto-rotate on 401 or 429 errors. Falls back to device Web Speech API on failure.
+63. IMAGE GENERATION: Type /image <prompt> or include "generate image", "create image", or "draw" in your message to generate an image directly in chat. Supports 5 providers selectable in Settings → Image Generation: (1) Pollinations AI — multi-key pool, model options include Flux. (2) Gemini Imagen — reuses Gemini key pool, models: Imagen 3 / Imagen 3 Fast (requires billing). (3) NVIDIA NIM (free) — multi-key pool stored as nvidiaImageApiKeys, models: FLUX.1 Schnell/Dev, SDXL Turbo. (4) Together AI (free+paid tier) — multi-key pool stored as togetherImageApiKeys, models: FLUX.1 Schnell (Free)/Dev, SDXL. (5) Hugging Face (free tier) — multi-key pool stored as hfImageApiKeys, models: FLUX.1 Schnell, SD 3.5, SDXL Turbo. All providers support multi-key auto-rotation on 401/429. Generated image shown as a card with download button and provider label.
+64. IMAGE & TTS USAGE TRACKING: Token Management dashboard (Settings → API → Token Management) now includes Image Generation section (images generated per platform: Pollinations, Gemini, NVIDIA, Together AI, Hugging Face) and TTS Usage section (characters used per provider: ElevenLabs, OpenAI TTS, Groq TTS, Gemini TTS). Counters stored in snoah_usage_counters localStorage key and reset together with token usage via confirmResetTokenUsage().
 APP STRUCTURE & LAYOUT:
 - Single HTML file (index.html) with all CSS (Tailwind CDN) and JavaScript inline — no separate files except backend Vercel serverless functions in /api/ folder.
 - Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
 - Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons.
 - Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates, Temp Chat buttons, main text input, Send/Stop button.
 - Sidebar (slides in from left): User profile at bottom, chat history list (shows 4 most recent; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us/Delete History), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
-- Settings → API tab sections: Platform & Model, API Keys pool (multi-key, auto-rotate), ElevenLabs TTS (multi-key pool + voice selector), Image Generation (Pollinations AI key + model, Gemini Imagen model), Advanced Model Parameters, Token Management, Notion Integration, Response Display.
+- Settings → API tab sections: Platform & Model, API Keys pool (multi-key, auto-rotate), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Advanced Model Parameters, Token Management, Notion Integration, Response Display.
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
