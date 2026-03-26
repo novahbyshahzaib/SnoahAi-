@@ -771,9 +771,9 @@
                             </div>
                             <select id="settings-hf-img-model"
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                                <option value="black-forest-labs/FLUX.1-schnell">FLUX.1 Schnell (FreeTier)</option>
-                                <option value="stabilityai/stable-diffusion-3.5-large">Stable Diffusion 3.5 (FreeTier)</option>
-                                <option value="stabilityai/sdxl-turbo">SDXL Turbo (FreeTier)</option>
+                                <option value="black-forest-labs/FLUX.1-schnell">FLUX.1 Schnell (Free Tier)</option>
+                                <option value="stabilityai/stable-diffusion-3.5-large">Stable Diffusion 3.5 (Free Tier)</option>
+                                <option value="stabilityai/sdxl-turbo">SDXL Turbo (Free Tier)</option>
                             </select>
                         </div>
                     </div>
@@ -3499,8 +3499,6 @@
             // Load TTS platform settings
             const ttsPlatSel = document.getElementById('settings-tts-platform');
             if (ttsPlatSel) { ttsPlatSel.value = ttsPlatform; switchTtsPlatform(ttsPlatform, true); }
-            const elVoiceSel2 = document.getElementById('settings-elevenlabs-voice');
-            if (elVoiceSel2) elVoiceSel2.value = localStorage.getItem('elevenLabsVoiceId') || '21m00Tcm4TlvDq8ikWAM';
             // Load Image Generation settings
             const imgPlatSel = document.getElementById('settings-img-platform');
             if (imgPlatSel) { imgPlatSel.value = imgPlatform; switchImgPlatform(imgPlatform, true); }
@@ -5590,6 +5588,7 @@
                 ttsActive = false;
                 document.querySelectorAll('.tts-btn').forEach(b => {
                     b.classList.remove('tts-active','text-[#D25D38]');
+                    b.setAttribute('title','Read aloud');
                 });
                 if (btn._wasSpeaking) { btn._wasSpeaking = false; return; }
             }
