@@ -5782,7 +5782,7 @@
 
         async function _speakWithGeminiTts(clean, btn) {
             const voice = localStorage.getItem('geminiTtsVoice') || 'Aoede';
-            const gemKey = geminiKeys[geminiKeyIdx] || geminiKeys[0] || apiKey || '';
+            const gemKey = geminiKeys[0] || apiKey || '';
             if (!gemKey) {
                 showToast('Gemini TTS failed, using built-in');
                 _speakWithWebSpeech(clean, btn);
@@ -6838,7 +6838,7 @@
                 }
                 if (imgSrc) { usageCounters.pollinationsImagesCount++; saveUsageCounters(); }
             } else if (usePlatform === 'gemini') {
-                const gemKey = geminiKeys[geminiKeyIdx] || geminiKeys[0] || apiKey || '';
+                const gemKey = geminiKeys[0] || apiKey || '';
                 const imgMdl = imagenModel || 'imagen-3.0-generate-002';
                 if (gemKey) {
                     try {
