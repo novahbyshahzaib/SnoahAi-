@@ -7410,7 +7410,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 puterMessages.push({ role: msg.role === 'user' ? 'user' : 'assistant', content: msg.originalText || msg.text || '' });
                             }
                             isStreaming = true;
-                            const puterStream = await puter.ai.chat(puterMessages, { model: puterModelId, stream: true });
+                            const puterStream = await puter.ai.chat(puterMessages, { model: puterModelId, stream: true, max_tokens: paramMaxTokens });
                             for await (const part of puterStream) {
                                 if (!isStreaming) break;
                                 const chunk = part?.text ?? part?.delta?.content ?? '';
