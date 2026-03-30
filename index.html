@@ -708,7 +708,14 @@
                             </div>
                             <select id="settings-pollinations-model"
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                                <option value="flux">Flux (Recommended)</option>
+                                <option value="flux">Flux (Recommended, Fast)</option>
+                                <option value="flux-realism">Flux Realism (Photo-realistic)</option>
+                                <option value="flux-anime">Flux Anime (Anime style)</option>
+                                <option value="flux-3d">Flux 3D (3D renders)</option>
+                                <option value="flux-pro">Flux Pro (Highest quality)</option>
+                                <option value="turbo">Turbo (SDXL, Fastest)</option>
+                                <option value="any-dark">Any Dark (Dark/moody art)</option>
+                                <option value="gptimage">GPT Image (Creative)</option>
                             </select>
                         </div>
 
@@ -733,12 +740,15 @@
                                     class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
                                 <button onclick="addNvidiaImgKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
                             </div>
-                            <select id="settings-nvidia-img-model"
-                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                                <option value="black-forest-labs/flux.1-schnell">FLUX.1 Schnell (Free)</option>
-                                <option value="black-forest-labs/flux.1-dev">FLUX.1 Dev (Free)</option>
-                                <option value="stabilityai/sdxl-turbo">Stable Diffusion XL (Free)</option>
-                            </select>
+                            <input type="text" id="settings-nvidia-img-model" list="nvidia-img-model-list"
+                                placeholder="e.g. black-forest-labs/flux.1-schnell"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                            <datalist id="nvidia-img-model-list">
+                                <option value="black-forest-labs/flux.1-schnell">FLUX.1 Schnell (Fast, Free)</option>
+                                <option value="black-forest-labs/flux.1-dev">FLUX.1 Dev (Quality, Free)</option>
+                                <option value="stabilityai/sdxl-turbo">Stable Diffusion XL Turbo (Free)</option>
+                                <option value="stabilityai/stable-diffusion-3-medium">SD 3 Medium (Free)</option>
+                            </datalist>
                         </div>
 
                         <!-- Together AI Section -->
@@ -1141,6 +1151,9 @@
             </div>
             <div class="p-4 flex-1 overflow-y-auto">
                 <div class="flex gap-2 mb-6">
+                    <button id="btn-temp-chat" onclick="toggleTempChat()" title="Temp Chat" class="flex items-center justify-center p-2.5 bg-[#EFECE6] hover:bg-[#EAE8E0] border border-[#E5E3DB] rounded-xl text-[#2C2B29] transition-colors shadow-sm shrink-0">
+                        <i data-lucide="clock" class="w-4 h-4 text-[#8C897D]"></i>
+                    </button>
                     <button onclick="startNewChat()" class="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#EFECE6] hover:bg-[#EAE8E0] border border-[#E5E3DB] rounded-xl text-[#2C2B29] font-medium transition-colors shadow-sm group">
                         <i data-lucide="plus" class="w-4 h-4 text-[#D25D38]"></i>New Chat
                     </button>
@@ -1289,9 +1302,6 @@
                     </button>
                     <button id="btn-image" onclick="triggerFileUpload()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> Attach
-                    </button>
-                    <button id="btn-temp-chat" onclick="toggleTempChat()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
-                        <i data-lucide="clock" class="w-3.5 h-3.5"></i> Temp Chat
                     </button>
                     <button id="btn-length" onclick="cycleLength()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="align-left" class="w-3.5 h-3.5"></i> <span id="length-label">Normal</span>
@@ -1815,6 +1825,12 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Extended Thinking Tag Support 🧠</strong> — The thought-process dropdown now captures reasoning from ALL models, not just those using &lt;think&gt; tags. Models using &lt;reasoning&gt;, &lt;thinking&gt;, &lt;reflection&gt; tags (Mistral, some OpenRouter models) or <code>reasoning_content</code> stream fields (DeepSeek, Qwen) are all shown in the collapsible "Thought Process" block.</li>
+                            <li><strong>Gemini TTS Fixed 🔊</strong> — Gemini Text-to-Speech now plays correctly. The API returns raw L16 PCM audio; the app now builds a proper WAV file with the correct RIFF header so the browser's audio player can decode it.</li>
+                            <li><strong>NVIDIA NIM Image Fix + Custom Model 🖼️</strong> — NVIDIA image generation now routes through a backend proxy (/api/nvidia-img) fixing the CORS error that prevented images from generating. The model selector is now a free-text input with suggested models (FLUX.1 Schnell/Dev, SDXL Turbo, SD 3 Medium) — enter any NVIDIA NIM image model ID.</li>
+                            <li><strong>More Pollinations Models 🎨</strong> — Settings → Image Generation → Pollinations AI now offers 8 model options: Flux, Flux Realism, Flux Anime, Flux 3D, Flux Pro, Turbo, Any Dark, and GPT Image.</li>
+                            <li><strong>Temp Chat in Sidebar 🕐</strong> — The Temp Chat toggle moved from the input toolbar to the sidebar header. A clock icon button now sits to the left of the "+ New Chat" button for quick access without cluttering the chat input area.</li>
+                            <li><strong>AI Platform &amp; Model Awareness 🤖</strong> — The AI now knows which platform and model it is currently running on. Ask "which AI are you?" or "what model is this?" and it will answer accurately based on your current Settings selection.</li>
                             <li><strong>5 TTS Platforms 🔊</strong> — Settings → TTS Platform dropdown now offers: Built-in Web Speech (free, no key), ElevenLabs (existing, freemium), OpenAI TTS (paid, multi-key), Groq TTS (free tier, multi-key), and Gemini TTS (free, reuses Gemini key). Falls back to built-in if selected platform fails.</li>
                             <li><strong>5 Image Generation Platforms 🖼️</strong> — Settings → Image Platform dropdown now includes NVIDIA NIM (free, FLUX.1/SDXL), Together AI (free+paid tier, FLUX.1/SDXL), and Hugging Face (free tier, FLUX.1/SD3.5). All support multi-key auto-rotation.</li>
                             <li><strong>Image &amp; TTS Usage Tracking 📊</strong> — Token Management dashboard now shows Images Generated per platform and TTS Characters Used per provider. Resets together with token usage.</li>
@@ -5782,6 +5798,24 @@
             tryNextKey();
         }
 
+        // Build a WAV file buffer from raw L16 PCM base64 data (Gemini TTS returns raw PCM, not a WAV file)
+        function _buildWavFromPcm(pcmStr, sampleRate, channels, bitsPerSample) {
+            const pcmLen = pcmStr.length;
+            const byteRate = sampleRate * channels * (bitsPerSample / 8);
+            const blockAlign = channels * (bitsPerSample / 8);
+            const buf = new ArrayBuffer(44 + pcmLen);
+            const v = new DataView(buf);
+            const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+            ws(0, 'RIFF'); v.setUint32(4, 36 + pcmLen, true);
+            ws(8, 'WAVE'); ws(12, 'fmt ');
+            v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+            v.setUint16(22, channels, true); v.setUint32(24, sampleRate, true);
+            v.setUint32(28, byteRate, true); v.setUint16(32, blockAlign, true);
+            v.setUint16(34, bitsPerSample, true); ws(36, 'data'); v.setUint32(40, pcmLen, true);
+            for (let i = 0; i < pcmLen; i++) v.setUint8(44 + i, pcmStr.charCodeAt(i));
+            return new Uint8Array(buf);
+        }
+
         async function _speakWithGeminiTts(clean, btn) {
             const voice = localStorage.getItem('geminiTtsVoice') || 'Aoede';
             const gemKey = geminiKeys[0] || apiKey || '';
@@ -5804,14 +5838,17 @@
                 });
                 if (!res.ok) throw new Error('gemini_tts_err_' + res.status);
                 const data = await res.json();
-                const b64 = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].inlineData && data.candidates[0].content.parts[0].inlineData.data;
+                const inlineData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+                const b64 = inlineData?.data;
                 if (!b64) throw new Error('no_audio_data');
                 usageCounters.geminiTtsCharsUsed += clean.length;
                 saveUsageCounters();
-                const byteChars = atob(b64);
-                const byteArr = new Uint8Array(byteChars.length);
-                for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
-                const blob = new Blob([byteArr], { type: 'audio/wav' });
+                // Gemini TTS returns raw L16 PCM — extract sample rate and build a proper WAV file
+                const mimeType = inlineData.mimeType || 'audio/L16;rate=24000';
+                const rateMatch = mimeType.match(/rate=(\d+)/i);
+                const sampleRate = rateMatch ? parseInt(rateMatch[1]) : 24000;
+                const wavBytes = _buildWavFromPcm(atob(b64), sampleRate, 1, 16);
+                const blob = new Blob([wavBytes], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
                 const audio = new Audio(url);
                 btn._elAudio = audio;
@@ -6873,10 +6910,10 @@
                 const mdl = nvidiaImageModel || 'black-forest-labs/flux.1-schnell';
                 for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
                     try {
-                        const res = await fetch('https://integrate.api.nvidia.com/v1/images/generations', {
+                        const res = await fetch('/api/nvidia-img', {
                             method: 'POST',
-                            headers: { 'Authorization': 'Bearer ' + keysToTry[ki], 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ model: mdl, prompt: prompt, n: 1, size: '1024x1024' })
+                            headers: { 'x-api-key': keysToTry[ki], 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ model: mdl, prompt: prompt, n: 1, size: '1024x1024', response_format: 'b64_json' })
                         });
                         if (res.status === 401 || res.status === 429) {
                             showToast('NVIDIA key rotated');
@@ -7057,7 +7094,7 @@
 APP OVERVIEW:
 - Name: SnoahAI | Developer: Shahzaib Muzaffar | Full stack web app designed for Android browsers and installable as a PWA
 - The app can be installed on Android home screen (Add to Home Screen / PWA install banner) for a fullscreen native-like experience
-- Single-page app with all HTML/CSS/JS in one file, using Tailwind CSS for styling
+- Complex multi-functional web app (HTML/CSS/JS with Tailwind CSS, plus backend Vercel serverless functions in /api/)
 
 PLATFORMS & MODELS (all configurable in Settings):
 - Google Gemini: default platform. Models: gemini-2.5-flash, gemini-2.5-pro, etc. Supports web search grounding and image uploads.
@@ -7079,7 +7116,7 @@ FEATURES:
 4. FILE ATTACHMENTS (📎 Attach button): Upload documents — PDFs, text files (.txt), CSVs, JSON, Markdown (.md), XML, .doc/.docx. Document content is extracted and sent as context to the AI. Combine with images in the same message.
 5. RESPONSE LENGTH (≡ Normal button): Cycles Normal → Short (2-4 sentences) → Detailed. Tap the button to cycle through lengths.
 6. TEMPLATES (🔖 Templates button): Pre-saved prompt starters. Built-in templates: Explain Simply, Clinical Summary, Compare & Contrast, Step by Step. Users can add custom templates with a name and text. Templates are saved to device storage.
-7. TEMP CHAT (🕐 Temp Chat button): Start a temporary conversation that won't be saved to chat history. Perfect for quick questions or sensitive topics. A yellow banner shows when Temp Chat is active. Toggle on/off with the Temp Chat button above the input.
+7. TEMP CHAT (🕐 Temp Chat button): Start a temporary conversation that won't be saved to chat history. Perfect for quick questions or sensitive topics. A yellow banner shows when Temp Chat is active. Toggle on/off with the clock icon button to the left of the "New Chat" button in the sidebar (☰ menu).
 8. DARK MODE: Menu (☰) → Light/Dark Mode toggle. Full dark theme support across all UI elements.
 9. CHAT HISTORY: All chats auto-saved locally on device. Access via ☰ menu. Auto-titled after first exchange using AI.
 10. CHAT TAGS: Tag chats with categories (Biology, Medicine, Physics, Code, Math, Other). Filter chats by tag via ☰ menu.
@@ -7135,14 +7172,16 @@ FEATURES:
 60. CHEMISTRY RENDERING: KaTeX mhchem extension is loaded alongside KaTeX. Chemistry equations using \\ce{...} notation render beautifully in both inline ($...$) and display ($$...$$) math blocks. Examples: $\\ce{H2O}$ renders as water, $\\ce{2H2 + O2 -> 2H2O}$ renders a balanced equation with arrow. Use \\ce{} for any chemical formula or reaction equation.
 61. MATH & MARKDOWN RENDERING: All lines in the AI response go through processInlineRaw() which handles: display math ($$...$$), inline math ($...$), chemistry (\\ce{}), HTML escaping, bold/italic/code/link Markdown in the correct order. Previously, lines containing math could display with unformatted surrounding text — this is now fixed.
 62. TTS PLATFORM (MULTI-KEY): Settings → API tab → TTS Platform section. Choose from: Built-in Web Speech (free, no key), ElevenLabs (freemium, multi-key pool stored as elevenLabsApiKeys), OpenAI TTS (paid, multi-key pool stored as openaiTtsApiKeys, voices: alloy/echo/fable/onyx/nova/shimmer, models: tts-1/tts-1-hd), Groq TTS (free tier, multi-key pool stored as groqTtsApiKeys, voices: Arista-PlayAI/Atlas-PlayAI/Fritz-PlayAI), Gemini TTS (free, reuses Gemini key pool, voices: Aoede/Kore/Fenrir/Charon/Puck/Leda/Orus/Zephyr). Active platform stored as ttsPlatform in localStorage. Keys auto-rotate on 401 or 429 errors. Falls back to device Web Speech API on failure.
-63. IMAGE GENERATION: Type /image <prompt> or include "generate image", "create image", or "draw" in your message to generate an image directly in chat. Supports 5 providers selectable in Settings → Image Generation: (1) Pollinations AI — multi-key pool, model options include Flux. (2) Gemini Imagen — reuses Gemini key pool, models: Imagen 3 / Imagen 3 Fast (requires billing). (3) NVIDIA NIM (free) — multi-key pool stored as nvidiaImageApiKeys, models: FLUX.1 Schnell/Dev, SDXL Turbo. (4) Together AI (free+paid tier) — multi-key pool stored as togetherImageApiKeys, models: FLUX.1 Schnell (Free)/Dev, SDXL. (5) Hugging Face (free tier) — multi-key pool stored as hfImageApiKeys, models: FLUX.1 Schnell, SD 3.5, SDXL Turbo. All providers support multi-key auto-rotation on 401/429. Generated image shown as a card with download button and provider label.
+63. IMAGE GENERATION: Type /image <prompt> or include "generate image", "create image", or "draw" in your message to generate an image directly in chat. Supports 5 providers selectable in Settings → Image Generation: (1) Pollinations AI — multi-key pool, model options: Flux, Flux Realism, Flux Anime, Flux 3D, Flux Pro, Turbo, Any Dark, GPT Image. (2) Gemini Imagen — reuses Gemini key pool, models: Imagen 3 / Imagen 3 Fast (requires billing). (3) NVIDIA NIM (free) — multi-key pool, custom model text input (datalist suggestions: FLUX.1 Schnell/Dev, SDXL Turbo, SD 3 Medium) — proxied via /api/nvidia-img. (4) Together AI (free+paid tier) — multi-key pool, models: FLUX.1 Schnell (Free)/Dev, SDXL. (5) Hugging Face (free tier) — multi-key pool, models: FLUX.1 Schnell, SD 3.5, SDXL Turbo. All providers support multi-key auto-rotation on 401/429. Generated image shown as a card with download button and provider label.
 64. IMAGE & TTS USAGE TRACKING: Token Management dashboard (Settings → API → Token Management) now includes Image Generation section (images generated per platform: Pollinations, Gemini, NVIDIA, Together AI, Hugging Face) and TTS Usage section (characters used per provider: ElevenLabs, OpenAI TTS, Groq TTS, Gemini TTS). Counters stored in snoah_usage_counters localStorage key and reset together with token usage via confirmResetTokenUsage().
+65. EXTENDED THINKING TAG SUPPORT: The app detects and renders thinking/reasoning content from ALL AI models — not just <think> tags. Models that use <reasoning>, <thinking>, <reflection> tags or emit delta.reasoning_content in the stream (e.g. DeepSeek, Qwen) all have their reasoning content captured and displayed in the collapsible "💭 Thought Process" dropdown, cleanly separated from the main answer.
+66. PLATFORM & MODEL AWARENESS: The AI always knows which platform and model it is running on (injected dynamically into the system prompt). When asked "which AI are you?", "what model is this?", or "which platform?" it gives the accurate answer based on the current selection.
 APP STRUCTURE & LAYOUT:
-- Single HTML file (index.html) with all CSS (Tailwind CDN) and JavaScript inline — no separate files except backend Vercel serverless functions in /api/ folder.
+- Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
 - Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
 - Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons.
-- Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates, Temp Chat buttons, main text input, Send/Stop button.
-- Sidebar (slides in from left): User profile at bottom, chat history list (shows 4 most recent; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us/Delete History), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
+- Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates buttons, main text input, Send/Stop button.
+- Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us/Delete History), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
 - Settings → API tab sections: Platform & Model, API Keys pool (multi-key, auto-rotate), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Advanced Model Parameters, Token Management, Notion Integration, Response Display.
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark) after response.
@@ -7168,6 +7207,10 @@ Always answer questions about the app based on the above. If asked "what can you
 
 FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $...$ display: $$...$$. For chemistry equations use KaTeX mhchem: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$, $$\\ce{CuSO4 + 2NaOH -> Cu(OH)2 + Na2SO4}$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. (6) DEVELOPER NOTE: Telegram username is @Owner_Of_Crypton and Instagram username is @shahzaib_muzaffar_7 — preserve underscores exactly as written. (7) IMAGE GENERATION: When the user asks you to include, generate, or show an image as part of your response, place an [IMG: detailed image description] marker exactly where the image should appear. The app will automatically generate the image and display it inline. You can mix text and images freely — e.g., explain something in text then place [IMG: ...] to show a visual. ` + lengthDirective;
                 if (useThinking) systemInstruction += "The user has enabled THINKING MODE. Wrap your detailed step-by-step internal reasoning inside <think> and </think> tags at the very beginning of your response, then give the final answer. ";
+                // Inject active platform and model so the AI can answer platform/model questions accurately
+                const _platNames = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', nvidia: 'NVIDIA NIM', huggingface: 'Hugging Face', githubmodels: 'GitHub Models', claude: 'Claude (Anthropic)', copilot: 'Microsoft Copilot', gais: 'Google AI Studio', ollama: 'Ollama', cohere: 'Cohere', puter: 'Puter.js', deepinfra: 'DeepInfra', cerebras: 'Cerebras AI', sambanova: 'SambaNova', fireworks: 'Fireworks AI', xai: 'xAI (Grok)', perplexity: 'Perplexity', nanogpt: 'NanoGPT', unify: 'Unify', kluster: 'Kluster.ai' };
+                const _activeModelNow = platform==='openrouter'?orModelId:platform==='groq'?groqModelId:platform==='together'?togetherModelId:platform==='mistral'?mistralModelId:platform==='nvidia'?nvidiaModelId:platform==='huggingface'?hfModelId:platform==='githubmodels'?ghModelId:platform==='claude'?claudeModelId:platform==='copilot'?copilotModelId:platform==='gais'?gaisModelId:platform==='ollama'?ollamaModelId:platform==='cohere'?cohereModelId:platform==='puter'?puterModelId:platform==='deepinfra'?deepinfraModelId:platform==='cerebras'?cerebrasModelId:platform==='sambanova'?sambanovaModelId:platform==='fireworks'?fireworksModelId:platform==='xai'?xaiModelId:platform==='perplexity'?perplexityModelId:platform==='nanogpt'?nanogptModelId:platform==='unify'?unifyModelId:platform==='kluster'?klusterModelId:modelId;
+                systemInstruction += '\n\nACTIVE PLATFORM & MODEL: You are currently running on the ' + (_platNames[platform] || platform) + ' platform. The active model is "' + _activeModelNow + '". When the user asks which AI, platform, or model is being used, state this information accurately. ';
                 if (platform === 'mistral') {
                     systemInstruction += 'You are running on Mistral AI. ';
                 }
@@ -7263,19 +7306,29 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 let lastMdRender = 0;     // throttle markdown render
                 const MD_INTERVAL = 120;  // ms between full markdown renders
 
+                // Normalize alternative reasoning tags used by various models to <think>...</think>
+                function _normalizeThinkTags(raw) {
+                    return raw
+                        .replace(/<reasoning>([\s\S]*?)<\/reasoning>/gi, '<think>$1</think>')
+                        .replace(/<thinking>([\s\S]*?)<\/thinking>/gi, '<think>$1</think>')
+                        .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>');
+                }
+
                 function rafRender(ts) {
                     if (renderDirty) {
                         renderDirty = false;
                         _streamPartialRaw = fullRaw;
+                        // Normalize alternative thinking tags before display parsing
+                        const _normRaw = _normalizeThinkTags(fullRaw);
                         let displayThink = '';
-                        let displayMain  = fullRaw;
-                        const thinkOpen  = fullRaw.indexOf('<think>');
-                        const thinkClose = fullRaw.indexOf('</think>');
+                        let displayMain  = _normRaw;
+                        const thinkOpen  = _normRaw.indexOf('<think>');
+                        const thinkClose = _normRaw.indexOf('</think>');
                         if (thinkOpen !== -1) {
                             thinkBlock.classList.remove('hidden');
                             if (thinkClose !== -1) {
-                                displayThink = fullRaw.slice(thinkOpen + 7, thinkClose);
-                                displayMain  = fullRaw.slice(thinkClose + 8).trimStart();
+                                displayThink = _normRaw.slice(thinkOpen + 7, thinkClose);
+                                displayMain  = _normRaw.slice(thinkClose + 8).trimStart();
                                 const dots = liveWrapper.querySelector('#think-dots-' + liveUID);
                                 if (dots) dots.style.display = 'none';
                             } else {
@@ -7342,6 +7395,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             const STREAM_TIMEOUT = 45000; // 45 seconds no-data timeout
                             let lastDataTime = Date.now();
                             let streamTimeoutId = null;
+                            // Track whether we are currently inside a reasoning_content block
+                            let _inReasoningBlock = false;
                             try {
                             while (true) {
                                 // Race between read and timeout
@@ -7380,9 +7435,18 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                                 completionTokens: chunk.usageMetadata.candidatesTokenCount || 0
                                             };
                                         }
-                                        // OpenRouter SSE format
+                                        // reasoning_content (DeepSeek, some OpenRouter models) — wrap as <think>...</think>
+                                        const reasoningDelta = chunk.choices?.[0]?.delta?.reasoning_content;
+                                        if (reasoningDelta) {
+                                            if (!_inReasoningBlock) { fullRaw += '<think>'; _inReasoningBlock = true; }
+                                            fullRaw += reasoningDelta;
+                                        }
+                                        // OpenRouter / OpenAI-compatible SSE format
                                         const delta = chunk.choices?.[0]?.delta?.content;
-                                        if (delta) fullRaw += delta;
+                                        if (delta) {
+                                            if (_inReasoningBlock) { fullRaw += '</think>'; _inReasoningBlock = false; }
+                                            fullRaw += delta;
+                                        }
                                         // Capture OpenAI-compatible usage
                                         if (chunk.usage) {
                                             lastStreamUsage = {
@@ -7397,7 +7461,11 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                     renderDirty = true;
                                 }
                             }
-                            } finally { if (streamTimeoutId) clearTimeout(streamTimeoutId); }
+                            } finally {
+                                if (streamTimeoutId) clearTimeout(streamTimeoutId);
+                                // Close any open reasoning block if stream ended mid-reasoning
+                                if (_inReasoningBlock) { fullRaw += '</think>'; _inReasoningBlock = false; }
+                            }
                         }
 
                         // When web search is ON, always use Gemini regardless of selected platform
@@ -7645,20 +7713,22 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Don't cancel RAF yet — let extraFrames drain for final paint
                 await new Promise(r => setTimeout(r, 50)); // small wait for RAF to paint
                 if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+                // Normalize alternative reasoning tags before final extraction
+                const _normFullRaw = _normalizeThinkTags(fullRaw);
                 // Do one final RAF render pass to flush remaining content
                 renderDirty = true;
                 let displayThinkFinal = '';
-                let displayMainFinal = fullRaw;
-                const tOF = fullRaw.indexOf('<think>'), tCF = fullRaw.indexOf('</think>');
-                if (tOF !== -1 && tCF !== -1) { displayThinkFinal = fullRaw.slice(tOF+7,tCF); displayMainFinal = fullRaw.slice(tCF+8).trimStart(); }
-                else if (tOF !== -1) { displayThinkFinal = fullRaw.slice(tOF+7); displayMainFinal = ''; }
+                let displayMainFinal = _normFullRaw;
+                const tOF = _normFullRaw.indexOf('<think>'), tCF = _normFullRaw.indexOf('</think>');
+                if (tOF !== -1 && tCF !== -1) { displayThinkFinal = _normFullRaw.slice(tOF+7,tCF); displayMainFinal = _normFullRaw.slice(tCF+8).trimStart(); }
+                else if (tOF !== -1) { displayThinkFinal = _normFullRaw.slice(tOF+7); displayMainFinal = ''; }
                 // Extract think vs main text
-                let mainText = fullRaw;
+                let mainText = _normFullRaw;
                 let thinkingText = null;
-                const thinkMatch = fullRaw.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
+                const thinkMatch = _normFullRaw.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
                 if (thinkMatch) {
                     thinkingText = thinkMatch[1].trim();
-                    mainText = fullRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
+                    mainText = _normFullRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
                 }
 
                 thinkBody.textContent = thinkingText || '';
@@ -7759,9 +7829,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // User-initiated abort (stop button) — save partial content and show Continue button
                 if (error.name === 'AbortError' && !abortController?._timedOut) {
                     if (_streamPartialRaw && _streamPartialRaw.trim() && _streamPartialWrapper && _streamPartialWrapper.isConnected) {
-                        let mainText = _streamPartialRaw;
-                        const thinkMatch = _streamPartialRaw.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
-                        if (thinkMatch) mainText = _streamPartialRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
+                        const _normPartial = _normalizeThinkTags(_streamPartialRaw);
+                        let mainText = _normPartial;
+                        const thinkMatch = _normPartial.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
+                        if (thinkMatch) mainText = _normPartial.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
                         const mainTextClean = mainText.replace(/\[IMG:[^\]]*\]/gi, '').trim();
                         if (mainTextClean) {
                             // Save partial response to message history (isPartial: true marks it as incomplete,
@@ -7826,9 +7897,9 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Save partial response to messages if there is content
                 const _errHasPartial = _streamPartialRaw && _streamPartialRaw.trim() && _streamPartialWrapper && _streamPartialWrapper.isConnected;
                 if (_errHasPartial) {
-                    let _errMainText = _streamPartialRaw;
-                    const _errThinkMatch = _streamPartialRaw.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
-                    if (_errThinkMatch) _errMainText = _streamPartialRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
+                    let _errMainText = _normalizeThinkTags(_streamPartialRaw);
+                    const _errThinkMatch = _errMainText.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
+                    if (_errThinkMatch) _errMainText = _errMainText.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
                     const _errTextClean = _errMainText.replace(/\[IMG:[^\]]*\]/gi, '').trim();
                     if (_errTextClean) {
                         messages.push({ role: 'model', text: _errTextClean, originalText: _streamPartialRaw, isPartial: true });
@@ -7899,10 +7970,15 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
             let thinkingContent = msg.thinking || null;
             let displayText = msg.text || '';
             if (!thinkingContent) {
-                const legacyMatch = displayText.match(THINK_RE);
+                // Normalize alternative reasoning tags before extraction
+                const _normDisplay = displayText
+                    .replace(/<reasoning>([\s\S]*?)<\/reasoning>/gi, '<think>$1</think>')
+                    .replace(/<thinking>([\s\S]*?)<\/thinking>/gi, '<think>$1</think>')
+                    .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>');
+                const legacyMatch = _normDisplay.match(THINK_RE);
                 if (legacyMatch) {
                     thinkingContent = legacyMatch[1].trim();
-                    displayText = displayText.replace(THINK_RE, '').trim();
+                    displayText = _normDisplay.replace(THINK_RE, '').trim();
                 }
             }
 
