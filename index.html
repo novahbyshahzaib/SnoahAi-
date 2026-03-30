@@ -821,10 +821,10 @@
                                     <span class="text-[12px] font-semibold text-[#5B5951]">Max Tokens</span>
                                     <span id="param-maxtok-val" class="text-[12px] font-mono text-[#A3A095]">4096</span>
                                 </div>
-                                <input type="range" id="param-max-tokens" min="256" max="16384" step="256" value="4096"
+                                <input type="range" id="param-max-tokens" min="256" max="1000000" step="1024" value="4096"
                                     oninput="document.getElementById('param-maxtok-val').textContent=this.value"
                                     class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
-                                <p class="text-[10px] text-[#A3A095] mt-0.5">Maximum length of AI response in tokens</p>
+                                <p class="text-[10px] text-[#A3A095] mt-0.5">Maximum length of AI response in tokens (up to 1M for long code/docs)</p>
                             </div>
                         </div>
                     </div>
@@ -2364,6 +2364,8 @@
         let activeStreamInterval = null;
         let activeStreamTextContainer = null;
         let activeStreamFullText = '';
+        let _streamPartialRaw = '';
+        let _streamPartialWrapper = null;
         let uploadedImages = [];  // multi-image: array of {data,mimeType,previewUrl}
         let activeTagFilter = null; // tag filter for sidebar
         let pinnedMessages = JSON.parse(localStorage.getItem('snoah_pins') || '[]'); // [{id,chatId,text,ts}]
@@ -6580,6 +6582,11 @@
             submitMessage(lastUser.text);
         }
 
+        function continueLastResponse() {
+            if (isLoading || isStreaming) return;
+            submitMessage('continue');
+        }
+
         // --- Copy Code Button ---
         window.copyCode = function(button, codeBase64) {
             const code = decodeURIComponent(escape(atob(codeBase64)));
@@ -7098,7 +7105,7 @@ FEATURES:
 30. STREAM TIMEOUT PROTECTION: If the AI takes too long to respond (45+ seconds of no data), the request is automatically cancelled with a helpful error message, preventing infinite loading states.
 31. USER NAME PERSONALIZATION: On first visit, users are prompted to enter their name. The name is displayed in the sidebar and saved to localStorage. The sidebar shows the user's initials and full name.
 32. IMPROVED TTS VOICE: TTS selects the best available voice on the device (preferring Google UK English Female, Google US English, etc.) for a more natural reading experience.
-33. ADVANCED MODEL PARAMETERS: Settings → Advanced Model Parameters. Users can adjust Temperature (0-2, controls randomness), Top P (0-1, nucleus sampling), Top K (1-100, Gemini only), and Max Tokens (256-16384, max response length). These are sent with every API request.
+33. ADVANCED MODEL PARAMETERS: Settings → Advanced Model Parameters. Users can adjust Temperature (0-2, controls randomness), Top P (0-1, nucleus sampling), Top K (1-100, Gemini only), and Max Tokens (256-1,000,000, max response length — increase to 1M for very long code or documents). These are sent with every API request.
 34. MULTI-MODAL OUTPUT (DIAGRAMS): When the AI generates a Mermaid code block (e.g. flowcharts, sequence diagrams, pie charts), it is automatically rendered as a visual diagram in the response. Use \`\`\`mermaid code blocks to generate visual diagrams, flowcharts, and charts.
 35. MULTI-AI RESPONSE: Settings → Multi-AI Response toggle. When enabled, the user's message is sent to multiple AI platforms simultaneously. Each AI's response is shown in a dropdown selector so the user can compare answers. Thinking Mode and Web Search are automatically disabled when Multi-AI is active. Platforms must have valid API keys configured.
 36. NOTION INTEGRATION: Settings → Notion Integration. Users can connect their Notion workspace by pasting a Notion Integration Token (get from notion.so/profile/integrations). Set a Default Save Page URL (must be a Notion page shared with the integration). Once connected: (a) Every AI response has a "Notion" button (next to Copy/Read/Pin) to save it to Notion. (b) Natural language commands work — type "add X to Notion", "save this to Notion", or "create a Notion page called X" and an action card appears in chat with a Save button. Tapping it opens a confirmation modal showing the title and content preview before saving. Tasks are saved as to-do checkboxes; responses are saved as sub-pages inside the configured parent page.
@@ -7259,6 +7266,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 function rafRender(ts) {
                     if (renderDirty) {
                         renderDirty = false;
+                        _streamPartialRaw = fullRaw;
                         let displayThink = '';
                         let displayMain  = fullRaw;
                         const thinkOpen  = fullRaw.indexOf('<think>');
@@ -7283,6 +7291,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             activeStreamTextContainer = liveTextEl;
                             updateSendButton();
                             liveAppended = true;
+                            _streamPartialWrapper = liveWrapper;
                             scrollToBottom(true);
                             // Haptic pulse after streaming is visible on screen
                             if (navigator.vibrate) navigator.vibrate(15);
@@ -7747,8 +7756,35 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 if (messages.filter(m=>m.role==='user').length === 1) autoTitleChat();
 
             } catch (error) {
-                // User-initiated abort (stop button) — silent return
-                if (error.name === 'AbortError' && !abortController?._timedOut) return;
+                // User-initiated abort (stop button) — save partial content and show Continue button
+                if (error.name === 'AbortError' && !abortController?._timedOut) {
+                    if (_streamPartialRaw && _streamPartialRaw.trim() && _streamPartialWrapper && _streamPartialWrapper.isConnected) {
+                        let mainText = _streamPartialRaw;
+                        const thinkMatch = _streamPartialRaw.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
+                        if (thinkMatch) mainText = _streamPartialRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
+                        const mainTextClean = mainText.replace(/\[IMG:[^\]]*\]/gi, '').trim();
+                        if (mainTextClean) {
+                            // Save partial response to message history (isPartial: true marks it as incomplete,
+                            // so continueLastResponse() can send "continue" and the AI will resume from here)
+                            messages.push({ role: 'model', text: mainTextClean, originalText: _streamPartialRaw, isPartial: true });
+                            saveCurrentChat();
+                            const innerCol = _streamPartialWrapper.querySelector('.flex.flex-col');
+                            if (innerCol) {
+                                const tempActionsDiv = document.createElement('div');
+                                tempActionsDiv.innerHTML = buildActionsDivHTML('', false);
+                                const actionsDiv = tempActionsDiv.firstElementChild;
+                                wireActionsDiv(actionsDiv, mainTextClean);
+                                innerCol.appendChild(actionsDiv);
+                                const contDiv = document.createElement('div');
+                                contDiv.className = 'mt-2 flex items-center gap-2';
+                                contDiv.innerHTML = '<button onclick="continueLastResponse()" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-white bg-[#D25D38] border border-[#C04E2C] rounded-full hover:bg-[#B84E2E] active:scale-95 transition-all"><i data-lucide="play" class="w-3 h-3"></i> Continue</button><span class="text-[11px] text-[#A3A095]">— Response was stopped</span>';
+                                innerCol.appendChild(contDiv);
+                                lucide.createIcons({ nodes: [actionsDiv, contDiv] });
+                            }
+                        }
+                    }
+                    return;
+                }
                 // Timeout-induced abort — show timeout message
                 if (error.name === 'AbortError' && abortController?._timedOut) {
                     error.message = 'Stream timeout: Connection timed out after 60 seconds';
@@ -7787,16 +7823,32 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     : isAuth
                     ? '⚠️ Invalid API key for ' + _platErrLabel + '. Go to Settings and check your key. Get a key at ' + _platErrUrl + '.'
                     : '⚠️ ' + errText.substring(0, 140);
+                // Save partial response to messages if there is content
+                const _errHasPartial = _streamPartialRaw && _streamPartialRaw.trim() && _streamPartialWrapper && _streamPartialWrapper.isConnected;
+                if (_errHasPartial) {
+                    let _errMainText = _streamPartialRaw;
+                    const _errThinkMatch = _streamPartialRaw.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
+                    if (_errThinkMatch) _errMainText = _streamPartialRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
+                    const _errTextClean = _errMainText.replace(/\[IMG:[^\]]*\]/gi, '').trim();
+                    if (_errTextClean) {
+                        messages.push({ role: 'model', text: _errTextClean, originalText: _streamPartialRaw, isPartial: true });
+                        saveCurrentChat();
+                    }
+                }
                 const errDiv = document.createElement('div');
                 errDiv.className = "flex w-full justify-start animate-slide-up";
                 errDiv.innerHTML = '<div class="text-[#D25D38] bg-[#FDF4F2] px-4 py-3 rounded-xl border border-[#F8E3DE] text-[15px] max-w-[95%]">' +
                     '<p>' + escapeHTML(displayErr) + '</p>' +
-                    '<div class="mt-2.5"><button onclick="regenerateLastResponse()" class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-white bg-[#D25D38] rounded-full hover:bg-[#B84E2E] active:scale-95 transition-all"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\'/><path d=\'M3 3v5h5\'/></svg> Retry</button></div>' +
+                    '<div class="mt-2.5 flex items-center gap-2"><button onclick="regenerateLastResponse()" class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-white bg-[#D25D38] rounded-full hover:bg-[#B84E2E] active:scale-95 transition-all"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\'/><path d=\'M3 3v5h5\'/></svg> Retry</button>' +
+                    (_errHasPartial ? '<button onclick="continueLastResponse()" class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-[#D25D38] bg-white border border-[#D25D38] rounded-full hover:bg-[#FDF4F2] active:scale-95 transition-all"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><polygon points=\'5 3 19 12 5 21 5 3\'/></svg> Continue</button>' : '') +
+                    '</div>' +
                     '</div>';
                 messagesWrapper.appendChild(errDiv);
                 scrollToBottom();
             } finally {
                 abortController = null;
+                _streamPartialRaw = '';
+                _streamPartialWrapper = null;
                 setIsLoading(false);
                 isStreaming = false;
                 streamingBarIndicator.classList.add('hidden');
