@@ -26,6 +26,6 @@ export default async function handler(req, res) {
     return res.status(response.status).json(data);
   } catch (error) {
     console.error('NVIDIA image proxy error:', error);
-    return res.status(500).json({ error: 'Proxy error: ' + error.message });
+    return res.status(500).json({ error: 'Proxy error: failed to reach NVIDIA NIM API.' });
   }
 }
