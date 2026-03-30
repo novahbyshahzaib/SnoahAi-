@@ -70,8 +70,7 @@ export default async function handler(req, res) {
   const anthropicBody = {
     model,
     messages: mergedMessages,
-    // Cap at 8192 — Anthropic's max_tokens limit for most models
-    max_tokens: Math.min(max_tokens || 4096, 8192),
+    max_tokens: max_tokens || 4096,
     stream,
   };
   if (systemPrompt) anthropicBody.system = systemPrompt;
