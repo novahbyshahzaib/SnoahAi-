@@ -7478,11 +7478,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         .replace(/<thinking>([\s\S]*?)<\/thinking>/gi, '<think>$1</think>')
                         .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>')
                         // GLM and some models use <tool_call> for internal reasoning output.
-                        // If the content looks like JSON (actual function call), strip it silently.
-                        // Otherwise treat it as thinking content.
+                        // Use JSON.parse to reliably distinguish real JSON function calls
+                        // (which are stripped) from plain-text reasoning (routed to <think>).
                         .replace(/<tool_call>([\s\S]*?)<\/tool_call>/gi, (_, content) => {
                             const trimmed = content.trim();
-                            return (trimmed.startsWith('{') || trimmed.startsWith('[')) ? '' : '<think>' + trimmed + '</think>';
+                            try { JSON.parse(trimmed); return ''; } catch(e) {}
+                            return '<think>' + trimmed + '</think>';
                         });
                 }
 
@@ -8149,7 +8150,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>')
                     .replace(/<tool_call>([\s\S]*?)<\/tool_call>/gi, (_, c) => {
                         const t = c.trim();
-                        return (t.startsWith('{') || t.startsWith('[')) ? '' : '<think>' + t + '</think>';
+                        try { JSON.parse(t); return ''; } catch(e) {}
+                        return '<think>' + t + '</think>';
                     });
                 const legacyMatch = _normDisplay.match(THINK_RE);
                 if (legacyMatch) {
