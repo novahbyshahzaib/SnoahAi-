@@ -1150,14 +1150,11 @@
             </div>
             <div class="p-4 flex-1 overflow-y-auto">
                 <div class="flex gap-2 mb-6">
-                    <button id="btn-temp-chat" onclick="toggleTempChat()" title="Temp Chat" class="flex items-center justify-center p-2.5 bg-[#EFECE6] hover:bg-[#EAE8E0] border border-[#E5E3DB] rounded-xl text-[#2C2B29] transition-colors shadow-sm shrink-0">
-                        <i data-lucide="clock" class="w-4 h-4 text-[#8C897D]"></i>
+                    <button onclick="startNewChat()" title="New Chat" class="flex-1 flex items-center justify-center p-2.5 bg-[#EFECE6] hover:bg-[#EAE8E0] border border-[#E5E3DB] rounded-xl text-[#2C2B29] transition-colors shadow-sm">
+                        <i data-lucide="plus" class="w-4 h-4 text-[#D25D38]"></i>
                     </button>
-                    <button onclick="startNewChat()" class="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#EFECE6] hover:bg-[#EAE8E0] border border-[#E5E3DB] rounded-xl text-[#2C2B29] font-medium transition-colors shadow-sm group">
-                        <i data-lucide="plus" class="w-4 h-4 text-[#D25D38]"></i>New Chat
-                    </button>
-                    <button onclick="openSearchModal()" class="flex items-center justify-center gap-2 px-3 py-2.5 bg-[#EFECE6] hover:bg-[#EAE8E0] border border-[#E5E3DB] rounded-xl text-[#2C2B29] font-medium transition-colors shadow-sm">
-                        <i data-lucide="search" class="w-4 h-4 text-[#8C897D]"></i>Search
+                    <button onclick="openSearchModal()" title="Search Chats" class="flex-1 flex items-center justify-center p-2.5 bg-[#EFECE6] hover:bg-[#EAE8E0] border border-[#E5E3DB] rounded-xl text-[#2C2B29] transition-colors shadow-sm">
+                        <i data-lucide="search" class="w-4 h-4 text-[#8C897D]"></i>
                     </button>
                 </div>
                 <div class="space-y-2 mb-6">
@@ -1211,7 +1208,7 @@
         </div>
 
         <!-- ===== HEADER ===== -->
-        <header class="flex items-center justify-between px-5 py-3 bg-[#FAF9F6]/90 backdrop-blur-md z-10 shrink-0 border-b border-[#EAE8E0]/50 header-bg">
+        <header class="flex items-center justify-between px-4 py-3 bg-[#FAF9F6]/90 backdrop-blur-md z-10 shrink-0 border-b border-[#EAE8E0]/50 header-bg">
             <button onclick="toggleSidebar()" class="p-2 -ml-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
                 <i data-lucide="menu" class="w-5 h-5"></i>
             </button>
@@ -1219,9 +1216,18 @@
                 <h1 class="text-[18px] font-serif font-semibold text-[#2C2B29] tracking-tight snoah-app-name">SnoahAI</h1>
                 <span id="header-model-badge" class="text-[10px] font-bold text-[#A3A095] tracking-widest uppercase mt-0.5">NOVAH GEM</span>
             </div>
-            <button onclick="startNewChat()" class="p-2 -mr-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
-                <i data-lucide="plus" class="w-5 h-5"></i>
-            </button>
+            <!-- Right-side header buttons: Temp Chat, Search, New Chat — equal icon buttons -->
+            <div class="flex items-center gap-0.5 -mr-1">
+                <button id="btn-temp-chat" onclick="toggleTempChat()" title="Temp Chat" class="p-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
+                    <i data-lucide="clock" class="w-5 h-5"></i>
+                </button>
+                <button onclick="openSearchModal()" title="Search Chats" class="p-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+                <button onclick="startNewChat()" title="New Chat" class="p-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                </button>
+            </div>
         </header>
 
         <!-- ===== CHAT AREA ===== -->
@@ -1818,12 +1824,15 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.4</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.5</span>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Artifacts 🗂️</strong> — Code blocks are now shown as compact <em>Artifact Cards</em> instead of raw code dumps in chat. Each card shows the filename (e.g. <code>index.html</code>), language, line count, and a 5-line preview. Tap <strong>Open Artifact</strong> to launch the full-screen Artifact Viewer with a <strong>Preview</strong> tab (sandboxed live render for HTML, SVG, JS, CSS, TypeScript) and a <strong>Code</strong> tab (syntax-highlighted source with Copy and Download buttons). Mermaid diagrams also open in the viewer. Fully mobile-first, no split pane.</li>
+                            <li><strong>Temp Chat in Header 🕐</strong> — The Temp Chat (clock) button moved from the sidebar to the top header bar, sitting alongside the Search and New Chat (+) buttons as three equal icon-only buttons on the right side of the header. The sidebar top row is now simpler with icon-only New Chat and Search buttons.</li>
+                            <li><strong>GLM &amp; Tool-Call Thinking Fix 🧠</strong> — Models like GLM-4.5 that output internal reasoning inside <code>&lt;tool_call&gt;</code> tags now have their reasoning correctly captured and separated into the collapsible "💭 Thought Process" dropdown instead of appearing raw in the response. JSON-format function calls are silently stripped; text-format reasoning is routed to the thinking block.</li>
                             <li><strong>Extended Thinking Tag Support 🧠</strong> — The thought-process dropdown now captures reasoning from ALL models, not just those using &lt;think&gt; tags. Models using &lt;reasoning&gt;, &lt;thinking&gt;, &lt;reflection&gt; tags (Mistral, some OpenRouter models) or <code>reasoning_content</code> stream fields (DeepSeek, Qwen) are all shown in the collapsible "Thought Process" block.</li>
                             <li><strong>Gemini TTS Fixed 🔊</strong> — Gemini Text-to-Speech now plays correctly. The API returns raw L16 PCM audio; the app now builds a proper WAV file with the correct RIFF header so the browser's audio player can decode it.</li>
                             <li><strong>NVIDIA NIM Image Fix + Custom Model 🖼️</strong> — NVIDIA image generation now routes through a backend proxy (/api/nvidia-img) fixing the CORS error that prevented images from generating. The model selector is now a free-text input with suggested models (FLUX.1 Schnell/Dev, SDXL Turbo, SD 3 Medium) — enter any NVIDIA NIM image model ID.</li>
@@ -1893,6 +1902,7 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">📋 All Features</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Artifacts 🗂️</strong> — AI code blocks open as full-screen Artifact Cards with Preview (sandboxed live render) and Code (copy/download) tabs.</li>
                             <li><strong>Image Generation 🖼️</strong> — Type /image &lt;prompt&gt; or say "generate image / create image / draw" to generate images. Supports Pollinations AI (add key in Settings) and Gemini Imagen (uses Gemini key). Images shown in cards with download button and provider label.</li>
                             <li><strong>Multi-Key ElevenLabs TTS 🔑</strong> — Add multiple ElevenLabs API keys with auto-rotation on rate limits. Falls back to Web Speech API when all keys fail.</li>
                             <li><strong>Auto Memory 🧠</strong> — Enable in Settings → Auto Memory. SnoahAI automatically saves important facts about you from each chat (name, goals, preferences, relationships, projects, constraints) and uses them as context in every future conversation. Smart deduplication prevents repeated facts. Requires Gemini API key. View and clear memory in settings.</li>
@@ -2922,8 +2932,8 @@
             const banner = document.getElementById('temp-chat-banner');
             if (btn) {
                 btn.className = isTempChat
-                    ? "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]"
-                    : "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
+                    ? "p-2 rounded-full transition-colors bg-[#FEF3C7] text-[#92400E]"
+                    : "p-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors";
             }
             if (banner) {
                 banner.classList.toggle('hidden', !isTempChat);
@@ -6144,6 +6154,195 @@
         }
 
         let _todoIdCounter = 0;
+
+        // ── ARTIFACT HELPERS ────────────────────────────────────────────
+        function _getArtifactFilename(lang) {
+            const map = {
+                html:'index.html', svg:'image.svg', javascript:'script.js', js:'script.js',
+                typescript:'script.ts', ts:'script.ts', jsx:'app.jsx', tsx:'app.tsx',
+                css:'styles.css', python:'script.py', py:'script.py', mermaid:'diagram.mmd',
+                json:'data.json', markdown:'document.md', md:'document.md',
+                sql:'query.sql', bash:'script.sh', sh:'script.sh', yaml:'config.yaml',
+                yml:'config.yaml', xml:'document.xml', java:'Main.java', cpp:'main.cpp',
+                c:'main.c', go:'main.go', rust:'main.rs', ruby:'script.rb', php:'script.php',
+                swift:'main.swift', kotlin:'main.kt', dart:'main.dart', r:'script.r',
+                scala:'main.scala', vue:'app.vue'
+            };
+            const l = (lang || 'text').toLowerCase();
+            return map[l] || ('code.' + l);
+        }
+
+        function _buildArtifactCard(codeText, lang, isStreaming) {
+            const filename = _getArtifactFilename(lang);
+            const lineCount = codeText ? codeText.split('\n').length : 0;
+            const previewLines = codeText ? codeText.split('\n').slice(0, 5).join('\n') : '';
+            const b64 = codeText ? btoa(unescape(encodeURIComponent(codeText))) : '';
+            const langUpper = escapeHTML((lang || 'text').toUpperCase());
+            const filenameSafe = escapeHTML(filename);
+            const langSafe = escapeHTML(lang || 'text');
+            // File icon SVG
+            const fileIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>';
+            // Chevron right SVG
+            const chevronSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+            return '<div class="artifact-card my-3 rounded-xl border border-[#E5E3DB] bg-[#FAF9F6] overflow-hidden shadow-sm">' +
+                // Header row: icon + filename + line count
+                '<div class="flex items-center gap-3 px-4 pt-3 pb-2">' +
+                    '<div class="w-9 h-9 rounded-lg bg-[#F2F0E9] flex items-center justify-center shrink-0 border border-[#E5E3DB]">' + fileIconSvg + '</div>' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<p class="font-semibold text-[13px] text-[#2C2B29] truncate">' + filenameSafe + '</p>' +
+                        '<p class="text-[11px] text-[#A3A095]">' + langUpper + (isStreaming ? ' · streaming…' : ' · ' + lineCount + ' lines') + '</p>' +
+                    '</div>' +
+                '</div>' +
+                // Code preview (first 4-5 lines, dimmed)
+                (previewLines ? '<div class="mx-4 mb-3 rounded-lg bg-[#F2F0E9] border border-[#E5E3DB] px-3 py-2 overflow-hidden" style="max-height:5.4em"><pre class="text-[11px] text-[#A3A095] font-mono leading-relaxed overflow-hidden whitespace-pre-wrap break-all" style="display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden">' + escapeHTML(previewLines) + '</pre></div>' : '') +
+                // Open Artifact button
+                (b64 && !isStreaming
+                    ? '<div class="px-4 pb-4"><button onclick="openArtifact(\'' + b64 + '\',\'' + langSafe + '\')" class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#2C2B29] text-white text-[13px] font-semibold hover:bg-[#3A3835] active:scale-95 transition-all">' +
+                        '<div class="flex items-center gap-2">' + fileIconSvg.replace('#D25D38', 'white').replace('18" height="18"', '14" height="14"') + ' Open Artifact</div>' +
+                        chevronSvg +
+                      '</button></div>'
+                    : (isStreaming ? '<div class="px-4 pb-3 flex items-center gap-2 text-[12px] text-[#A3A095]"><span class="thinking-dots"></span><span>Generating…</span></div>' : '')) +
+                '</div>';
+        }
+
+        // ── ARTIFACT VIEWER ─────────────────────────────────────────────
+        function openArtifact(b64, lang) {
+            let code = '';
+            try { code = decodeURIComponent(escape(atob(b64))); } catch(e) { return; }
+            const filename = _getArtifactFilename(lang);
+            const langLower = (lang || 'text').toLowerCase();
+            const renderableLangs = ['html', 'svg', 'javascript', 'js', 'jsx', 'tsx', 'typescript', 'ts', 'css'];
+            const canPreview = renderableLangs.includes(langLower) || langLower === 'mermaid';
+            // Remove existing overlay
+            const existing = document.getElementById('artifact-viewer-overlay');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'artifact-viewer-overlay';
+            overlay.className = 'fixed inset-0 bg-white flex flex-col';
+            overlay.style.zIndex = '9999';
+            const langDisplay = (lang || 'text').toUpperCase();
+            const codeEscaped = escapeHTML(code);
+            // Build iframe src
+            let iframeSrc = '';
+            if (langLower === 'html') { iframeSrc = code; }
+            else if (langLower === 'svg') { iframeSrc = '<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}</style></head><body>' + code + '</body></html>'; }
+            else if (['javascript','js','jsx','tsx','typescript','ts'].includes(langLower)) { iframeSrc = '<!DOCTYPE html><html><head><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}</style></head><body><script>' + code.replace(/<\/script>/gi,'<\\/script>') + '<\/script></body></html>'; }
+            else if (langLower === 'css') { iframeSrc = '<!DOCTYPE html><html><head><style>' + code + '</style></head><body><p style="font-family:system-ui;padding:1rem;color:#888">CSS Preview — styles are applied above.</p></body></html>'; }
+            overlay.innerHTML =
+                // Header bar
+                '<div class="flex items-center justify-between px-4 py-3 border-b border-[#E5E3DB] bg-[#FAF9F6] shrink-0" style="gap:8px">' +
+                    '<button onclick="closeArtifact()" style="padding:8px;margin-left:-8px;border-radius:50%;background:none;border:none;cursor:pointer;color:#5B5951">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></svg>' +
+                    '</button>' +
+                    '<div style="flex:1;display:flex;align-items:center;gap:8px;min-width:0;justify-content:center">' +
+                        '<span style="font-weight:600;font-size:14px;color:#2C2B29;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHTML(filename) + '</span>' +
+                        '<span style="padding:2px 8px;border-radius:9999px;background:#F2F0E9;font-size:10px;font-weight:700;color:#A3A095;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">' + escapeHTML(langDisplay) + '</span>' +
+                    '</div>' +
+                    '<button onclick="closeArtifact()" style="padding:8px;margin-right:-8px;border-radius:50%;background:none;border:none;cursor:pointer;color:#5B5951">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '</button>' +
+                '</div>' +
+                // Tab switcher
+                '<div style="display:flex;align-items:center;justify-content:center;padding:10px 16px;border-bottom:1px solid #E5E3DB;background:#FAF9F6;flex-shrink:0">' +
+                    '<div style="display:flex;background:#F2F0E9;border-radius:9999px;padding:3px;gap:3px">' +
+                        '<button id="artifact-tab-preview" onclick="switchArtifactTab(\'preview\')" style="padding:6px 20px;border-radius:9999px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s;' + (canPreview ? 'background:white;color:#2C2B29;box-shadow:0 1px 3px rgba(0,0,0,.1)' : 'background:transparent;color:#C0BDB5;cursor:not-allowed') + '">Preview</button>' +
+                        '<button id="artifact-tab-code" onclick="switchArtifactTab(\'code\')" style="padding:6px 20px;border-radius:9999px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s;' + (canPreview ? 'background:transparent;color:#A3A095' : 'background:white;color:#2C2B29;box-shadow:0 1px 3px rgba(0,0,0,.1)') + '">Code</button>' +
+                    '</div>' +
+                '</div>' +
+                // Content area
+                '<div id="artifact-content" style="flex:1;position:relative;overflow:hidden">' +
+                    // Preview area
+                    '<div id="artifact-preview-area" style="position:absolute;inset:0;' + (canPreview ? '' : 'display:none') + '">' +
+                        (canPreview && langLower !== 'mermaid'
+                            ? '<iframe id="artifact-iframe" sandbox="allow-scripts allow-same-origin" style="width:100%;height:100%;border:none;background:white"></iframe>'
+                            : (langLower === 'mermaid'
+                                ? '<div style="width:100%;height:100%;overflow:auto;background:white;padding:24px;display:flex;align-items:flex-start;justify-content:center"><div id="artifact-mermaid-render" class="mermaid">' + codeEscaped + '</div></div>'
+                                : '')) +
+                    '</div>' +
+                    // Code area
+                    '<div id="artifact-code-area" style="position:absolute;inset:0;background:#1E1D1B;display:flex;flex-direction:column;' + (canPreview ? 'display:none' : '') + '">' +
+                        '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#2C2B29;border-bottom:1px solid #3A3835;flex-shrink:0">' +
+                            '<span style="font-size:11px;font-family:monospace;font-weight:700;color:#A3A095;text-transform:uppercase;letter-spacing:.05em">' + escapeHTML(lang || 'text') + '</span>' +
+                            '<div style="display:flex;align-items:center;gap:16px">' +
+                                '<button onclick="copyArtifactCode(\'' + b64 + '\')" style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#A3A095;background:none;border:none;cursor:pointer" onmouseover="this.style.color=\'#fff\'" onmouseout="this.style.color=\'#A3A095\'">' +
+                                    '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy' +
+                                '</button>' +
+                                '<button onclick="downloadArtifact(\'' + b64 + '\',\'' + escapeHTML(filename) + '\')" style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#A3A095;background:none;border:none;cursor:pointer" onmouseover="this.style.color=\'#fff\'" onmouseout="this.style.color=\'#A3A095\'">' +
+                                    '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>' +
+                        '<pre style="flex:1;overflow:auto;padding:16px;color:#E8E6DF;font-size:13px;font-family:monospace;line-height:1.6;margin:0"><code>' + codeEscaped + '</code></pre>' +
+                    '</div>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            // Store artifact state on overlay element
+            overlay._artifactCanPreview = canPreview;
+            overlay._artifactLang = langLower;
+            // Initialize iframe for renderable types
+            if (canPreview && langLower !== 'mermaid' && iframeSrc) {
+                const iframe = overlay.querySelector('#artifact-iframe');
+                if (iframe) iframe.srcdoc = iframeSrc;
+            }
+            // Render mermaid diagram
+            if (langLower === 'mermaid') {
+                setTimeout(() => {
+                    try { if (window.mermaid) { const el = overlay.querySelector('#artifact-mermaid-render'); if (el) mermaid.init(undefined, el); } } catch(e) {}
+                }, 150);
+            }
+        }
+
+        function closeArtifact() {
+            const el = document.getElementById('artifact-viewer-overlay');
+            if (el) el.remove();
+        }
+
+        function switchArtifactTab(tab) {
+            const overlay = document.getElementById('artifact-viewer-overlay');
+            if (!overlay) return;
+            const previewArea = overlay.querySelector('#artifact-preview-area');
+            const codeArea = overlay.querySelector('#artifact-code-area');
+            const tabPreview = overlay.querySelector('#artifact-tab-preview');
+            const tabCode = overlay.querySelector('#artifact-tab-code');
+            const canPreview = overlay._artifactCanPreview;
+            if (tab === 'preview') {
+                if (!canPreview) return;
+                if (previewArea) previewArea.style.display = '';
+                if (codeArea) codeArea.style.display = 'none';
+                if (tabPreview) { tabPreview.style.background = 'white'; tabPreview.style.color = '#2C2B29'; tabPreview.style.boxShadow = '0 1px 3px rgba(0,0,0,.1)'; }
+                if (tabCode) { tabCode.style.background = 'transparent'; tabCode.style.color = '#A3A095'; tabCode.style.boxShadow = 'none'; }
+            } else {
+                if (previewArea) previewArea.style.display = 'none';
+                if (codeArea) codeArea.style.display = 'flex';
+                if (tabCode) { tabCode.style.background = 'white'; tabCode.style.color = '#2C2B29'; tabCode.style.boxShadow = '0 1px 3px rgba(0,0,0,.1)'; }
+                if (tabPreview) { tabPreview.style.background = 'transparent'; tabPreview.style.color = canPreview ? '#A3A095' : '#C0BDB5'; tabPreview.style.boxShadow = 'none'; }
+            }
+        }
+
+        function copyArtifactCode(b64) {
+            try {
+                const code = decodeURIComponent(escape(atob(b64)));
+                navigator.clipboard.writeText(code).then(() => showToast('✅ Code copied!')).catch(() => {
+                    const ta = document.createElement('textarea');
+                    ta.value = code; document.body.appendChild(ta); ta.select();
+                    try { document.execCommand('copy'); showToast('✅ Code copied!'); } catch(e) {}
+                    document.body.removeChild(ta);
+                });
+            } catch(e) {}
+        }
+
+        function downloadArtifact(b64, filename) {
+            try {
+                const code = decodeURIComponent(escape(atob(b64)));
+                const blob = new Blob([code], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = filename; a.click();
+                URL.revokeObjectURL(url);
+            } catch(e) {}
+        }
+
+        let _todoIdCounter = 0;
         function formatMarkdown(text) {
             if (!text) return '';
             let html = '';
@@ -6183,24 +6382,7 @@
                     } else {
                         inCode = false;
                         const codeText = codeLines.join('\n');
-                        if (codeLang === 'mermaid') {
-                            // Render as Mermaid diagram
-                            const mermaidId = 'mermaid_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-                            html += '<div class="my-3 rounded-xl overflow-hidden border border-[#E5E3DB] bg-white p-4">' +
-                                '<div class="flex items-center gap-2 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><span class="text-[11px] font-bold text-[#A3A095] uppercase tracking-wider">Diagram</span></div>' +
-                                '<div class="mermaid" id="' + mermaidId + '">' + escapeHTML(codeText) + '</div></div>';
-                        } else {
-                            const b64 = btoa(unescape(encodeURIComponent(codeText)));
-                            const canRun = ['javascript','js','html','python','py'].includes(codeLang);
-                            html += '<div class="code-block-wrap my-3 rounded-xl overflow-hidden border border-[#3A3835] shadow-md">' +
-                                '<div class="flex items-center justify-between px-3 py-2 bg-[#2C2B29]">' +
-                                '<span class="text-[11px] font-mono font-bold text-[#A3A095] uppercase tracking-wider">' + escapeHTML(codeLang) + '</span>' +
-                                '<div class="flex items-center gap-2">' +
-                                (canRun ? '<button onclick="runCode(this,\'' + b64 + '\',\'' + codeLang + '\')" class="text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors flex items-center gap-1"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><polygon points=\'5 3 19 12 5 21 5 3\'/></svg>Run</button>' : '') +
-                                '<button onclick="copyCode(this,\'' + b64 + '\')" class="flex items-center gap-1 text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy</span></button>' +
-                                '</div></div>' +
-                                '<pre class="overflow-x-auto p-4 bg-[#1E1D1B] text-[#E8E6DF] text-[13px] font-mono leading-relaxed"><code>' + escapeHTML(codeText) + '</code></pre></div>';
-                        }
+                        html += _buildArtifactCard(codeText, codeLang, false);
                     }
                     continue;
                 }
@@ -6255,24 +6437,7 @@
             // Flush unclosed code block — happens during streaming when the closing ``` hasn't arrived yet
             if (inCode) {
                 const codeText = codeLines.join('\n');
-                if (codeLang === 'mermaid') {
-                    const mermaidId = 'mermaid_partial_' + Date.now();
-                    html += '<div class="my-3 rounded-xl overflow-hidden border border-[#E5E3DB] bg-white p-4">' +
-                        '<div class="flex items-center gap-2 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><span class="text-[11px] font-bold text-[#A3A095] uppercase tracking-wider">Diagram</span></div>' +
-                        '<div class="mermaid" id="' + mermaidId + '">' + escapeHTML(codeText) + '</div></div>';
-                } else {
-                    const b64 = codeText ? btoa(unescape(encodeURIComponent(codeText))) : '';
-                    const canRun = ['javascript','js','html','python','py'].includes(codeLang);
-                    html += '<div class="code-block-wrap my-3 rounded-xl overflow-hidden border border-[#3A3835] shadow-md">' +
-                        '<div class="flex items-center justify-between px-3 py-2 bg-[#2C2B29]">' +
-                        '<span class="text-[11px] font-mono font-bold text-[#A3A095] uppercase tracking-wider">' + escapeHTML(codeLang || 'text') + '</span>' +
-                        '<div class="flex items-center gap-2">' +
-                        (codeText && canRun ? '<button onclick="runCode(this,\'' + b64 + '\',\'' + codeLang + '\')" class="text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors flex items-center gap-1"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><polygon points=\'5 3 19 12 5 21 5 3\'/></svg>Run</button>' : '') +
-                        (codeText ? '<button onclick="copyCode(this,\'' + b64 + '\')" class="flex items-center gap-1 text-[11px] font-semibold text-[#A3A095] hover:text-white transition-colors"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy</span></button>' : '') +
-                        '<span class="streaming-cursor text-[#A3A095]"></span>' +
-                        '</div></div>' +
-                        '<pre class="overflow-x-auto p-4 bg-[#1E1D1B] text-[#E8E6DF] text-[13px] font-mono leading-relaxed"><code>' + escapeHTML(codeText) + '</code></pre></div>';
-                }
+                html += _buildArtifactCard(codeText, codeLang || 'text', true);
             }
             return html;
         }
@@ -7115,7 +7280,7 @@ FEATURES:
 4. FILE ATTACHMENTS (📎 Attach button): Upload documents — PDFs, text files (.txt), CSVs, JSON, Markdown (.md), XML, .doc/.docx. Document content is extracted and sent as context to the AI. Combine with images in the same message.
 5. RESPONSE LENGTH (≡ Normal button): Cycles Normal → Short (2-4 sentences) → Detailed. Tap the button to cycle through lengths.
 6. TEMPLATES (🔖 Templates button): Pre-saved prompt starters. Built-in templates: Explain Simply, Clinical Summary, Compare & Contrast, Step by Step. Users can add custom templates with a name and text. Templates are saved to device storage.
-7. TEMP CHAT (🕐 Temp Chat button): Start a temporary conversation that won't be saved to chat history. Perfect for quick questions or sensitive topics. A yellow banner shows when Temp Chat is active. Toggle on/off with the clock icon button to the left of the "New Chat" button in the sidebar (☰ menu).
+7. TEMP CHAT (🕐 Temp Chat button): Start a temporary conversation that won't be saved to chat history. Perfect for quick questions or sensitive topics. A yellow banner shows when Temp Chat is active. Toggle on/off with the clock icon button in the top header bar (to the left of the Search and New Chat icons on the right side of the header).
 8. DARK MODE: Menu (☰) → Light/Dark Mode toggle. Full dark theme support across all UI elements.
 9. CHAT HISTORY: All chats auto-saved locally on device. Access via ☰ menu. Auto-titled after first exchange using AI.
 10. CHAT TAGS: Tag chats with categories (Biology, Medicine, Physics, Code, Math, Other). Filter chats by tag via ☰ menu.
@@ -7175,9 +7340,10 @@ FEATURES:
 64. IMAGE & TTS USAGE TRACKING: Token Management dashboard (Settings → API → Token Management) now includes Image Generation section (images generated per platform: Pollinations, Gemini, NVIDIA, Together AI, Hugging Face) and TTS Usage section (characters used per provider: ElevenLabs, OpenAI TTS, Groq TTS, Gemini TTS). Counters stored in snoah_usage_counters localStorage key and reset together with token usage via confirmResetTokenUsage().
 65. EXTENDED THINKING TAG SUPPORT: The app detects and renders thinking/reasoning content from ALL AI models — not just <think> tags. Models that use <reasoning>, <thinking>, <reflection> tags or emit delta.reasoning_content in the stream (e.g. DeepSeek, Qwen) all have their reasoning content captured and displayed in the collapsible "💭 Thought Process" dropdown, cleanly separated from the main answer.
 66. PLATFORM & MODEL AWARENESS: The AI always knows which platform and model it is running on (injected dynamically into the system prompt). When asked "which AI are you?", "what model is this?", or "which platform?" it gives the accurate answer based on the current selection.
+67. ARTIFACTS: When the AI responds with a code block (any language), it is shown as a compact "Artifact Card" instead of a raw code block. The card shows a file icon, filename (e.g. index.html, script.js), language badge, line count, and a 5-line code preview. A dark "Open Artifact" button at the bottom opens a full-screen Artifact Viewer. The viewer has: a header bar with back arrow, filename, language badge, and close (X) button; a Preview/Code pill tab switcher. Preview tab renders the artifact in a sandboxed iframe (for HTML, SVG, JavaScript, CSS, TypeScript, JSX/TSX) or as a Mermaid diagram. Code tab shows the raw syntax-highlighted code with Copy and Download buttons. The iframe uses sandbox="allow-scripts allow-same-origin" for security.
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
-- Top bar: App name "SnoahAI" (left), model badge (center), hamburger menu ☰ (right).
+- Top bar: App name "SnoahAI" (left), model badge (center), three icon buttons on the right: Temp Chat (clock 🕐), Search (🔍), New Chat (+).
 - Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons.
 - Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates buttons, main text input, Send/Stop button.
 - Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us/Delete History), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
@@ -7310,7 +7476,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     return raw
                         .replace(/<reasoning>([\s\S]*?)<\/reasoning>/gi, '<think>$1</think>')
                         .replace(/<thinking>([\s\S]*?)<\/thinking>/gi, '<think>$1</think>')
-                        .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>');
+                        .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>')
+                        // GLM and some models use <tool_call> for internal reasoning output.
+                        // If the content looks like JSON (actual function call), strip it silently.
+                        // Otherwise treat it as thinking content.
+                        .replace(/<tool_call>([\s\S]*?)<\/tool_call>/gi, (_, content) => {
+                            const trimmed = content.trim();
+                            return (trimmed.startsWith('{') || trimmed.startsWith('[')) ? '' : '<think>' + trimmed + '</think>';
+                        });
                 }
 
                 function rafRender(ts) {
@@ -7973,7 +8146,11 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const _normDisplay = displayText
                     .replace(/<reasoning>([\s\S]*?)<\/reasoning>/gi, '<think>$1</think>')
                     .replace(/<thinking>([\s\S]*?)<\/thinking>/gi, '<think>$1</think>')
-                    .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>');
+                    .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>')
+                    .replace(/<tool_call>([\s\S]*?)<\/tool_call>/gi, (_, c) => {
+                        const t = c.trim();
+                        return (t.startsWith('{') || t.startsWith('[')) ? '' : '<think>' + t + '</think>';
+                    });
                 const legacyMatch = _normDisplay.match(THINK_RE);
                 if (legacyMatch) {
                     thinkingContent = legacyMatch[1].trim();
