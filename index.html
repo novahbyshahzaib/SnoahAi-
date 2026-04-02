@@ -79,6 +79,8 @@
             'info': '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
             'languages': '<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
             'list': '<line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>',
+            'sliders': '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+            'layout-panel-right': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/>',
         },
         createIcons() {
             document.querySelectorAll('i[data-lucide]').forEach(el => {
@@ -1208,16 +1210,18 @@
         </div>
 
         <!-- ===== HEADER ===== -->
-        <header class="flex items-center justify-between px-4 py-3 bg-[#FAF9F6]/90 backdrop-blur-md z-10 shrink-0 border-b border-[#EAE8E0]/50 header-bg">
-            <button onclick="toggleSidebar()" class="p-2 -ml-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
-                <i data-lucide="menu" class="w-5 h-5"></i>
-            </button>
+        <header class="flex items-center px-4 py-3 bg-[#FAF9F6]/90 backdrop-blur-md z-10 shrink-0 border-b border-[#EAE8E0]/50 header-bg">
+            <div class="flex-1 flex items-center">
+                <button onclick="toggleSidebar()" class="p-2 -ml-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+            </div>
             <div class="flex flex-col items-center">
                 <h1 class="text-[18px] font-serif font-semibold text-[#2C2B29] tracking-tight snoah-app-name">SnoahAI</h1>
                 <span id="header-model-badge" class="text-[10px] font-bold text-[#A3A095] tracking-widest uppercase mt-0.5">NOVAH GEM</span>
             </div>
             <!-- Right-side header buttons: Temp Chat, Search, New Chat — equal icon buttons -->
-            <div class="flex items-center gap-0.5 -mr-1">
+            <div class="flex-1 flex items-center justify-end gap-0.5 -mr-1">
                 <button id="btn-temp-chat" onclick="toggleTempChat()" title="Temp Chat" class="p-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
                     <i data-lucide="clock" class="w-5 h-5"></i>
                 </button>
@@ -1313,6 +1317,9 @@
                     </button>
                     <button onclick="openTemplatesModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Templates
+                    </button>
+                    <button id="btn-canvas" onclick="toggleCanvasMode()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
+                        <i data-lucide="layout-panel-right" class="w-3.5 h-3.5"></i> Canvas
                     </button>
                 </div>
 
@@ -1514,7 +1521,7 @@
                     </button>
                 </div>
                 <div class="p-5 overflow-y-auto flex-1 text-[13px] text-[#5B5951] leading-relaxed space-y-4">
-                    <p class="text-[12px] text-[#A3A095]">Last updated: March 2026</p>
+                    <p class="text-[12px] text-[#A3A095]">Last updated: April 2026</p>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">1. Acceptance of Terms</h3>
@@ -1523,12 +1530,12 @@
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">2. Service Description</h3>
-                        <p>SnoahAI is an AI chat assistant that connects to third-party AI platforms (Google Gemini, OpenRouter, Groq, Together AI, Mistral AI) using API keys that you provide. SnoahAI does not provide its own AI models.</p>
+                        <p>SnoahAI is an AI chat assistant that connects to third-party AI platforms — including Google Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA NIM, Hugging Face, GitHub Models, Anthropic Claude, Cohere, DeepInfra, xAI, Perplexity, NanoGPT, Unify, Kluster.ai, SambaNova, Fireworks, Cerebras, Ollama, and Puter.js — using API keys that you provide. SnoahAI does not provide its own AI models.</p>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">3. API Keys & Data Storage</h3>
-                        <p>Your API keys and preferences are stored locally on your device using browser local storage. SnoahAI does not transmit your keys to any server other than the selected AI platform's official API endpoint.</p>
+                        <p>Your API keys and preferences are stored locally on your device using browser local storage. SnoahAI does not transmit your keys to any server other than the selected AI platform's official API endpoint. Some platforms are proxied via Vercel serverless functions solely to avoid browser CORS restrictions; no key data is logged or retained.</p>
                         <ul class="list-disc list-inside mt-1.5 space-y-1">
                             <li><strong>Cookies Accepted:</strong> You may store multiple API keys per platform, enabling auto-rotation on rate limits for uninterrupted usage.</li>
                             <li><strong>Cookies Rejected:</strong> Storage is limited to 1 API key per platform. Additional keys cannot be saved.</li>
@@ -1537,27 +1544,37 @@
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">4. User Responsibilities</h3>
-                        <p>You are responsible for safeguarding your API keys and for any charges incurred through their use. Do not share your API keys publicly. You must comply with the terms of service of each third-party AI platform.</p>
+                        <p>You are responsible for safeguarding your API keys and for any charges incurred through their use. Do not share your API keys publicly. You must comply with the terms of service of each third-party AI platform you connect to via SnoahAI.</p>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">5. Privacy</h3>
-                        <p>SnoahAI operates entirely in your browser. Chat history, settings, and API keys are stored in your browser's local storage and are not sent to SnoahAI's servers. Conversations are sent directly to the AI platform you have selected.</p>
+                        <p>SnoahAI operates entirely in your browser. Chat history, settings, and API keys are stored in your browser's local storage and are not sent to SnoahAI's servers. Conversations are sent directly to the AI platform you have selected. Community chat messages are stored in Firebase Firestore and are visible to other community users.</p>
                     </div>
 
                     <div>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">6. Disclaimer</h3>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">6. Acceptable Use</h3>
+                        <p>You agree not to use SnoahAI to generate harmful, illegal, or abusive content. You are solely responsible for the content you submit and any outputs you act upon. SnoahAI's community chat must be used respectfully and in accordance with applicable laws.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">7. Disclaimer</h3>
                         <p>SnoahAI is provided "as is" without warranties of any kind. AI responses may contain inaccuracies. Do not rely on SnoahAI for medical, legal, or financial advice without consulting a qualified professional.</p>
                     </div>
 
                     <div>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">7. Limitation of Liability</h3>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">8. Limitation of Liability</h3>
                         <p>SnoahAI and its developer shall not be liable for any damages arising from the use of this application, including but not limited to data loss, API charges, or inaccurate AI responses.</p>
                     </div>
 
                     <div>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">8. Changes to Terms</h3>
-                        <p>These terms may be updated from time to time. Continued use of SnoahAI after changes constitutes acceptance of the updated terms.</p>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">9. Intellectual Property</h3>
+                        <p>SnoahAI's interface, design, and code are the property of Shahzaib Muzaffar. You may not copy, reproduce, or redistribute the application without explicit written permission. AI-generated outputs may be subject to the terms of the respective AI platform provider.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">10. Changes to Terms</h3>
+                        <p>These terms may be updated from time to time. Continued use of SnoahAI after changes constitutes acceptance of the updated terms. The "Last updated" date above reflects when the terms were last revised.</p>
                     </div>
                 </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
@@ -1615,7 +1632,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                             <h3 class="font-serif font-semibold text-[16px] text-[#2C2B29]">Terms & Conditions</h3>
                         </div>
-                        <p class="text-[12px] text-[#A3A095] mb-3">Last updated: March 2026</p>
+                        <p class="text-[12px] text-[#A3A095] mb-3">Last updated: April 2026</p>
 
                         <div class="space-y-4">
                             <div>
@@ -1625,12 +1642,12 @@
 
                             <div>
                                 <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">2. Service Description</h4>
-                                <p>SnoahAI is an AI chat assistant that connects to third-party AI platforms (Google Gemini, OpenRouter, Groq, Together AI, Mistral AI) using API keys that you provide. SnoahAI does not provide its own AI models.</p>
+                                <p>SnoahAI is an AI chat assistant that connects to third-party AI platforms — including Google Gemini, OpenRouter, Groq, Together AI, Mistral AI, OpenAI, NVIDIA NIM, Hugging Face, GitHub Models, Anthropic Claude, Cohere, DeepInfra, xAI, Perplexity, NanoGPT, Unify, Kluster.ai, SambaNova, Fireworks, Cerebras, Ollama, and Puter.js — using API keys that you provide. SnoahAI does not provide its own AI models.</p>
                             </div>
 
                             <div>
                                 <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">3. API Keys & Data Storage</h4>
-                                <p>Your API keys and preferences are stored locally on your device using browser local storage. SnoahAI does not transmit your keys to any server other than the selected AI platform's official API endpoint.</p>
+                                <p>Your API keys and preferences are stored locally on your device using browser local storage. SnoahAI does not transmit your keys to any server other than the selected AI platform's official API endpoint. Some platforms are proxied via Vercel serverless functions solely to avoid browser CORS restrictions; no key data is logged or retained.</p>
                                 <ul class="list-disc list-inside mt-1.5 space-y-1">
                                     <li><strong>Cookies Accepted:</strong> You may store multiple API keys per platform, enabling auto-rotation on rate limits for uninterrupted usage.</li>
                                     <li><strong>Cookies Rejected:</strong> Storage is limited to 1 API key per platform. Additional keys cannot be saved.</li>
@@ -1639,27 +1656,37 @@
 
                             <div>
                                 <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">4. User Responsibilities</h4>
-                                <p>You are responsible for safeguarding your API keys and for any charges incurred through their use. Do not share your API keys publicly. You must comply with the terms of service of each third-party AI platform.</p>
+                                <p>You are responsible for safeguarding your API keys and for any charges incurred through their use. Do not share your API keys publicly. You must comply with the terms of service of each third-party AI platform you connect to via SnoahAI.</p>
                             </div>
 
                             <div>
                                 <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">5. Privacy</h4>
-                                <p>SnoahAI operates entirely in your browser. Chat history, settings, and API keys are stored in your browser's local storage and are not sent to SnoahAI's servers. Conversations are sent directly to the AI platform you have selected.</p>
+                                <p>SnoahAI operates entirely in your browser. Chat history, settings, and API keys are stored in your browser's local storage and are not sent to SnoahAI's servers. Conversations are sent directly to the AI platform you have selected. Community chat messages are stored in Firebase Firestore and are visible to other community users.</p>
                             </div>
 
                             <div>
-                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">6. Disclaimer</h4>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">6. Acceptable Use</h4>
+                                <p>You agree not to use SnoahAI to generate harmful, illegal, or abusive content. You are solely responsible for the content you submit and any outputs you act upon. SnoahAI's community chat must be used respectfully and in accordance with applicable laws.</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">7. Disclaimer</h4>
                                 <p>SnoahAI is provided "as is" without warranties of any kind. AI responses may contain inaccuracies. Do not rely on SnoahAI for medical, legal, or financial advice without consulting a qualified professional.</p>
                             </div>
 
                             <div>
-                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">7. Limitation of Liability</h4>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">8. Limitation of Liability</h4>
                                 <p>SnoahAI and its developer shall not be liable for any damages arising from the use of this application, including but not limited to data loss, API charges, or inaccurate AI responses.</p>
                             </div>
 
                             <div>
-                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">8. Changes to Terms</h4>
-                                <p>These terms may be updated from time to time. Continued use of SnoahAI after changes constitutes acceptance of the updated terms.</p>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">9. Intellectual Property</h4>
+                                <p>SnoahAI's interface, design, and code are the property of Shahzaib Muzaffar. You may not copy, reproduce, or redistribute the application without explicit written permission. AI-generated outputs may be subject to the terms of the respective AI platform provider.</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-[14px] text-[#2C2B29] mb-1">10. Changes to Terms</h4>
+                                <p>These terms may be updated from time to time. Continued use of SnoahAI after changes constitutes acceptance of the updated terms. The "Last updated" date above reflects when the terms were last revised.</p>
                             </div>
                         </div>
                     </div>
@@ -2369,6 +2396,7 @@
         let responseLang = localStorage.getItem('snoah_response_lang') || '';
         let showTimestamps = localStorage.getItem('snoah_show_timestamps') === 'true';
         let bookmarks = JSON.parse(localStorage.getItem('snoah_bookmarks') || '[]');
+        let canvasMode = localStorage.getItem('snoah_canvas_mode') === 'true';
         const NOTION_PROXY = '/api/notion';
         let uploadedImage = null; // { data, mimeType, previewUrl }
         let messages = [];
@@ -3242,6 +3270,20 @@
             if (btnAgent) btnAgent.className = useAgent
                 ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#E8F0FE] text-[#1967D2] border border-[#D2E3FC]"
                 : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
+            const btnCanvas = document.getElementById('btn-canvas');
+            if (btnCanvas) btnCanvas.className = canvasMode
+                ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#EEF4FF] text-[#3B5BDB] border border-[#C5D8FF]"
+                : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
+        }
+
+        function toggleCanvasMode() {
+            canvasMode = !canvasMode;
+            localStorage.setItem('snoah_canvas_mode', canvasMode);
+            const btn = document.getElementById('btn-canvas');
+            if (btn) btn.className = canvasMode
+                ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#EEF4FF] text-[#3B5BDB] border border-[#C5D8FF]"
+                : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
+            showToast(canvasMode ? '🖼️ Canvas mode on — code opens in Artifact Viewer' : 'Canvas mode off');
         }
 
         function toggleExpand(buttonId, contentId) {
@@ -6193,10 +6235,10 @@
                 '</div>' +
                 // Code preview (first 4-5 lines, dimmed)
                 (previewLines ? '<div class="mx-4 mb-3 rounded-lg bg-[#F2F0E9] border border-[#E5E3DB] px-3 py-2 overflow-hidden" style="max-height:5.4em"><pre class="text-[11px] text-[#A3A095] font-mono leading-relaxed overflow-hidden whitespace-pre-wrap break-all" style="display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden">' + escapeHTML(previewLines) + '</pre></div>' : '') +
-                // Open Artifact button
-                (b64 && !isStreaming
-                    ? '<div class="px-4 pb-4"><button onclick="openArtifact(\'' + b64 + '\',\'' + langSafe + '\')" class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#2C2B29] text-white text-[13px] font-semibold hover:bg-[#3A3835] active:scale-95 transition-all">' +
-                        '<div class="flex items-center gap-2">' + fileIconSvg.replace('#D25D38', 'white').replace('18" height="18"', '14" height="14"') + ' Open Artifact</div>' +
+                // Open Artifact button — shown at all times (streaming or not) if there's code
+                (b64
+                    ? '<div class="px-4 pb-4"><button onclick="openArtifact(\'' + b64 + '\',\'' + langSafe + '\')" class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl ' + (isStreaming ? 'bg-[#3B5BDB] hover:bg-[#2F4CC5]' : 'bg-[#2C2B29] hover:bg-[#3A3835]') + ' text-white text-[13px] font-semibold active:scale-95 transition-all">' +
+                        '<div class="flex items-center gap-2">' + fileIconSvg.replace('#D25D38', 'white').replace('18" height="18"', '14" height="14"') + (isStreaming ? ' Open (streaming…)' : ' Open Artifact') + '</div>' +
                         chevronSvg +
                       '</button></div>'
                     : (isStreaming ? '<div class="px-4 pb-3 flex items-center gap-2 text-[12px] text-[#A3A095]"><span class="thinking-dots"></span><span>Generating…</span></div>' : '')) +
@@ -6340,6 +6382,38 @@
             } catch(e) {}
         }
 
+        // ── INLINE CODE BLOCK (canvas mode OFF) ─────────────────────────
+        function _buildInlineCodeBlock(codeText, lang, isStreaming) {
+            const langUpper = escapeHTML((lang || 'text').toUpperCase());
+            const codeEscaped = escapeHTML(codeText || '');
+            const b64 = codeText ? btoa(unescape(encodeURIComponent(codeText))) : '';
+            const copyBtnHtml = b64 && !isStreaming
+                ? '<button onclick="copyArtifactCode(\'' + b64 + '\')" style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#A3A095;background:none;border:none;cursor:pointer;transition:color .15s" onmouseover="this.style.color=\'#fff\'" onmouseout="this.style.color=\'#A3A095\'">' +
+                  '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy</button>'
+                : (isStreaming
+                    ? '<span style="font-size:11px;color:#737166;display:flex;align-items:center;gap:5px"><span class="thinking-dots"></span>streaming</span>'
+                    : '');
+            return '<div class="my-3 rounded-xl overflow-hidden border border-[#3A3835] shadow-sm">' +
+                '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#2C2B29">' +
+                    '<span style="font-size:10px;font-family:monospace;font-weight:700;color:#A3A095;text-transform:uppercase;letter-spacing:.05em">' + langUpper + '</span>' +
+                    copyBtnHtml +
+                '</div>' +
+                '<pre style="background:#1E1D1B;padding:14px 16px;overflow-x:auto;font-size:13px;font-family:monospace;line-height:1.6;color:#E8E6DF;margin:0;white-space:pre"><code>' + codeEscaped + '</code></pre>' +
+                '</div>';
+        }
+
+        // ── LIVE-UPDATE CANVAS VIEWER DURING STREAMING ──────────────────
+        function _updateCanvasViewer(rawText) {
+            const overlay = document.getElementById('artifact-viewer-overlay');
+            if (!overlay) return;
+            // Extract first code block from raw text (may be open/unclosed during streaming)
+            const match = rawText.match(/```(?:\w*)\n?([\s\S]*?)(?:```|$)/);
+            if (!match) return;
+            const latestCode = match[1] || '';
+            const codeEl = overlay.querySelector('#artifact-code-area pre code');
+            if (codeEl) codeEl.textContent = latestCode;
+        }
+
         let _todoIdCounter = 0;
         function formatMarkdown(text) {
             if (!text) return '';
@@ -6380,7 +6454,7 @@
                     } else {
                         inCode = false;
                         const codeText = codeLines.join('\n');
-                        html += _buildArtifactCard(codeText, codeLang, false);
+                        html += canvasMode ? _buildArtifactCard(codeText, codeLang, false) : _buildInlineCodeBlock(codeText, codeLang, false);
                     }
                     continue;
                 }
@@ -6435,7 +6509,7 @@
             // Flush unclosed code block — happens during streaming when the closing ``` hasn't arrived yet
             if (inCode) {
                 const codeText = codeLines.join('\n');
-                html += _buildArtifactCard(codeText, codeLang || 'text', true);
+                html += canvasMode ? _buildArtifactCard(codeText, codeLang || 'text', true) : _buildInlineCodeBlock(codeText, codeLang || 'text', true);
             }
             return html;
         }
@@ -7075,7 +7149,7 @@
                         const res = await fetch('/api/nvidia-img', {
                             method: 'POST',
                             headers: { 'x-api-key': keysToTry[ki], 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ model: mdl, prompt: prompt, n: 1, size: '1024x1024', response_format: 'b64_json' })
+                            body: JSON.stringify({ model: mdl, prompt: prompt, n: 1, width: 1024, height: 1024 })
                         });
                         if (res.status === 401 || res.status === 429) {
                             showToast('NVIDIA key rotated');
@@ -7085,9 +7159,17 @@
                         }
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         const data = await res.json();
-                        const b64 = data.data && data.data[0] && data.data[0].b64_json;
-                        if (!b64) throw new Error('no_image_data');
-                        imgSrc = 'data:image/png;base64,' + b64;
+                        // NVIDIA NIM returns b64_json in artifacts[] (native format) or data[] (OpenAI-compat)
+                        const b64 = (data.artifacts && data.artifacts[0] && data.artifacts[0].b64_json)
+                            || (data.data && data.data[0] && data.data[0].b64_json);
+                        if (b64) {
+                            imgSrc = 'data:image/png;base64,' + b64;
+                        } else {
+                            // Some models return a URL instead of base64
+                            const imgUrl = data.data && data.data[0] && data.data[0].url;
+                            if (imgUrl) imgSrc = imgUrl;
+                            else throw new Error('no_image_data');
+                        }
                         provider = 'NVIDIA NIM';
                     } catch(e) { console.error('[SnoahAI] NVIDIA image error:', e); }
                 }
@@ -7468,6 +7550,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 let extraFrames = 0;      // drain after streamActive=false
                 let lastMdRender = 0;     // throttle markdown render
                 const MD_INTERVAL = 120;  // ms between full markdown renders
+                let _canvasAutoOpened = false; // track canvas auto-open per stream session
 
                 // Normalize alternative reasoning tags used by various models to <think>...</think>
                 function _normalizeThinkTags(raw) {
@@ -7538,6 +7621,18 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 // First frame — always render immediately
                                 liveTextEl.innerHTML = formatMarkdown(displayMainFiltered);
                                 liveTextEl.style.whiteSpace = '';
+                            }
+                            // Canvas mode: auto-open artifact viewer when first code block appears
+                            if (canvasMode && !_canvasAutoOpened) {
+                                const artifactBtn = liveTextEl.querySelector('.artifact-card button[onclick^="openArtifact"]');
+                                if (artifactBtn) {
+                                    _canvasAutoOpened = true;
+                                    artifactBtn.click();
+                                }
+                            }
+                            // Canvas mode: live-update the open artifact viewer with latest streamed code
+                            if (canvasMode && _canvasAutoOpened) {
+                                _updateCanvasViewer(displayMain);
                             }
                         } else {
                             liveTextEl.textContent = '';
