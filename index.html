@@ -6382,6 +6382,38 @@
             } catch(e) {}
         }
 
+        // ── INLINE CODE BLOCK (canvas mode OFF) ─────────────────────────
+        function _buildInlineCodeBlock(codeText, lang, isStreaming) {
+            const langUpper = escapeHTML((lang || 'text').toUpperCase());
+            const codeEscaped = escapeHTML(codeText || '');
+            const b64 = codeText ? btoa(unescape(encodeURIComponent(codeText))) : '';
+            const copyBtnHtml = b64 && !isStreaming
+                ? '<button onclick="copyArtifactCode(\'' + b64 + '\')" style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#A3A095;background:none;border:none;cursor:pointer;transition:color .15s" onmouseover="this.style.color=\'#fff\'" onmouseout="this.style.color=\'#A3A095\'">' +
+                  '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy</button>'
+                : (isStreaming
+                    ? '<span style="font-size:11px;color:#737166;display:flex;align-items:center;gap:5px"><span class="thinking-dots"></span>streaming</span>'
+                    : '');
+            return '<div class="my-3 rounded-xl overflow-hidden border border-[#3A3835] shadow-sm">' +
+                '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#2C2B29">' +
+                    '<span style="font-size:10px;font-family:monospace;font-weight:700;color:#A3A095;text-transform:uppercase;letter-spacing:.05em">' + langUpper + '</span>' +
+                    copyBtnHtml +
+                '</div>' +
+                '<pre style="background:#1E1D1B;padding:14px 16px;overflow-x:auto;font-size:13px;font-family:monospace;line-height:1.6;color:#E8E6DF;margin:0;white-space:pre"><code>' + codeEscaped + '</code></pre>' +
+                '</div>';
+        }
+
+        // ── LIVE-UPDATE CANVAS VIEWER DURING STREAMING ──────────────────
+        function _updateCanvasViewer(rawText) {
+            const overlay = document.getElementById('artifact-viewer-overlay');
+            if (!overlay) return;
+            // Extract first code block from raw text (may be open/unclosed during streaming)
+            const match = rawText.match(/```(?:\w*)\n?([\s\S]*?)(?:```|$)/);
+            if (!match) return;
+            const latestCode = match[1] || '';
+            const codeEl = overlay.querySelector('#artifact-code-area pre code');
+            if (codeEl) codeEl.textContent = latestCode;
+        }
+
         let _todoIdCounter = 0;
         function formatMarkdown(text) {
             if (!text) return '';
@@ -6422,7 +6454,7 @@
                     } else {
                         inCode = false;
                         const codeText = codeLines.join('\n');
-                        html += _buildArtifactCard(codeText, codeLang, false);
+                        html += canvasMode ? _buildArtifactCard(codeText, codeLang, false) : _buildInlineCodeBlock(codeText, codeLang, false);
                     }
                     continue;
                 }
@@ -6477,7 +6509,7 @@
             // Flush unclosed code block — happens during streaming when the closing ``` hasn't arrived yet
             if (inCode) {
                 const codeText = codeLines.join('\n');
-                html += _buildArtifactCard(codeText, codeLang || 'text', true);
+                html += canvasMode ? _buildArtifactCard(codeText, codeLang || 'text', true) : _buildInlineCodeBlock(codeText, codeLang || 'text', true);
             }
             return html;
         }
@@ -7597,6 +7629,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                     _canvasAutoOpened = true;
                                     artifactBtn.click();
                                 }
+                            }
+                            // Canvas mode: live-update the open artifact viewer with latest streamed code
+                            if (canvasMode && _canvasAutoOpened) {
+                                _updateCanvasViewer(displayMain);
                             }
                         } else {
                             liveTextEl.textContent = '';
