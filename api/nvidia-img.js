@@ -18,11 +18,16 @@ export default async function handler(req, res) {
     const body = req.body || {};
 
     // Map OpenAI-style model names to NVIDIA native genai model paths
-    let modelPath = (body.model || 'black-forest-labs/flux-schnell')
-      .replace(/flux\.1-schnell/i, 'flux-schnell')
-      .replace(/flux\.1-dev/i,     'flux-dev')
-      .replace(/flux-1-schnell/i,  'flux-schnell')
-      .replace(/flux-1-dev/i,      'flux-dev');
+    const modelNameMap = {
+      'flux.1-schnell': 'flux-schnell',
+      'flux.1-dev':     'flux-dev',
+      'flux-1-schnell': 'flux-schnell',
+      'flux-1-dev':     'flux-dev',
+    };
+    let modelPath = body.model || 'black-forest-labs/flux-schnell';
+    for (const [from, to] of Object.entries(modelNameMap)) {
+      modelPath = modelPath.replace(new RegExp(from.replace('.', '\\.'), 'i'), to);
+    }
 
     // Build NVIDIA native request (only supported fields)
     const nativeBody = {

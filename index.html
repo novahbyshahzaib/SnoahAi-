@@ -3498,7 +3498,7 @@
                 localStorage.setItem('snoah_all_chats', JSON.stringify(allChats));
             } catch(e) {
                 if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                    // Storage full — prune to 10 oldest chats and retry
+                    // Storage full — prune to 10 most-recent chats and retry
                     allChats = allChats.slice(0, 10);
                     try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(_) {}
                     showToast('⚠️ Storage almost full — older chats trimmed');
