@@ -277,11 +277,33 @@
         .dark #welcome-screen p { color: #9B9891 !important; }
         .dark #welcome-screen button { background: #252422 !important; border-color: #3A3835 !important; color: #C8C6BF !important; }
 
-        /* Name prompt modal */
+        /* Name/welcome prompt modal */
         .dark #name-prompt-modal > div:last-child { background: #1E1D1B !important; border-color: #3A3835 !important; }
         .dark #name-prompt-modal h3 { color: #E8E6DF !important; }
-        .dark #name-prompt-modal p { color: #9B9891 !important; }
+        .dark #name-prompt-modal p, .dark #name-prompt-modal label { color: #9B9891 !important; }
         .dark #name-prompt-modal input { background: #252422 !important; border-color: #3A3835 !important; color: #E8E6DF !important; }
+        .dark #name-prompt-modal .border-\[\#E5E3DB\] { border-color: #3A3835 !important; }
+        .dark #name-prompt-modal .bg-white { background: #252422 !important; }
+        .dark #name-prompt-modal #welcome-terms-body { color: #9B9891 !important; border-color: #3A3835 !important; }
+        /* Custom checkbox for welcome consent */
+        .welcome-checkbox {
+            -webkit-appearance: none; appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 6px; border: 2px solid #E5E3DB;
+            background: #fff; cursor: pointer;
+            position: relative; transition: background 0.15s, border-color 0.15s;
+            flex-shrink: 0;
+        }
+        .welcome-checkbox:checked {
+            background: #D25D38; border-color: #D25D38;
+        }
+        .welcome-checkbox:checked::after {
+            content: '';
+            position: absolute; left: 4px; top: 1px;
+            width: 5px; height: 9px;
+            border: 2px solid #fff; border-top: none; border-left: none;
+            transform: rotate(45deg);
+        }
 
         /* Modals backdrop */
         .dark [class*="bg-\[\#2C2B29\]\/40"] { background: rgba(0,0,0,0.6) !important; }
@@ -742,13 +764,14 @@
                                 <button onclick="addNvidiaImgKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
                             </div>
                             <input type="text" id="settings-nvidia-img-model" list="nvidia-img-model-list"
-                                placeholder="e.g. black-forest-labs/flux.1-schnell"
+                                placeholder="e.g. black-forest-labs/flux-schnell"
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
                             <datalist id="nvidia-img-model-list">
-                                <option value="black-forest-labs/flux.1-schnell">FLUX.1 Schnell (Fast, Free)</option>
-                                <option value="black-forest-labs/flux.1-dev">FLUX.1 Dev (Quality, Free)</option>
-                                <option value="stabilityai/sdxl-turbo">Stable Diffusion XL Turbo (Free)</option>
-                                <option value="stabilityai/stable-diffusion-3-medium">SD 3 Medium (Free)</option>
+                                <option value="black-forest-labs/flux-schnell">FLUX.1 Schnell (Fast, Free)</option>
+                                <option value="black-forest-labs/flux-dev">FLUX.1 Dev (Higher Quality)</option>
+                                <option value="stabilityai/sdxl-turbo">Stable Diffusion XL Turbo</option>
+                                <option value="stabilityai/stable-diffusion-3-5-medium">SD 3.5 Medium</option>
+                                <option value="stabilityai/stable-diffusion-3-medium">SD 3 Medium</option>
                             </datalist>
                         </div>
 
@@ -1469,7 +1492,7 @@
         </div>
     </div>
 
-        <!-- ===== COOKIE CONSENT BANNER ===== -->
+        <!-- ===== COOKIE CONSENT BANNER (returning users who skipped consent) ===== -->
         <div id="cookie-banner" class="absolute bottom-0 left-0 right-0 z-[60] hidden">
             <div class="bg-[#2C2B29] text-white rounded-t-[22px] shadow-2xl p-5 mx-0">
                 <div class="flex items-start gap-3 mb-3">
@@ -1489,18 +1512,59 @@
             </div>
         </div>
 
-        <!-- ===== NAME PROMPT MODAL ===== -->
+        <!-- ===== WELCOME SETUP MODAL (first-time: name + cookie consent combined) ===== -->
         <div id="name-prompt-modal" class="absolute inset-0 z-[65] flex items-center justify-center p-5 hidden">
             <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm"></div>
             <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full max-w-sm shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden">
-                <div class="p-6 text-center">
-                    <div class="w-14 h-14 bg-[#F2F0E9] rounded-[18px] flex items-center justify-center mx-auto mb-4 shadow-sm border border-[#E5E3DB]">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="p-6">
+                    <!-- Header -->
+                    <div class="text-center mb-5">
+                        <div class="w-14 h-14 bg-[#F2F0E9] rounded-[18px] flex items-center justify-center mx-auto mb-4 shadow-sm border border-[#E5E3DB]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29] mb-1">Welcome to SnoahAI!</h3>
+                        <p class="text-[13px] text-[#737166]">Set up your account to get started</p>
                     </div>
-                    <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29] mb-1">Welcome to SnoahAI!</h3>
-                    <p class="text-[13px] text-[#737166] mb-5">What should we call you?</p>
-                    <input id="name-prompt-input" type="text" placeholder="Enter your name" maxlength="30" class="w-full px-4 py-3 rounded-xl border border-[#E5E3DB] bg-white text-[14px] text-[#2C2B29] placeholder-[#A3A095] focus:outline-none focus:border-[#D25D38] focus:ring-1 focus:ring-[#D25D38]/30 mb-4" autocomplete="off">
-                    <button onclick="saveUserName()" class="w-full py-3 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Continue</button>
+                    <!-- Name input -->
+                    <label class="block text-[12px] font-semibold text-[#5B5951] mb-1.5">Your Name</label>
+                    <input id="name-prompt-input" type="text" placeholder="Enter your name" maxlength="30"
+                        oninput="updateWelcomeConfirmBtn()"
+                        class="w-full px-4 py-3 rounded-xl border border-[#E5E3DB] bg-white text-[14px] text-[#2C2B29] placeholder-[#A3A095] focus:outline-none focus:border-[#D25D38] focus:ring-1 focus:ring-[#D25D38]/30 mb-4" autocomplete="off">
+                    <!-- Cookie & Terms accordion -->
+                    <div class="rounded-xl border border-[#E5E3DB] bg-white mb-4 overflow-hidden">
+                        <button type="button" onclick="toggleWelcomeTerms()"
+                            class="w-full flex items-center justify-between px-4 py-3 text-[13px] font-medium text-[#5B5951] hover:bg-[#F2F0E9] transition-colors">
+                            <div class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="8" cy="9" r="1.5" fill="#D25D38"/><circle cx="15" cy="11" r="1.5" fill="#D25D38"/><circle cx="10" cy="15" r="1.5" fill="#D25D38"/></svg>
+                                <span>Cookie & Storage Policy</span>
+                            </div>
+                            <svg id="welcome-terms-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-200"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div id="welcome-terms-body" class="hidden px-4 pb-4 pt-2 text-[12px] text-[#737166] leading-relaxed space-y-2 border-t border-[#E5E3DB]">
+                            <p>SnoahAI uses <strong>local browser storage</strong> (not cookies) to save:</p>
+                            <ul class="list-disc pl-4 space-y-1">
+                                <li>Your name &amp; preferences</li>
+                                <li>API keys you provide (stored only on your device)</li>
+                                <li>Chat history (up to 30 recent conversations)</li>
+                                <li>App settings (theme, font size, etc.)</li>
+                            </ul>
+                            <p class="mt-1"><strong>No personal data is sent to our servers.</strong> Your API keys and chats never leave your browser. Accepting allows multiple API keys per platform for auto-rotation on rate limits.</p>
+                            <button onclick="openTermsModal()" class="text-[#D25D38] underline text-[11px] mt-1">View full Terms &amp; Conditions →</button>
+                        </div>
+                    </div>
+                    <!-- Checkbox -->
+                    <label class="flex items-start gap-3 cursor-pointer mb-5 select-none">
+                        <div class="relative mt-0.5 shrink-0 welcome-check-wrap">
+                            <input type="checkbox" id="welcome-consent-check" onchange="updateWelcomeConfirmBtn()"
+                                class="w-5 h-5 rounded-md border-2 border-[#E5E3DB] appearance-none bg-white cursor-pointer transition-colors welcome-checkbox" style="margin:0;padding:0;">
+                        </div>
+                        <span class="text-[12px] text-[#5B5951] leading-relaxed">I accept the cookie &amp; storage policy and <button type="button" onclick="openTermsModal()" class="text-[#D25D38] underline">Terms &amp; Conditions</button></span>
+                    </label>
+                    <!-- Confirm button -->
+                    <button id="welcome-confirm-btn" onclick="saveUserName()" disabled
+                        class="w-full py-3 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold transition-all shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#B84E2E]">
+                        Get Started
+                    </button>
                 </div>
             </div>
         </div>
@@ -2338,7 +2402,7 @@
         let nvidiaImageKeys = _loadKeys('nvidiaImageApiKeys');
         let nvidiaImageKeyIdx = Math.max(0, parseInt(localStorage.getItem('nvidiaImageKeyIndex') || '0'));
         if (nvidiaImageKeyIdx >= nvidiaImageKeys.length) nvidiaImageKeyIdx = 0;
-        let nvidiaImageModel = localStorage.getItem('nvidiaImageModel') || 'black-forest-labs/flux.1-schnell';
+        let nvidiaImageModel = localStorage.getItem('nvidiaImageModel') || 'black-forest-labs/flux-schnell';
 
         let togetherImageKeys = _loadKeys('togetherImageApiKeys');
         let togetherImageKeyIdx = Math.max(0, parseInt(localStorage.getItem('togetherImageKeyIndex') || '0'));
@@ -2547,15 +2611,51 @@
         updatePinBadge();
         updateBookmarkBadge();
         if (showTimestamps) document.getElementById('html-root').classList.add('show-timestamps');
-        showCookieBannerIfNeeded();
-        showNamePromptIfNeeded();
+        showWelcomeSetupIfNeeded();
         updateSidebarUserName();
 
         // --- Cookie Consent & Terms ---
+        // showCookieBannerIfNeeded: shown only to returning users who have a name but no consent decision yet
         function showCookieBannerIfNeeded() {
-            if (cookiesAccepted !== 'true') {
+            if (userName && cookiesAccepted !== 'true' && cookiesAccepted !== 'false') {
                 document.getElementById('cookie-banner').classList.remove('hidden');
             }
+        }
+
+        // showWelcomeSetupIfNeeded: first-time combined name + cookie consent modal
+        function showWelcomeSetupIfNeeded() {
+            if (!userName) {
+                // First-time visitor — show the unified welcome modal
+                document.getElementById('name-prompt-modal').classList.remove('hidden');
+                const inp = document.getElementById('name-prompt-input');
+                inp.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        const check = document.getElementById('welcome-consent-check');
+                        if (inp.value.trim() && check && check.checked) saveUserName();
+                    }
+                });
+                updateWelcomeConfirmBtn();
+            } else {
+                // Returning user — show cookie banner if they haven't decided yet
+                showCookieBannerIfNeeded();
+            }
+        }
+
+        function updateWelcomeConfirmBtn() {
+            const inp = document.getElementById('name-prompt-input');
+            const check = document.getElementById('welcome-consent-check');
+            const btn = document.getElementById('welcome-confirm-btn');
+            if (!btn) return;
+            const ready = inp && inp.value.trim().length > 0 && check && check.checked;
+            btn.disabled = !ready;
+        }
+
+        function toggleWelcomeTerms() {
+            const body = document.getElementById('welcome-terms-body');
+            const chevron = document.getElementById('welcome-terms-chevron');
+            if (!body) return;
+            const hidden = body.classList.toggle('hidden');
+            if (chevron) chevron.style.transform = hidden ? '' : 'rotate(180deg)';
         }
 
         function acceptCookies() {
@@ -2599,17 +2699,20 @@
 
         // --- Name Prompt ---
         function showNamePromptIfNeeded() {
-            if (!userName) {
-                document.getElementById('name-prompt-modal').classList.remove('hidden');
-                const inp = document.getElementById('name-prompt-input');
-                inp.addEventListener('keydown', e => { if (e.key === 'Enter') saveUserName(); });
-            }
+            showWelcomeSetupIfNeeded();
         }
 
         function saveUserName() {
             const inp = document.getElementById('name-prompt-input');
-            const name = inp.value.trim();
-            if (!name) { showToast('Please enter your name'); inp.focus(); return; }
+            const name = inp ? inp.value.trim() : '';
+            if (!name) { showToast('Please enter your name'); if (inp) inp.focus(); return; }
+            // When called from the combined welcome modal, also process cookie consent
+            const check = document.getElementById('welcome-consent-check');
+            if (check) {
+                // Combined welcome modal — check must be ticked
+                if (!check.checked) { showToast('Please accept the terms to continue'); return; }
+                acceptCookies();
+            }
             userName = name;
             localStorage.setItem('snoah_user_name', userName);
             document.getElementById('name-prompt-modal').classList.add('hidden');
@@ -3352,7 +3455,18 @@
         document.getElementById('chat-container').addEventListener('scroll', updateScrollJumpBtn, { passive: true });
 
         // ── CHAT HISTORY ENGINE ─────────────────────────────────────────
-        let allChats = JSON.parse(localStorage.getItem('snoah_all_chats') || '[]');
+        let allChats = (() => {
+            try {
+                const raw = localStorage.getItem('snoah_all_chats');
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch(e) {
+                console.warn('[SnoahAI] Chat history corrupted, resetting:', e);
+                try { localStorage.removeItem('snoah_all_chats'); } catch(_) {}
+                return [];
+            }
+        })();
         let currentChatId = null;
 
         function generateChatId() {
@@ -3380,7 +3494,16 @@
             else allChats.unshift(entry);
             // Keep only 30 chats to avoid localStorage overflow
             allChats = allChats.slice(0, 30);
-            try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(e) {}
+            try {
+                localStorage.setItem('snoah_all_chats', JSON.stringify(allChats));
+            } catch(e) {
+                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                    // Storage full — prune to 10 oldest chats and retry
+                    allChats = allChats.slice(0, 10);
+                    try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(_) {}
+                    showToast('⚠️ Storage almost full — older chats trimmed');
+                }
+            }
             renderChatHistoryList();
         }
 
@@ -7143,13 +7266,13 @@
                 const keysToTry = nvidiaImageKeys.length > 0
                     ? [...nvidiaImageKeys.slice(nvidiaImageKeyIdx), ...nvidiaImageKeys.slice(0, nvidiaImageKeyIdx)]
                     : [];
-                const mdl = nvidiaImageModel || 'black-forest-labs/flux.1-schnell';
+                const mdl = nvidiaImageModel || 'black-forest-labs/flux-schnell';
                 for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
                     try {
                         const res = await fetch('/api/nvidia-img', {
                             method: 'POST',
                             headers: { 'x-api-key': keysToTry[ki], 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ model: mdl, prompt: prompt, n: 1, width: 1024, height: 1024 })
+                            body: JSON.stringify({ model: mdl, prompt: prompt, cfg_scale: 5, aspect_ratio: '1/1', seed: 0, steps: 4, negative_prompt: '' })
                         });
                         if (res.status === 401 || res.status === 429) {
                             showToast('NVIDIA key rotated');
@@ -8010,14 +8133,64 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 updateSendButton();
 
                 // Final markdown render (RAF may have done this already, but force it clean)
-                // Extract [IMG: prompt] markers from mainText before rendering
+                // Build ordered parts array: alternating text segments and [IMG: prompt] markers
                 const imgMarkerRe = /\[IMG:([^\]]*)\]/gi;
-                const inlineImagePrompts = [];
-                let mainTextClean = mainText.replace(imgMarkerRe, (_, p) => { inlineImagePrompts.push(p.trim()); return ''; }).trim();
-                liveTextEl.className = 'md-content text-[#2C2B29] leading-relaxed';
-                liveTextEl.innerHTML = formatMarkdown(mainTextClean);
+                const orderedParts = [];
+                {
+                    let _last = 0, _m;
+                    imgMarkerRe.lastIndex = 0;
+                    while ((_m = imgMarkerRe.exec(mainText)) !== null) {
+                        if (_m.index > _last) {
+                            const seg = mainText.slice(_last, _m.index).trim();
+                            if (seg) orderedParts.push({ type: 'text', content: seg });
+                        }
+                        orderedParts.push({ type: 'img', content: _m[1].trim() });
+                        _last = _m.index + _m[0].length;
+                    }
+                    if (_last < mainText.length) {
+                        const rest = mainText.slice(_last).trim();
+                        if (rest) orderedParts.push({ type: 'text', content: rest });
+                    }
+                    if (!orderedParts.length) orderedParts.push({ type: 'text', content: mainText.trim() });
+                }
+                const hasInlineImages = orderedParts.some(p => p.type === 'img');
+                // mainTextClean is the plain text (no IMG markers) used for saving and actions
+                const mainTextClean = orderedParts.filter(p => p.type === 'text').map(p => p.content).join('\n\n');
+
+                // Render text content (and inline image cards in correct order)
                 liveTextEl.style.whiteSpace = '';
-                renderMermaidDiagrams();
+                if (hasInlineImages) {
+                    // Render ordered parts: text segments and image loading cards in their original order
+                    liveTextEl.className = '';
+                    liveTextEl.innerHTML = '';
+                    const _imgLoadingInner = '<div class="bg-white rounded-[20px] border border-[#E5E3DB] px-5 py-5 flex items-center gap-3 max-w-[90%] shadow-sm">' +
+                        '<div class="w-5 h-5 border-2 border-[#D25D38] border-t-transparent rounded-full animate-spin shrink-0"></div>' +
+                        '<span class="text-[13px] text-[#737166]">Generating image…</span></div>';
+                    const _imgCards = [];
+                    for (const part of orderedParts) {
+                        if (part.type === 'text') {
+                            const textDiv = document.createElement('div');
+                            textDiv.className = 'md-content text-[#2C2B29] leading-relaxed mb-2';
+                            textDiv.innerHTML = formatMarkdown(part.content);
+                            liveTextEl.appendChild(textDiv);
+                        } else {
+                            const imgCard = document.createElement('div');
+                            imgCard.className = 'flex w-full justify-start my-2';
+                            imgCard.innerHTML = _imgLoadingInner;
+                            liveTextEl.appendChild(imgCard);
+                            _imgCards.push({ card: imgCard, prompt: part.content });
+                        }
+                    }
+                    renderMermaidDiagrams();
+                    // Start image generation for all cards (async, order preserved in DOM)
+                    for (const { card, prompt } of _imgCards) {
+                        generateImage(prompt, card);
+                    }
+                } else {
+                    liveTextEl.className = 'md-content text-[#2C2B29] leading-relaxed';
+                    liveTextEl.innerHTML = formatMarkdown(mainTextClean);
+                    renderMermaidDiagrams();
+                }
 
                 // Update thinking block to final state
                 if (thinkingText) {
@@ -8066,21 +8239,6 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 wireActionsDiv(actionsDiv, mainTextClean);
                 lucide.createIcons({ nodes: [actionsDiv] });
                 scrollToBottom();
-
-                // Process inline [IMG: prompt] markers from AI response
-                if (inlineImagePrompts.length > 0) {
-                    for (const imgPrompt of inlineImagePrompts) {
-                        const inlineCard = document.createElement('div');
-                        inlineCard.className = 'flex w-full justify-start mt-2';
-                        inlineCard.innerHTML = '<div class="bg-white rounded-[20px] border border-[#E5E3DB] px-5 py-5 flex items-center gap-3 max-w-[90%] shadow-sm">' +
-                            '<div class="w-5 h-5 border-2 border-[#D25D38] border-t-transparent rounded-full animate-spin shrink-0"></div>' +
-                            '<span class="text-[13px] text-[#737166]">Generating image…</span>' +
-                            '</div>';
-                        innerCol.insertBefore(inlineCard, actionsDiv);
-                        scrollToBottom();
-                        generateImage(imgPrompt, inlineCard);
-                    }
-                }
 
                 const aiMsg = { role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries };
                 messages.push(aiMsg);
