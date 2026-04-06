@@ -7416,6 +7416,9 @@
             overlay.addEventListener('touchend', function(e) { const now = Date.now(); if (now - lastTap < 300) { scale=1; translateX=0; translateY=0; applyTransform(); } lastTap = now; });
             // Click overlay background to close (only if not zoomed)
             overlay.addEventListener('click', function(e) { if (e.target === overlay) { overlay.remove(); } });
+            // Keyboard: Escape to close
+            function handleKeydown(e) { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', handleKeydown); } }
+            document.addEventListener('keydown', handleKeydown);
         }
 
         async function generateImage(prompt, cardDiv) {
