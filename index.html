@@ -554,6 +554,7 @@
                                 <option value="nanogpt">NanoGPT</option>
                                 <option value="unify">Unify</option>
                                 <option value="kluster">Kluster.ai</option>
+                                <option value="custom">Custom Endpoint</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
@@ -579,6 +580,21 @@
                             <button onclick="addApiKey()" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
                         </div>
                         <p id="apikey-hint" class="text-[11px] text-[#A3A095] mt-1.5">Get your key at <span class="text-[#D25D38]">aistudio.google.com</span></p>
+                    </div>
+
+                    <!-- Custom Endpoint section (shown only for custom platform) -->
+                    <div id="custom-endpoint-section" class="hidden">
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Endpoint URL</label>
+                        <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Enter the full OpenAI-compatible chat completions URL (e.g. <span class="font-mono text-[#D25D38]">https://api.openai.com/v1/chat/completions</span>).</p>
+                        <input type="text" id="settings-custom-url" placeholder="https://your-api.example.com/v1/chat/completions"
+                            class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono mb-2">
+                        <div class="flex gap-2 items-center">
+                            <label class="text-[12px] text-[#737166]">Auth type:</label>
+                            <select id="settings-custom-auth-type" class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-2 py-1.5 text-[12px] text-[#2C2B29] focus:outline-none">
+                                <option value="bearer">Bearer Token</option>
+                                <option value="none">No Auth</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Divider -->
@@ -1156,6 +1172,43 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Chat Backup & Restore -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Chat Backup &amp; Restore</label>
+                        <p class="text-[12px] text-[#737166] mb-3 leading-relaxed">Backup all your chats to a JSON file, or restore previously backed-up chats on this or any other device.</p>
+                        <div class="flex gap-2">
+                            <button onclick="backupChats()" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E5E3DB] text-[13px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Backup
+                            </button>
+                            <label class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E5E3DB] text-[13px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 3v12"/><path d="m5 10 7-7 7 7"/></svg>
+                                Restore
+                                <input type="file" id="restore-chats-input" accept=".json" style="display:none" onchange="restoreChats(this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Delete All Chats -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Danger Zone</label>
+                        <button onclick="closeSettings();confirmDeleteHistory();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#FDF4F2] border border-[#F8E3DE] text-left transition-colors group">
+                            <div class="w-8 h-8 rounded-lg bg-[#FDF4F2] group-hover:bg-[#FDEAE5] flex items-center justify-center shrink-0 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C5A09A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </div>
+                            <div>
+                                <span class="text-[14px] text-[#D25D38] font-medium block">Delete All Chats</span>
+                                <span class="text-[11px] text-[#A3A095]">Permanently remove all conversations</span>
+                            </div>
+                        </button>
+                    </div>
                 </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] flex gap-3 shrink-0 bg-[#FAF9F6]">
                     <button onclick="confirmResetSettings()" class="px-3 py-2.5 rounded-xl border border-[#E5E3DB] text-[13px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors font-medium shrink-0">Reset</button>
@@ -1438,7 +1491,7 @@
                 <i data-lucide="trash-2" class="w-5 h-5 text-[#D25D38]"></i>
             </div>
             <h3 class="font-serif font-semibold text-[17px] text-[#2C2B29] mb-1.5">Delete chat history?</h3>
-            <p class="text-[13px] text-[#737166] mb-5 leading-relaxed">This will clear all messages in the current conversation. This can't be undone.</p>
+            <p class="text-[13px] text-[#737166] mb-5 leading-relaxed">This will permanently delete <strong>all saved chats</strong> from your history. This can't be undone.</p>
             <div class="flex gap-3">
                 <button onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-xl border border-[#E5E3DB] text-[14px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">Cancel</button>
                 <button onclick="deleteHistory()" class="flex-1 py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Delete</button>
@@ -1877,15 +1930,6 @@
                                     <span class="text-[11px] text-[#A3A095]">Reach the developer</span>
                                 </div>
                             </button>
-                            <button onclick="closePreferencesModal();confirmDeleteHistory();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#FDF4F2] text-left transition-colors group">
-                                <div class="w-8 h-8 rounded-lg bg-[#FDF4F2] group-hover:bg-[#FDEAE5] flex items-center justify-center shrink-0 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C5A09A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                </div>
-                                <div>
-                                    <span class="text-[14px] text-[#D25D38] font-medium block">Delete Chat History</span>
-                                    <span class="text-[11px] text-[#A3A095]">Permanently remove all conversations</span>
-                                </div>
-                            </button>
                         </div>
                     </div>
 
@@ -1915,12 +1959,20 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.5</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.6</span>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Full-Screen Image Viewer 🖼️</strong> — Tap any AI-generated image to open it in a full-screen viewer. Pinch to zoom in/out on mobile, scroll wheel on desktop, drag to pan when zoomed. Double-tap to reset zoom. Zoom controls (+/−) and a download button are shown in the top bar.</li>
+                            <li><strong>Image Model Display 🏷️</strong> — AI-generated image cards now show both the provider name and the exact model used (e.g. Pollinations AI · flux-realism), so you always know which model produced which image.</li>
+                            <li><strong>React &amp; Python Artifact Preview ⚛️</strong> — Artifact Viewer now supports live preview of React/JSX/TSX components (rendered using Babel + React CDN) and Python scripts (executed client-side via Pyodide WebAssembly). Open any React or Python artifact and tap Preview to see it run live.</li>
+                            <li><strong>Enter Key = Newline 💬</strong> — Pressing Enter in the chat input now inserts a newline instead of sending the message. Use the Send button or Shift+Enter to send. This is more natural on mobile keyboards.</li>
+                            <li><strong>Custom Endpoint 🔌</strong> — New LLM platform option: <em>Custom Endpoint</em>. Select it in Settings → Platform to configure any OpenAI-compatible API endpoint with your own URL, API key, and model name. Works with self-hosted models, LM Studio, LocalAI, and any OpenAI-compatible service.</li>
+                            <li><strong>Chat Pinning 📌</strong> — Pin any chat in the sidebar to keep it at the top of your history. Pinned chats stay visible above regular ones and show a pin icon. Tap the pin button on hover to toggle pinning on any chat.</li>
+                            <li><strong>Delete All Chats Fix 🗑️</strong> — "Delete All Chats" now works even when no chat is currently open — previously it showed "Nothing to delete" incorrectly. The button has been moved from Preferences to Settings → App tab for better discoverability.</li>
+                            <li><strong>Chat Backup &amp; Restore 💾</strong> — New in Settings → App tab. Export all your chats to a JSON file for safekeeping, and restore them on any device. Backup preserves all messages, titles, tags, and pinned state.</li>
                             <li><strong>Artifacts 🗂️</strong> — Code blocks are now shown as compact <em>Artifact Cards</em> instead of raw code dumps in chat. Each card shows the filename (e.g. <code>index.html</code>), language, line count, and a 5-line preview. Tap <strong>Open Artifact</strong> to launch the full-screen Artifact Viewer with a <strong>Preview</strong> tab (sandboxed live render for HTML, SVG, JS, CSS, TypeScript) and a <strong>Code</strong> tab (syntax-highlighted source with Copy and Download buttons). Mermaid diagrams also open in the viewer. Fully mobile-first, no split pane.</li>
                             <li><strong>Temp Chat in Header 🕐</strong> — The Temp Chat (clock) button moved from the sidebar to the top header bar, sitting alongside the Search and New Chat (+) buttons as three equal icon-only buttons on the right side of the header. The sidebar top row is now simpler with icon-only New Chat and Search buttons.</li>
                             <li><strong>GLM &amp; Tool-Call Thinking Fix 🧠</strong> — Models like GLM-4.5 that output internal reasoning inside <code>&lt;tool_call&gt;</code> tags now have their reasoning correctly captured and separated into the collapsible "💭 Thought Process" dropdown instead of appearing raw in the response. JSON-format function calls are silently stripped; text-format reasoning is routed to the thinking block.</li>
@@ -2373,6 +2425,12 @@
         let klusterKeyIdx = 0;
         let klusterApiKey = klusterKeys[0] || '';
         let klusterModelId = localStorage.getItem('snoah_kluster_model') || 'klusterai/Meta-Llama-3.1-8B-Instruct-Turbo';
+        // Custom Endpoint — user-configurable OpenAI-compatible endpoint
+        let customEndpointUrl = localStorage.getItem('snoah_custom_url') || '';
+        let customEndpointKeys = _loadKeys('snoah_custom_keys');
+        let customEndpointKeyIdx = 0;
+        let customEndpointApiKey = customEndpointKeys[0] || '';
+        let customModelId = localStorage.getItem('snoah_custom_model') || 'gpt-4o-mini';
         let customInstructions = localStorage.getItem('snoah_instructions') || '';
         // ElevenLabs multi-key TTS — migrate old single key if present
         (function() {
@@ -3272,7 +3330,7 @@
         });
 
         chatInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && e.shiftKey) {
                 e.preventDefault();
                 hideSlashMenu();
                 handleSendClick();
@@ -3489,7 +3547,8 @@
             const words = firstUserText.trim().split(/\s+/);
             const title = words.slice(0, 2).join(' ') + (words.length > 2 ? '...' : '');
             const existingTag = idx >= 0 ? allChats[idx].tag : null;
-            const entry = { id: currentChatId, title, updatedAt: Date.now(), messages: saveable, tag: existingTag };
+            const existingPinned = idx >= 0 ? allChats[idx].pinned : false;
+            const entry = { id: currentChatId, title, updatedAt: Date.now(), messages: saveable, tag: existingTag, pinned: existingPinned };
             if (idx >= 0) allChats[idx] = entry;
             else allChats.unshift(entry);
             // Keep only 30 chats to avoid localStorage overflow
@@ -3519,15 +3578,20 @@
                 list.innerHTML = '<p class="text-[12px] text-[#A3A095] px-2 py-1">' + (activeTagFilter ? 'No chats with this tag' : 'No chats yet') + '</p>';
                 return;
             }
-            const showAll = chatHistoryExpanded || filtered.length <= CHAT_HISTORY_PREVIEW;
-            const visible = showAll ? filtered : filtered.slice(0, CHAT_HISTORY_PREVIEW);
+            const pinned = filtered.filter(c => c.pinned);
+            const unpinned = filtered.filter(c => !c.pinned);
+            const orderedFiltered = [...pinned, ...unpinned];
+            const showAll = chatHistoryExpanded || orderedFiltered.length <= CHAT_HISTORY_PREVIEW;
+            const pinnedCount = pinned.length;
+            // When collapsed, always show pinned first, then fill remaining slots with unpinned
+            const visible = showAll ? orderedFiltered : orderedFiltered.slice(0, CHAT_HISTORY_PREVIEW);
             const chatItemHTML = (chat) => {
                 const isActive = chat.id === currentChatId;
                 const date = new Date(chat.updatedAt);
                 const dateStr = date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
                 return `<div class="flex items-center gap-1 group/item">
                     <button onclick="loadChat('${chat.id}')" class="flex-1 flex items-start gap-2.5 px-3 py-2 rounded-lg text-left transition-colors ${isActive ? 'bg-[#FDF4F2] border border-[#F8E3DE]' : 'hover:bg-[#F2F0E9]'}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5 ${isActive ? 'text-[#D25D38]' : 'text-[#8C897D]'}"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        ${chat.pinned ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="#D25D38" stroke="#D25D38" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-1"><path d="M12 2L9 9H2l5.5 4-2 7L12 16l6.5 4-2-7L22 9h-7z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5 ' + (isActive ? 'text-[#D25D38]' : 'text-[#8C897D]') + '"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'}
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-1.5">
                                 <p class="text-[13px] ${isActive ? 'text-[#D25D38] font-semibold' : 'text-[#5B5951] font-medium'} truncate">${escapeHTML(chat.title)}</p>
@@ -3536,14 +3600,19 @@
                             <p class="text-[10px] text-[#A3A095] mt-0.5">${dateStr} · ${chat.messages.length} msgs</p>
                         </div>
                     </button>
-                    <button onclick="deleteSingleChat('${chat.id}')" class="opacity-0 group-hover/item:opacity-100 p-1.5 rounded-lg text-[#C5C3BB] hover:text-[#D25D38] hover:bg-[#FDF4F2] transition-all shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>
+                    <div class="flex opacity-0 group-hover/item:opacity-100 transition-all">
+                        <button onclick="toggleChatPin('${chat.id}')" class="p-1.5 rounded-lg text-[#C5C3BB] hover:text-[#D25D38] hover:bg-[#FDF4F2] transition-all shrink-0" title="${chat.pinned ? 'Unpin' : 'Pin'}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="${chat.pinned ? '#D25D38' : 'none'}" stroke="${chat.pinned ? '#D25D38' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
+                        </button>
+                        <button onclick="deleteSingleChat('${chat.id}')" class="p-1.5 rounded-lg text-[#C5C3BB] hover:text-[#D25D38] hover:bg-[#FDF4F2] transition-all shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
                 </div>`;
             };
             let html = visible.map(chatItemHTML).join('');
-            if (filtered.length > CHAT_HISTORY_PREVIEW) {
-                const remaining = filtered.length - CHAT_HISTORY_PREVIEW;
+            if (orderedFiltered.length > CHAT_HISTORY_PREVIEW) {
+                const remaining = orderedFiltered.length - CHAT_HISTORY_PREVIEW;
                 if (!showAll) {
                     html += `<button onclick="toggleChatHistoryExpand()" class="w-full flex items-center justify-center gap-1.5 mt-1 px-3 py-2 rounded-lg text-[12px] text-[#8C897D] hover:text-[#D25D38] hover:bg-[#F2F0E9] transition-colors font-medium">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -3599,6 +3668,15 @@
             renderChatHistoryList();
         }
 
+        function toggleChatPin(chatId) {
+            const chat = allChats.find(c => c.id === chatId);
+            if (!chat) return;
+            chat.pinned = !chat.pinned;
+            try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(e) {}
+            renderChatHistoryList();
+            showToast(chat.pinned ? '📌 Chat pinned' : 'Chat unpinned');
+        }
+
         function startNewChat() {
             saveCurrentChat();
             currentChatId = generateChatId();
@@ -3618,8 +3696,8 @@
         function updateModelLabels() {
             const badge = document.getElementById('header-model-badge');
             const sidebarLabel = document.getElementById('sidebar-model-label');
-            const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : platform === 'together' ? 'Together AI' : platform === 'mistral' ? 'Mistral AI' : platform === 'nvidia' ? 'NVIDIA' : platform === 'huggingface' ? 'Hugging Face' : platform === 'githubmodels' ? 'GitHub Models' : platform === 'claude' ? 'Claude' : platform === 'copilot' ? 'Copilot' : platform === 'gais' ? 'Google AI Studio' : platform === 'ollama' ? 'Ollama' : platform === 'cohere' ? 'Cohere' : platform === 'puter' ? 'Puter.js' : platform === 'deepinfra' ? 'DeepInfra' : platform === 'cerebras' ? 'Cerebras AI' : platform === 'sambanova' ? 'SambaNova' : platform === 'fireworks' ? 'Fireworks AI' : platform === 'xai' ? 'xAI (Grok)' : platform === 'perplexity' ? 'Perplexity' : platform === 'nanogpt' ? 'NanoGPT' : platform === 'unify' ? 'Unify' : platform === 'kluster' ? 'Kluster.ai' : 'Gemini';
-            const activeModel = platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'gais' ? gaisModelId : platform === 'ollama' ? ollamaModelId : platform === 'cohere' ? cohereModelId : platform === 'puter' ? puterModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : platform === 'xai' ? xaiModelId : platform === 'perplexity' ? perplexityModelId : platform === 'nanogpt' ? nanogptModelId : platform === 'unify' ? unifyModelId : platform === 'kluster' ? klusterModelId : modelId;
+            const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : platform === 'together' ? 'Together AI' : platform === 'mistral' ? 'Mistral AI' : platform === 'nvidia' ? 'NVIDIA' : platform === 'huggingface' ? 'Hugging Face' : platform === 'githubmodels' ? 'GitHub Models' : platform === 'claude' ? 'Claude' : platform === 'copilot' ? 'Copilot' : platform === 'gais' ? 'Google AI Studio' : platform === 'ollama' ? 'Ollama' : platform === 'cohere' ? 'Cohere' : platform === 'puter' ? 'Puter.js' : platform === 'deepinfra' ? 'DeepInfra' : platform === 'cerebras' ? 'Cerebras AI' : platform === 'sambanova' ? 'SambaNova' : platform === 'fireworks' ? 'Fireworks AI' : platform === 'xai' ? 'xAI (Grok)' : platform === 'perplexity' ? 'Perplexity' : platform === 'nanogpt' ? 'NanoGPT' : platform === 'unify' ? 'Unify' : platform === 'kluster' ? 'Kluster.ai' : platform === 'custom' ? 'Custom Endpoint' : 'Gemini';
+            const activeModel = platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'gais' ? gaisModelId : platform === 'ollama' ? ollamaModelId : platform === 'cohere' ? cohereModelId : platform === 'puter' ? puterModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : platform === 'xai' ? xaiModelId : platform === 'perplexity' ? perplexityModelId : platform === 'nanogpt' ? nanogptModelId : platform === 'unify' ? unifyModelId : platform === 'kluster' ? klusterModelId : platform === 'custom' ? customModelId : modelId;
             if (badge) badge.textContent = 'NOVAH GEM';
             if (sidebarLabel) sidebarLabel.textContent = platLabel + ' · ' + activeModel;
         }
@@ -3673,6 +3751,8 @@
                 document.getElementById('settings-model').value = unifyModelId;
             } else if (platform === 'kluster') {
                 document.getElementById('settings-model').value = klusterModelId;
+            } else if (platform === 'custom') {
+                document.getElementById('settings-model').value = customModelId;
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
@@ -3917,6 +3997,12 @@
                 if (newModel) klusterModelId = newModel;
                 localStorage.setItem('snoah_kluster_model', klusterModelId);
                 localStorage.setItem('snoah_kluster_keys', JSON.stringify(klusterKeys));
+            } else if (platform === 'custom') {
+                if (newModel) customModelId = newModel;
+                localStorage.setItem('snoah_custom_model', customModelId);
+                localStorage.setItem('snoah_custom_keys', JSON.stringify(customEndpointKeys));
+                const urlInput = document.getElementById('settings-custom-url');
+                if (urlInput && urlInput.value.trim()) { customEndpointUrl = urlInput.value.trim(); localStorage.setItem('snoah_custom_url', customEndpointUrl); }
             } else {
                 if (newModel) modelId = newModel;
                 localStorage.setItem('snoah_model', modelId);
@@ -4087,6 +4173,8 @@
                 document.getElementById('settings-model').value = unifyModelId;
             } else if (p === 'kluster') {
                 document.getElementById('settings-model').value = klusterModelId;
+            } else if (p === 'custom') {
+                document.getElementById('settings-model').value = customModelId;
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
@@ -4117,6 +4205,7 @@
             const isNGPT = platform === 'nanogpt';
             const isUnify = platform === 'unify';
             const isKluster = platform === 'kluster';
+            const isCUSTOM = platform === 'custom';
             const noWeb = false; // Web uses Gemini when on non-Gemini platform
             const hint = document.getElementById('apikey-hint');
             const mhint = document.getElementById('model-hint');
@@ -4134,7 +4223,7 @@
                     btnAgent.style.pointerEvents = '';
                 }
             }
-            if (lbl) lbl.textContent = isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : isTG ? 'Together AI API Key' : isMT ? 'Mistral AI API Key' : isNV ? 'NVIDIA API Key' : isHF ? 'Hugging Face Token' : isGH ? 'GitHub Token' : isCL ? 'Anthropic API Key' : isCO ? 'GitHub/Azure Token' : isGA ? 'Google AI Studio Key' : isOL ? 'Ollama (no key needed)' : isCR ? 'Cohere API Key' : isPT ? 'Puter.js (no key needed)' : isDI ? 'DeepInfra API Key' : isCB ? 'Cerebras API Key' : isSN ? 'SambaNova API Key' : isFW ? 'Fireworks API Key' : isXAI ? 'xAI API Key' : isPPX ? 'Perplexity API Key' : isNGPT ? 'NanoGPT API Key' : isUnify ? 'Unify API Key' : isKluster ? 'Kluster.ai API Key' : 'Gemini API Key';
+            if (lbl) lbl.textContent = isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : isTG ? 'Together AI API Key' : isMT ? 'Mistral AI API Key' : isNV ? 'NVIDIA API Key' : isHF ? 'Hugging Face Token' : isGH ? 'GitHub Token' : isCL ? 'Anthropic API Key' : isCO ? 'GitHub/Azure Token' : isGA ? 'Google AI Studio Key' : isOL ? 'Ollama (no key needed)' : isCR ? 'Cohere API Key' : isPT ? 'Puter.js (no key needed)' : isDI ? 'DeepInfra API Key' : isCB ? 'Cerebras API Key' : isSN ? 'SambaNova API Key' : isFW ? 'Fireworks API Key' : isXAI ? 'xAI API Key' : isPPX ? 'Perplexity API Key' : isNGPT ? 'NanoGPT API Key' : isUnify ? 'Unify API Key' : isKluster ? 'Kluster.ai API Key' : isCUSTOM ? 'Custom Endpoint API Key (optional)' : 'Gemini API Key';
             if (hint) hint.innerHTML = isOR
                 ? 'Get your key at <a href="https://openrouter.ai/keys" target="_blank" class="underline">openrouter.ai/keys</a>'
                 : isGQ
@@ -4179,7 +4268,12 @@
                 ? 'Get your key at <a href="https://app.unify.ai/api-keys" target="_blank" class="underline">app.unify.ai/api-keys</a>'
                 : isKluster
                 ? 'Get your key at <a href="https://kluster.ai/api-keys" target="_blank" class="underline">kluster.ai/api-keys</a>'
+                : isCUSTOM
+                ? 'Enter your custom endpoint API key above (leave blank if no auth required)'
                 : 'Get your key at <a href="https://aistudio.google.com" target="_blank" class="underline">aistudio.google.com</a>';
+            // Show/hide custom endpoint section
+            const customSection = document.getElementById('custom-endpoint-section');
+            if (customSection) { customSection.style.display = isCUSTOM ? '' : 'none'; if (isCUSTOM && customEndpointUrl) { const urlInput = document.getElementById('settings-custom-url'); if (urlInput) urlInput.value = customEndpointUrl; } }
             if (mhint) mhint.innerHTML = isOR
                 ? 'Default: <span class="font-mono text-[#5B5951]">z-ai/glm-4.5-air:free</span>'
                 : isGQ
@@ -4224,6 +4318,8 @@
                 ? 'Default: <span class="font-mono text-[#5B5951]">llama-3.1-8b-instruct@fireworks-ai</span> · format: model@provider'
                 : isKluster
                 ? 'Default: <span class="font-mono text-[#5B5951]">klusterai/Meta-Llama-3.1-8B-Instruct-Turbo</span>'
+                : isCUSTOM
+                ? 'Enter the model name your endpoint expects (e.g. <span class="font-mono text-[#5B5951]">gpt-4o</span>, <span class="font-mono text-[#5B5951]">llama-3.3-70b</span>)'
                 : 'Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> · <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span>';
         }
 
@@ -4480,8 +4576,8 @@
         function renderKeysList() {
             const list = document.getElementById('keys-list');
             if (!list) return;
-            const keys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : platform === 'claude' ? claudeKeys : platform === 'copilot' ? copilotKeys : platform === 'gais' ? gaisKeys : platform === 'cohere' ? cohereKeys : platform === 'deepinfra' ? deepinfraKeys : platform === 'cerebras' ? cerebrasKeys : platform === 'sambanova' ? sambanovaKeys : platform === 'fireworks' ? fireworksKeys : platform === 'xai' ? xaiKeys : platform === 'perplexity' ? perplexityKeys : platform === 'nanogpt' ? nanogptKeys : platform === 'unify' ? unifyKeys : platform === 'kluster' ? klusterKeys : geminiKeys;
-            const activeIdx = platform === 'openrouter' ? orKeyIdx : platform === 'groq' ? groqKeyIdx : platform === 'together' ? togetherKeyIdx : platform === 'mistral' ? mistralKeyIdx : platform === 'nvidia' ? nvidiaKeyIdx : platform === 'huggingface' ? hfKeyIdx : platform === 'githubmodels' ? ghKeyIdx : platform === 'claude' ? claudeKeyIdx : platform === 'copilot' ? copilotKeyIdx : platform === 'gais' ? gaisKeyIdx : platform === 'cohere' ? cohereKeyIdx : platform === 'deepinfra' ? deepinfraKeyIdx : platform === 'cerebras' ? cerebrasKeyIdx : platform === 'sambanova' ? sambanovaKeyIdx : platform === 'fireworks' ? fireworksKeyIdx : platform === 'xai' ? xaiKeyIdx : platform === 'perplexity' ? perplexityKeyIdx : platform === 'nanogpt' ? nanogptKeyIdx : platform === 'unify' ? unifyKeyIdx : platform === 'kluster' ? klusterKeyIdx : geminiKeyIdx;
+            const keys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : platform === 'claude' ? claudeKeys : platform === 'copilot' ? copilotKeys : platform === 'gais' ? gaisKeys : platform === 'cohere' ? cohereKeys : platform === 'deepinfra' ? deepinfraKeys : platform === 'cerebras' ? cerebrasKeys : platform === 'sambanova' ? sambanovaKeys : platform === 'fireworks' ? fireworksKeys : platform === 'xai' ? xaiKeys : platform === 'perplexity' ? perplexityKeys : platform === 'nanogpt' ? nanogptKeys : platform === 'unify' ? unifyKeys : platform === 'kluster' ? klusterKeys : platform === 'custom' ? customEndpointKeys : geminiKeys;
+            const activeIdx = platform === 'openrouter' ? orKeyIdx : platform === 'groq' ? groqKeyIdx : platform === 'together' ? togetherKeyIdx : platform === 'mistral' ? mistralKeyIdx : platform === 'nvidia' ? nvidiaKeyIdx : platform === 'huggingface' ? hfKeyIdx : platform === 'githubmodels' ? ghKeyIdx : platform === 'claude' ? claudeKeyIdx : platform === 'copilot' ? copilotKeyIdx : platform === 'gais' ? gaisKeyIdx : platform === 'cohere' ? cohereKeyIdx : platform === 'deepinfra' ? deepinfraKeyIdx : platform === 'cerebras' ? cerebrasKeyIdx : platform === 'sambanova' ? sambanovaKeyIdx : platform === 'fireworks' ? fireworksKeyIdx : platform === 'xai' ? xaiKeyIdx : platform === 'perplexity' ? perplexityKeyIdx : platform === 'nanogpt' ? nanogptKeyIdx : platform === 'unify' ? unifyKeyIdx : platform === 'kluster' ? klusterKeyIdx : platform === 'custom' ? customEndpointKeyIdx : geminiKeyIdx;
             const validKeys = keys.filter(k => typeof k === 'string' && k.length > 0);
             if (!validKeys.length) { list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
             list.innerHTML = validKeys.map((k, i) =>
@@ -4499,7 +4595,7 @@
             const key = input.value.trim();
             if (!key) { showToast('Paste a key first'); return; }
             // Enforce single-key limit when cookies not accepted
-            const currentKeys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : platform === 'claude' ? claudeKeys : platform === 'copilot' ? copilotKeys : platform === 'gais' ? gaisKeys : platform === 'cohere' ? cohereKeys : platform === 'deepinfra' ? deepinfraKeys : platform === 'cerebras' ? cerebrasKeys : platform === 'sambanova' ? sambanovaKeys : platform === 'fireworks' ? fireworksKeys : platform === 'xai' ? xaiKeys : platform === 'perplexity' ? perplexityKeys : platform === 'nanogpt' ? nanogptKeys : platform === 'unify' ? unifyKeys : platform === 'kluster' ? klusterKeys : geminiKeys;
+            const currentKeys = platform === 'openrouter' ? orKeys : platform === 'groq' ? groqKeys : platform === 'together' ? togetherKeys : platform === 'mistral' ? mistralKeys : platform === 'nvidia' ? nvidiaKeys : platform === 'huggingface' ? hfKeys : platform === 'githubmodels' ? ghKeys : platform === 'claude' ? claudeKeys : platform === 'copilot' ? copilotKeys : platform === 'gais' ? gaisKeys : platform === 'cohere' ? cohereKeys : platform === 'deepinfra' ? deepinfraKeys : platform === 'cerebras' ? cerebrasKeys : platform === 'sambanova' ? sambanovaKeys : platform === 'fireworks' ? fireworksKeys : platform === 'xai' ? xaiKeys : platform === 'perplexity' ? perplexityKeys : platform === 'nanogpt' ? nanogptKeys : platform === 'unify' ? unifyKeys : platform === 'kluster' ? klusterKeys : platform === 'custom' ? customEndpointKeys : geminiKeys;
             if (cookiesAccepted !== 'true' && currentKeys.length >= 1) {
                 showToast('Accept cookies to save multiple API keys');
                 return;
@@ -4564,13 +4660,16 @@
             } else if (platform === 'kluster') {
                 if (klusterKeys.includes(key)) { showToast('Key already added'); return; }
                 klusterKeys.push(key); localStorage.setItem('snoah_kluster_keys', JSON.stringify(klusterKeys)); klusterApiKey = klusterKeys[klusterKeyIdx];
+            } else if (platform === 'custom') {
+                if (customEndpointKeys.includes(key)) { showToast('Key already added'); return; }
+                customEndpointKeys.push(key); localStorage.setItem('snoah_custom_keys', JSON.stringify(customEndpointKeys)); customEndpointApiKey = customEndpointKeys[customEndpointKeyIdx];
             } else {
                 if (geminiKeys.includes(key)) { showToast('Key already added'); return; }
                 geminiKeys.push(key); localStorage.setItem('snoah_gemini_keys', JSON.stringify(geminiKeys)); apiKey = geminiKeys[geminiKeyIdx];
             }
             input.value = '';
             renderKeysList();
-            const kCount = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : platform === 'nvidia' ? nvidiaKeys.length : platform === 'huggingface' ? hfKeys.length : platform === 'githubmodels' ? ghKeys.length : platform === 'claude' ? claudeKeys.length : platform === 'copilot' ? copilotKeys.length : platform === 'gais' ? gaisKeys.length : platform === 'cohere' ? cohereKeys.length : platform === 'deepinfra' ? deepinfraKeys.length : platform === 'cerebras' ? cerebrasKeys.length : platform === 'sambanova' ? sambanovaKeys.length : platform === 'fireworks' ? fireworksKeys.length : platform === 'xai' ? xaiKeys.length : platform === 'perplexity' ? perplexityKeys.length : platform === 'nanogpt' ? nanogptKeys.length : platform === 'unify' ? unifyKeys.length : platform === 'kluster' ? klusterKeys.length : geminiKeys.length;
+            const kCount = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : platform === 'nvidia' ? nvidiaKeys.length : platform === 'huggingface' ? hfKeys.length : platform === 'githubmodels' ? ghKeys.length : platform === 'claude' ? claudeKeys.length : platform === 'copilot' ? copilotKeys.length : platform === 'gais' ? gaisKeys.length : platform === 'cohere' ? cohereKeys.length : platform === 'deepinfra' ? deepinfraKeys.length : platform === 'cerebras' ? cerebrasKeys.length : platform === 'sambanova' ? sambanovaKeys.length : platform === 'fireworks' ? fireworksKeys.length : platform === 'xai' ? xaiKeys.length : platform === 'perplexity' ? perplexityKeys.length : platform === 'nanogpt' ? nanogptKeys.length : platform === 'unify' ? unifyKeys.length : platform === 'kluster' ? klusterKeys.length : platform === 'custom' ? customEndpointKeys.length : geminiKeys.length;
             showToast('Key added ✓ (' + kCount + ' total)');
         }
 
@@ -4655,6 +4754,10 @@
                 if (klusterKeys.length <= 1) { showToast('Need at least 1 key'); return; }
                 klusterKeys.splice(idx, 1); klusterKeyIdx = Math.min(klusterKeyIdx, klusterKeys.length-1); klusterApiKey = klusterKeys[klusterKeyIdx];
                 localStorage.setItem('snoah_kluster_keys', JSON.stringify(klusterKeys));
+            } else if (platform === 'custom') {
+                if (customEndpointKeys.length <= 1) { showToast('Need at least 1 key'); return; }
+                customEndpointKeys.splice(idx, 1); customEndpointKeyIdx = Math.min(customEndpointKeyIdx, customEndpointKeys.length-1); customEndpointApiKey = customEndpointKeys[customEndpointKeyIdx];
+                localStorage.setItem('snoah_custom_keys', JSON.stringify(customEndpointKeys));
             } else {
                 if (geminiKeys.length <= 1) { showToast('Need at least 1 key'); return; }
                 geminiKeys.splice(idx, 1); geminiKeyIdx = Math.min(geminiKeyIdx, geminiKeys.length-1); apiKey = geminiKeys[geminiKeyIdx];
@@ -4724,6 +4827,9 @@
             } else if (platform === 'kluster') {
                 if (klusterKeys.length <= 1) return false;
                 klusterKeyIdx = (klusterKeyIdx + 1) % klusterKeys.length; klusterApiKey = klusterKeys[klusterKeyIdx]; return true;
+            } else if (platform === 'custom') {
+                if (customEndpointKeys.length <= 1) return false;
+                customEndpointKeyIdx = (customEndpointKeyIdx + 1) % customEndpointKeys.length; customEndpointApiKey = customEndpointKeys[customEndpointKeyIdx]; return true;
             } else {
                 if (geminiKeys.length <= 1) return false;
                 geminiKeyIdx = (geminiKeyIdx + 1) % geminiKeys.length; apiKey = geminiKeys[geminiKeyIdx]; return true;
@@ -5164,7 +5270,7 @@
 
         // --- Delete Chat History ---
         function confirmDeleteHistory() {
-            if (messages.length === 0) { showToast('Nothing to delete'); return; }
+            if (allChats.length === 0 && messages.length === 0) { showToast('Nothing to delete'); return; }
             document.getElementById('delete-modal').classList.remove('hidden');
             lucide.createIcons();
             if (isSidebarOpen) toggleSidebar();
@@ -5183,6 +5289,38 @@
             renderChatHistoryList();
             closeDeleteModal();
             showToast('All chat history deleted');
+        }
+
+        function backupChats() {
+            if (allChats.length === 0) { showToast('No chats to backup'); return; }
+            const data = { version: 1, app: 'SnoahAI', exported: new Date().toISOString(), chats: allChats };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'snoah-chats-' + new Date().toISOString().slice(0,10) + '.json';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✅ Chat backup downloaded');
+        }
+        function restoreChats(inputEl) {
+            const file = inputEl.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const raw = JSON.parse(e.target.result);
+                    const imported = Array.isArray(raw) ? raw : (Array.isArray(raw.chats) ? raw.chats : []);
+                    if (imported.length === 0) { showToast('No valid chats found in file'); return; }
+                    const existingIds = new Set(allChats.map(c => c.id));
+                    const newChats = imported.filter(c => c && c.id && !existingIds.has(c.id));
+                    allChats = [...allChats, ...newChats].slice(0, 50);
+                    try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(err) {}
+                    renderChatHistoryList();
+                    showToast('✅ Restored ' + newChats.length + ' chat(s)');
+                } catch(err) { showToast('❌ Invalid backup file'); }
+                inputEl.value = '';
+            };
+            reader.readAsText(file);
         }
 
         // --- Export Chat ---
@@ -6374,7 +6512,7 @@
             try { code = decodeURIComponent(escape(atob(b64))); } catch(e) { return; }
             const filename = _getArtifactFilename(lang);
             const langLower = (lang || 'text').toLowerCase();
-            const renderableLangs = ['html', 'svg', 'javascript', 'js', 'jsx', 'tsx', 'typescript', 'ts', 'css'];
+            const renderableLangs = ['html', 'svg', 'javascript', 'js', 'jsx', 'tsx', 'typescript', 'ts', 'css', 'react', 'python', 'py'];
             const canPreview = renderableLangs.includes(langLower) || langLower === 'mermaid';
             // Remove existing overlay
             const existing = document.getElementById('artifact-viewer-overlay');
@@ -6389,8 +6527,16 @@
             let iframeSrc = '';
             if (langLower === 'html') { iframeSrc = code; }
             else if (langLower === 'svg') { iframeSrc = '<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}</style></head><body>' + code + '</body></html>'; }
-            else if (['javascript','js','jsx','tsx','typescript','ts'].includes(langLower)) { iframeSrc = '<!DOCTYPE html><html><head><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}</style></head><body><script>' + code.replace(/<\/script>/gi,'<\\/script>') + '<\/script></body></html>'; }
+            else if (['jsx', 'tsx', 'react'].includes(langLower)) {
+                const reactCode = code.replace(/<\/script>/gi,'<\\/script>');
+                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}#root{min-height:50px}</style></head><body><div id="root"></div><script src="https://unpkg.com/react@18/umd/react.development.js"><\/script><script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script><script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script><script type="text/babel" data-presets="react">' + reactCode + ';(function(){try{const el=document.getElementById("root");if(typeof App!=="undefined"){ReactDOM.createRoot(el).render(React.createElement(App));}else{const comps=Object.keys(window).filter(k=>typeof window[k]==="function"&&/^[A-Z]/.test(k)&&k!=="React"&&k!=="ReactDOM"&&k!=="Babel");if(comps.length)ReactDOM.createRoot(el).render(React.createElement(window[comps[0]]));}}catch(e){document.getElementById("root").innerHTML=\'<pre style="color:red;font-size:12px;white-space:pre-wrap">\'+e.message+\'<\/pre>\';}})();<\/script></body></html>';
+            }
+            else if (['javascript','js','typescript','ts'].includes(langLower)) { iframeSrc = '<!DOCTYPE html><html><head><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}</style></head><body><script>' + code.replace(/<\/script>/gi,'<\\/script>') + '<\/script></body></html>'; }
             else if (langLower === 'css') { iframeSrc = '<!DOCTYPE html><html><head><style>' + code + '</style></head><body><p style="font-family:system-ui;padding:1rem;color:#888">CSS Preview — styles are applied above.</p></body></html>'; }
+            else if (langLower === 'python' || langLower === 'py') {
+                const pyCode = JSON.stringify(code);
+                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff;margin:0}#output{white-space:pre-wrap;font-family:monospace;font-size:13px;line-height:1.5;color:#2C2B29}#status{font-size:12px;color:#A3A095;margin-bottom:8px}</style></head><body><div id="status">⏳ Loading Python runtime (Pyodide)…</div><div id="output"></div><script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"><\/script><script>async function main(){const status=document.getElementById("status");const output=document.getElementById("output");try{const pyodide=await loadPyodide({stdout:(t)=>{output.textContent+=t+"\\n";},stderr:(t)=>{output.innerHTML+=\'<span style="color:#D25D38">\'+t+\'<\/span>\\n\';}});status.textContent="✅ Python ready";await pyodide.runPythonAsync(' + pyCode + ');}catch(e){document.getElementById("status").textContent="❌ Error";output.innerHTML=\'<span style="color:#D25D38">\'+e.message+\'<\/span>\';}}main();<\/script></body></html>';
+            }
             overlay.innerHTML =
                 // Header bar
                 '<div class="flex items-center justify-between px-4 py-3 border-b border-[#E5E3DB] bg-[#FAF9F6] shrink-0" style="gap:8px">' +
@@ -7181,19 +7327,26 @@
             return null;
         }
 
-        function buildImageCard(src, prompt, provider) {
+        function buildImageCard(src, prompt, provider, model) {
             const safePrompt = escapeHTML(prompt);
             const safeProvider = escapeHTML(provider);
+            const safeModel = model ? escapeHTML(model) : '';
+            const srcEsc = src.replace(/'/g, "\\'");
             return '<div class="bg-white rounded-[20px] border border-[#E5E3DB] overflow-hidden shadow-sm max-w-full">' +
                 '<div class="relative">' +
-                '<img src="' + src + '" alt="' + safePrompt + '" class="w-full rounded-t-[20px] object-cover" style="max-height:400px;display:block;" crossorigin="anonymous">' +
+                '<img src="' + src + '" alt="' + safePrompt + '" class="w-full rounded-t-[20px] object-cover" style="max-height:400px;display:block;cursor:pointer;" crossorigin="anonymous" onclick="openImageFullscreen(\'' + srcEsc + '\',\'' + safePrompt.replace(/'/g,"\\'") + '\')">' +
                 '<a download="snoah-image.png" href="' + src + '" class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-sm hover:bg-white transition-colors" title="Download image">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B5951" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
                 '</a>' +
+                '<div class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1" title="Tap to view fullscreen">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>' +
+                '<span class="text-[9px] text-white font-semibold">Tap to expand</span>' +
+                '</div>' +
                 '</div>' +
                 '<div class="px-3 py-2 flex items-center gap-2">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
                 '<span class="text-[11px] font-semibold text-[#A3A095] uppercase tracking-widest">' + safeProvider + '</span>' +
+                (safeModel ? '<span class="text-[10px] text-[#C5C3BB]">· ' + safeModel + '</span>' : '') +
                 '</div>' +
                 '</div>';
         }
@@ -7207,6 +7360,65 @@
             };
             const msg = msgs[platform] || '🖼️ Pollinations image generation failed. Check your internet connection or add a Pollinations API key in Settings → Image Generation.';
             return '<div class="bg-[#FDF4F2] border border-[#F8E3DE] rounded-[20px] px-4 py-4 text-[14px] text-[#D25D38] max-w-full">' + msg + '</div>';
+        }
+
+        function openImageFullscreen(src, caption) {
+            const existing = document.getElementById('img-fullscreen-overlay');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'img-fullscreen-overlay';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none;overflow:hidden';
+            let scale = 1, lastTouchDist = null, translateX = 0, translateY = 0, lastTouchX = 0, lastTouchY = 0, isPanning = false;
+            overlay.innerHTML =
+                '<div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;z-index:2">' +
+                    '<button onclick="document.getElementById(\'img-fullscreen-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;">&times;</button>' +
+                    '<div style="display:flex;gap:8px">' +
+                        '<button id="fs-zoom-in" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:20px;font-weight:300;">+</button>' +
+                        '<button id="fs-zoom-out" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:20px;font-weight:300;">−</button>' +
+                        '<a download="snoah-image.png" href="' + src + '" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+                        '</a>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="flex:1;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden">' +
+                    '<img id="fs-img" src="' + src + '" style="max-width:100%;max-height:80vh;object-fit:contain;transition:transform 0.1s;user-select:none;-webkit-user-drag:none;" crossorigin="anonymous">' +
+                '</div>' +
+                (caption ? '<div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,0.7));text-align:center;"><p style="color:rgba(255,255,255,0.8);font-size:12px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + caption + '</p></div>' : '');
+            document.body.appendChild(overlay);
+            const img = overlay.querySelector('#fs-img');
+            function applyTransform() { img.style.transform = 'translate(' + translateX + 'px,' + translateY + 'px) scale(' + scale + ')'; }
+            overlay.querySelector('#fs-zoom-in').addEventListener('click', function(e) { e.stopPropagation(); scale = Math.min(scale * 1.25, 5); applyTransform(); });
+            overlay.querySelector('#fs-zoom-out').addEventListener('click', function(e) { e.stopPropagation(); scale = Math.max(scale * 0.8, 0.5); if(scale <= 1) { translateX=0; translateY=0; } applyTransform(); });
+            overlay.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 1) { isPanning = true; lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY; }
+                else if (e.touches.length === 2) { isPanning = false; const dx = e.touches[0].clientX - e.touches[1].clientX; const dy = e.touches[0].clientY - e.touches[1].clientY; lastTouchDist = Math.sqrt(dx*dx + dy*dy); }
+            }, { passive: true });
+            overlay.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                if (e.touches.length === 2) {
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (lastTouchDist) { scale = Math.min(Math.max(scale * (dist / lastTouchDist), 0.5), 5); applyTransform(); }
+                    lastTouchDist = dist;
+                } else if (e.touches.length === 1 && isPanning && scale > 1) {
+                    translateX += e.touches[0].clientX - lastTouchX;
+                    translateY += e.touches[0].clientY - lastTouchY;
+                    lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
+                    applyTransform();
+                }
+            }, { passive: false });
+            overlay.addEventListener('touchend', function(e) { if (e.touches.length < 2) lastTouchDist = null; if (e.touches.length === 0) isPanning = false; });
+            // Wheel zoom on desktop
+            overlay.addEventListener('wheel', function(e) { e.preventDefault(); scale = Math.min(Math.max(scale * (e.deltaY < 0 ? 1.1 : 0.9), 0.5), 5); if(scale <= 1) { translateX=0; translateY=0; } applyTransform(); }, { passive: false });
+            // Double-tap to reset
+            let lastTap = 0;
+            overlay.addEventListener('touchend', function(e) { const now = Date.now(); if (now - lastTap < 300) { scale=1; translateX=0; translateY=0; applyTransform(); } lastTap = now; });
+            // Click overlay background to close (only if not zoomed)
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) { overlay.remove(); } });
+            // Keyboard: Escape to close
+            function handleKeydown(e) { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', handleKeydown); } }
+            document.addEventListener('keydown', handleKeydown);
         }
 
         async function generateImage(prompt, cardDiv) {
@@ -7355,7 +7567,8 @@
             }
 
             if (imgSrc) {
-                cardDiv.innerHTML = buildImageCard(imgSrc, prompt, provider);
+                const _imgModel = usePlatform === 'pollinations' ? (pollinationsModel || 'flux') : usePlatform === 'gemini' ? (imagenModel || 'imagen-3.0-generate-002') : usePlatform === 'nvidia_img' ? (nvidiaImageModel || 'flux-schnell') : usePlatform === 'together_img' ? (togetherImageModel || 'FLUX.1-schnell-Free') : usePlatform === 'hf_img' ? (hfImageModel || 'FLUX.1-schnell') : '';
+                cardDiv.innerHTML = buildImageCard(imgSrc, prompt, provider, _imgModel);
             } else {
                 cardDiv.innerHTML = buildImageErrorCard(usePlatform);
             }
@@ -7418,11 +7631,16 @@
                 return;
             }
 
+            // Custom endpoint URL validation
+            if (platform === 'custom' && !customEndpointUrl) {
+                showToast('⚠️ Please set your Custom Endpoint URL in Settings first.');
+                return;
+            }
             // Pre-flight API key validation (skip for keyless platforms)
-            const isKeylessPlatform = platform === 'puter' || platform === 'ollama';
-            const activeKey = isKeylessPlatform ? '__nokey__' : platform === 'gemini' ? apiKey : platform === 'openrouter' ? orApiKey : platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : platform === 'nvidia' ? nvidiaApiKey : platform === 'huggingface' ? hfApiKey : platform === 'githubmodels' ? ghApiKey : platform === 'claude' ? claudeApiKey : platform === 'copilot' ? copilotApiKey : platform === 'gais' ? gaisApiKey : platform === 'cohere' ? cohereApiKey : platform === 'deepinfra' ? deepinfraApiKey : platform === 'cerebras' ? cerebrasApiKey : platform === 'sambanova' ? sambanovaApiKey : platform === 'fireworks' ? fireworksApiKey : platform === 'xai' ? xaiApiKey : platform === 'perplexity' ? perplexityApiKey : platform === 'nanogpt' ? nanogptApiKey : platform === 'unify' ? unifyApiKey : platform === 'kluster' ? klusterApiKey : mistralApiKey;
+            const isKeylessPlatform = platform === 'puter' || platform === 'ollama' || (platform === 'custom' && !customEndpointApiKey);
+            const activeKey = isKeylessPlatform ? '__nokey__' : platform === 'gemini' ? apiKey : platform === 'openrouter' ? orApiKey : platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : platform === 'nvidia' ? nvidiaApiKey : platform === 'huggingface' ? hfApiKey : platform === 'githubmodels' ? ghApiKey : platform === 'claude' ? claudeApiKey : platform === 'copilot' ? copilotApiKey : platform === 'gais' ? gaisApiKey : platform === 'cohere' ? cohereApiKey : platform === 'deepinfra' ? deepinfraApiKey : platform === 'cerebras' ? cerebrasApiKey : platform === 'sambanova' ? sambanovaApiKey : platform === 'fireworks' ? fireworksApiKey : platform === 'xai' ? xaiApiKey : platform === 'perplexity' ? perplexityApiKey : platform === 'nanogpt' ? nanogptApiKey : platform === 'unify' ? unifyApiKey : platform === 'kluster' ? klusterApiKey : platform === 'custom' ? customEndpointApiKey : mistralApiKey;
             if (!activeKey) {
-                const platformLabel = platform === 'gemini' ? 'Gemini (aistudio.google.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'nvidia' ? 'NVIDIA (build.nvidia.com)' : platform === 'huggingface' ? 'Hugging Face (huggingface.co/settings/tokens)' : platform === 'githubmodels' ? 'GitHub Models (github.com/settings/tokens)' : platform === 'claude' ? 'Claude (console.anthropic.com)' : platform === 'copilot' ? 'Microsoft Copilot (github.com/settings/tokens)' : platform === 'gais' ? 'Google AI Studio (aistudio.google.com/apikey)' : platform === 'cohere' ? 'Cohere (dashboard.cohere.com/api-keys)' : platform === 'deepinfra' ? 'DeepInfra (deepinfra.com/dash/api_keys)' : platform === 'cerebras' ? 'Cerebras AI (cloud.cerebras.ai)' : platform === 'sambanova' ? 'SambaNova (cloud.sambanova.ai)' : platform === 'fireworks' ? 'Fireworks AI (fireworks.ai/api-keys)' : platform === 'xai' ? 'xAI (console.x.ai)' : platform === 'perplexity' ? 'Perplexity (perplexity.ai/settings/api)' : platform === 'nanogpt' ? 'NanoGPT (nano-gpt.com/api)' : platform === 'unify' ? 'Unify (app.unify.ai/api-keys)' : platform === 'kluster' ? 'Kluster.ai (kluster.ai/api-keys)' : 'Mistral AI (console.mistral.ai)';
+                const platformLabel = platform === 'gemini' ? 'Gemini (aistudio.google.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'nvidia' ? 'NVIDIA (build.nvidia.com)' : platform === 'huggingface' ? 'Hugging Face (huggingface.co/settings/tokens)' : platform === 'githubmodels' ? 'GitHub Models (github.com/settings/tokens)' : platform === 'claude' ? 'Claude (console.anthropic.com)' : platform === 'copilot' ? 'Microsoft Copilot (github.com/settings/tokens)' : platform === 'gais' ? 'Google AI Studio (aistudio.google.com/apikey)' : platform === 'cohere' ? 'Cohere (dashboard.cohere.com/api-keys)' : platform === 'deepinfra' ? 'DeepInfra (deepinfra.com/dash/api_keys)' : platform === 'cerebras' ? 'Cerebras AI (cloud.cerebras.ai)' : platform === 'sambanova' ? 'SambaNova (cloud.sambanova.ai)' : platform === 'fireworks' ? 'Fireworks AI (fireworks.ai/api-keys)' : platform === 'xai' ? 'xAI (console.x.ai)' : platform === 'perplexity' ? 'Perplexity (perplexity.ai/settings/api)' : platform === 'nanogpt' ? 'NanoGPT (nano-gpt.com/api)' : platform === 'unify' ? 'Unify (app.unify.ai/api-keys)' : platform === 'kluster' ? 'Kluster.ai (kluster.ai/api-keys)' : platform === 'custom' ? 'Custom Endpoint' : 'Mistral AI (console.mistral.ai)';
                 showToast('🔑 Please add an API key for ' + platformLabel + ' in Settings first.');
                 return;
             }
@@ -7544,13 +7762,22 @@ FEATURES:
 65. EXTENDED THINKING TAG SUPPORT: The app detects and renders thinking/reasoning content from ALL AI models — not just <think> tags. Models that use <reasoning>, <thinking>, <reflection> tags or emit delta.reasoning_content in the stream (e.g. DeepSeek, Qwen) all have their reasoning content captured and displayed in the collapsible "💭 Thought Process" dropdown, cleanly separated from the main answer.
 66. PLATFORM & MODEL AWARENESS: The AI always knows which platform and model it is running on (injected dynamically into the system prompt). When asked "which AI are you?", "what model is this?", or "which platform?" it gives the accurate answer based on the current selection.
 67. ARTIFACTS: When the AI responds with a code block (any language), it is shown as a compact "Artifact Card" instead of a raw code block. The card shows a file icon, filename (e.g. index.html, script.js), language badge, line count, and a 5-line code preview. A dark "Open Artifact" button at the bottom opens a full-screen Artifact Viewer. The viewer has: a header bar with back arrow, filename, language badge, and close (X) button; a Preview/Code pill tab switcher. Preview tab renders the artifact in a sandboxed iframe (for HTML, SVG, JavaScript, CSS, TypeScript, JSX/TSX) or as a Mermaid diagram. Code tab shows the raw syntax-highlighted code with Copy and Download buttons. The iframe uses sandbox="allow-scripts allow-same-origin" for security.
+68. FULL-SCREEN IMAGE VIEWER: Tap any AI-generated image to open it in a full-screen overlay viewer. Supports pinch-to-zoom (mobile) and scroll-wheel zoom (desktop). Pan the image when zoomed in. Double-tap to reset zoom. Top bar shows zoom +/− controls and a download button. Tap the background or × to close.
+69. IMAGE MODEL DISPLAY: AI-generated image cards now show both the provider name and the exact model used (e.g. "Pollinations AI · flux-realism", "Gemini Imagen · imagen-3.0-generate-002"), so you always know which model generated which image.
+70. REACT & PYTHON ARTIFACT PREVIEW: Artifact Viewer now supports live preview of: (a) React/JSX/TSX components — transpiled via Babel Standalone CDN, rendered with React 18, auto-renders if an App component is exported; (b) Python scripts — executed client-side via Pyodide WebAssembly, stdout captured and shown in the preview pane. Both run in a sandboxed iframe.
+71. CUSTOM ENDPOINT PLATFORM: A new "Custom Endpoint" option in Settings → Platform lets users connect any OpenAI-compatible API. Enter the full endpoint URL (e.g. https://api.openai.com/v1/chat/completions), an optional API key, and a model name. Works with LM Studio, LocalAI, Ollama-remote, or any self-hosted OpenAI-compatible service. Direct fetch (no proxy). Stored in snoah_custom_url, snoah_custom_keys, snoah_custom_model.
+72. CHAT PINNING: Any chat in the sidebar can be pinned. Pinned chats always appear at the top of the chat history list above regular chats, with a 📌 pin icon. Hover/tap a chat item to see the pin button. Pinned state (pinned: true/false) is stored in the chat entry in snoah_all_chats.
+73. CHAT BACKUP & RESTORE: Settings → App tab → Chat Backup & Restore. "Backup" downloads all chats as a JSON file. "Restore" imports chats from a JSON backup file (merges, no duplicates). Backup format: { version, app, exported, chats[] }.
+74. ENTER KEY = NEWLINE: Pressing Enter in the chat input inserts a newline. To send, use the Send button or Shift+Enter. This is the standard mobile messaging behavior.
+
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
 - Top bar: App name "SnoahAI" (left), model badge (center), three icon buttons on the right: Temp Chat (clock 🕐), Search (🔍), New Chat (+).
 - Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons.
 - Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates buttons, main text input, Send/Stop button.
-- Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us/Delete History), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
-- Settings → API tab sections: Platform & Model, API Keys pool (multi-key, auto-rotate), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Advanced Model Parameters, Token Management, Notion Integration, Response Display.
+- Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
+- Settings → API tab sections: Platform & Model (24 platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Advanced Model Parameters, Token Management, Notion Integration, Response Display.
+- Settings → App tab sections: Font Size, Theme, Message Timestamps, Chat Backup & Restore (export/import JSON), Delete All Chats (Danger Zone).
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
@@ -7889,7 +8116,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             clearTimeout(connTimeoutGA);
                             await readStream(resGA);
                             abortController = null;
-                        } else if ((platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral' || platform === 'nvidia' || platform === 'huggingface' || platform === 'githubmodels' || platform === 'claude' || platform === 'copilot' || platform === 'cohere' || platform === 'deepinfra' || platform === 'ollama' || platform === 'cerebras' || platform === 'sambanova' || platform === 'fireworks' || platform === 'xai' || platform === 'perplexity' || platform === 'nanogpt' || platform === 'unify' || platform === 'kluster') && !useAgent) {
+                        } else if ((platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral' || platform === 'nvidia' || platform === 'huggingface' || platform === 'githubmodels' || platform === 'claude' || platform === 'copilot' || platform === 'cohere' || platform === 'deepinfra' || platform === 'ollama' || platform === 'cerebras' || platform === 'sambanova' || platform === 'fireworks' || platform === 'xai' || platform === 'perplexity' || platform === 'nanogpt' || platform === 'unify' || platform === 'kluster' || platform === 'custom') && !useAgent) {
                             const isGroq = platform === 'groq';
                             const isTogether = platform === 'together';
                             const isMistral = platform === 'mistral';
@@ -7975,13 +8202,17 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 ? '/api/unify'
                                 : isKluster
                                 ? '/api/kluster'
+                                : (platform === 'custom')
+                                ? customEndpointUrl
                                 : 'https://openrouter.ai/api/v1/chat/completions';
-                            const chatKey = isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : isNvidia ? nvidiaApiKey : isHF ? hfApiKey : isGH ? ghApiKey : isClaude ? claudeApiKey : isCopilot ? copilotApiKey : isCohere ? cohereApiKey : isDeepInfra ? deepinfraApiKey : isOllama ? 'ollama' : isCerebras ? cerebrasApiKey : isSambaNova ? sambanovaApiKey : isFireworks ? fireworksApiKey : isXAI ? xaiApiKey : isPPX ? perplexityApiKey : isNGPT ? nanogptApiKey : isUnify ? unifyApiKey : isKluster ? klusterApiKey : orApiKey;
-                            const chatModel = isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : isNvidia ? nvidiaModelId : isHF ? hfModelId : isGH ? ghModelId : isClaude ? claudeModelId : isCopilot ? copilotModelId : isCohere ? cohereModelId : isDeepInfra ? deepinfraModelId : isOllama ? ollamaModelId : isCerebras ? cerebrasModelId : isSambaNova ? sambanovaModelId : isFireworks ? fireworksModelId : isXAI ? xaiModelId : isPPX ? perplexityModelId : isNGPT ? nanogptModelId : isUnify ? unifyModelId : isKluster ? klusterModelId : orModelId;
+                            const chatKey = isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : isNvidia ? nvidiaApiKey : isHF ? hfApiKey : isGH ? ghApiKey : isClaude ? claudeApiKey : isCopilot ? copilotApiKey : isCohere ? cohereApiKey : isDeepInfra ? deepinfraApiKey : isOllama ? 'ollama' : isCerebras ? cerebrasApiKey : isSambaNova ? sambanovaApiKey : isFireworks ? fireworksApiKey : isXAI ? xaiApiKey : isPPX ? perplexityApiKey : isNGPT ? nanogptApiKey : isUnify ? unifyApiKey : isKluster ? klusterApiKey : (platform === 'custom') ? customEndpointApiKey : orApiKey;
+                            const chatModel = isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : isNvidia ? nvidiaModelId : isHF ? hfModelId : isGH ? ghModelId : isClaude ? claudeModelId : isCopilot ? copilotModelId : isCohere ? cohereModelId : isDeepInfra ? deepinfraModelId : isOllama ? ollamaModelId : isCerebras ? cerebrasModelId : isSambaNova ? sambanovaModelId : isFireworks ? fireworksModelId : isXAI ? xaiModelId : isPPX ? perplexityModelId : isNGPT ? nanogptModelId : isUnify ? unifyModelId : isKluster ? klusterModelId : (platform === 'custom') ? customModelId : orModelId;
                             const chatHeaders = isProxied
                                 ? { 'Content-Type': 'application/json', 'x-api-key': chatKey }
                                 : isOllama
                                 ? { 'Content-Type': 'application/json' }
+                                : (platform === 'custom')
+                                ? (customEndpointApiKey ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey } : { 'Content-Type': 'application/json' })
                                 : (isGroq || isTogether || isMistral || isCerebras || isSambaNova || isFireworks)
                                 ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey }
                                 : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + chatKey, 'HTTP-Referer': 'https://snoah.ai', 'X-Title': 'SnoahAI' };
