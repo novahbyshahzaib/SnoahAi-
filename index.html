@@ -2051,6 +2051,11 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Web Search Platform 🔍</strong> — New in Settings → API tab. Choose which search engine powers the Web button: <em>Gemini</em> (default, Google Search), <em>Tavily AI</em> (free 1000/month), <em>Brave Search</em> (free 2000/month), <em>Serper.dev / Google</em> (free 2500/month), or a <em>Custom endpoint</em>. Real-time search now works on ALL AI platforms — results are injected as context, not just Gemini.</li>
+                            <li><strong>⚡ Smart / Agentic Mode</strong> — New button in the input toolbar. When enabled, SnoahAI auto-detects what each question needs: turns on Web Search for live-data questions, and enables Thinking mode on Gemini for analytical ones. Both overrides reset after the response so your manual toggles stay intact.</li>
+                            <li><strong>Storage Manager 📦</strong> — New section in Settings → App tab. See exactly how much browser storage SnoahAI is using, broken down by category: Chat History, API Keys, Settings &amp; Preferences, Memory &amp; Templates, and Total. Refresh on demand or tap "Clear Keys" to wipe all API key pools.</li>
+                            <li><strong>Full Backup &amp; Restore 💾</strong> — Upgraded from chat-only to a complete backup. The new v2 backup file includes everything: all chats, API key pools, settings, preferences, selected AI platform &amp; model, Notion config, memory, templates, and more. Restore reloads the app with your full setup intact. Old v1 backup files (chats-only) are still supported.</li>
+                            <li><strong>AI Feature State Awareness 🤖</strong> — The AI now knows which features are currently ON or OFF for every conversation: Web Search, Thinking Mode, Smart Mode, Canvas Mode, Multi-AI Mode, Instant Response, Temp Chat, Auto Memory, Notion Auto-Save, Response Language, and Timestamps. Ask "which features are on?" and it will answer accurately.</li>
                             <li><strong>Full-Screen Image Viewer 🖼️</strong> — Tap any AI-generated image to open it in a full-screen viewer. Pinch to zoom in/out on mobile, scroll wheel on desktop, drag to pan when zoomed. Double-tap to reset zoom. Zoom controls (+/−) and a download button are shown in the top bar.</li>
                             <li><strong>Image Model Display 🏷️</strong> — AI-generated image cards now show both the provider name and the exact model used (e.g. Pollinations AI · flux-realism), so you always know which model produced which image.</li>
                             <li><strong>React &amp; Python Artifact Preview ⚛️</strong> — Artifact Viewer now supports live preview of React/JSX/TSX components (rendered using Babel + React CDN) and Python scripts (executed client-side via Pyodide WebAssembly). Open any React or Python artifact and tap Preview to see it run live.</li>
@@ -8072,17 +8077,20 @@ FEATURES:
 70. REACT & PYTHON ARTIFACT PREVIEW: Artifact Viewer now supports live preview of: (a) React/JSX/TSX components — transpiled via Babel Standalone CDN, rendered with React 18, auto-renders if an App component is exported; (b) Python scripts — executed client-side via Pyodide WebAssembly, stdout captured and shown in the preview pane. Both run in a sandboxed iframe.
 71. CUSTOM ENDPOINT PLATFORM: A new "Custom Endpoint" option in Settings → Platform lets users connect any OpenAI-compatible API. Enter the full endpoint URL (e.g. https://api.openai.com/v1/chat/completions), an optional API key, and a model name. Works with LM Studio, LocalAI, Ollama-remote, or any self-hosted OpenAI-compatible service. Direct fetch (no proxy). Stored in snoah_custom_url, snoah_custom_keys, snoah_custom_model.
 72. CHAT PINNING: Any chat in the sidebar can be pinned. Pinned chats always appear at the top of the chat history list above regular chats, with a 📌 pin icon. Hover/tap a chat item to see the pin button. Pinned state (pinned: true/false) is stored in the chat entry in snoah_all_chats.
-73. CHAT BACKUP & RESTORE: Settings → App tab → Chat Backup & Restore. "Backup" downloads all chats as a JSON file. "Restore" imports chats from a JSON backup file (merges, no duplicates). Backup format: { version, app, exported, chats[] }.
+73. FULL BACKUP & RESTORE: Settings → App tab → Full Backup & Restore. "Backup" downloads a v2 JSON file containing ALL chats AND all settings/API keys/preferences/selected AI. "Restore" re-imports everything and reloads the page. Old v1 (chats-only) backup files are also supported — they merge chats without overwriting settings.
 74. ENTER KEY = NEWLINE: Pressing Enter in the chat input inserts a newline. To send, use the Send button or Shift+Enter. This is the standard mobile messaging behavior.
+75. STORAGE MANAGER: Settings → App tab → Storage Manager. Shows a live breakdown of browser localStorage usage by category: Chat History, API Keys, Settings & Preferences, Memory & Templates, and Total. "↻ Refresh" recalculates. "Clear Keys" removes all API key pools (with confirmation prompt).
+76. SMART / AGENTIC MODE: ⚡ Smart button in the input toolbar. When enabled, SnoahAI automatically detects what the current question needs: enables Web Search for live-data questions (today's news, prices, weather, current events) and enables Thinking mode for analytical questions (explain, analyze, compare, code, math). Both overrides reset after each response; manual Web and Thinking toggles are unaffected.
+77. WEB SEARCH PLATFORM: Settings → API tab → Web Search Platform. Choose the search engine that powers the Web (🔍) button. Options: Gemini (default, free — uses Google Search grounding, Gemini key required), Tavily AI Search (free 1000 searches/month), Brave Search (free 2000 queries/month), Google via Serper.dev (free 2500 searches/month), Custom (your own endpoint accepting POST {query, key} → {results:[{title, url, snippet}]}). For non-Gemini AI platforms, results are fetched and injected into the system context so ANY platform supports real-time web search.
 
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
 - Top bar: App name "SnoahAI" (left), model badge (center), three icon buttons on the right: Temp Chat (clock 🕐), Search (🔍), New Chat (+).
 - Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons.
-- Bottom bar: Input toolbar with Attach (📎), Voice (🎤), Thinking (🧠), Web Search (🔍), Response Length, Templates buttons, main text input, Send/Stop button.
+- Bottom bar: Input toolbar with ⚡ Smart, Thinking (🧠), Web Search (🔍), Response Length, Templates, Canvas buttons, main text input (with Attach 📎 plus-icon on the left and Voice 🎤 on the right), Send/Stop button.
 - Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
-- Settings → API tab sections: Platform & Model (24 platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Advanced Model Parameters, Token Management, Notion Integration, Response Display.
-- Settings → App tab sections: Font Size, Theme, Message Timestamps, Chat Backup & Restore (export/import JSON), Delete All Chats (Danger Zone).
+- Settings → API tab sections: Platform & Model (24 platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Web Search Platform (Gemini/Tavily/Brave/Serper/Custom with per-provider key pool), Advanced Model Parameters, Token Management, Notion Integration, Response Display.
+- Settings → App tab sections: Font Size, Theme, Message Timestamps, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
@@ -8097,8 +8105,7 @@ TERMS & CONDITIONS / PRIVACY POLICY / COOKIES:
 
 LIMITATIONS:
 - AI training has a cutoff date and cannot access real-time info by default
-- For today's date, current news, live data: enable Web Search (🔍) — when enabled, Gemini is always used regardless of selected platform
-- Groq, Together AI, Mistral: no web search capability on these platforms directly (Web button switches to Gemini)
+- For today's date, current news, live data: enable Web Search (🔍) — works on ALL platforms. Gemini uses native Google Search grounding; all other platforms receive search results injected as context via your chosen Web Search Platform (Tavily/Brave/Serper/Custom/Gemini fallback).
 - All data is stored locally on the device — no cloud sync between devices
 
 DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mobile-first web apps. Contact: Telegram @Owner_Of_Crypton, Instagram @shahzaib_muzaffar_7.
@@ -8111,6 +8118,22 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const _platNames = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', nvidia: 'NVIDIA NIM', huggingface: 'Hugging Face', githubmodels: 'GitHub Models', claude: 'Claude (Anthropic)', copilot: 'Microsoft Copilot', gais: 'Google AI Studio', ollama: 'Ollama', cohere: 'Cohere', puter: 'Puter.js', deepinfra: 'DeepInfra', cerebras: 'Cerebras AI', sambanova: 'SambaNova', fireworks: 'Fireworks AI', xai: 'xAI (Grok)', perplexity: 'Perplexity', nanogpt: 'NanoGPT', unify: 'Unify', kluster: 'Kluster.ai' };
                 const _activeModelNow = platform==='openrouter'?orModelId:platform==='groq'?groqModelId:platform==='together'?togetherModelId:platform==='mistral'?mistralModelId:platform==='nvidia'?nvidiaModelId:platform==='huggingface'?hfModelId:platform==='githubmodels'?ghModelId:platform==='claude'?claudeModelId:platform==='copilot'?copilotModelId:platform==='gais'?gaisModelId:platform==='ollama'?ollamaModelId:platform==='cohere'?cohereModelId:platform==='puter'?puterModelId:platform==='deepinfra'?deepinfraModelId:platform==='cerebras'?cerebrasModelId:platform==='sambanova'?sambanovaModelId:platform==='fireworks'?fireworksModelId:platform==='xai'?xaiModelId:platform==='perplexity'?perplexityModelId:platform==='nanogpt'?nanogptModelId:platform==='unify'?unifyModelId:platform==='kluster'?klusterModelId:modelId;
                 systemInstruction += '\n\nACTIVE PLATFORM & MODEL: You are currently running on the ' + (_platNames[platform] || platform) + ' platform. The active model is "' + _activeModelNow + '". When the user asks which AI, platform, or model is being used, state this information accurately. ';
+                // Inject live feature state so AI always knows which toggles are on/off
+                const _wsProviders = { gemini: 'Gemini (Google Search)', tavily: 'Tavily AI Search', brave: 'Brave Search', serper: 'Google via Serper.dev', custom: 'Custom Search API' };
+                const _featureState = [
+                    'Web Search: ' + (useAgent ? 'ON (provider: ' + (_wsProviders[webSearchPlatform] || webSearchPlatform) + ')' : 'OFF'),
+                    'Thinking Mode: ' + (useThinking ? 'ON' : 'OFF'),
+                    'Smart / Agentic Mode: ' + (smartMode ? 'ON (auto-selects web search and thinking per query)' : 'OFF'),
+                    'Canvas Mode: ' + (canvasMode ? 'ON (code opens in Artifact Viewer)' : 'OFF'),
+                    'Multi-AI Mode: ' + (multiAIEnabled ? 'ON (platforms: ' + (multiAIPlatforms.join(', ') || 'none selected') + ')' : 'OFF'),
+                    'Instant Response Display: ' + (instantResponseMode ? 'ON (full response shown at once)' : 'OFF (animated character-by-character)'),
+                    'Response Language: ' + (responseLang ? responseLang : 'auto (matches user language)'),
+                    'Message Timestamps: ' + (showTimestamps ? 'ON' : 'OFF'),
+                    'Temp Chat: ' + (isTempChat ? 'ON (this conversation is not saved)' : 'OFF'),
+                    'Auto Memory: ' + (autoMemoryEnabled ? 'ON' : 'OFF'),
+                    'Notion Auto-Save: ' + (notionAutoSave ? 'ON' : 'OFF'),
+                ].join(' | ');
+                systemInstruction += '\n\nACTIVE FEATURE STATE: ' + _featureState + '. When the user asks which features are on or off, or what mode is active, answer accurately from this state.';
                 if (platform === 'mistral') {
                     systemInstruction += 'You are running on Mistral AI. ';
                 }
@@ -8123,9 +8146,9 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 if (useAgent) {
                     const now = new Date();
                     if (platform === 'gemini') {
-                        systemInstruction += "WEB SEARCH IS CURRENTLY ENABLED. Today's date is " + now.toDateString() + ". You have access to real-time Google Search results via the google_search tool. Use it to answer questions about current events, today's date, live data, or anything requiring up-to-date information. Do NOT tell the user to enable web search — it is already on. ";
+                        systemInstruction += "WEB SEARCH IS CURRENTLY ENABLED (Google Search). Today's date is " + now.toDateString() + ". You have access to real-time Google Search results via the google_search tool. Use it to answer questions about current events, today's date, live data, or anything requiring up-to-date information. Do NOT tell the user to enable web search — it is already on. ";
                     } else {
-
+                        systemInstruction += "WEB SEARCH IS CURRENTLY ENABLED via " + (_wsProviders[webSearchPlatform] || webSearchPlatform) + ". Today's date is " + new Date().toDateString() + ". Real-time web search results have been injected above as context. Use them to answer the user's question. Do NOT tell the user to enable web search — it is already on. ";
                     }
                 } else {
                     systemInstruction += "Web search is currently OFF. If the user asks about real-time info (today's date, current events, live data), answer from your training knowledge and suggest they tap the Web (🔍) button to enable real-time search. ";
