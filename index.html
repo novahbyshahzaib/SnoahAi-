@@ -831,6 +831,72 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
+                    <!-- Web Search Platform -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">
+                            Web Search Platform
+                            <span class="ml-1.5 px-1.5 py-0.5 bg-[#FEF3C7] text-[#92400E] rounded text-[9px] font-bold border border-[#FDE68A]">NEW</span>
+                        </label>
+                        <p class="text-[12px] text-[#737166] mb-3 leading-relaxed">Choose which search engine powers the <strong>Web</strong> button. Gemini (default) uses Google Search grounding. All other providers inject results as context, enabling web search with any AI platform.</p>
+                        <div class="relative mb-4">
+                            <select id="settings-websearch-platform" onchange="switchWebSearchPlatform(this.value)"
+                                class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
+                                <option value="gemini">Gemini (Default, Free)</option>
+                                <option value="tavily">Tavily AI Search</option>
+                                <option value="brave">Brave Search</option>
+                                <option value="serper">Google via Serper.dev</option>
+                                <option value="custom">Custom Search API</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                            </div>
+                        </div>
+                        <div id="ws-section-gemini">
+                            <p class="text-[11px] text-[#A3A095]">Reuses your Gemini API key pool above — no extra key needed. All AI platforms will use Gemini for web search.</p>
+                        </div>
+                        <div id="ws-section-tavily" class="hidden">
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">AI-powered search by Tavily. Get a free API key at <a href="https://tavily.com" target="_blank" class="underline text-[#D25D38]">tavily.com</a> (free tier: 1000 searches/month).</p>
+                            <div id="tavily-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2">
+                                <input type="password" id="settings-tavily-newkey" placeholder="Add Tavily API key…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addWebSearchKey('tavily')" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                        </div>
+                        <div id="ws-section-brave" class="hidden">
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Privacy-focused search by Brave. Get a free API key at <a href="https://api.search.brave.com" target="_blank" class="underline text-[#D25D38]">api.search.brave.com</a> (free tier: 2000 queries/month).</p>
+                            <div id="brave-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2">
+                                <input type="password" id="settings-brave-newkey" placeholder="Add Brave Search API key…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addWebSearchKey('brave')" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                        </div>
+                        <div id="ws-section-serper" class="hidden">
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Google Search via Serper.dev. Get a free key at <a href="https://serper.dev" target="_blank" class="underline text-[#D25D38]">serper.dev</a> (2500 searches/month free). Always uses Google regardless of AI platform.</p>
+                            <div id="serper-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2">
+                                <input type="password" id="settings-serper-newkey" placeholder="Add Serper API key…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addWebSearchKey('serper')" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                        </div>
+                        <div id="ws-section-custom" class="hidden">
+                            <p class="text-[12px] text-[#737166] mb-2 leading-relaxed">Use your own search API. The app POSTs <code class="bg-[#F2F0E9] px-1 rounded">{"query","key"}</code> and expects <code class="bg-[#F2F0E9] px-1 rounded">{"results":[{"title","url","snippet"}]}</code>.</p>
+                            <input type="text" id="settings-custom-search-url" placeholder="https://your-search-api.com/search"
+                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 mb-2">
+                            <div id="custom-search-keys-list" class="space-y-2 mb-2"></div>
+                            <div class="flex gap-2">
+                                <input type="password" id="settings-custom-search-newkey" placeholder="Add API key (optional)…"
+                                    class="flex-1 bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
+                                <button onclick="addWebSearchKey('custom')" class="px-3 py-2 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Add</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
                     <!-- Advanced Model Parameters -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Advanced Model Parameters</label>
@@ -1176,10 +1242,10 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
-                    <!-- Chat Backup & Restore -->
+                    <!-- Full Backup & Restore -->
                     <div>
-                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Chat Backup &amp; Restore</label>
-                        <p class="text-[12px] text-[#737166] mb-3 leading-relaxed">Backup all your chats to a JSON file, or restore previously backed-up chats on this or any other device.</p>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Full Backup &amp; Restore</label>
+                        <p class="text-[12px] text-[#737166] mb-3 leading-relaxed">Backup everything — chats, settings, API keys, preferences, and selected AI — to a JSON file. Restore on any device to get your full setup back.</p>
                         <div class="flex gap-2">
                             <button onclick="backupChats()" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E5E3DB] text-[13px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1188,8 +1254,28 @@
                             <label class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#E5E3DB] text-[13px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 3v12"/><path d="m5 10 7-7 7 7"/></svg>
                                 Restore
-                                <input type="file" id="restore-chats-input" accept=".json" style="display:none" onchange="restoreChats(this)">
+                                <input type="file" id="restore-chats-input" accept=".json" style="display:none" onchange="restoreFullBackup(this)">
                             </label>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Storage Manager -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Storage Manager</label>
+                        <p class="text-[12px] text-[#737166] mb-3 leading-relaxed">View how much browser storage SnoahAI is using and selectively clear data categories.</p>
+                        <div id="storage-stats" class="bg-[#F2F0E9] rounded-xl p-3 mb-3 border border-[#E5E3DB] space-y-1.5">
+                            <div class="flex justify-between text-[12px]"><span class="text-[#5B5951] font-medium">Chat History</span><span id="stor-chats" class="text-[#A3A095] font-mono">—</span></div>
+                            <div class="flex justify-between text-[12px]"><span class="text-[#5B5951] font-medium">API Keys</span><span id="stor-keys" class="text-[#A3A095] font-mono">—</span></div>
+                            <div class="flex justify-between text-[12px]"><span class="text-[#5B5951] font-medium">Settings &amp; Preferences</span><span id="stor-settings" class="text-[#A3A095] font-mono">—</span></div>
+                            <div class="flex justify-between text-[12px]"><span class="text-[#5B5951] font-medium">Memory &amp; Templates</span><span id="stor-memory" class="text-[#A3A095] font-mono">—</span></div>
+                            <div class="flex justify-between text-[12px] pt-1 border-t border-[#E5E3DB]"><span class="text-[#2C2B29] font-semibold">Total</span><span id="stor-total" class="text-[#D25D38] font-mono font-semibold">—</span></div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="refreshStorageStats()" class="flex-1 py-2 rounded-xl border border-[#E5E3DB] text-[12px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">↻ Refresh</button>
+                            <button onclick="clearApiKeysStorage()" class="flex-1 py-2 rounded-xl border border-[#F8E3DE] text-[12px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors font-medium">Clear Keys</button>
                         </div>
                     </div>
 
@@ -1379,14 +1465,14 @@
                 
                 <!-- Toggle Buttons -->
                 <div class="flex items-center gap-1.5 px-3 pt-3 pb-1.5 border-b border-[#F2F0E9] bg-white flex-wrap">
+                    <button id="btn-smart" onclick="toggleSmartMode()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
+                        <i data-lucide="zap" class="w-3.5 h-3.5"></i> Smart
+                    </button>
                     <button id="btn-thinking" onclick="toggleFeature('thinking')" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="brain" class="w-3.5 h-3.5"></i> Thinking
                     </button>
                     <button id="btn-agent" onclick="toggleFeature('agent')" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="search" class="w-3.5 h-3.5"></i> Web
-                    </button>
-                    <button id="btn-image" onclick="triggerFileUpload()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
-                        <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> Attach
                     </button>
                     <button id="btn-length" onclick="cycleLength()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="align-left" class="w-3.5 h-3.5"></i> <span id="length-label">Normal</span>
@@ -2527,6 +2613,13 @@
         let isTempChat = false;
         let useThinking = false;
         let useAgent = false;
+        let smartMode = false;
+        let webSearchPlatform = localStorage.getItem('snoah_websearch_platform') || 'gemini';
+        let tavilyKeys = _loadKeys('snoah_tavily_keys');
+        let braveKeys = _loadKeys('snoah_brave_keys');
+        let serperKeys = _loadKeys('snoah_serper_keys');
+        let customSearchKeys = _loadKeys('snoah_custom_search_keys');
+        let customSearchUrl = localStorage.getItem('snoah_custom_search_url') || '';
         let isSidebarOpen = false;
         let isDarkMode = localStorage.getItem('snoah_dark') === 'true';
         let responseLength = localStorage.getItem('snoah_length') || 'normal'; // short | normal | detailed
@@ -3422,7 +3515,20 @@
             }
         }
 
+        function toggleSmartMode() {
+            smartMode = !smartMode;
+            const btn = document.getElementById('btn-smart');
+            if (btn) btn.className = smartMode
+                ? "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]"
+                : "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
+            showToast(smartMode ? '⚡ Smart mode on — AI auto-selects tools' : 'Smart mode off');
+        }
+
         function updateToggleButtons() {
+            const btnSmart = document.getElementById('btn-smart');
+            if (btnSmart) btnSmart.className = smartMode
+                ? "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]"
+                : "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
             const btnThinking = document.getElementById('btn-thinking');
             const btnAgent = document.getElementById('btn-agent');
             if (btnThinking) btnThinking.className = useThinking
@@ -3822,6 +3928,11 @@
             const responseLangSel = document.getElementById('settings-response-lang');
             if (responseLangSel) responseLangSel.value = responseLang;
             updateTimestampsUI();
+            // Load web search platform
+            const wsPlat = document.getElementById('settings-websearch-platform');
+            if (wsPlat) { wsPlat.value = webSearchPlatform; switchWebSearchPlatform(webSearchPlatform, true); }
+            // Refresh storage stats
+            refreshStorageStats();
             switchSettingsTab('api');
             document.getElementById('settings-modal').classList.remove('hidden');
             if (isSidebarOpen) toggleSidebar();
@@ -4088,6 +4199,10 @@
                 responseLang = responseLangSel.value;
                 localStorage.setItem('snoah_response_lang', responseLang);
             }
+
+            // Save custom search URL
+            const csUrl = document.getElementById('settings-custom-search-url');
+            if (csUrl && csUrl.value.trim()) { customSearchUrl = csUrl.value.trim(); localStorage.setItem('snoah_custom_search_url', customSearchUrl); }
 
             closeSettings();
             showToast('Settings saved ✓');
@@ -4397,6 +4512,144 @@
                 const sec = document.getElementById('img-section-' + p);
                 if (sec) sec.classList.toggle('hidden', val !== p);
             });
+        }
+
+        function switchWebSearchPlatform(val, silent) {
+            if (!silent) { webSearchPlatform = val; localStorage.setItem('snoah_websearch_platform', val); }
+            ['gemini','tavily','brave','serper','custom'].forEach(p => {
+                const el = document.getElementById('ws-section-' + p);
+                if (el) el.classList.toggle('hidden', p !== val);
+            });
+            if (val === 'tavily') renderWebSearchKeysList('tavily');
+            else if (val === 'brave') renderWebSearchKeysList('brave');
+            else if (val === 'serper') renderWebSearchKeysList('serper');
+            else if (val === 'custom') {
+                renderWebSearchKeysList('custom');
+                const u = document.getElementById('settings-custom-search-url');
+                if (u) u.value = customSearchUrl;
+            }
+        }
+
+        function renderWebSearchKeysList(provider) {
+            const keys = provider === 'tavily' ? tavilyKeys : provider === 'brave' ? braveKeys : provider === 'serper' ? serperKeys : customSearchKeys;
+            const listId = provider + '-keys-list';
+            const el = document.getElementById(listId);
+            if (!el) return;
+            if (!keys.length) { el.innerHTML = '<p class="text-[12px] text-[#A3A095]">No keys added yet</p>'; return; }
+            el.innerHTML = '';
+            keys.forEach((k, i) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2 bg-white border border-[#E5E3DB] rounded-xl px-3 py-1.5';
+                const label = document.createElement('span');
+                label.className = 'flex-1 text-[12px] font-mono text-[#2C2B29] truncate';
+                label.textContent = k.substring(0,8) + '••••••••';
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'text-[11px] text-[#D25D38] hover:underline shrink-0';
+                removeBtn.textContent = 'Remove';
+                removeBtn.addEventListener('click', () => removeWebSearchKey(provider, i));
+                row.appendChild(label); row.appendChild(removeBtn);
+                el.appendChild(row);
+            });
+        }
+
+        function addWebSearchKey(provider) {
+            const inputId = provider === 'custom' ? 'settings-custom-search-newkey' : 'settings-' + provider + '-newkey';
+            const input = document.getElementById(inputId);
+            if (!input || !input.value.trim()) { showToast('Paste a key first'); return; }
+            const key = input.value.trim();
+            const storageKey = 'snoah_' + provider + '_keys';
+            if (provider === 'tavily') {
+                if (!tavilyKeys.includes(key)) tavilyKeys.push(key);
+                localStorage.setItem(storageKey, JSON.stringify(tavilyKeys)); renderWebSearchKeysList('tavily');
+            } else if (provider === 'brave') {
+                if (!braveKeys.includes(key)) braveKeys.push(key);
+                localStorage.setItem(storageKey, JSON.stringify(braveKeys)); renderWebSearchKeysList('brave');
+            } else if (provider === 'serper') {
+                if (!serperKeys.includes(key)) serperKeys.push(key);
+                localStorage.setItem(storageKey, JSON.stringify(serperKeys)); renderWebSearchKeysList('serper');
+            } else {
+                if (!customSearchKeys.includes(key)) customSearchKeys.push(key);
+                localStorage.setItem(storageKey, JSON.stringify(customSearchKeys)); renderWebSearchKeysList('custom');
+            }
+            input.value = '';
+            showToast('Key added ✓');
+        }
+
+        function removeWebSearchKey(provider, idx) {
+            const storageKey = 'snoah_' + provider + '_keys';
+            if (provider === 'tavily') { tavilyKeys.splice(idx, 1); localStorage.setItem(storageKey, JSON.stringify(tavilyKeys)); renderWebSearchKeysList('tavily'); }
+            else if (provider === 'brave') { braveKeys.splice(idx, 1); localStorage.setItem(storageKey, JSON.stringify(braveKeys)); renderWebSearchKeysList('brave'); }
+            else if (provider === 'serper') { serperKeys.splice(idx, 1); localStorage.setItem(storageKey, JSON.stringify(serperKeys)); renderWebSearchKeysList('serper'); }
+            else { customSearchKeys.splice(idx, 1); localStorage.setItem(storageKey, JSON.stringify(customSearchKeys)); renderWebSearchKeysList('custom'); }
+        }
+
+        async function performWebSearch(userMessages) {
+            const lastUser = [...userMessages].reverse().find(m => m.role === 'user' && !m.isError);
+            const query = (lastUser && (lastUser.text || '')).substring(0, 500);
+            if (!query) return null;
+
+            if (webSearchPlatform === 'tavily' && tavilyKeys.length) {
+                try {
+                    const key = tavilyKeys[0];
+                    const r = await fetch('https://api.tavily.com/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+                        body: JSON.stringify({ query, max_results: 5, search_depth: 'basic' })
+                    });
+                    if (!r.ok) throw new Error('Tavily HTTP ' + r.status);
+                    const d = await r.json();
+                    const results = d.results || [];
+                    const text = results.map(x => '**' + (x.title||'') + '**\n' + (x.content||x.snippet||'') + '\nSource: ' + x.url).join('\n\n');
+                    return { text: text || 'No results.', sources: results.map(x => ({ uri: x.url, title: x.title })), queries: [query] };
+                } catch(e) { console.warn('Tavily search error:', e.message); }
+            }
+
+            if (webSearchPlatform === 'brave' && braveKeys.length) {
+                try {
+                    const key = braveKeys[0];
+                    const r = await fetch('/api/brave-search?q=' + encodeURIComponent(query), { headers: { 'x-api-key': key } });
+                    if (!r.ok) throw new Error('Brave HTTP ' + r.status);
+                    const d = await r.json();
+                    const results = (d.web?.results || []).slice(0, 5);
+                    const text = results.map(x => '**' + (x.title||'') + '**\n' + (x.description||'') + '\nSource: ' + x.url).join('\n\n');
+                    return { text: text || 'No results.', sources: results.map(x => ({ uri: x.url, title: x.title })), queries: [query] };
+                } catch(e) { console.warn('Brave search error:', e.message); }
+            }
+
+            if (webSearchPlatform === 'serper' && serperKeys.length) {
+                try {
+                    const key = serperKeys[0];
+                    const r = await fetch('https://google.serper.dev/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-API-KEY': key },
+                        body: JSON.stringify({ q: query, num: 5 })
+                    });
+                    if (!r.ok) throw new Error('Serper HTTP ' + r.status);
+                    const d = await r.json();
+                    const results = (d.organic || []).slice(0, 5);
+                    const text = results.map(x => '**' + (x.title||'') + '**\n' + (x.snippet||'') + '\nSource: ' + x.link).join('\n\n');
+                    return { text: text || 'No results.', sources: results.map(x => ({ uri: x.link, title: x.title })), queries: [query] };
+                } catch(e) { console.warn('Serper search error:', e.message); }
+            }
+
+            if (webSearchPlatform === 'custom' && customSearchUrl) {
+                try {
+                    const key = customSearchKeys[0] || '';
+                    const r = await fetch(customSearchUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query, key })
+                    });
+                    if (!r.ok) throw new Error('Custom search HTTP ' + r.status);
+                    const d = await r.json();
+                    const results = (d.results || []).slice(0, 5);
+                    const text = results.map(x => '**' + (x.title||'') + '**\n' + (x.snippet||x.description||'') + '\nSource: ' + (x.url||x.link||'')).join('\n\n');
+                    return { text: text || 'No results.', sources: results.map(x => ({ uri: x.url||x.link||'', title: x.title||'' })), queries: [query] };
+                } catch(e) { console.warn('Custom search error:', e.message); }
+            }
+
+            // Fallback to Gemini
+            return geminiWebSearch(userMessages);
         }
 
         function renderNvidiaImgKeysList() {
@@ -5292,35 +5545,75 @@
         }
 
         function backupChats() {
-            if (allChats.length === 0) { showToast('No chats to backup'); return; }
-            const data = { version: 1, app: 'SnoahAI', exported: new Date().toISOString(), chats: allChats };
+            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_unify_model','snoah_kluster_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_canvas_mode','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_unify_keys','snoah_kluster_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
+            const settings = {};
+            settingsKeys.forEach(k => { const v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
+            const data = { version: 2, app: 'SnoahAI', exported: new Date().toISOString(), chats: allChats, settings };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; a.download = 'snoah-chats-' + new Date().toISOString().slice(0,10) + '.json';
+            a.href = url; a.download = 'snoah-backup-' + new Date().toISOString().slice(0,10) + '.json';
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast('✅ Chat backup downloaded');
+            showToast('✅ Full backup downloaded');
         }
-        function restoreChats(inputEl) {
+        function restoreFullBackup(inputEl) {
             const file = inputEl.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const raw = JSON.parse(e.target.result);
-                    const imported = Array.isArray(raw) ? raw : (Array.isArray(raw.chats) ? raw.chats : []);
-                    if (imported.length === 0) { showToast('No valid chats found in file'); return; }
-                    const existingIds = new Set(allChats.map(c => c.id));
-                    const newChats = imported.filter(c => c && c.id && !existingIds.has(c.id));
-                    allChats = [...allChats, ...newChats].slice(0, 50);
-                    try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(err) {}
-                    renderChatHistoryList();
-                    showToast('✅ Restored ' + newChats.length + ' chat(s)');
+                    if (raw.version === 2 && raw.settings) {
+                        Object.entries(raw.settings).forEach(([k, v]) => localStorage.setItem(k, v));
+                        const imported = Array.isArray(raw.chats) ? raw.chats : [];
+                        try { localStorage.setItem('snoah_all_chats', JSON.stringify(imported)); } catch(err) {}
+                        showToast('✅ Full backup restored — reloading…');
+                        setTimeout(() => location.reload(), 1200);
+                    } else {
+                        const imported = Array.isArray(raw) ? raw : (Array.isArray(raw.chats) ? raw.chats : []);
+                        if (imported.length === 0) { showToast('No valid chats found in file'); return; }
+                        const existingIds = new Set(allChats.map(c => c.id));
+                        const newChats = imported.filter(c => c && c.id && !existingIds.has(c.id));
+                        allChats = [...allChats, ...newChats].slice(0, 50);
+                        try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(err) {}
+                        renderChatHistoryList();
+                        showToast('✅ Restored ' + newChats.length + ' chat(s)');
+                    }
                 } catch(err) { showToast('❌ Invalid backup file'); }
                 inputEl.value = '';
             };
             reader.readAsText(file);
+        }
+        function refreshStorageStats() {
+            const chatStr = localStorage.getItem('snoah_all_chats') || '';
+            const apiKeyNames = ['snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_unify_keys','snoah_kluster_keys','snoah_custom_keys','elevenLabsApiKeys','pollinationsApiKeys','openaiTtsKeys','groqTtsKeys','nvidiaImageKeys','togetherImageKeys','hfImageKeys','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys'];
+            let keysBytes = 0;
+            apiKeyNames.forEach(k => { const v = localStorage.getItem(k); if (v) keysBytes += new TextEncoder().encode(v).length; });
+            const memNames = ['snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks'];
+            let memBytes = 0;
+            memNames.forEach(k => { const v = localStorage.getItem(k); if (v) memBytes += new TextEncoder().encode(v).length; });
+            let totalBytes = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                const v = localStorage.getItem(k) || '';
+                totalBytes += new TextEncoder().encode(k + v).length;
+            }
+            const chatBytes = new TextEncoder().encode(chatStr).length;
+            const settingsBytes = Math.max(0, totalBytes - chatBytes - keysBytes - memBytes);
+            const fmt = b => b < 1024 ? b + ' B' : (b/1024).toFixed(1) + ' KB';
+            const s = document.getElementById('stor-chats'); if (s) s.textContent = fmt(chatBytes);
+            const sk = document.getElementById('stor-keys'); if (sk) sk.textContent = fmt(keysBytes);
+            const ss = document.getElementById('stor-settings'); if (ss) ss.textContent = fmt(settingsBytes);
+            const sm = document.getElementById('stor-memory'); if (sm) sm.textContent = fmt(memBytes);
+            const st = document.getElementById('stor-total'); if (st) st.textContent = fmt(totalBytes);
+        }
+        function clearApiKeysStorage() {
+            if (!confirm('Clear all API keys? You will need to re-enter them.')) return;
+            ['snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_unify_keys','snoah_kluster_keys','snoah_custom_keys','elevenLabsApiKeys','pollinationsApiKeys','openaiTtsKeys','groqTtsKeys','nvidiaImageKeys','togetherImageKeys','hfImageKeys'].forEach(k => localStorage.removeItem(k));
+            geminiKeys = []; orKeys = []; groqKeys = []; togetherKeys = []; mistralKeys = [];
+            showToast('All API keys cleared ✓');
+            refreshStorageStats();
         }
 
         // --- Export Chat ---
@@ -7666,6 +7959,18 @@
 
             setIsLoading(true);
 
+            // Smart mode: auto-enable web search and/or thinking based on question
+            let _smartWebOverride = false;
+            let _smartThinkOverride = false;
+            if (smartMode) {
+                const q = (textToSend || '').toLowerCase();
+                const needsSearch = /\b(today|current|latest|now|recent|news|weather|price|stock|live|real.?time|right now|this (week|month|year)|who (is|are|won)|what (is|are) (happening|the (date|time|weather)))\b/.test(q);
+                const needsThink = /\b(explain|how (do|does|can|should|would)|why|analyze|compare|difference|pros|cons|calculate|math|code|write|create|design|plan|step.?by.?step|algorithm|solve)\b/.test(q);
+                if (needsSearch && !useAgent) { useAgent = true; _smartWebOverride = true; }
+                if (needsThink && !useThinking && platform === 'gemini') { useThinking = true; _smartThinkOverride = true; }
+                if (_smartWebOverride || _smartThinkOverride) updateToggleButtons();
+            }
+
             try {
                 const lengthDirective = responseLength === 'short'
                     ? 'RESPONSE LENGTH: Be brief and concise — 2-4 sentences max unless code is required. '
@@ -7865,6 +8170,19 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     }
                 }
 
+                // For non-Gemini platforms with web search on, fetch results and inject into systemInstruction
+                let _preFetchedSources = null, _preFetchedQueries = null;
+                if (useAgent && platform !== 'gemini' && platform !== 'gais' && webSearchPlatform !== 'gemini') {
+                    try {
+                        const ws = await performWebSearch(messages);
+                        if (ws && ws.text) {
+                            _preFetchedSources = ws.sources || [];
+                            _preFetchedQueries = ws.queries || [];
+                            systemInstruction += '\n\n[REAL-TIME WEB SEARCH RESULTS FOR THIS QUERY]\n' + ws.text + '\n[END OF WEB SEARCH RESULTS]\nUse the above search results to answer the user\'s question accurately. Cite sources when relevant.';
+                        }
+                    } catch(e) { console.warn('Web search injection error:', e); }
+                }
+
                 // ── Build live response bubble immediately ──
                 const liveWrapper = document.createElement('div');
                 liveWrapper.className = 'flex w-full justify-start animate-slide-up';
@@ -7892,8 +8210,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const liveTextEl   = liveWrapper.querySelector('#text-live-' + liveUID);
                 const liveCursor   = liveWrapper.querySelector('#cursor-live-' + liveUID);
                 let fullRaw = '';
-                let uniqueSources = [];
-                let queries = [];
+                let uniqueSources = _preFetchedSources || [];
+                let queries = _preFetchedQueries || [];
                 let renderDirty = false;
                 let rafId = null;
                 let streamActive = true;
@@ -8479,6 +8797,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
                 if (lastUserMsg) extractAndSaveMemory(lastUserMsg.text || '', mainTextClean);
                 if (messages.filter(m=>m.role==='user').length === 1) autoTitleChat();
+                // Reset smart mode overrides
+                if (_smartWebOverride) { useAgent = false; }
+                if (_smartThinkOverride) { useThinking = false; }
+                if (_smartWebOverride || _smartThinkOverride) updateToggleButtons();
 
             } catch (error) {
                 // User-initiated abort (stop button) — save partial content and show Continue button
@@ -8575,6 +8897,9 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 abortController = null;
                 _streamPartialRaw = '';
                 _streamPartialWrapper = null;
+                // Reset any smart mode overrides
+                if (_smartWebOverride) { useAgent = false; _smartWebOverride = false; }
+                if (_smartThinkOverride) { useThinking = false; _smartThinkOverride = false; }
                 setIsLoading(false);
                 isStreaming = false;
                 streamingBarIndicator.classList.add('hidden');
