@@ -5287,7 +5287,7 @@
                 'Rules:',
                 '- ONLY output NEW facts not already captured in existing memory.',
                 '- You MAY save multiple facts from a single message — capture everything relevant.',
-                '- Save complete, meaningful sentences — not just keywords.',
+                '- Save complete, meaningful sentences — not just keywords. E.g. "User is learning React for a freelance project" not just "React".',
                 '- Skip pure general knowledge questions with zero personal information.',
                 '- Format: bullet points, one fact per line.',
                 '- If nothing new to save, respond EXACTLY: NOTHING_TO_SAVE',
@@ -8244,11 +8244,11 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             _preFetchedQueries = ws.queries || [];
                             systemInstruction += '\n\n[REAL-TIME WEB SEARCH RESULTS FOR THIS QUERY]\n' + ws.text + '\n[END OF WEB SEARCH RESULTS]\nUse the above search results to answer the user\'s question accurately. Cite sources when relevant.';
                         } else {
-                            showToast('⚠️ Web search returned no results — answering from training data');
+                            showToast('No web results found — answering from knowledge base');
                         }
                     } catch(e) {
                         console.warn('Web search injection error:', e);
-                        showToast('⚠️ Web search failed — check your search provider API key in Settings');
+                        showToast('⚠️ Web search failed (' + (e.message || 'network error') + ') — check your search API key in Settings');
                     }
                 }
 
@@ -8739,9 +8739,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 }
 
                 // Parse and execute [SNOAH: feature=value] control commands from AI response
-                const _snoahCtrlRe = /\[SNOAH:\s*([a-z_]+)\s*=\s*(on|off)\]/gi;
-                let _snoahCtrlMatch;
-                while ((_snoahCtrlMatch = _snoahCtrlRe.exec(mainText)) !== null) {
+                const _snoahCtrlMatches = [...mainText.matchAll(/\[SNOAH:\s*([a-z_]+)\s*=\s*(on|off)\]/gi)];
+                for (const _snoahCtrlMatch of _snoahCtrlMatches) {
                     const feat = _snoahCtrlMatch[1].toLowerCase().replace(/_/g, '');
                     const val = _snoahCtrlMatch[2].toLowerCase() === 'on';
                     if (feat === 'canvas' && val !== canvasMode) { canvasMode = val; localStorage.setItem('snoah_canvas_mode', canvasMode); updateToggleButtons(); showToast(val ? '🖼️ Canvas mode ON' : 'Canvas mode OFF'); }
@@ -8752,10 +8751,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 mainText = mainText.replace(/\[SNOAH:[^\]]*\]/gi, '').trim();
 
                 // Parse and save [MEMORY: fact1. fact2] manual memory commands
-                const _memRe = /\[MEMORY:\s*([\s\S]*?)\]/gi;
-                let _memMatch;
                 const _memFacts = [];
-                while ((_memMatch = _memRe.exec(mainText)) !== null) {
+                for (const _memMatch of mainText.matchAll(/\[MEMORY:\s*([\s\S]*?)\]/gi)) {
                     const facts = _memMatch[1].trim();
                     if (facts) _memFacts.push(facts);
                 }
