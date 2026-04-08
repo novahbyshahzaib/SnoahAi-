@@ -81,6 +81,7 @@
             'list': '<line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>',
             'sliders': '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
             'layout-panel-right': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/>',
+            'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
         },
         createIcons() {
             document.querySelectorAll('i[data-lucide]').forEach(el => {
@@ -2045,12 +2046,19 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.6</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.7</span>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Universal Web Search for ALL Platforms 🔍</strong> — Web Search now works properly on every AI platform (Groq, NVIDIA, Claude, Mistral, Together AI, etc.). The app pre-fetches results from your configured search provider and injects them into the selected AI's context. The selected AI handles the full response with live data — no more switching to Gemini behind the scenes.</li>
+                            <li><strong>Smart Mode Canvas Auto-Enable 🖼️</strong> — Smart / Agentic Mode now also auto-enables Canvas (Artifact Viewer) when your question asks for code, HTML, an app, a game, a dashboard, etc. Canvas resets after the response just like Web Search and Thinking overrides.</li>
+                            <li><strong>AI Feature Control Commands 🎛️</strong> — Any AI can now toggle app features by including <code>[SNOAH: feature=value]</code> in its response (e.g. <code>[SNOAH: canvas=on]</code>). Ask the AI to "turn on canvas mode", "disable web search", or "enable thinking" and it will apply the change instantly. Control tags are silently removed from the displayed text.</li>
+                            <li><strong>Manual Memory Saves (Any Platform) 🧠</strong> — Ask any AI to "save this to memory" or "remember this". The AI includes <code>[MEMORY: your facts]</code> in its response, which is saved to your memory bank and removed from the display. Works on ALL platforms — not just Gemini.</li>
+                            <li><strong>Auto Memory for All Platforms 🧠</strong> — Auto Memory extraction no longer requires a Gemini key. It now uses Gemini if available, and falls back to your currently active AI platform (Groq, Claude, Mistral, etc.) for memory extraction.</li>
+                            <li><strong>Full App Awareness in Smart Mode 🤖</strong> — The AI now has ~90%+ awareness of the full app state: all toggle states, model parameters (Temperature, Top P, Top K, Max Tokens), response length, language, and more. Ask "what are my current settings?" and get an accurate answer.</li>
+                            <li><strong>Fixed Smart Mode Icon ⚡</strong> — The Smart button in the input toolbar now correctly shows the lightning bolt ⚡ icon.</li>
                             <li><strong>Web Search Platform 🔍</strong> — New in Settings → API tab. Choose which search engine powers the Web button: <em>Gemini</em> (default, Google Search), <em>Tavily AI</em> (free 1000/month), <em>Brave Search</em> (free 2000/month), <em>Serper.dev / Google</em> (free 2500/month), or a <em>Custom endpoint</em>. Real-time search now works on ALL AI platforms — results are injected as context, not just Gemini.</li>
                             <li><strong>⚡ Smart / Agentic Mode</strong> — New button in the input toolbar. When enabled, SnoahAI auto-detects what each question needs: turns on Web Search for live-data questions, and enables Thinking mode on Gemini for analytical ones. Both overrides reset after the response so your manual toggles stay intact.</li>
                             <li><strong>Storage Manager 📦</strong> — New section in Settings → App tab. See exactly how much browser storage SnoahAI is using, broken down by category: Chat History, API Keys, Settings &amp; Preferences, Memory &amp; Templates, and Total. Refresh on demand or tap "Clear Keys" to wipe all API key pools.</li>
@@ -5255,16 +5263,11 @@
 
         async function extractAndSaveMemory(userText, aiText) {
             if (!autoMemoryEnabled) return;
-            // Requires at least one Gemini key
-            const firstKey = geminiKeys[0];
-            if (!firstKey) return;
-            // Sanitize text: strip control characters that could interfere with prompt structure
-            // Use larger limits so full sentences and context are preserved
+            // Sanitize text
             const sanitize = s => (s || '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').substring(0, 4000);
             const uSnip = sanitize(userText);
             const aSnip = sanitize(aiText).substring(0, 6000);
             const existingMemory = autoMemoryContent.trim();
-            // Build instruction that includes existing memory for deduplication
             const instructionText = [
                 'You are a memory extraction assistant for a personal AI assistant.',
                 'Your job: extract genuinely important facts about the USER from the conversation below.',
@@ -5292,45 +5295,72 @@
                 'New facts to save (or NOTHING_TO_SAVE):'
             ].filter(Boolean).join('\n');
             const conversationText = 'User said:\n' + uSnip + '\n\nAI replied:\n' + aSnip;
-            try {
-                const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + firstKey;
-                const resp = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ role: 'user', parts: [{ text: conversationText }] }],
-                        systemInstruction: { parts: [{ text: instructionText }] },
-                        generationConfig: { maxOutputTokens: 1000, temperature: 0.1 }
-                    })
-                });
-                if (!resp.ok) return;
-                const data = await resp.json();
-                const extracted = (data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+
+            const _saveExtracted = (extracted) => {
                 if (!extracted || extracted.toUpperCase().includes('NOTHING_TO_SAVE')) return;
-                // Append with timestamp
                 const ts = new Date().toLocaleDateString();
                 autoMemoryContent = (autoMemoryContent ? autoMemoryContent + '\n' : '') + '[' + ts + ']\n' + extracted;
-                // Cap at ~20,000 chars by trimming the oldest timestamped entries from the front
                 const MAX_CHARS = 20000;
                 if (autoMemoryContent.length > MAX_CHARS) {
-                    // Find the second occurrence of a '[' date marker and trim everything before it
                     const firstBracket = autoMemoryContent.indexOf('[');
                     if (firstBracket !== -1) {
                         const secondBracket = autoMemoryContent.indexOf('[', firstBracket + 1);
                         if (secondBracket !== -1) {
                             autoMemoryContent = autoMemoryContent.substring(secondBracket);
                         } else {
-                            // Only one entry block, just cap it
                             autoMemoryContent = autoMemoryContent.substring(autoMemoryContent.length - MAX_CHARS);
                         }
                     }
                 }
                 localStorage.setItem('snoah_auto_memory', autoMemoryContent);
                 showToast('Memory updated 🧠');
-            } catch(e) {
-                // Silent fail — memory extraction is a background task
+            };
+
+            // Try Gemini first if key is available
+            const geminiKey = geminiKeys[0];
+            if (geminiKey) {
+                try {
+                    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + geminiKey;
+                    const resp = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ role: 'user', parts: [{ text: conversationText }] }],
+                            systemInstruction: { parts: [{ text: instructionText }] },
+                            generationConfig: { maxOutputTokens: 1000, temperature: 0.1 }
+                        })
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        const extracted = (data?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                        _saveExtracted(extracted);
+                        return;
+                    }
+                } catch(e) { /* fall through to active platform */ }
             }
+
+            // Fallback: use current active platform if it's OpenAI-compatible
+            const _openAICompatPlatforms = ['openrouter', 'groq', 'together', 'mistral', 'nvidia', 'huggingface', 'githubmodels', 'claude', 'copilot', 'cohere', 'deepinfra', 'ollama', 'cerebras', 'sambanova', 'fireworks', 'xai', 'perplexity', 'nanogpt', 'unify', 'kluster', 'custom'];
+            if (!_openAICompatPlatforms.includes(platform)) return;
+            const _memChatKey = platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : platform === 'mistral' ? mistralApiKey : platform === 'nvidia' ? nvidiaApiKey : platform === 'huggingface' ? hfApiKey : platform === 'githubmodels' ? ghApiKey : platform === 'claude' ? claudeApiKey : platform === 'copilot' ? copilotApiKey : platform === 'cohere' ? cohereApiKey : platform === 'deepinfra' ? deepinfraApiKey : platform === 'cerebras' ? cerebrasApiKey : platform === 'sambanova' ? sambanovaApiKey : platform === 'fireworks' ? fireworksApiKey : platform === 'xai' ? xaiApiKey : platform === 'perplexity' ? perplexityApiKey : platform === 'nanogpt' ? nanogptApiKey : platform === 'unify' ? unifyApiKey : platform === 'kluster' ? klusterApiKey : platform === 'custom' ? customEndpointApiKey : orApiKey;
+            if (!_memChatKey && platform !== 'ollama') return;
+            const _memChatUrl = platform === 'groq' ? 'https://api.groq.com/openai/v1/chat/completions' : platform === 'together' ? 'https://api.together.xyz/v1/chat/completions' : platform === 'mistral' ? 'https://api.mistral.ai/v1/chat/completions' : platform === 'nvidia' ? '/api/nvidia' : platform === 'huggingface' ? '/api/huggingface' : platform === 'githubmodels' ? '/api/github' : platform === 'claude' ? '/api/claude' : platform === 'copilot' ? '/api/github' : platform === 'cohere' ? '/api/cohere' : platform === 'deepinfra' ? '/api/deepinfra' : platform === 'ollama' ? (ollamaHost + '/v1/chat/completions') : platform === 'cerebras' ? 'https://api.cerebras.ai/v1/chat/completions' : platform === 'sambanova' ? 'https://api.sambanova.ai/v1/chat/completions' : platform === 'fireworks' ? 'https://api.fireworks.ai/inference/v1/chat/completions' : platform === 'xai' ? '/api/xai' : platform === 'perplexity' ? '/api/perplexity' : platform === 'nanogpt' ? '/api/nanogpt' : platform === 'unify' ? '/api/unify' : platform === 'kluster' ? '/api/kluster' : platform === 'custom' ? customEndpointUrl : 'https://openrouter.ai/api/v1/chat/completions';
+            const _isProxiedMem = ['nvidia','huggingface','githubmodels','claude','copilot','cohere','deepinfra','xai','perplexity','nanogpt','unify','kluster'].includes(platform);
+            const _memChatModel = platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'cohere' ? cohereModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'ollama' ? ollamaModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : platform === 'xai' ? xaiModelId : platform === 'perplexity' ? perplexityModelId : platform === 'nanogpt' ? nanogptModelId : platform === 'unify' ? unifyModelId : platform === 'kluster' ? klusterModelId : platform === 'custom' ? customModelId : orModelId;
+            const _memHeaders = _isProxiedMem ? { 'Content-Type': 'application/json', 'x-api-key': _memChatKey } : platform === 'ollama' ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _memChatKey };
+            try {
+                const resp = await fetch(_memChatUrl, {
+                    method: 'POST',
+                    headers: _memHeaders,
+                    body: JSON.stringify({ model: _memChatModel, messages: [{ role: 'system', content: instructionText }, { role: 'user', content: conversationText }], max_tokens: 1000, temperature: 0.1, stream: false })
+                });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const extracted = (data?.choices?.[0]?.message?.content || '').trim();
+                _saveExtracted(extracted);
+            } catch(e) { /* Silent fail */ }
         }
+
 
         async function notionAPICall(method, endpoint, body) {
             if (!notionKey) { showToast('Add your Notion token in Settings first'); return null; }
@@ -7964,16 +7994,19 @@
 
             setIsLoading(true);
 
-            // Smart mode: auto-enable web search and/or thinking based on question
+            // Smart mode: auto-enable web search, thinking, and/or canvas based on question
             let _smartWebOverride = false;
             let _smartThinkOverride = false;
+            let _smartCanvasOverride = false;
             if (smartMode) {
                 const q = (textToSend || '').toLowerCase();
                 const needsSearch = /\b(today|current|latest|now|recent|news|weather|price|stock|live|real.?time|right now|this (week|month|year)|who (is|are|won)|what (is|are) (happening|the (date|time|weather)))\b/.test(q);
                 const needsThink = /\b(explain|how (do|does|can|should|would)|why|analyze|compare|difference|pros|cons|calculate|math|code|write|create|design|plan|step.?by.?step|algorithm|solve)\b/.test(q);
+                const needsCanvas = /\b(html|css|javascript|react|python|component|webpage|website|page|app|game|animation|dashboard|ui|script|function|diagram|chart|svg)\b/.test(q) && /\b(create|build|make|write|generate|code|design|draw|show)\b/.test(q);
                 if (needsSearch && !useAgent) { useAgent = true; _smartWebOverride = true; }
                 if (needsThink && !useThinking && platform === 'gemini') { useThinking = true; _smartThinkOverride = true; }
-                if (_smartWebOverride || _smartThinkOverride) updateToggleButtons();
+                if (needsCanvas && !canvasMode) { canvasMode = true; localStorage.setItem('snoah_canvas_mode', canvasMode); _smartCanvasOverride = true; }
+                if (_smartWebOverride || _smartThinkOverride || _smartCanvasOverride) updateToggleButtons();
             }
 
             try {
@@ -7992,11 +8025,11 @@ APP OVERVIEW:
 - Complex multi-functional web app (HTML/CSS/JS with Tailwind CSS, plus backend Vercel serverless functions in /api/)
 
 PLATFORMS & MODELS (all configurable in Settings):
-- Google Gemini: default platform. Models: gemini-2.5-flash, gemini-2.5-pro, etc. Supports web search grounding and image uploads.
-- OpenRouter: aggregates 100+ models. Many free ones (with :free suffix). Supports image uploads.
-- Groq: ultra-fast inference. Free models: llama-3.3-70b-versatile (default), llama-3.1-8b-instant, gemma2-9b-it. No web search.
-- Together AI: open-source models. Free models have -Free suffix e.g. meta-llama/Llama-3.3-70B-Instruct-Turbo-Free. No web search. Requires account verification at api.together.ai.
-- Mistral AI: free tier with phone verification only (no card). Default model: mistral-small-latest. Also: open-mistral-7b, open-mixtral-8x7b. No web search.
+- Google Gemini: default platform. Models: gemini-2.5-flash, gemini-2.5-pro, etc. Supports native Google Search grounding and image uploads.
+- OpenRouter: aggregates 100+ models. Many free ones (with :free suffix). Supports image uploads and web search via configured Web Search Platform.
+- Groq: ultra-fast inference. Free models: llama-3.3-70b-versatile (default), llama-3.1-8b-instant, gemma2-9b-it. Supports web search via configured Web Search Platform (results injected as context).
+- Together AI: open-source models. Free models have -Free suffix e.g. meta-llama/Llama-3.3-70B-Instruct-Turbo-Free. Supports web search via configured Web Search Platform. Requires account verification at api.together.ai.
+- Mistral AI: free tier with phone verification only (no card). Default model: mistral-small-latest. Also: open-mistral-7b, open-mixtral-8x7b. Supports web search via configured Web Search Platform.
 - NVIDIA: NVIDIA NIM API via backend proxy. Default model: meta/llama-3.1-8b-instruct. Get key at build.nvidia.com. Uses /api/nvidia proxy for CORS protection.
 - Hugging Face: Inference API via backend proxy. Default model: meta-llama/Llama-3.3-70B-Instruct. Get token at huggingface.co/settings/tokens. Uses /api/huggingface proxy for CORS protection.
 - GitHub Models: Azure-hosted models via backend proxy. Default model: gpt-4o-mini. Also: Phi-3.5-mini-instruct. Get token at github.com/settings/tokens. Uses /api/github proxy for CORS protection.
@@ -8006,7 +8039,7 @@ MULTI-KEY POOL: Add multiple API keys per platform. On rate limit (429), app sil
 
 FEATURES:
 1. THINKING MODE (🧠 Thinking button): AI reasons step-by-step. A live collapsible "💭 Thinking…" block streams in real-time. Best for complex problems, math, logic. Available on all platforms.
-2. WEB SEARCH (🔍 Web button): When enabled, the app ALWAYS uses Gemini to handle the request — regardless of which platform is selected. Gemini uses Google Search grounding to fetch real-time results. When Web is OFF, the selected platform (Groq, Mistral, etc.) handles the request normally. This means Web Search always requires a valid Gemini API key in Settings.
+2. WEB SEARCH (🔍 Web button): When enabled, all AI platforms can perform real-time web search. Gemini uses native Google Search grounding. All other platforms receive search results pre-fetched from the configured Web Search Platform (Tavily, Brave, Serper, Custom, or Gemini) and injected as context — so EVERY platform supports live web search. The web search provider is independent of the AI platform. Web search works on ALL 23+ AI platforms. You should NEVER tell the user that a non-Gemini platform cannot do web search — all platforms support it when the Web button is ON.
 3. IMAGE UPLOAD (📎 Attach button / + button): Upload images for AI to analyze. Supported on ALL platforms that accept the OpenAI-compatible image_url format — including Gemini, OpenRouter, NVIDIA, Groq, Together AI, Mistral AI, Claude, Hugging Face, GitHub Models, Copilot, Google AI Studio, Cohere, DeepInfra, Ollama, Cerebras, SambaNova, Fireworks, xAI, Perplexity, NanoGPT, Unify, and Kluster.ai. Vision availability depends on whether the specific model selected supports image input; if not, the platform will return an error. Tap Attach button or the + button. Multi-image upload supported with preview strip.
 4. FILE ATTACHMENTS (📎 Attach button): Upload documents — PDFs, text files (.txt), CSVs, JSON, Markdown (.md), XML, .doc/.docx. Document content is extracted and sent as context to the AI. Combine with images in the same message.
 5. RESPONSE LENGTH (≡ Normal button): Cycles Normal → Short (2-4 sentences) → Detailed. Tap the button to cycle through lengths.
@@ -8052,7 +8085,7 @@ FEATURES:
 45. RETRY BUTTON ON ERRORS: When an API error occurs (rate limit, auth failure, timeout, credit limit, etc.), a Retry button appears directly in the error message. Tapping it calls regenerateLastResponse() to retry the last user message.
 46. RESET SETTINGS: Settings footer has a "Reset Settings" button. Clicking it (after confirmation) resets all settings to their defaults: platform → Gemini, models to defaults, model parameters (temperature, top_p, top_k, max_tokens) to defaults, custom instructions cleared, persona cleared, Multi-AI disabled. API keys and chat data are NOT deleted.
 47. CODE STREAMING FIX: AI responses now show code blocks streaming in real-time. Partial/in-progress code blocks are rendered live as the AI generates them — you can watch the code appear line by line instead of waiting for the full block to finish. A streaming cursor is shown inside the code block header while it is still being written.
-48. AUTO MEMORY: Settings → Auto Memory toggle. When enabled, SnoahAI automatically extracts and saves important facts about the user from each conversation (name, profession, goals, preferences, ongoing projects, relationships, constraints, etc.) into a local memory bank. The memory extractor uses deduplication — it will never save the same fact twice. Memory is injected as context into every future chat so the AI can give more personalized, context-aware responses. Requires a Gemini API key for extraction. Memory can be viewed and cleared in Settings → Auto Memory.
+48. AUTO MEMORY: Settings → Auto Memory toggle. When enabled, SnoahAI automatically extracts and saves important facts about the user from each conversation (name, profession, goals, preferences, ongoing projects, relationships, constraints, etc.) into a local memory bank. The memory extractor uses deduplication — it will never save the same fact twice. Memory is injected as context into every future chat so the AI can give more personalized, context-aware responses. Uses Gemini for extraction if a Gemini key is available; otherwise uses the currently active AI platform. Memory can be viewed and cleared in Settings → Auto Memory. Additionally, any AI can save manual memories when the user asks — it outputs [MEMORY: facts] which is parsed and saved automatically.
 49. IMPROVED VOICE-TO-TEXT: Voice input uses continuous recognition with text accumulation. Tap the mic button to start (shows 🎤 Listening toast), speak, then tap again to stop. Interim and final results are accumulated progressively in the input field, so partial speech is visible in real-time. Works on Chrome, Safari, and other modern browsers.
 50. COMPACT RESPONSE ACTIONS (⋮ MENU): AI response action buttons now show only 3 buttons (Copy, Retry, Read) plus a vertical three-dots (⋮) button. Tapping ⋮ opens a compact popup card with ALL available actions: Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark. This prevents layout-breaking when many buttons are present.
 51. COPY AS MARKDOWN: Available in the ⋮ action menu on every AI response. Copies the raw Markdown source text of the response to the clipboard — useful for pasting into Notion, GitHub, or Markdown editors.
@@ -8080,8 +8113,12 @@ FEATURES:
 73. FULL BACKUP & RESTORE: Settings → App tab → Full Backup & Restore. "Backup" downloads a v2 JSON file containing ALL chats AND all settings/API keys/preferences/selected AI. "Restore" re-imports everything and reloads the page. Old v1 (chats-only) backup files are also supported — they merge chats without overwriting settings.
 74. ENTER KEY = NEWLINE: Pressing Enter in the chat input inserts a newline. To send, use the Send button or Shift+Enter. This is the standard mobile messaging behavior.
 75. STORAGE MANAGER: Settings → App tab → Storage Manager. Shows a live breakdown of browser localStorage usage by category: Chat History, API Keys, Settings & Preferences, Memory & Templates, and Total. "↻ Refresh" recalculates. "Clear Keys" removes all API key pools (with confirmation prompt).
-76. SMART / AGENTIC MODE: ⚡ Smart button in the input toolbar. When enabled, SnoahAI automatically detects what the current question needs: enables Web Search for live-data questions (today's news, prices, weather, current events) and enables Thinking mode for analytical questions (explain, analyze, compare, code, math). Both overrides reset after each response; manual Web and Thinking toggles are unaffected.
-77. WEB SEARCH PLATFORM: Settings → API tab → Web Search Platform. Choose the search engine that powers the Web (🔍) button. Options: Gemini (default, free — uses Google Search grounding, Gemini key required), Tavily AI Search (free 1000 searches/month), Brave Search (free 2000 queries/month), Google via Serper.dev (free 2500 searches/month), Custom (your own endpoint accepting POST {query, key} → {results:[{title, url, snippet}]}). For non-Gemini AI platforms, results are fetched and injected into the system context so ANY platform supports real-time web search.
+76. SMART / AGENTIC MODE: ⚡ Smart button in the input toolbar. When enabled, SnoahAI automatically detects what the current question needs: enables Web Search for live-data questions (today's news, prices, weather, current events), enables Thinking mode for analytical questions (explain, analyze, compare, code, math), and enables Canvas/Artifact mode for code/creative output questions (build a webpage, create an app, write a script). All overrides reset after each response; manual toggles are unaffected. In Smart mode, the selected AI has full awareness of all active features.
+77. WEB SEARCH PLATFORM: Settings → API tab → Web Search Platform. Choose the search engine that powers the Web (🔍) button. Options: Gemini (default, free — uses Google Search grounding, Gemini key required), Tavily AI Search (free 1000 searches/month), Brave Search (free 2000 queries/month), Google via Serper.dev (free 2500 searches/month), Custom (your own endpoint accepting POST {query, key} → {results:[{title, url, snippet}]}). ALL AI platforms support real-time web search — results are pre-fetched from the configured provider and injected as context. Non-Gemini platforms receive search results in their system context and respond with live data.
+78. UNIVERSAL WEB SEARCH: All 23+ AI platforms can now perform real-time web search. Web search is not limited to Gemini. When Web Search is ON, the app pre-fetches results from the configured Web Search Platform (Tavily/Brave/Serper/Custom/Gemini) and injects them into the selected AI's system context. The AI then answers using live data. The selected AI (Groq, NVIDIA, Claude, etc.) handles the actual response with web context.
+79. AI FEATURE CONTROL COMMANDS: The AI can toggle app features by including [SNOAH: feature=value] in its response. Features: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). When the user asks the AI to turn a feature on or off, the AI responds with the appropriate [SNOAH:...] command and the app applies it automatically. Control tags are removed from the displayed text.
+80. MANUAL MEMORY SAVES: Any AI platform can save facts to memory. When the user says "save this to memory" or "remember this", the AI includes [MEMORY: fact1. fact2.] in its response. The app parses these tags, saves the facts to the memory bank, and removes the tags from displayed text. Auto Memory extraction also now works with all platforms — uses Gemini if available, otherwise uses the currently active platform.
+81. FULL APP AWARENESS IN SMART MODE: When Smart Mode is active, the AI has ~90%+ awareness of the app state: active platform, model, all toggle states (web search, thinking, canvas, multi-AI, instant response, timestamps, temp chat, auto memory, notion auto-save), model parameters (temperature, top P, top K, max tokens), response length, and response language. The AI can read and control all these features.
 
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
@@ -8123,7 +8160,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const _featureState = [
                     'Web Search: ' + (useAgent ? 'ON (provider: ' + (_wsProviders[webSearchPlatform] || webSearchPlatform) + ')' : 'OFF'),
                     'Thinking Mode: ' + (useThinking ? 'ON' : 'OFF'),
-                    'Smart / Agentic Mode: ' + (smartMode ? 'ON (auto-selects web search and thinking per query)' : 'OFF'),
+                    'Smart / Agentic Mode: ' + (smartMode ? 'ON (auto-selects web search, thinking, and canvas per query)' : 'OFF'),
                     'Canvas Mode: ' + (canvasMode ? 'ON (code opens in Artifact Viewer)' : 'OFF'),
                     'Multi-AI Mode: ' + (multiAIEnabled ? 'ON (platforms: ' + (multiAIPlatforms.join(', ') || 'none selected') + ')' : 'OFF'),
                     'Instant Response Display: ' + (instantResponseMode ? 'ON (full response shown at once)' : 'OFF (animated character-by-character)'),
@@ -8132,8 +8169,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     'Temp Chat: ' + (isTempChat ? 'ON (this conversation is not saved)' : 'OFF'),
                     'Auto Memory: ' + (autoMemoryEnabled ? 'ON' : 'OFF'),
                     'Notion Auto-Save: ' + (notionAutoSave ? 'ON' : 'OFF'),
+                    'Model Parameters: Temperature=' + paramTemperature + ' | Top P=' + paramTopP + ' | Top K=' + paramTopK + ' | Max Tokens=' + paramMaxTokens,
+                    'Response Length: ' + responseLength,
                 ].join(' | ');
-                systemInstruction += '\n\nACTIVE FEATURE STATE: ' + _featureState + '. When the user asks which features are on or off, or what mode is active, answer accurately from this state.';
+                systemInstruction += '\n\nACTIVE FEATURE STATE: ' + _featureState + '. When the user asks which features are on or off, what mode is active, or what parameters are set, answer accurately from this state.\n\nFEATURE CONTROL: You can toggle app features by including a control tag anywhere in your response: [SNOAH: feature=value] where feature can be: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). These tags are silently processed and removed from the displayed response. Example: if the user says "turn on canvas mode", include [SNOAH: canvas=on] somewhere in your response along with your text reply. MEMORY CONTROL: If the user asks you to save something to memory or remember something, include [MEMORY: fact1. fact2. fact3] in your response — each fact separated by a period. These will be saved and removed from the displayed text.';
                 if (platform === 'mistral') {
                     systemInstruction += 'You are running on Mistral AI. ';
                 }
@@ -8195,15 +8234,22 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
                 // For non-Gemini platforms with web search on, fetch results and inject into systemInstruction
                 let _preFetchedSources = null, _preFetchedQueries = null;
-                if (useAgent && platform !== 'gemini' && platform !== 'gais' && webSearchPlatform !== 'gemini') {
+                let _wsPreFetchAttempted = false;
+                if (useAgent && platform !== 'gemini' && platform !== 'gais') {
+                    _wsPreFetchAttempted = true;
                     try {
                         const ws = await performWebSearch(messages);
                         if (ws && ws.text) {
                             _preFetchedSources = ws.sources || [];
                             _preFetchedQueries = ws.queries || [];
                             systemInstruction += '\n\n[REAL-TIME WEB SEARCH RESULTS FOR THIS QUERY]\n' + ws.text + '\n[END OF WEB SEARCH RESULTS]\nUse the above search results to answer the user\'s question accurately. Cite sources when relevant.';
+                        } else {
+                            showToast('No web results found — answering from knowledge base');
                         }
-                    } catch(e) { console.warn('Web search injection error:', e); }
+                    } catch(e) {
+                        console.warn('Web search injection error:', e);
+                        showToast('⚠️ Web search failed (' + (e.message || 'network error') + ') — check your search API key in Settings');
+                    }
                 }
 
                 // ── Build live response bubble immediately ──
@@ -8425,8 +8471,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             }
                         }
 
-                        // When web search is ON, always use Gemini regardless of selected platform
-                        if (platform === 'puter' && !useAgent) {
+                        // When web search is ON for non-Gemini/non-GAIS platforms, results are pre-fetched and injected into systemInstruction above — the selected platform handles the response.
+                        if (platform === 'puter') {
                             // Puter.js — free AI via puter.js library
                             if (typeof puter === 'undefined') throw new Error('Puter.js is still loading. Please wait a moment and try again.');
                             const puterMessages = [{ role: 'system', content: systemInstruction }];
@@ -8457,7 +8503,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             clearTimeout(connTimeoutGA);
                             await readStream(resGA);
                             abortController = null;
-                        } else if ((platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral' || platform === 'nvidia' || platform === 'huggingface' || platform === 'githubmodels' || platform === 'claude' || platform === 'copilot' || platform === 'cohere' || platform === 'deepinfra' || platform === 'ollama' || platform === 'cerebras' || platform === 'sambanova' || platform === 'fireworks' || platform === 'xai' || platform === 'perplexity' || platform === 'nanogpt' || platform === 'unify' || platform === 'kluster' || platform === 'custom') && !useAgent) {
+                        } else if (platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral' || platform === 'nvidia' || platform === 'huggingface' || platform === 'githubmodels' || platform === 'claude' || platform === 'copilot' || platform === 'cohere' || platform === 'deepinfra' || platform === 'ollama' || platform === 'cerebras' || platform === 'sambanova' || platform === 'fireworks' || platform === 'xai' || platform === 'perplexity' || platform === 'nanogpt' || platform === 'unify' || platform === 'kluster' || platform === 'custom') {
                             const isGroq = platform === 'groq';
                             const isTogether = platform === 'together';
                             const isMistral = platform === 'mistral';
@@ -8692,6 +8738,33 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     mainText = _normFullRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
                 }
 
+                // Parse and execute [SNOAH: feature=value] control commands from AI response
+                const _snoahCtrlMatches = [...mainText.matchAll(/\[SNOAH:\s*([a-z_]+)\s*=\s*(on|off)\]/gi)];
+                for (const _snoahCtrlMatch of _snoahCtrlMatches) {
+                    const feat = _snoahCtrlMatch[1].toLowerCase().replace(/_/g, '');
+                    const val = _snoahCtrlMatch[2].toLowerCase() === 'on';
+                    if (feat === 'canvas' && val !== canvasMode) { canvasMode = val; localStorage.setItem('snoah_canvas_mode', canvasMode); updateToggleButtons(); showToast(val ? '🖼️ Canvas mode ON' : 'Canvas mode OFF'); }
+                    else if (feat === 'thinking' && val !== useThinking) { useThinking = val; updateToggleButtons(); showToast(val ? '🧠 Thinking mode ON' : 'Thinking mode OFF'); }
+                    else if ((feat === 'websearch' || feat === 'web') && val !== useAgent) { useAgent = val; updateToggleButtons(); showToast(val ? '🔍 Web Search ON' : 'Web Search OFF'); }
+                    else if (feat === 'smart' && val !== smartMode) { smartMode = val; updateToggleButtons(); showToast(val ? '⚡ Smart mode ON' : 'Smart mode OFF'); }
+                }
+                mainText = mainText.replace(/\[SNOAH:[^\]]*\]/gi, '').trim();
+
+                // Parse and save [MEMORY: fact1. fact2] manual memory commands
+                const _memFacts = [];
+                for (const _memMatch of mainText.matchAll(/\[MEMORY:\s*([\s\S]*?)\]/gi)) {
+                    const facts = _memMatch[1].trim();
+                    if (facts) _memFacts.push(facts);
+                }
+                if (_memFacts.length > 0) {
+                    const ts = new Date().toLocaleDateString();
+                    const newMem = _memFacts.join('\n');
+                    autoMemoryContent = (autoMemoryContent ? autoMemoryContent + '\n' : '') + '[' + ts + ' — Manual Save]\n' + newMem;
+                    localStorage.setItem('snoah_auto_memory', autoMemoryContent);
+                    showToast('Memory saved 🧠 (' + _memFacts.length + ' item' + (_memFacts.length > 1 ? 's' : '') + ')');
+                }
+                mainText = mainText.replace(/\[MEMORY:[^\]]*\]/gi, '').trim();
+
                 thinkBody.textContent = thinkingText || '';
                 if (!liveAppended && fullRaw.trim()) { messagesWrapper.appendChild(liveWrapper); liveAppended = true; }
                 if (!liveAppended) { messagesWrapper.appendChild(liveWrapper); }
@@ -8823,7 +8896,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Reset smart mode overrides
                 if (_smartWebOverride) { useAgent = false; }
                 if (_smartThinkOverride) { useThinking = false; }
-                if (_smartWebOverride || _smartThinkOverride) updateToggleButtons();
+                if (_smartCanvasOverride) { canvasMode = false; localStorage.setItem('snoah_canvas_mode', false); }
+                if (_smartWebOverride || _smartThinkOverride || _smartCanvasOverride) updateToggleButtons();
 
             } catch (error) {
                 // User-initiated abort (stop button) — save partial content and show Continue button
@@ -8923,6 +8997,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Reset any smart mode overrides
                 if (_smartWebOverride) { useAgent = false; _smartWebOverride = false; }
                 if (_smartThinkOverride) { useThinking = false; _smartThinkOverride = false; }
+                if (_smartCanvasOverride) { canvasMode = false; localStorage.setItem('snoah_canvas_mode', false); _smartCanvasOverride = false; updateToggleButtons(); }
                 setIsLoading(false);
                 isStreaming = false;
                 streamingBarIndicator.classList.add('hidden');
