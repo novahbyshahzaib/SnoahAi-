@@ -1039,7 +1039,7 @@
                         <input type="range" id="stream-timeout-slider" min="15" max="120" step="15" value="45"
                             oninput="document.getElementById('stream-timeout-val').textContent=this.value+'s'"
                             class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
-                        <div class="flex justify-between text-[10px] text-[#A3A095] mt-0.5">
+                        <div class="flex justify-between gap-1 text-[10px] text-[#A3A095] mt-0.5">
                             <span>15s</span><span>30s</span><span>45s</span><span>60s</span><span>75s</span><span>90s</span><span>105s</span><span>120s</span>
                         </div>
                     </div>
@@ -1743,7 +1743,7 @@
                             <input type="checkbox" id="welcome-cookies-check"
                                 class="w-5 h-5 rounded-md border-2 border-[#E5E3DB] appearance-none bg-white cursor-pointer transition-colors welcome-checkbox" style="margin:0;padding:0;">
                         </div>
-                        <span class="text-[12px] text-[#5B5951] leading-relaxed"><strong>Optional:</strong> Allow multiple API keys per platform (enables key auto-rotation on rate limits). You can change this later in Preferences.</span>
+                        <span class="text-[12px] text-[#5B5951] leading-relaxed"><strong>Optional:</strong> Allow multiple API keys per platform (enables key auto-rotation on rate limits). You can change this later in Preferences → App &amp; Info → Multi-Key Storage.</span>
                     </label>
                     <!-- Confirm button -->
                     <button id="welcome-confirm-btn" onclick="saveUserName()" disabled
@@ -3735,15 +3735,17 @@
             }
         }
 
+        const AUTO_SCROLL_THRESHOLD_PX = 80; // pixels from bottom to detect manual scroll-up during streaming
+
         // Listen to scroll events on chat container
         document.getElementById('chat-container').addEventListener('scroll', function() {
             if (isStreaming) {
                 const container = document.getElementById('chat-container');
                 const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-                // If user scrolled more than 80px away from bottom, pause auto-scroll
-                if (distFromBottom > 80) {
+                // If user scrolled beyond threshold, pause auto-scroll
+                if (distFromBottom > AUTO_SCROLL_THRESHOLD_PX) {
                     userPausedAutoScroll = true;
-                } else if (distFromBottom <= 80) {
+                } else {
                     // Near bottom again — resume auto-scroll
                     userPausedAutoScroll = false;
                 }
@@ -5877,6 +5879,8 @@
             // Start SpeechRecognition directly — it requests mic permission itself.
             // Using getUserMedia() first would open a competing audio stream that
             // prevents SpeechRecognition from capturing audio on many browsers.
+            // If the user denies the mic permission, SpeechRecognition fires onerror('not-allowed')
+            // which is handled by the onerror handler inside startSpeechRecognition().
             startSpeechRecognition();
         }
 
@@ -6693,16 +6697,14 @@
             ttsActive = true;
             btn.classList.add('tts-active','text-[#D25D38]');
             btn._wasSpeaking = true;
-            ttsUtterance.onend = () => {
+            const _stopWebSpeech = () => {
                 ttsActive = false;
                 btn.classList.remove('tts-active','text-[#D25D38]');
                 btn._wasSpeaking = false;
             };
-            ttsUtterance.onerror = () => {
-                ttsActive = false;
-                btn.classList.remove('tts-active','text-[#D25D38]');
-                btn._wasSpeaking = false;
-            };
+            ttsUtterance.onend = _stopWebSpeech;
+            // If permission is denied, SpeechRecognition fires onerror('not-allowed') on its own
+            ttsUtterance.onerror = _stopWebSpeech;
             // Speak immediately — no delay waiting for voice list to load
             window.speechSynthesis.speak(ttsUtterance);
         }
@@ -7448,7 +7450,9 @@
         }
 
         function copyPlainText(text) {
-            // Strip markdown: bold, italic, headers, code fences, inline code, links, horizontal rules
+            // Strip markdown formatting for a clean plain-text copy.
+            // Note: the code-fence regex matches lazily so consecutive blocks are handled
+            // separately. Nested code blocks and deeply-indented lists are flattened intentionally.
             const plain = text
                 .replace(/```[\s\S]*?```/g, (m) => m.replace(/```\w*\n?/g, '').trim()) // code blocks → content only
                 .replace(/`([^`]+)`/g, '$1')      // inline code
@@ -7459,7 +7463,7 @@
                 .replace(/_(.+?)_/g, '$1')         // italic underscore
                 .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links
                 .replace(/^[-*_]{3,}$/gm, '')      // horizontal rules
-                .replace(/^[-*+]\s+/gm, '• ')      // unordered list bullets
+                .replace(/^[-*+]\s+/gm, '• ')      // unordered list bullets (nested indentation flattened)
                 .replace(/^\d+\.\s+/gm, '')        // ordered list numbers
                 .replace(/^>\s+/gm, '')            // blockquotes
                 .trim();
@@ -8594,7 +8598,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             const decoder = new TextDecoder();
                             let buf = '';
                             lastStreamUsage = null;
-                            const STREAM_TIMEOUT = streamTimeoutMs || 45000; // configurable no-data timeout
+                            const STREAM_TIMEOUT = streamTimeoutMs; // configurable no-data timeout (Settings → API → Request Timeout)
                             let lastDataTime = Date.now();
                             let streamTimeoutId = null;
                             // Track whether we are currently inside a reasoning_content block
