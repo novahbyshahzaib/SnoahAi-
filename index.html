@@ -1024,6 +1024,25 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- API Request Timeout -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">API Request Timeout</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">How long to wait without receiving any data before cancelling a request. Increase for slow connections or very long responses.</p>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[12px] font-semibold text-[#5B5951]">Timeout</span>
+                            <span id="stream-timeout-val" class="text-[12px] font-mono text-[#A3A095]">45s</span>
+                        </div>
+                        <input type="range" id="stream-timeout-slider" min="15" max="120" step="15" value="45"
+                            oninput="document.getElementById('stream-timeout-val').textContent=this.value+'s'"
+                            class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
+                        <div class="flex justify-between text-[10px] text-[#A3A095] mt-0.5">
+                            <span>15s</span><span>30s</span><span>45s</span><span>60s</span><span>75s</span><span>90s</span><span>105s</span><span>120s</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- AI Config Tab -->
@@ -1196,6 +1215,24 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Conversation Style -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Conversation Style</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Pick a tone preset that shapes how the AI communicates. Applied on top of any Custom Instructions.</p>
+                        <div class="grid grid-cols-3 gap-2" id="conv-style-grid">
+                            <button onclick="setConvStyle('standard')" id="cs-standard" class="conv-style-btn py-2 rounded-xl border text-[12px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Standard</button>
+                            <button onclick="setConvStyle('friendly')" id="cs-friendly" class="conv-style-btn py-2 rounded-xl border text-[12px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Friendly</button>
+                            <button onclick="setConvStyle('concise')" id="cs-concise" class="conv-style-btn py-2 rounded-xl border text-[12px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Concise</button>
+                            <button onclick="setConvStyle('detailed')" id="cs-detailed" class="conv-style-btn py-2 rounded-xl border text-[12px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Detailed</button>
+                            <button onclick="setConvStyle('academic')" id="cs-academic" class="conv-style-btn py-2 rounded-xl border text-[12px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Academic</button>
+                            <button onclick="setConvStyle('casual')" id="cs-casual" class="conv-style-btn py-2 rounded-xl border text-[12px] font-medium transition-colors border-[#E5E3DB] text-[#5B5951] hover:bg-[#F2F0E9]">Casual</button>
+                        </div>
+                        <p id="conv-style-desc" class="text-[11px] text-[#A3A095] mt-2"></p>
                     </div>
                 </div>
 
@@ -1692,13 +1729,21 @@
                             <button onclick="openTermsModal()" class="text-[#D25D38] underline text-[11px] mt-1">View full Terms &amp; Conditions →</button>
                         </div>
                     </div>
-                    <!-- Checkbox -->
-                    <label class="flex items-start gap-3 cursor-pointer mb-5 select-none">
+                    <!-- Terms checkbox (required) -->
+                    <label class="flex items-start gap-3 cursor-pointer mb-3 select-none">
                         <div class="relative mt-0.5 shrink-0 welcome-check-wrap">
                             <input type="checkbox" id="welcome-consent-check" onchange="updateWelcomeConfirmBtn()"
                                 class="w-5 h-5 rounded-md border-2 border-[#E5E3DB] appearance-none bg-white cursor-pointer transition-colors welcome-checkbox" style="margin:0;padding:0;">
                         </div>
-                        <span class="text-[12px] text-[#5B5951] leading-relaxed">I accept the cookie &amp; storage policy and <button type="button" onclick="openTermsModal()" class="text-[#D25D38] underline">Terms &amp; Conditions</button></span>
+                        <span class="text-[12px] text-[#5B5951] leading-relaxed"><strong>Required:</strong> I accept the storage policy and <button type="button" onclick="openTermsModal()" class="text-[#D25D38] underline">Terms &amp; Conditions</button></span>
+                    </label>
+                    <!-- Cookies checkbox (optional) -->
+                    <label class="flex items-start gap-3 cursor-pointer mb-5 select-none">
+                        <div class="relative mt-0.5 shrink-0 welcome-check-wrap">
+                            <input type="checkbox" id="welcome-cookies-check"
+                                class="w-5 h-5 rounded-md border-2 border-[#E5E3DB] appearance-none bg-white cursor-pointer transition-colors welcome-checkbox" style="margin:0;padding:0;">
+                        </div>
+                        <span class="text-[12px] text-[#5B5951] leading-relaxed"><strong>Optional:</strong> Allow multiple API keys per platform (enables key auto-rotation on rate limits). You can change this later in Preferences.</span>
                     </label>
                     <!-- Confirm button -->
                     <button id="welcome-confirm-btn" onclick="saveUserName()" disabled
@@ -1981,6 +2026,19 @@
                     <div>
                         <p class="text-[11px] text-[#A3A095] uppercase font-bold tracking-widest mb-2">App &amp; Info</p>
                         <div class="space-y-1">
+                            <!-- Cookies toggle -->
+                            <div class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#F2F0E9] border border-[#E5E3DB]">
+                                <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="8" cy="9" r="1.5" fill="#D25D38" stroke="none"/><circle cx="15" cy="11" r="1.5" fill="#D25D38" stroke="none"/><circle cx="10" cy="15" r="1.5" fill="#D25D38" stroke="none"/></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-[13px] font-semibold text-[#2C2B29]">Multi-Key Storage <span id="pref-cookies-badge" class="text-[10px] text-[#A3A095] font-normal"></span></p>
+                                    <p class="text-[11px] text-[#A3A095]">Allow multiple API keys per platform</p>
+                                </div>
+                                <button id="pref-cookies-toggle" onclick="toggleCookiesPref()" class="relative w-11 h-6 rounded-full transition-colors duration-300 flex-shrink-0 bg-[#D9D6CE]">
+                                    <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                                </button>
+                            </div>
                             <button onclick="toggleDarkMode()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F2F0E9] text-left transition-colors group">
                                 <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] group-hover:bg-[#EAE8E0] flex items-center justify-center shrink-0 transition-colors">
                                     <i id="dark-mode-icon" data-lucide="moon" class="w-[15px] h-[15px] text-[#8C897D] group-hover:text-[#D25D38]"></i>
@@ -2046,13 +2104,26 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.7</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.8</span>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
-                            <li><strong>Universal Web Search for ALL Platforms 🔍</strong> — Web Search now works properly on every AI platform (Groq, NVIDIA, Claude, Mistral, Together AI, etc.). The app pre-fetches results from your configured search provider and injects them into the selected AI's context. The selected AI handles the full response with live data — no more switching to Gemini behind the scenes.</li>
+                            <li><strong>Instant TTS ⚡</strong> — Text-to-Speech now speaks immediately when triggered. WebSpeech (Built-in) no longer waits for the browser voice list to load — it fires right away using the device's default voice. All platforms respond faster.</li>
+                            <li><strong>Fixed Voice Input 🎤</strong> — Speech-to-text mic now works reliably. The conflicting getUserMedia audio stream that prevented SpeechRecognition from capturing speech has been removed. Tap the mic, speak, and your words appear in the input bar.</li>
+                            <li><strong>Scroll During Streaming 📜</strong> — You can now freely scroll up or down while an AI response is streaming. Auto-scroll pauses the moment you scroll away; it resumes automatically when you scroll back near the bottom.</li>
+                            <li><strong>Separate Cookies Consent ✅</strong> — The welcome setup now has two checkboxes: <em>Terms &amp; Conditions</em> (required to start) and <em>Allow Multiple API Keys</em> (optional — enables key auto-rotation). You can also toggle multi-key access later in Preferences → Multi-Key Storage.</li>
+                            <li><strong>Copy Plain Text 📋</strong> — The ⋮ action menu's "Copy MD" button is now <em>Copy Text</em>. It strips all markdown formatting (*#-`) before copying, giving you clean plain text for pasting anywhere.</li>
+                            <li><strong>API Request Timeout ⏱️</strong> — New slider in Settings → API tab. Set how long SnoahAI waits for data before cancelling a request (15–120 seconds, default 45s). Useful on slow connections or for very long responses.</li>
+                            <li><strong>Conversation Style 🎨</strong> — New presets in Settings → AI tab. Choose from: <em>Standard</em> (default), <em>Friendly</em>, <em>Concise</em>, <em>Detailed</em>, <em>Academic</em>, or <em>Casual</em>. Each preset adjusts the AI's tone and verbosity on top of your Custom Instructions.</li>
+                        </ul>
+                    </div>
+
+                    <!-- v3.7 section -->
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">v3.7 — Previous Release</h3>
+                        <ul class="list-disc list-inside space-y-1.5 text-[13px]">
                             <li><strong>Smart Mode Canvas Auto-Enable 🖼️</strong> — Smart / Agentic Mode now also auto-enables Canvas (Artifact Viewer) when your question asks for code, HTML, an app, a game, a dashboard, etc. Canvas resets after the response just like Web Search and Thinking overrides.</li>
                             <li><strong>AI Feature Control Commands 🎛️</strong> — Any AI can now toggle app features by including <code>[SNOAH: feature=value]</code> in its response (e.g. <code>[SNOAH: canvas=on]</code>). Ask the AI to "turn on canvas mode", "disable web search", or "enable thinking" and it will apply the change instantly. Control tags are silently removed from the displayed text.</li>
                             <li><strong>Manual Memory Saves (Any Platform) 🧠</strong> — Ask any AI to "save this to memory" or "remember this". The AI includes <code>[MEMORY: your facts]</code> in its response, which is saved to your memory bank and removed from the display. Works on ALL platforms — not just Gemini.</li>
@@ -2618,6 +2689,8 @@
         let showTimestamps = localStorage.getItem('snoah_show_timestamps') === 'true';
         let bookmarks = JSON.parse(localStorage.getItem('snoah_bookmarks') || '[]');
         let canvasMode = localStorage.getItem('snoah_canvas_mode') === 'true';
+        let streamTimeoutMs = parseInt(localStorage.getItem('snoah_stream_timeout') || '45') * 1000;
+        let convStyle = localStorage.getItem('snoah_conv_style') || 'standard';
         const NOTION_PROXY = '/api/notion';
         let uploadedImage = null; // { data, mimeType, previewUrl }
         let messages = [];
@@ -2870,12 +2943,20 @@
             const inp = document.getElementById('name-prompt-input');
             const name = inp ? inp.value.trim() : '';
             if (!name) { showToast('Please enter your name'); if (inp) inp.focus(); return; }
-            // When called from the combined welcome modal, also process cookie consent
-            const check = document.getElementById('welcome-consent-check');
-            if (check) {
-                // Combined welcome modal — check must be ticked
-                if (!check.checked) { showToast('Please accept the terms to continue'); return; }
-                acceptCookies();
+            // When called from the combined welcome modal, check terms (required) and cookies (optional) separately
+            const termsCheck = document.getElementById('welcome-consent-check');
+            if (termsCheck) {
+                // Terms checkbox is required
+                if (!termsCheck.checked) { showToast('Please accept the Terms & Conditions to continue'); return; }
+                // Cookies checkbox is optional — check it separately
+                const cookiesCheck = document.getElementById('welcome-cookies-check');
+                if (cookiesCheck && cookiesCheck.checked) {
+                    acceptCookies();
+                } else {
+                    // Declined cookies — set to 'false' (no multi-key)
+                    cookiesAccepted = 'false';
+                    localStorage.setItem('snoah_cookies_accepted', 'false');
+                }
             }
             userName = name;
             localStorage.setItem('snoah_user_name', userName);
@@ -2916,6 +2997,27 @@
             if (isSidebarOpen) toggleSidebar();
             document.getElementById('preferences-modal').classList.remove('hidden');
             lucide.createIcons();
+            // Sync cookies toggle state
+            _syncCookiesToggle();
+        }
+
+        function _syncCookiesToggle() {
+            const toggle = document.getElementById('pref-cookies-toggle');
+            const badge = document.getElementById('pref-cookies-badge');
+            if (!toggle) return;
+            const on = cookiesAccepted === 'true';
+            toggle.style.backgroundColor = on ? 'var(--accent, #D25D38)' : '';
+            toggle.querySelector('span').style.transform = on ? 'translateX(20px)' : '';
+            if (badge) badge.textContent = on ? '(enabled)' : '(disabled)';
+        }
+
+        function toggleCookiesPref() {
+            if (cookiesAccepted === 'true') {
+                rejectCookies();
+            } else {
+                acceptCookies();
+            }
+            _syncCookiesToggle();
         }
 
         function closePreferencesModal() {
@@ -3578,17 +3680,22 @@
             }
         }
 
+        let userPausedAutoScroll = false; // set true when user manually scrolls up during streaming
+
         function scrollToBottom(force=false) {
             if (!scrollAnchor) return;
             const container = document.getElementById('chat-container');
             if (!container) { scrollAnchor.scrollIntoView({ behavior: 'smooth' }); return; }
             if (isStreaming) {
+                // Don't auto-scroll if the user has manually scrolled away during this stream
+                if (!force && userPausedAutoScroll) return;
                 const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
                 if (force || distFromBottom < 300) {
                     // Scroll container to absolute bottom — padding-bottom handles clearance
                     container.scrollTop = container.scrollHeight;
                 }
             } else {
+                userPausedAutoScroll = false;
                 scrollAnchor.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         }
@@ -3629,7 +3736,20 @@
         }
 
         // Listen to scroll events on chat container
-        document.getElementById('chat-container').addEventListener('scroll', updateScrollJumpBtn, { passive: true });
+        document.getElementById('chat-container').addEventListener('scroll', function() {
+            if (isStreaming) {
+                const container = document.getElementById('chat-container');
+                const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+                // If user scrolled more than 80px away from bottom, pause auto-scroll
+                if (distFromBottom > 80) {
+                    userPausedAutoScroll = true;
+                } else if (distFromBottom <= 80) {
+                    // Near bottom again — resume auto-scroll
+                    userPausedAutoScroll = false;
+                }
+            }
+            updateScrollJumpBtn();
+        }, { passive: true });
 
         // ── CHAT HISTORY ENGINE ─────────────────────────────────────────
         let allChats = (() => {
@@ -3944,6 +4064,16 @@
             // Load web search platform
             const wsPlat = document.getElementById('settings-websearch-platform');
             if (wsPlat) { wsPlat.value = webSearchPlatform; switchWebSearchPlatform(webSearchPlatform, true); }
+            // Load stream timeout slider
+            const timeoutSlider = document.getElementById('stream-timeout-slider');
+            if (timeoutSlider) {
+                const savedSec = parseInt(localStorage.getItem('snoah_stream_timeout') || '45');
+                timeoutSlider.value = savedSec;
+                const timeoutVal = document.getElementById('stream-timeout-val');
+                if (timeoutVal) timeoutVal.textContent = savedSec + 's';
+            }
+            // Load conversation style
+            updateConvStyleUI();
             // Refresh storage stats
             refreshStorageStats();
             switchSettingsTab('api');
@@ -4211,6 +4341,14 @@
             if (responseLangSel) {
                 responseLang = responseLangSel.value;
                 localStorage.setItem('snoah_response_lang', responseLang);
+            }
+
+            // Save stream timeout
+            const timeoutSlider = document.getElementById('stream-timeout-slider');
+            if (timeoutSlider) {
+                const secs = parseInt(timeoutSlider.value);
+                localStorage.setItem('snoah_stream_timeout', secs);
+                streamTimeoutMs = secs * 1000;
             }
 
             // Save custom search URL
@@ -5173,6 +5311,44 @@
             }
         }
 
+        const CONV_STYLE_LABELS = {
+            standard: 'Standard — balanced, helpful, neutral tone.',
+            friendly: 'Friendly — warm, encouraging, conversational.',
+            concise: 'Concise — short, direct answers only.',
+            detailed: 'Detailed — thorough explanations with examples.',
+            academic: 'Academic — formal, precise, citation-aware style.',
+            casual: 'Casual — relaxed, informal, plain language.'
+        };
+        const CONV_STYLE_INSTRUCTIONS = {
+            standard: '',
+            friendly: 'Respond in a warm, friendly, and encouraging tone. Be conversational and approachable.',
+            concise: 'Keep all responses as short and direct as possible. Avoid unnecessary elaboration.',
+            detailed: 'Provide thorough, comprehensive answers with examples and explanations wherever helpful.',
+            academic: 'Use a formal, precise academic tone. Cite sources when possible and use technical terminology appropriately.',
+            casual: 'Use a relaxed, informal tone. Write in plain everyday language, like talking to a friend.'
+        };
+
+        function setConvStyle(style) {
+            convStyle = style;
+            localStorage.setItem('snoah_conv_style', style);
+            updateConvStyleUI();
+        }
+
+        function updateConvStyleUI() {
+            document.querySelectorAll('.conv-style-btn').forEach(btn => {
+                const id = btn.id.replace('cs-', '');
+                if (id === convStyle) {
+                    btn.classList.add('bg-[#D25D38]', 'text-white', 'border-[#D25D38]');
+                    btn.classList.remove('border-[#E5E3DB]', 'text-[#5B5951]', 'hover:bg-[#F2F0E9]');
+                } else {
+                    btn.classList.remove('bg-[#D25D38]', 'text-white', 'border-[#D25D38]');
+                    btn.classList.add('border-[#E5E3DB]', 'text-[#5B5951]', 'hover:bg-[#F2F0E9]');
+                }
+            });
+            const desc = document.getElementById('conv-style-desc');
+            if (desc) desc.textContent = CONV_STYLE_LABELS[convStyle] || '';
+        }
+
         function toggleTimestamps() {
             showTimestamps = !showTimestamps;
             localStorage.setItem('snoah_show_timestamps', showTimestamps);
@@ -5580,7 +5756,7 @@
         }
 
         function backupChats() {
-            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_unify_model','snoah_kluster_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_canvas_mode','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_unify_keys','snoah_kluster_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
+            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_unify_model','snoah_kluster_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_unify_keys','snoah_kluster_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
             const settings = {};
             settingsKeys.forEach(k => { const v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
             const data = { version: 2, app: 'SnoahAI', exported: new Date().toISOString(), chats: allChats, settings };
@@ -5698,12 +5874,10 @@
                 return;
             }
 
-            // Request mic permission first then start
-            navigator.mediaDevices?.getUserMedia({ audio: true })
-                .then(() => startSpeechRecognition())
-                .catch(() => {
-                    showToast('Mic permission denied — allow in browser settings');
-                });
+            // Start SpeechRecognition directly — it requests mic permission itself.
+            // Using getUserMedia() first would open a competing audio stream that
+            // prevents SpeechRecognition from capturing audio on many browsers.
+            startSpeechRecognition();
         }
 
         function startSpeechRecognition() {
@@ -5771,6 +5945,7 @@
             if (activeStreamInterval) { clearInterval(activeStreamInterval); activeStreamInterval = null; }
             isLoading = false;
             isStreaming = false;
+            userPausedAutoScroll = false;
             updateSendButton();
             // Hide any visible streaming cursors
             document.querySelectorAll('.streaming-cursor').forEach(el => el.style.display = 'none');
@@ -6512,40 +6687,24 @@
             ttsUtterance = new SpeechSynthesisUtterance(clean);
             ttsUtterance.rate = 0.95;
             ttsUtterance.pitch = 1;
+            // Apply best available voice immediately — don't wait for voiceschanged
             const voice = getBestVoice();
             if (voice) ttsUtterance.voice = voice;
-            ttsUtterance.onstart = () => {
-                ttsActive = true;
-                btn.classList.add('tts-active','text-[#D25D38]');
-                btn._wasSpeaking = true;
-            };
+            ttsActive = true;
+            btn.classList.add('tts-active','text-[#D25D38]');
+            btn._wasSpeaking = true;
             ttsUtterance.onend = () => {
-                window.speechSynthesis.cancel();
                 ttsActive = false;
                 btn.classList.remove('tts-active','text-[#D25D38]');
                 btn._wasSpeaking = false;
             };
             ttsUtterance.onerror = () => {
-                window.speechSynthesis.cancel();
                 ttsActive = false;
                 btn.classList.remove('tts-active','text-[#D25D38]');
                 btn._wasSpeaking = false;
             };
-            btn._wasSpeaking = false;
-            const doSpeak = () => {
-                window.speechSynthesis.cancel();
-                window.speechSynthesis.speak(ttsUtterance);
-            };
-            if (window.speechSynthesis.getVoices().length === 0) {
-                window.speechSynthesis.onvoiceschanged = () => {
-                    window.speechSynthesis.onvoiceschanged = null;
-                    const v = getBestVoice();
-                    if (v) ttsUtterance.voice = v;
-                    doSpeak();
-                };
-            } else {
-                doSpeak();
-            }
+            // Speak immediately — no delay waiting for voice list to load
+            window.speechSynthesis.speak(ttsUtterance);
         }
 
         // ── CODE RUNNER ────────────────────────────────────────────────
@@ -7288,6 +7447,32 @@
                 .catch(() => showToast('Copy failed'));
         }
 
+        function copyPlainText(text) {
+            // Strip markdown: bold, italic, headers, code fences, inline code, links, horizontal rules
+            const plain = text
+                .replace(/```[\s\S]*?```/g, (m) => m.replace(/```\w*\n?/g, '').trim()) // code blocks → content only
+                .replace(/`([^`]+)`/g, '$1')      // inline code
+                .replace(/^#{1,6}\s+/gm, '')      // headers
+                .replace(/\*\*(.+?)\*\*/g, '$1')  // bold
+                .replace(/\*(.+?)\*/g, '$1')       // italic
+                .replace(/__(.+?)__/g, '$1')       // bold underscore
+                .replace(/_(.+?)_/g, '$1')         // italic underscore
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links
+                .replace(/^[-*_]{3,}$/gm, '')      // horizontal rules
+                .replace(/^[-*+]\s+/gm, '• ')      // unordered list bullets
+                .replace(/^\d+\.\s+/gm, '')        // ordered list numbers
+                .replace(/^>\s+/gm, '')            // blockquotes
+                .trim();
+            navigator.clipboard.writeText(plain)
+                .then(() => showToast('Text copied ✓'))
+                .catch(() => {
+                    const ta = document.createElement('textarea');
+                    ta.value = plain; document.body.appendChild(ta); ta.select();
+                    document.execCommand('copy'); document.body.removeChild(ta);
+                    showToast('Text copied ✓');
+                });
+        }
+
         function downloadResponse(text) {
             const blob = new Blob([text], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -7387,7 +7572,7 @@
                 '<button class="notion-save-btn ' + btnCls + '">' + notionSvg + ' Notion</button>' +
                 '<button class="translate-btn ' + btnCls + '"><i data-lucide="languages" class="w-3 h-3 text-[#8C897D]"></i> Translate</button>' +
                 '<button class="share-btn ' + btnCls + '"><i data-lucide="share-2" class="w-3 h-3 text-[#8C897D]"></i> Share</button>' +
-                '<button class="copy-md-btn ' + btnCls + '"><i data-lucide="code-2" class="w-3 h-3 text-[#8C897D]"></i> Copy MD</button>' +
+                '<button class="copy-text-btn ' + btnCls + '"><i data-lucide="type" class="w-3 h-3 text-[#8C897D]"></i> Copy Text</button>' +
                 '<button class="download-btn ' + btnCls + '"><i data-lucide="download" class="w-3 h-3 text-[#8C897D]"></i> Download</button>' +
                 '<button class="summarize-btn ' + btnCls + '"><i data-lucide="list" class="w-3 h-3 text-[#8C897D]"></i> Summarize</button>' +
                 '<button class="followup-btn ' + btnCls + '"><i data-lucide="corner-down-right" class="w-3 h-3 text-[#8C897D]"></i> Follow-up</button>' +
@@ -7420,8 +7605,8 @@
             if (translateBtnEl) translateBtnEl.onclick = () => { translateMessage(text, translateBtnEl); close(); };
             const shareBtnEl = actionsDiv.querySelector('.share-btn');
             if (shareBtnEl) shareBtnEl.onclick = () => { shareMessage(text); close(); };
-            const copyMdBtn = actionsDiv.querySelector('.copy-md-btn');
-            if (copyMdBtn) copyMdBtn.onclick = () => { copyAsMarkdown(text); close(); };
+            const copyMdBtn = actionsDiv.querySelector('.copy-text-btn');
+            if (copyMdBtn) copyMdBtn.onclick = () => { copyPlainText(text); close(); };
             const downloadBtn = actionsDiv.querySelector('.download-btn');
             if (downloadBtn) downloadBtn.onclick = () => { downloadResponse(text); close(); };
             const summarizeBtn = actionsDiv.querySelector('.summarize-btn');
@@ -7575,7 +7760,8 @@
             setIsLoading(true);
 
             const lengthDirective = responseLength === 'short' ? 'Be brief and concise — 2-4 sentences max. ' : responseLength === 'detailed' ? 'Be thorough and detailed. ' : '';
-            const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + lengthDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '') + (responseLang ? '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language.' : '');
+            const _convStyleExtra = (convStyle && convStyle !== 'standard' && CONV_STYLE_INSTRUCTIONS[convStyle]) ? '\n\nCONVERSATION STYLE: ' + CONV_STYLE_INSTRUCTIONS[convStyle] : '';
+            const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + lengthDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '') + _convStyleExtra + (responseLang ? '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language.' : '');
 
             try {
                 const results = await Promise.all(platforms.map(p => multiAIFetchSingle(p, textToSend, sysInstruction)));
@@ -8119,24 +8305,33 @@ FEATURES:
 79. AI FEATURE CONTROL COMMANDS: The AI can toggle app features by including [SNOAH: feature=value] in its response. Features: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). When the user asks the AI to turn a feature on or off, the AI responds with the appropriate [SNOAH:...] command and the app applies it automatically. Control tags are removed from the displayed text.
 80. MANUAL MEMORY SAVES: Any AI platform can save facts to memory. When the user says "save this to memory" or "remember this", the AI includes [MEMORY: fact1. fact2.] in its response. The app parses these tags, saves the facts to the memory bank, and removes the tags from displayed text. Auto Memory extraction also now works with all platforms — uses Gemini if available, otherwise uses the currently active platform.
 81. FULL APP AWARENESS IN SMART MODE: When Smart Mode is active, the AI has ~90%+ awareness of the app state: active platform, model, all toggle states (web search, thinking, canvas, multi-AI, instant response, timestamps, temp chat, auto memory, notion auto-save), model parameters (temperature, top P, top K, max tokens), response length, and response language. The AI can read and control all these features.
+82. INSTANT TTS: Text-to-Speech now speaks immediately using the device's built-in WebSpeech API without waiting for the browser voice list to load. All TTS platforms (WebSpeech, ElevenLabs, OpenAI TTS, Groq TTS, Gemini TTS) respond faster. The default is WebSpeech (free, no key).
+83. FIXED VOICE INPUT (STT): The microphone speech-to-text now works reliably. It starts SpeechRecognition directly without a competing getUserMedia audio stream. Tap the mic 🎤 button, speak your message, and the transcribed text appears live in the input bar. Tap again to stop.
+84. SMART SCROLL DURING STREAMING: Users can now scroll freely up or down while an AI response is streaming. Auto-scroll pauses automatically the moment the user scrolls away from the bottom, and resumes when the user scrolls back near the bottom. Streaming no longer locks the viewport.
+85. SEPARATE COOKIES CONSENT: The new-user welcome screen now has two checkboxes. (1) Terms & Conditions (required — must be accepted to proceed). (2) Allow Multiple API Keys (optional — when checked, enables storing multiple API keys per platform with auto-rotation on rate limits). The cookies consent can also be toggled later in Preferences → App & Info → Multi-Key Storage.
+86. COPY PLAIN TEXT: The ⋮ action menu on AI responses now has a "Copy Text" button (replacing "Copy MD"). It copies the response text with all markdown formatting stripped — no asterisks, hashes, or backticks. The regular "Copy" button still copies the raw markdown source.
+87. API REQUEST TIMEOUT: Settings → API tab → API Request Timeout slider. Configurable from 15 to 120 seconds (default 45s). Controls how long SnoahAI waits without receiving any data before cancelling a streaming request. Useful for slow connections or very long responses.
+88. CONVERSATION STYLE: Settings → AI tab → Conversation Style presets. Six styles: Standard (default, balanced), Friendly (warm, encouraging), Concise (short, direct), Detailed (thorough with examples), Academic (formal, precise), Casual (relaxed, plain language). The selected style injects a tone instruction into the system prompt, applied on top of any Custom Instructions. Stored in localStorage as snoah_conv_style.
 
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
 - Top bar: App name "SnoahAI" (left), model badge (center), three icon buttons on the right: Temp Chat (clock 🕐), Search (🔍), New Chat (+).
 - Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons.
 - Bottom bar: Input toolbar with ⚡ Smart, Thinking (🧠), Web Search (🔍), Response Length, Templates, Canvas buttons, main text input (with Attach 📎 plus-icon on the left and Voice 🎤 on the right), Send/Stop button.
-- Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Dark Mode/About/Updates/Contact Us), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
-- Settings → API tab sections: Platform & Model (24 platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Web Search Platform (Gemini/Tavily/Brave/Serper/Custom with per-provider key pool), Advanced Model Parameters, Token Management, Notion Integration, Response Display.
+- Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Multi-Key Storage toggle/Dark Mode/About/Updates/Contact Us), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
+- Settings → API tab sections: Platform & Model (24 platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Web Search Platform (Gemini/Tavily/Brave/Serper/Custom with per-provider key pool), Advanced Model Parameters, API Request Timeout (15–120s slider), Token Management, Notion Integration, Response Display.
+- Settings → AI tab sections: AI Persona (system prompt override), Custom Instructions, Multi-AI Response, Auto Memory, Response Language, Conversation Style (Standard/Friendly/Concise/Detailed/Academic/Casual).
 - Settings → App tab sections: Font Size, Theme, Message Timestamps, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
-- AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy MD, Download, Summarize, Follow-up, Bookmark) after response.
+- AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy Text, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
+- New user onboarding: Welcome modal with name input, required Terms & Conditions checkbox, and optional Multi-Key Storage (cookies) checkbox.
 
 TERMS & CONDITIONS / PRIVACY POLICY / COOKIES:
 - SnoahAI is a personal AI chat assistant with no formal Terms of Service or Privacy Policy document.
 - All user data (chat history, API keys, settings, memory) is stored ONLY in the user's browser localStorage. Nothing is sent to or stored on SnoahAI's servers.
 - API keys are stored locally and sent directly to respective AI providers (Gemini, OpenRouter, etc.) from the user's browser. For backend-proxied platforms (NVIDIA, Claude, etc.), keys are sent via the app's Vercel serverless proxy, which forwards them to the target API without logging or storing them.
-- The app does not use cookies for tracking. localStorage is used exclusively for user preferences, chat history, and API keys.
+- Cookies/localStorage consent: Users can optionally accept multi-key storage (stores multiple API keys per platform for auto-rotation). This is controlled by the optional cookies checkbox in onboarding and the "Multi-Key Storage" toggle in Preferences. If declined, only 1 key per platform is stored.
 - No user analytics, advertising, or third-party tracking is present in the app.
 - Users are responsible for their own API key usage, costs, and adherence to each AI provider's terms of service.
 
@@ -8193,6 +8388,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     systemInstruction += "Web search is currently OFF. If the user asks about real-time info (today's date, current events, live data), answer from your training knowledge and suggest they tap the Web (🔍) button to enable real-time search. ";
                 }
                 if (customInstructions) systemInstruction += '\n\nUser custom instructions: ' + customInstructions;
+                // Inject conversation style instruction if not standard
+                if (convStyle && convStyle !== 'standard' && CONV_STYLE_INSTRUCTIONS[convStyle]) {
+                    systemInstruction += '\n\nCONVERSATION STYLE: ' + CONV_STYLE_INSTRUCTIONS[convStyle];
+                }
                 // Inject auto memory context if enabled and there is saved memory
                 if (autoMemoryEnabled && autoMemoryContent && autoMemoryContent.trim()) {
                     systemInstruction += '\n\nUSER MEMORY (important facts about this user, automatically saved from previous conversations — use as context):\n' + autoMemoryContent.trim();
@@ -8395,7 +8594,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             const decoder = new TextDecoder();
                             let buf = '';
                             lastStreamUsage = null;
-                            const STREAM_TIMEOUT = 45000; // 45 seconds no-data timeout
+                            const STREAM_TIMEOUT = streamTimeoutMs || 45000; // configurable no-data timeout
                             let lastDataTime = Date.now();
                             let streamTimeoutId = null;
                             // Track whether we are currently inside a reasoning_content block
@@ -8769,6 +8968,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 if (!liveAppended && fullRaw.trim()) { messagesWrapper.appendChild(liveWrapper); liveAppended = true; }
                 if (!liveAppended) { messagesWrapper.appendChild(liveWrapper); }
                 isStreaming = false;
+                userPausedAutoScroll = false;
                 liveCursor.style.display = 'none';
                 streamingBarIndicator.classList.add('hidden');
                 floatingLoading.classList.add('hidden');
