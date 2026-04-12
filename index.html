@@ -925,7 +925,7 @@
                                     <span id="agent-browse-depth-val" class="text-[12px] font-mono text-[#A3A095]">1 page</span>
                                 </div>
                                 <input type="range" id="agent-browse-depth-slider" min="1" max="3" step="1" value="1"
-                                    oninput="document.getElementById('agent-browse-depth-val').textContent=this.value+' page'+(+this.value>1?'s':'')"
+                                    oninput="updateBrowseDepthDisplay(this.value)"
                                     class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
                                 <p class="text-[10px] text-[#A3A095] mt-0.5">Max URLs the AI can browse per response (1–3). Higher values enable deeper research.</p>
                             </div>
@@ -5489,6 +5489,12 @@
             }
         }
 
+        function updateBrowseDepthDisplay(val) {
+            const v = parseInt(val);
+            const el = document.getElementById('agent-browse-depth-val');
+            if (el) el.textContent = v + ' page' + (v > 1 ? 's' : '');
+        }
+
         function toggleFollowUpSuggestions() {
             followUpSuggestions = !followUpSuggestions;
             localStorage.setItem('snoah_followup_suggestions', followUpSuggestions);
@@ -5522,7 +5528,7 @@
                 osc.frequency.setValueAtTime(880, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.1);
                 gain.gain.setValueAtTime(0.12, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
                 osc.start(ctx.currentTime);
                 osc.stop(ctx.currentTime + 0.5);
                 setTimeout(() => { try { ctx.close(); } catch(e) {} }, 700);
@@ -9127,7 +9133,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 }
                                 // Extract text before [BROWSE: url] command (the AI's reasoning/plan text)
                                 const _browseIdx = fullRaw.indexOf(_browseMatch[0]);
-                                let _preBrowseRaw = _browseIdx > 0 ? _normalizeThinkTags(fullRaw.slice(0, _browseIdx)).replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/\[BROWSE:[^\]]*\]/gi, '').trim() : '';
+                                let _preBrowseRaw = _browseIdx > 0 ? _normalizeThinkTags(fullRaw.slice(0, _browseIdx)).replace(/<think>[\s\S]*?<\/think>/gi, '').trim() : '';
 
                                 // Create a permanent "Search Process" block showing the intermediate steps
                                 const _agentBlock = document.createElement('div');
@@ -9142,10 +9148,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                                 '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto"><polyline points="6 9 12 15 18 9"/></svg>' +
                                             '</summary>' +
                                             '<div class="px-4 py-3 space-y-2">' +
-                                                (_preBrowseRaw ? '<div class="text-[13px] text-[#5B5951] leading-relaxed mb-2 whitespace-pre-wrap">' + _preBrowseRaw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' : '') +
+                                                (_preBrowseRaw ? '<div class="text-[13px] text-[#5B5951] leading-relaxed mb-2 whitespace-pre-wrap">' + escapeHTML(_preBrowseRaw) + '</div>' : '') +
                                                 '<div id="' + _agentUID + '-visit" class="flex items-center gap-2 text-[13px] text-[#737166] italic">' +
                                                     '<span class="animate-pulse text-base">🌐</span>' +
-                                                    '<span>Visiting <a href="' + _browseUrl + '" target="_blank" class="underline text-[#D25D38] break-all">' + _browseUrl + '</a>…</span>' +
+                                                    '<span>Visiting <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a>…</span>' +
                                                 '</div>' +
                                             '</div>' +
                                         '</details>' +
@@ -9160,7 +9166,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                         if (_bData.content) {
                                             // Update visit indicator to show success and collapse block
                                             const _visitEl = document.getElementById(_agentUID + '-visit');
-                                            if (_visitEl) _visitEl.innerHTML = '<span class="text-base">✅</span><span>Read <a href="' + _browseUrl + '" target="_blank" class="underline text-[#D25D38] break-all">' + _browseUrl + '</a></span>';
+                                            if (_visitEl) _visitEl.innerHTML = '<span class="text-base">✅</span><span>Read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
                                             const _detailsEl = document.getElementById(_agentUID);
                                             if (_detailsEl) _detailsEl.removeAttribute('open');
                                             systemInstruction += '\n\n[SYSTEM OBSERVATION — Visited URL: ' + _browseUrl + ']\n' + _bData.content + '\n[END OF PAGE CONTENT]\nUsing the above page content, now answer the user\'s question fully and accurately.';
@@ -9170,12 +9176,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                             continue; // re-run AI with page content injected
                                         }
                                     }
-                                    // If fetch failed silently, show error in process block
+                                    // Fetch failed or returned no content — show error and count as a browse attempt
                                     const _visitEl2 = document.getElementById(_agentUID + '-visit');
-                                    if (_visitEl2) _visitEl2.innerHTML = '<span class="text-base">❌</span><span>Failed to read <a href="' + _browseUrl + '" target="_blank" class="underline text-[#D25D38] break-all">' + _browseUrl + '</a></span>';
+                                    if (_visitEl2) _visitEl2.innerHTML = '<span class="text-base">❌</span><span>Failed to read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
+                                    _browsesDone++; // count failed attempts to prevent infinite loops
                                 } catch(_bErr) {
                                     const _visitEl3 = document.getElementById(_agentUID + '-visit');
-                                    if (_visitEl3) _visitEl3.innerHTML = '<span class="text-base">❌</span><span>Error visiting <a href="' + _browseUrl + '" target="_blank" class="underline text-[#D25D38] break-all">' + _browseUrl + '</a></span>';
+                                    if (_visitEl3) _visitEl3.innerHTML = '<span class="text-base">❌</span><span>Error visiting <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
+                                    _browsesDone++; // count failed attempts to prevent infinite loops
                                     console.warn('Browser agent error:', _bErr.message);
                                 }
                             }
@@ -9256,7 +9264,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 if (_fuLineMatch) {
                     mainText = mainText.replace(/^FOLLOW_UP:\s*.+$/m, '').trim();
                     _followUpQuestions = _fuLineMatch[1].split('|')
-                        .map(q => q.replace(/^\[|\]$/g, '').trim())
+                        .map(q => q.replace(/^\[/, '').replace(/\]$/, '').replace(/[*_`#]/g, '').trim())
                         .filter(q => q && q.length > 3);
                 }
 
