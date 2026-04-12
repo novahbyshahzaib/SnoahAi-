@@ -6940,12 +6940,12 @@
             s = escapeHTML(s);
             // Apply inline formatting
             s = s
-                .replace(/(https?:\/\/[^\s<"&]+)/g, '<a href="$1" target="_blank" class="text-[#D25D38] underline hover:text-[#B84E2E] break-all">$1</a>')
+                .replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" class="text-[#D25D38] underline hover:text-[#B84E2E] break-all">$1</a>')
                 .replace(/\*\*\*(.*?)\*\*\*/g, '<strong class="font-semibold"><em class="italic">$1</em></strong>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-[#1A1A1A]">$1</strong>')
                 .replace(/__(.*?)__/g, '<strong class="font-semibold text-[#1A1A1A]">$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-                .replace(/_([^_]+)_/g, '<em class="italic">$1</em>')
+                .replace(/(^|[^\w])_([^_\n]+?)_(?=[^\w]|$)/g, '$1<em class="italic">$2</em>')
                 .replace(/`([^`]+)`/g, '<code class="bg-[#F2F0E9] text-[#2C2B29] px-1.5 py-0.5 rounded-md text-[13.5px] font-mono border border-[#E5E3DB]">$1</code>');
             // Restore math
             s = s.replace(/\x00MATH(\d+)\x00/g, (_, i) => mathParts[+i] || '');
@@ -6955,12 +6955,12 @@
         // Legacy processInline (receives pre-escaped text — kept for back-compat)
         function processInline(escapedText) {
             return escapedText
-                .replace(/(https?:\/\/[^\s<"&]+)/g, '<a href="$1" target="_blank" class="text-[#D25D38] underline hover:text-[#B84E2E] break-all">$1</a>')
+                .replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" class="text-[#D25D38] underline hover:text-[#B84E2E] break-all">$1</a>')
                 .replace(/\*\*\*(.*?)\*\*\*/g, '<strong class="font-semibold"><em class="italic">$1</em></strong>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-[#1A1A1A]">$1</strong>')
                 .replace(/__(.*?)__/g, '<strong class="font-semibold text-[#1A1A1A]">$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-                .replace(/_([^_]+)_/g, '<em class="italic">$1</em>')
+                .replace(/(^|[^\w])_([^_\n]+?)_(?=[^\w]|$)/g, '$1<em class="italic">$2</em>')
                 .replace(/`([^`]+)`/g, '<code class="bg-[#F2F0E9] text-[#2C2B29] px-1.5 py-0.5 rounded-md text-[13.5px] font-mono border border-[#E5E3DB]">$1</code>');
         }
 
@@ -8623,6 +8623,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
                 const totalKeys = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : platform === 'nvidia' ? nvidiaKeys.length : platform === 'huggingface' ? hfKeys.length : platform === 'githubmodels' ? ghKeys.length : geminiKeys.length;
                 let attempts = 0;
+                let _browsesDone = 0; // separate counter for agentic browse retries (must not share with key-rotation counter)
                 while (attempts <= totalKeys) {
                     try {
                         // ── READ SSE STREAM (with timeout) ──
@@ -8915,6 +8916,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                         webIdx += WEB_CHUNK;
                                         if (webIdx >= webRaw.length) {
                                             fullRaw = webRaw;
+                                            renderDirty = true; // ensure RAF paints the final chunk
                                             resolve();
                                         } else {
                                             fullRaw = webRaw.slice(0, webIdx);
@@ -8932,7 +8934,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         }
 
                         // ── AGENTIC WEB BROWSING: detect [BROWSE: url] commands in AI response ──
-                        if (agenticWebSearch && useAgent && attempts < 2) {
+                        // Uses _browsesDone (not attempts) so key-rotation counter is not affected.
+                        if (agenticWebSearch && useAgent && _browsesDone === 0) {
                             const _browseMatch = fullRaw.match(/\[BROWSE:\s*(https?:\/\/[^\]]+)\]/i);
                             if (_browseMatch) {
                                 const _browseUrl = _browseMatch[1].trim();
@@ -8957,7 +8960,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                             systemInstruction += '\n\n[SYSTEM OBSERVATION — Visited URL: ' + _browseUrl + ']\n' + _bData.content + '\n[END OF PAGE CONTENT]\nUsing the above page content, now answer the user\'s question fully and accurately.';
                                             fullRaw = '';
                                             liveWrapper.remove(); liveAppended = false;
-                                            attempts++;
+                                            _browsesDone++; // only increment browse counter, not key-rotation attempts
                                             continue; // re-run AI with page content injected
                                         }
                                     }
@@ -9031,6 +9034,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     showToast('Memory saved 🧠 (' + _memFacts.length + ' item' + (_memFacts.length > 1 ? 's' : '') + ')');
                 }
                 mainText = mainText.replace(/\[MEMORY:[^\]]*\]/gi, '').trim();
+                // Strip any leftover [BROWSE: url] commands from the visible text
+                mainText = mainText.replace(/\[BROWSE:\s*https?:\/\/[^\]]*\]/gi, '').trim();
 
                 thinkBody.textContent = thinkingText || '';
                 if (!liveAppended && fullRaw.trim()) { messagesWrapper.appendChild(liveWrapper); liveAppended = true; }
