@@ -4759,7 +4759,7 @@
                     const d = await r.json();
                     const results = (d.query?.search || []).slice(0, 5);
                     const text = results.map(x => {
-                        const snippet = (x.snippet || '').replace(/<[^>]*>/g, '');
+                        const snippet = (x.snippet || '').replace(/<[^>]*>/gi, '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                         const url = 'https://en.wikipedia.org/wiki/' + encodeURIComponent((x.title || '').replace(/ /g, '_'));
                         return '**' + (x.title || '') + '**\n' + snippet + '\nSource: ' + url;
                     }).join('\n\n');
