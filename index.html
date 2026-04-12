@@ -324,6 +324,9 @@
         .dark .app-bg { background: #1F1E1B !important; border-color: #3A3835 !important; }
         .dark .header-bg { background: rgba(31,30,27,0.92) !important; }
 
+        /* Focus Mode */
+        header.focus-mode-hidden { height: 0 !important; overflow: hidden !important; padding: 0 !important; border: none !important; transition: height 0.3s ease, padding 0.3s ease; }
+
 
         /* Pinned messages */
         .pinned-banner { background:#FFFBF0; border:1px solid #F5E6A3; border-radius:12px; padding:8px 12px; margin-bottom:8px; font-size:12.5px; color:#5B5951; }
@@ -915,6 +918,17 @@
                                 </label>
                             </div>
                             <p class="text-[11px] text-[#A3A095] mt-1.5 leading-relaxed">When ON, the AI can use <code class="bg-[#F2F0E9] px-1 rounded">[BROWSE: url]</code> to visit any URL and read the full page content. Useful for deep research — the AI can visit, read, and summarize any webpage.</p>
+                            <!-- Agentic Browse Depth -->
+                            <div class="mt-3">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[12px] font-semibold text-[#5B5951]">Browse Depth</span>
+                                    <span id="agent-browse-depth-val" class="text-[12px] font-mono text-[#A3A095]">1 page</span>
+                                </div>
+                                <input type="range" id="agent-browse-depth-slider" min="1" max="3" step="1" value="1"
+                                    oninput="document.getElementById('agent-browse-depth-val').textContent=this.value+' page'+(+this.value>1?'s':'')"
+                                    class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
+                                <p class="text-[10px] text-[#A3A095] mt-0.5">Max URLs the AI can browse per response (1–3). Higher values enable deeper research.</p>
+                            </div>
                         </div>
                     </div>
 
@@ -1254,6 +1268,24 @@
                         </div>
                         <p id="conv-style-desc" class="text-[11px] text-[#A3A095] mt-2"></p>
                     </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Follow-Up Suggestions -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Follow-Up Suggestions</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">When ON, the AI automatically appends 3 clickable follow-up questions at the end of each response — tap any question to instantly send it.</p>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Suggest Follow-Up Questions</p>
+                                <p class="text-[11px] text-[#A3A095]">AI adds 3 tappable follow-up questions</p>
+                            </div>
+                            <button id="followup-toggle" onclick="toggleFollowUpSuggestions()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- App Config Tab -->
@@ -1292,6 +1324,23 @@
                                 <p class="text-[11px] text-[#A3A095]">Display time on each message bubble</p>
                             </div>
                             <button id="timestamps-toggle" onclick="toggleTimestamps()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Response Sound -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Response Sound</label>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Play Sound on Response</p>
+                                <p class="text-[11px] text-[#A3A095]">Subtle chime when AI finishes streaming</p>
+                            </div>
+                            <button id="response-sound-toggle" onclick="toggleResponseSound()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
                                 <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
                             </button>
                         </div>
@@ -2068,6 +2117,15 @@
                                     <span class="text-[11px] text-[#A3A095]">Switch between light and dark theme</span>
                                 </div>
                             </button>
+                            <button onclick="toggleFocusMode()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F2F0E9] text-left transition-colors group">
+                                <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] group-hover:bg-[#EAE8E0] flex items-center justify-center shrink-0 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C897D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+                                </div>
+                                <div>
+                                    <span id="focus-mode-label" class="text-[14px] text-[#2C2B29] font-medium block">Focus Mode</span>
+                                    <span class="text-[11px] text-[#A3A095]">Hide header for distraction-free chatting</span>
+                                </div>
+                            </button>
                             <button onclick="closePreferencesModal();openAboutModal();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F2F0E9] text-left transition-colors group">
                                 <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] group-hover:bg-[#EAE8E0] flex items-center justify-center shrink-0 transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C897D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -2124,13 +2182,17 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v3.8</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.0</span>
                     </div>
 
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
-                            <li><strong>Agentic Web Search 🌐</strong> — SnoahAI's Web Search is now a Live Browser Agent. Toggle "Agentic Web Search" in Settings alongside Web Search to enable the AI to visit URLs and read full page content. The AI uses <code>[BROWSE: url]</code> to trigger a page visit, fetched via the backend /api/browser using Jina AI Reader. A live "🌐 Visiting URL…" indicator appears in chat during browsing.</li>
+                            <li><strong>Agentic Search Process Log 🔍</strong> — The agentic web search now shows a collapsible "Search Process" block in chat. When the AI visits a URL, you see the AI's reasoning text, a live "🌐 Visiting…" indicator, and a "✅ Read" confirmation — all preserved above the final answer. The process block auto-collapses after the visit completes so only the final response is prominent.</li>
+                            <li><strong>Agentic Browse Depth 🌐</strong> — New slider in Settings → API → Agentic Web Search. Control how many URLs the AI can visit per response (1–3 pages). Increase to 3 for deep multi-page research; keep at 1 for faster single-source lookups. Saved in localStorage as <code>snoah_agent_browse_depth</code>.</li>
+                            <li><strong>Follow-Up Suggestions 💬</strong> — New toggle in Settings → AI. When ON, the AI automatically appends 3 clickable follow-up questions at the end of each response. Tap any question to instantly fill the input bar and send it — great for exploring topics deeper without retyping.</li>
+                            <li><strong>Response Sound 🔔</strong> — New toggle in Settings → App. When ON, a subtle chime plays via the Web Audio API when the AI finishes streaming — useful for knowing when a long response completes without watching the screen. Tapping the toggle plays a preview sound.</li>
+                            <li><strong>Focus Mode 🎯</strong> — New option in Preferences → App &amp; Info. Tap "Focus Mode" to hide the app header for a distraction-free, full-screen chat experience. Tap "Exit Focus Mode" in Preferences to restore the header.</li>
                             <li><strong>Wikipedia Search 📖</strong> — New web search platform: Wikipedia Search. No API key required. Uses Wikipedia's public API to return article summaries and excerpts directly in your AI's context. Great for factual, encyclopedic queries.</li>
                             <li><strong>DuckDuckGo Search 🦆</strong> — New web search platform: DuckDuckGo Search. No API key required. Returns instant answers, definitions, and related topics via DuckDuckGo's public Instant Answers API, routed through the SnoahAI backend.</li>
                             <li><strong>Unify Removed 🗑️</strong> — The Unify LLM platform has been removed from the app to free up a serverless function slot (Vercel free plan: 12 max). All 22 remaining AI platforms continue to work as before.</li>
@@ -2144,9 +2206,9 @@
                         </ul>
                     </div>
 
-                    <!-- v3.7 section -->
+                    <!-- v3.8/3.9 section -->
                     <div>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">v3.7 — Previous Release</h3>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">v3.8–3.9 — Previous Releases</h3>
                         <ul class="list-disc list-inside space-y-1.5 text-[13px]">
                             <li><strong>Smart Mode Canvas Auto-Enable 🖼️</strong> — Smart / Agentic Mode now also auto-enables Canvas (Artifact Viewer) when your question asks for code, HTML, an app, a game, a dashboard, etc. Canvas resets after the response just like Web Search and Thinking overrides.</li>
                             <li><strong>AI Feature Control Commands 🎛️</strong> — Any AI can now toggle app features by including <code>[SNOAH: feature=value]</code> in its response (e.g. <code>[SNOAH: canvas=on]</code>). Ask the AI to "turn on canvas mode", "disable web search", or "enable thinking" and it will apply the change instantly. Control tags are silently removed from the displayed text.</li>
@@ -2721,6 +2783,10 @@
         let smartMode = false;
         let webSearchPlatform = localStorage.getItem('snoah_websearch_platform') || 'gemini';
         let agenticWebSearch = localStorage.getItem('snoah_agentic_ws') === '1';
+        let agentBrowseDepth = parseInt(localStorage.getItem('snoah_agent_browse_depth') || '1');
+        let followUpSuggestions = localStorage.getItem('snoah_followup_suggestions') === 'true';
+        let responseSound = localStorage.getItem('snoah_response_sound') === 'true';
+        let focusModeActive = false;
         let tavilyKeys = _loadKeys('snoah_tavily_keys');
         let braveKeys = _loadKeys('snoah_brave_keys');
         let serperKeys = _loadKeys('snoah_serper_keys');
@@ -4086,6 +4152,13 @@
             // Load agentic web search toggle
             const agWsCb = document.getElementById('settings-agentic-websearch');
             if (agWsCb) agWsCb.checked = agenticWebSearch;
+            // Load agentic browse depth slider
+            const browseDepthSlider = document.getElementById('agent-browse-depth-slider');
+            if (browseDepthSlider) {
+                browseDepthSlider.value = agentBrowseDepth;
+                const browseDepthVal = document.getElementById('agent-browse-depth-val');
+                if (browseDepthVal) browseDepthVal.textContent = agentBrowseDepth + ' page' + (agentBrowseDepth > 1 ? 's' : '');
+            }
             // Load stream timeout slider
             const timeoutSlider = document.getElementById('stream-timeout-slider');
             if (timeoutSlider) {
@@ -4096,6 +4169,10 @@
             }
             // Load conversation style
             updateConvStyleUI();
+            // Load follow-up suggestions
+            updateFollowUpUI();
+            // Load response sound
+            updateResponseSoundUI();
             // Refresh storage stats
             refreshStorageStats();
             switchSettingsTab('api');
@@ -4366,6 +4443,13 @@
                 const secs = parseInt(timeoutSlider.value);
                 localStorage.setItem('snoah_stream_timeout', secs);
                 streamTimeoutMs = secs * 1000;
+            }
+
+            // Save agentic browse depth
+            const browseDepthEl = document.getElementById('agent-browse-depth-slider');
+            if (browseDepthEl) {
+                agentBrowseDepth = parseInt(browseDepthEl.value);
+                localStorage.setItem('snoah_agent_browse_depth', agentBrowseDepth);
             }
 
             // Save custom search URL
@@ -5403,6 +5487,88 @@
                 toggle.classList.add('bg-[#D9D6CE]');
                 if (knob) knob.style.transform = 'translateX(0)';
             }
+        }
+
+        function toggleFollowUpSuggestions() {
+            followUpSuggestions = !followUpSuggestions;
+            localStorage.setItem('snoah_followup_suggestions', followUpSuggestions);
+            updateFollowUpUI();
+        }
+
+        function updateFollowUpUI() {
+            const toggle = document.getElementById('followup-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (followUpSuggestions) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function playResponseChime() {
+            if (!responseSound) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.5);
+                setTimeout(() => { try { ctx.close(); } catch(e) {} }, 700);
+            } catch(e) {}
+        }
+
+        function toggleResponseSound() {
+            responseSound = !responseSound;
+            localStorage.setItem('snoah_response_sound', responseSound);
+            updateResponseSoundUI();
+            if (responseSound) playResponseChime();
+        }
+
+        function updateResponseSoundUI() {
+            const toggle = document.getElementById('response-sound-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (responseSound) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function toggleFocusMode() {
+            focusModeActive = !focusModeActive;
+            const header = document.querySelector('header');
+            if (header) header.classList.toggle('focus-mode-hidden', focusModeActive);
+            const label = document.getElementById('focus-mode-label');
+            if (label) label.textContent = focusModeActive ? 'Exit Focus Mode' : 'Focus Mode';
+            if (focusModeActive) {
+                closePreferencesModal();
+                showToast('Focus mode ON — open Preferences to exit');
+            }
+        }
+
+        function fillInputBar(text) {
+            const inp = document.getElementById('message-input');
+            if (!inp) return;
+            inp.value = text;
+            inp.dispatchEvent(new Event('input'));
+            inp.focus();
         }
 
         async function autoSaveToNotion(text) {
@@ -8344,17 +8510,21 @@ FEATURES:
 87. API REQUEST TIMEOUT: Settings → API tab → API Request Timeout slider. Configurable from 15 to 120 seconds (default 45s). Controls how long SnoahAI waits without receiving any data before cancelling a streaming request. Useful for slow connections or very long responses.
 88. CONVERSATION STYLE: Settings → AI tab → Conversation Style presets. Six styles: Standard (default, balanced), Friendly (warm, encouraging), Concise (short, direct), Detailed (thorough with examples), Academic (formal, precise), Casual (relaxed, plain language). The selected style injects a tone instruction into the system prompt, applied on top of any Custom Instructions. Stored in localStorage as snoah_conv_style.
 89. WIKIPEDIA & DUCKDUCKGO WEB SEARCH: Two new search platforms added to Web Search: (1) Wikipedia Search — uses Wikipedia's public API, no API key required, returns article summaries and excerpts. Great for factual and encyclopedic queries. (2) DuckDuckGo Search — uses DuckDuckGo's Instant Answers public API, no API key required, routed through the SnoahAI backend (/api/browser). Returns instant answers, definitions, and related topics.
-90. AGENTIC WEB SEARCH (LIVE BROWSER AGENT): When "Agentic Web Search" is toggled ON in Settings alongside Web Search, the AI can visit URLs and read full page content. The AI uses [BROWSE: url] command to trigger a page visit. The backend /api/browser serverless function uses Jina AI Reader to fetch and clean any URL into Markdown text. The full page content is fed back to the AI as a [SYSTEM OBSERVATION]. A live "🌐 Visiting URL…" indicator is shown in the chat during page loading. This allows deep research: the AI can visit, read, and summarize any webpage in real-time. Agentic mode is toggled per-session and stored in localStorage (snoah_agentic_ws).
+90. AGENTIC WEB SEARCH (LIVE BROWSER AGENT): When "Agentic Web Search" is toggled ON in Settings alongside Web Search, the AI can visit URLs and read full page content. The AI uses [BROWSE: url] command to trigger a page visit. The backend /api/browser serverless function uses Jina AI Reader to fetch and clean any URL into Markdown text. The full page content is fed back to the AI as a [SYSTEM OBSERVATION]. A collapsible "🔍 Search Process" block appears in chat showing: the AI's pre-browse reasoning text, a live "🌐 Visiting…" indicator, and a "✅ Read" confirmation once done. The block auto-collapses after the visit completes, then the final response appears below. Agentic mode is toggled per-session and stored in localStorage (snoah_agentic_ws).
+91. AGENTIC BROWSE DEPTH: Settings → API tab → Agentic Web Search → Browse Depth slider (1–3). Controls how many URLs the AI can visit per response when Agentic Web Search is ON. Default: 1 page. Higher values (2–3) allow deeper multi-page research. Stored in localStorage as snoah_agent_browse_depth.
+92. FOLLOW-UP SUGGESTIONS: Settings → AI tab → Follow-Up Suggestions toggle. When ON, the AI appends 3 tappable follow-up questions at the end of each response. They appear as rounded chip buttons below the response — tap any to instantly fill the chat input and send it. The questions are AI-generated based on the conversation context. Stored in localStorage as snoah_followup_suggestions.
+93. RESPONSE SOUND: Settings → App tab → Response Sound toggle. When ON, a subtle two-tone chime plays via the Web Audio API (no external audio file needed) when the AI finishes streaming. Useful for knowing when a long response is complete without watching the screen. Toggling ON plays a preview of the sound. Stored in localStorage as snoah_response_sound.
+94. FOCUS MODE: Preferences → App & Info → Focus Mode button. Toggles a distraction-free mode that hides the app header (app name, model badge, top buttons), giving the full viewport height to the chat thread. Tap "Exit Focus Mode" in Preferences to restore the header. Runtime only — not persisted.
 
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
-- Top bar: App name "SnoahAI" (left), model badge (center), three icon buttons on the right: Temp Chat (clock 🕐), Search (🔍), New Chat (+).
-- Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons.
+- Top bar: App name "SnoahAI" (left), model badge (center), three icon buttons on the right: Temp Chat (clock 🕐), Search (🔍), New Chat (+). Hidden in Focus Mode.
+- Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons. Agentic web search shows a collapsible "🔍 Search Process" block above the final response.
 - Bottom bar: Input toolbar with ⚡ Smart, Thinking (🧠), Web Search (🔍), Response Length, Templates, Canvas buttons, main text input (with Attach 📎 plus-icon on the left and Voice 🎤 on the right), Send/Stop button.
-- Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Multi-Key Storage toggle/Dark Mode/About/Updates/Contact Us), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
-- Settings → API tab sections: Platform & Model (24 platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Web Search Platform (Gemini/Tavily/Brave/Serper/Custom with per-provider key pool), Advanced Model Parameters, API Request Timeout (15–120s slider), Token Management, Notion Integration, Response Display.
-- Settings → AI tab sections: AI Persona (system prompt override), Custom Instructions, Multi-AI Response, Auto Memory, Response Language, Conversation Style (Standard/Friendly/Concise/Detailed/Academic/Casual).
-- Settings → App tab sections: Font Size, Theme, Message Timestamps, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
+- Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Multi-Key Storage toggle/Dark Mode/Focus Mode/About/Updates/Contact Us), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal).
+- Settings → API tab sections: Platform & Model (24 platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Web Search Platform (Gemini/Tavily/Brave/Serper/Custom with per-provider key pool + Agentic Web Search toggle + Browse Depth slider), Advanced Model Parameters, API Request Timeout (15–120s slider), Token Management, Notion Integration, Response Display.
+- Settings → AI tab sections: AI Persona (system prompt override), Custom Instructions, Multi-AI Response, Auto Memory, Response Language, Conversation Style (Standard/Friendly/Concise/Detailed/Academic/Casual), Follow-Up Suggestions toggle.
+- Settings → App tab sections: Font Size, Theme, Message Timestamps, Response Sound toggle, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy Text, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
@@ -8397,7 +8567,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     'Temp Chat: ' + (isTempChat ? 'ON (this conversation is not saved)' : 'OFF'),
                     'Auto Memory: ' + (autoMemoryEnabled ? 'ON' : 'OFF'),
                     'Notion Auto-Save: ' + (notionAutoSave ? 'ON' : 'OFF'),
-                    'Agentic Web Search: ' + (agenticWebSearch ? 'ON (AI can visit URLs with [BROWSE: url])' : 'OFF'),
+                    'Agentic Web Search: ' + (agenticWebSearch ? 'ON (AI can visit URLs with [BROWSE: url], browse depth: ' + agentBrowseDepth + ')' : 'OFF'),
+                    'Follow-Up Suggestions: ' + (followUpSuggestions ? 'ON (AI appends 3 tappable follow-up questions)' : 'OFF'),
+                    'Response Sound: ' + (responseSound ? 'ON (chime plays when streaming completes)' : 'OFF'),
+                    'Focus Mode: ' + (focusModeActive ? 'ON (header hidden)' : 'OFF'),
                     'Model Parameters: Temperature=' + paramTemperature + ' | Top P=' + paramTopP + ' | Top K=' + paramTopK + ' | Max Tokens=' + paramMaxTokens,
                     'Response Length: ' + responseLength,
                 ].join(' | ');
@@ -8423,6 +8596,9 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 }
                 if (useAgent && agenticWebSearch) {
                     systemInstruction += "\n\nAGENTIC WEB BROWSING IS ENABLED: You can visit any URL to read its full content. To browse a URL, output [BROWSE: https://example.com] on its own line. The system will fetch the full page content and return it to you as a [PAGE CONTENT] observation. After receiving page content, analyze it and answer the user's question thoroughly. You can use [BROWSE: url] when the user asks you to read a specific URL, or when search results show a promising link you need to read in full. IMPORTANT: Only use [BROWSE: url] when truly needed — once per response at most. ";
+                }
+                if (followUpSuggestions) {
+                    systemInstruction += "\n\nFOLLOW-UP SUGGESTIONS: After your response, on a new line, add exactly this line: FOLLOW_UP: [First follow-up question?] | [Second follow-up question?] | [Third follow-up question?] — replace the bracket text with 3 concise, relevant follow-up questions. This line is parsed and shown as tappable buttons. Do NOT apply markdown formatting to this line.";
                 }
                 if (customInstructions) systemInstruction += '\n\nUser custom instructions: ' + customInstructions;
                 // Inject conversation style instruction if not standard
@@ -8935,11 +9111,11 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
                         // ── AGENTIC WEB BROWSING: detect [BROWSE: url] commands in AI response ──
                         // Uses _browsesDone (not attempts) so key-rotation counter is not affected.
-                        if (agenticWebSearch && useAgent && _browsesDone === 0) {
+                        if (agenticWebSearch && useAgent && _browsesDone < agentBrowseDepth) {
                             const _browseMatch = fullRaw.match(/\[BROWSE:\s*(https?:\/\/[^\]]+)\]/i);
                             if (_browseMatch) {
                                 const _browseUrl = _browseMatch[1].trim();
-                                // Show live "visiting URL" status in chat bubble
+                                // Ensure live wrapper is in DOM so we can extract pre-browse text
                                 if (!liveAppended) {
                                     messagesWrapper.appendChild(liveWrapper);
                                     setIsLoading(false);
@@ -8949,7 +9125,32 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                     liveAppended = true;
                                     _streamPartialWrapper = liveWrapper;
                                 }
-                                liveTextEl.innerHTML = '<span class="opacity-75 italic">🌐 Visiting <a href="' + _browseUrl + '" target="_blank" class="underline text-[#D25D38]">' + _browseUrl + '</a>…</span>';
+                                // Extract text before [BROWSE: url] command (the AI's reasoning/plan text)
+                                const _browseIdx = fullRaw.indexOf(_browseMatch[0]);
+                                let _preBrowseRaw = _browseIdx > 0 ? _normalizeThinkTags(fullRaw.slice(0, _browseIdx)).replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/\[BROWSE:[^\]]*\]/gi, '').trim() : '';
+
+                                // Create a permanent "Search Process" block showing the intermediate steps
+                                const _agentBlock = document.createElement('div');
+                                _agentBlock.className = 'flex w-full justify-start mb-1';
+                                const _agentUID = 'agent_proc_' + Date.now();
+                                _agentBlock.innerHTML =
+                                    '<div class="w-full max-w-[95%]">' +
+                                        '<details id="' + _agentUID + '" class="rounded-xl border border-[#E5E3DB] bg-[#F2F0E9] overflow-hidden" open>' +
+                                            '<summary class="flex items-center gap-2 px-4 py-2.5 border-b border-[#E5E3DB] cursor-pointer select-none list-none">' +
+                                                '<span class="text-[13px]">🔍</span>' +
+                                                '<span class="text-[12px] font-semibold text-[#8C897D]">Search Process</span>' +
+                                                '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto"><polyline points="6 9 12 15 18 9"/></svg>' +
+                                            '</summary>' +
+                                            '<div class="px-4 py-3 space-y-2">' +
+                                                (_preBrowseRaw ? '<div class="text-[13px] text-[#5B5951] leading-relaxed mb-2 whitespace-pre-wrap">' + _preBrowseRaw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' : '') +
+                                                '<div id="' + _agentUID + '-visit" class="flex items-center gap-2 text-[13px] text-[#737166] italic">' +
+                                                    '<span class="animate-pulse text-base">🌐</span>' +
+                                                    '<span>Visiting <a href="' + _browseUrl + '" target="_blank" class="underline text-[#D25D38] break-all">' + _browseUrl + '</a>…</span>' +
+                                                '</div>' +
+                                            '</div>' +
+                                        '</details>' +
+                                    '</div>';
+                                messagesWrapper.appendChild(_agentBlock);
                                 if (floatingLoadingText) floatingLoadingText.innerText = '🌐 Visiting page…';
                                 scrollToBottom();
                                 try {
@@ -8957,6 +9158,11 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                     if (_bRes.ok) {
                                         const _bData = await _bRes.json();
                                         if (_bData.content) {
+                                            // Update visit indicator to show success and collapse block
+                                            const _visitEl = document.getElementById(_agentUID + '-visit');
+                                            if (_visitEl) _visitEl.innerHTML = '<span class="text-base">✅</span><span>Read <a href="' + _browseUrl + '" target="_blank" class="underline text-[#D25D38] break-all">' + _browseUrl + '</a></span>';
+                                            const _detailsEl = document.getElementById(_agentUID);
+                                            if (_detailsEl) _detailsEl.removeAttribute('open');
                                             systemInstruction += '\n\n[SYSTEM OBSERVATION — Visited URL: ' + _browseUrl + ']\n' + _bData.content + '\n[END OF PAGE CONTENT]\nUsing the above page content, now answer the user\'s question fully and accurately.';
                                             fullRaw = '';
                                             liveWrapper.remove(); liveAppended = false;
@@ -8964,7 +9170,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                             continue; // re-run AI with page content injected
                                         }
                                     }
-                                } catch(_bErr) { console.warn('Browser agent error:', _bErr.message); }
+                                    // If fetch failed silently, show error in process block
+                                    const _visitEl2 = document.getElementById(_agentUID + '-visit');
+                                    if (_visitEl2) _visitEl2.innerHTML = '<span class="text-base">❌</span><span>Failed to read <a href="' + _browseUrl + '" target="_blank" class="underline text-[#D25D38] break-all">' + _browseUrl + '</a></span>';
+                                } catch(_bErr) {
+                                    const _visitEl3 = document.getElementById(_agentUID + '-visit');
+                                    if (_visitEl3) _visitEl3.innerHTML = '<span class="text-base">❌</span><span>Error visiting <a href="' + _browseUrl + '" target="_blank" class="underline text-[#D25D38] break-all">' + _browseUrl + '</a></span>';
+                                    console.warn('Browser agent error:', _bErr.message);
+                                }
                             }
                         }
                         break; // success
@@ -9036,6 +9249,16 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 mainText = mainText.replace(/\[MEMORY:[^\]]*\]/gi, '').trim();
                 // Strip any leftover [BROWSE: url] commands from the visible text
                 mainText = mainText.replace(/\[BROWSE:\s*https?:\/\/[^\]]*\]/gi, '').trim();
+
+                // Extract FOLLOW_UP suggestions line from AI response
+                let _followUpQuestions = [];
+                const _fuLineMatch = mainText.match(/^FOLLOW_UP:\s*(.+)$/m);
+                if (_fuLineMatch) {
+                    mainText = mainText.replace(/^FOLLOW_UP:\s*.+$/m, '').trim();
+                    _followUpQuestions = _fuLineMatch[1].split('|')
+                        .map(q => q.replace(/^\[|\]$/g, '').trim())
+                        .filter(q => q && q.length > 3);
+                }
 
                 thinkBody.textContent = thinkingText || '';
                 if (!liveAppended && fullRaw.trim()) { messagesWrapper.appendChild(liveWrapper); liveAppended = true; }
@@ -9156,7 +9379,21 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 innerCol.appendChild(actionsDiv);
                 wireActionsDiv(actionsDiv, mainTextClean);
                 lucide.createIcons({ nodes: [actionsDiv] });
+
+                // Add follow-up suggestion chips
+                if (_followUpQuestions.length > 0) {
+                    const fuDiv = document.createElement('div');
+                    fuDiv.className = 'mt-3 flex flex-wrap gap-2';
+                    fuDiv.innerHTML = _followUpQuestions.map(q =>
+                        '<button onclick="fillInputBar(' + JSON.stringify(q) + ')" class="text-[12px] text-[#5B5951] bg-[#F2F0E9] border border-[#E5E3DB] px-3 py-1.5 rounded-full hover:bg-[#EAE8E0] hover:text-[#D25D38] transition-colors text-left active:scale-95">' +
+                        escapeHTML(q) + '</button>'
+                    ).join('');
+                    innerCol.appendChild(fuDiv);
+                }
+
                 scrollToBottom();
+                // Play response completion sound if enabled
+                playResponseChime();
 
                 const aiMsg = { role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries };
                 messages.push(aiMsg);
