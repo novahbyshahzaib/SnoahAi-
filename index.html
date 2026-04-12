@@ -6945,7 +6945,7 @@
                 .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-[#1A1A1A]">$1</strong>')
                 .replace(/__(.*?)__/g, '<strong class="font-semibold text-[#1A1A1A]">$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-                .replace(/(?<!\w)_([^_\n]+?)_(?!\w)/g, '<em class="italic">$1</em>')
+                .replace(/(^|[^\w])_([^_\n]+?)_(?=[^\w]|$)/g, '$1<em class="italic">$2</em>')
                 .replace(/`([^`]+)`/g, '<code class="bg-[#F2F0E9] text-[#2C2B29] px-1.5 py-0.5 rounded-md text-[13.5px] font-mono border border-[#E5E3DB]">$1</code>');
             // Restore math
             s = s.replace(/\x00MATH(\d+)\x00/g, (_, i) => mathParts[+i] || '');
@@ -6960,7 +6960,7 @@
                 .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-[#1A1A1A]">$1</strong>')
                 .replace(/__(.*?)__/g, '<strong class="font-semibold text-[#1A1A1A]">$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-                .replace(/(?<!\w)_([^_\n]+?)_(?!\w)/g, '<em class="italic">$1</em>')
+                .replace(/(^|[^\w])_([^_\n]+?)_(?=[^\w]|$)/g, '$1<em class="italic">$2</em>')
                 .replace(/`([^`]+)`/g, '<code class="bg-[#F2F0E9] text-[#2C2B29] px-1.5 py-0.5 rounded-md text-[13.5px] font-mono border border-[#E5E3DB]">$1</code>');
         }
 
@@ -8935,7 +8935,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
                         // ── AGENTIC WEB BROWSING: detect [BROWSE: url] commands in AI response ──
                         // Uses _browsesDone (not attempts) so key-rotation counter is not affected.
-                        if (agenticWebSearch && useAgent && _browsesDone < 1) {
+                        if (agenticWebSearch && useAgent && _browsesDone === 0) {
                             const _browseMatch = fullRaw.match(/\[BROWSE:\s*(https?:\/\/[^\]]+)\]/i);
                             if (_browseMatch) {
                                 const _browseUrl = _browseMatch[1].trim();
