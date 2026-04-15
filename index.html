@@ -5739,7 +5739,7 @@
         }
 
         function fillInputBar(text) {
-            const inp = document.getElementById('chat-input');
+            const inp = document.getElementById('chat-input') || document.getElementById('message-input');
             if (!inp) return;
             inp.value = text;
             inp.dispatchEvent(new Event('input'));
@@ -9618,7 +9618,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     const fuDiv = document.createElement('div');
                     fuDiv.className = 'mt-3 flex flex-wrap gap-2';
                     fuDiv.innerHTML = _followUpQuestions.map(q =>
-                        '<button onclick="sendFollowUpSuggestion(' + JSON.stringify(q) + ')" class="text-[12px] text-[#5B5951] bg-[#F2F0E9] border border-[#E5E3DB] px-3 py-1.5 rounded-full hover:bg-[#EAE8E0] hover:text-[#D25D38] transition-colors text-left active:scale-95">' +
+                        '<button onclick="sendFollowUpSuggestion(decodeURIComponent(\'' + encodeURIComponent(q) + '\'))" class="text-[12px] text-[#5B5951] bg-[#F2F0E9] border border-[#E5E3DB] px-3 py-1.5 rounded-full hover:bg-[#EAE8E0] hover:text-[#D25D38] transition-colors text-left active:scale-95">' +
                         escapeHTML(q) + '</button>'
                     ).join('');
                     innerCol.appendChild(fuDiv);
