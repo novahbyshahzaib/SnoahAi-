@@ -4092,8 +4092,8 @@
             const sourceChat = allChats.find(c => c.id === currentChatId);
             const branchId = generateChatId();
             const branchBaseTitle = (sourceChat?.title || 'Conversation') + ' (Branch)';
-            const existingBranchCount = allChats.filter(c => (c.title || '').startsWith(branchBaseTitle)).length;
-            const branchTitle = existingBranchCount > 0 ? branchBaseTitle + ' ' + (existingBranchCount + 1) : branchBaseTitle;
+            const existingBranchCount = allChats.filter(c => (c.title || '') === branchBaseTitle || (c.title || '').startsWith(branchBaseTitle + ' ')).length;
+            const branchTitle = existingBranchCount > 0 ? branchBaseTitle + ' ' + existingBranchCount : branchBaseTitle;
             const branchMessages = messages.map(m => ({ ...m }));
             allChats.unshift({
                 id: branchId,
@@ -5747,9 +5747,9 @@
         }
 
         function sendFollowUpSuggestion(text) {
-            const q = (text || '').trim();
-            if (!q) return;
-            submitMessage(q);
+            const query = (text || '').trim();
+            if (!query) return;
+            submitMessage(query);
         }
 
         async function autoSaveToNotion(text) {
@@ -8987,7 +8987,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 let attempts = 0;
                 let _browsesDone = 0; // separate counter for agentic browse retries (must not share with key-rotation counter)
                 const _agenticProcessLogs = [];
-                const _browsedUrlsThisTurn = new Set();
+                const _visitedUrlsInCurrentResponse = new Set();
                 while (attempts <= totalKeys) {
                     try {
                         // ── READ SSE STREAM (with timeout) ──
@@ -9316,7 +9316,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 // Extract text before [BROWSE: url] command (the AI's reasoning/plan text)
                                 const _browseIdx = fullRaw.indexOf(_browseMatch[0]);
                                 let _preBrowseRaw = _browseIdx > 0 ? _normalizeThinkTags(fullRaw.slice(0, _browseIdx)).replace(/<think>[\s\S]*?<\/think>/gi, '').trim() : '';
-                                const _browseKey = (_browseUrl || '').replace(/\/+$/, '').toLowerCase();
+                                let _browseKey = (_browseUrl || '').replace(/\/+$/, '').toLowerCase();
+                                try {
+                                    const _u = new URL(_browseUrl);
+                                    const _host = (_u.hostname || '').replace(/^www\./i, '').toLowerCase();
+                                    const _path = (_u.pathname || '/').replace(/\/+$/, '') || '/';
+                                    const _query = _u.search || '';
+                                    _browseKey = _host + _path + _query;
+                                } catch (_) {}
 
                                 // Create a permanent "Search Process" block showing the intermediate steps
                                 const _agentBlock = document.createElement('div');
@@ -9342,7 +9349,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 messagesWrapper.appendChild(_agentBlock);
                                 if (floatingLoadingText) floatingLoadingText.innerText = '🌐 Visiting page…';
                                 scrollToBottom();
-                                if (_browsedUrlsThisTurn.has(_browseKey)) {
+                                if (_visitedUrlsInCurrentResponse.has(_browseKey)) {
                                     const _visitSkipEl = document.getElementById(_agentUID + '-visit');
                                     if (_visitSkipEl) _visitSkipEl.innerHTML = '<span class="text-base">⏭️</span><span>Skipped duplicate visit to <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
                                     const _detailsSkip = document.getElementById(_agentUID);
@@ -9354,7 +9361,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                     _browsesDone++;
                                     continue;
                                 }
-                                _browsedUrlsThisTurn.add(_browseKey);
+                                _visitedUrlsInCurrentResponse.add(_browseKey);
                                 const _logEntry = { preface: _preBrowseRaw, url: _browseUrl, status: 'visiting' };
                                 _agenticProcessLogs.push(_logEntry);
                                 try {
