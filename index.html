@@ -912,7 +912,7 @@
                             <input type="range" id="websearch-limit-slider" min="3" max="10" step="1" value="5"
                                 oninput="updateWebSearchLimitDisplay(this.value)"
                                 class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
-                            <p class="text-[10px] text-[#A3A095] mt-0.5">How many web search results are injected into AI context (3–10).</p>
+                            <p class="text-[10px] text-[#A3A095] mt-0.5">How many web search results are injected into AI context (3-10).</p>
                         </div>
 
                         <!-- Agentic Web Search toggle -->
@@ -2841,7 +2841,7 @@
         let useAgent = false;
         let smartMode = false;
         let webSearchPlatform = localStorage.getItem('snoah_websearch_platform') || 'gemini';
-        let webSearchResultLimit = Math.min(10, Math.max(3, parseInt(localStorage.getItem('snoah_websearch_limit') || '5') || 5));
+        let webSearchResultLimit = Math.min(10, Math.max(3, parseInt(localStorage.getItem('snoah_websearch_limit') || '5', 10) || 5));
         let agenticWebSearch = localStorage.getItem('snoah_agentic_ws') === '1';
         let agentBrowseDepth = parseInt(localStorage.getItem('snoah_agent_browse_depth') || '1');
         let followUpSuggestions = localStorage.getItem('snoah_followup_suggestions') === 'true';
@@ -2852,7 +2852,7 @@
             } catch (_) { return []; }
         })();
         let responseSound = localStorage.getItem('snoah_response_sound') === 'true';
-        let chatHistoryLimit = Math.min(100, Math.max(10, parseInt(localStorage.getItem('snoah_chat_limit') || '30') || 30));
+        let chatHistoryLimit = Math.min(100, Math.max(10, parseInt(localStorage.getItem('snoah_chat_limit') || '30', 10) || 30));
         let focusModeActive = false;
         let tavilyKeys = _loadKeys('snoah_tavily_keys');
         let braveKeys = _loadKeys('snoah_brave_keys');
@@ -3933,7 +3933,11 @@
                 originalText: m.originalText || m.text || '',
                 thinking: m.thinking || null,
                 sources: m.sources || [],
-                agenticLogs: m.agenticLogs || []
+                agenticLogs: (m.agenticLogs || []).slice(0, 8).map(l => ({
+                    preface: (l.preface || '').slice(0, 500),
+                    url: l.url || '',
+                    status: l.status || 'read'
+                }))
                 // skip image data — too large for localStorage
             }));
             const idx = allChats.findIndex(c => c.id === currentChatId);
@@ -4093,7 +4097,7 @@
             const branchId = generateChatId();
             const branchBaseTitle = (sourceChat?.title || 'Conversation') + ' (Branch)';
             const existingBranchCount = allChats.filter(c => (c.title || '') === branchBaseTitle || (c.title || '').startsWith(branchBaseTitle + ' ')).length;
-            const branchTitle = existingBranchCount > 0 ? branchBaseTitle + ' ' + existingBranchCount : branchBaseTitle;
+            const branchTitle = branchBaseTitle + ' ' + (existingBranchCount + 1);
             const branchMessages = messages.map(m => ({ ...m }));
             allChats.unshift({
                 id: branchId,
@@ -4568,7 +4572,7 @@
              // Save web search result limit
             const wsLimitSlider = document.getElementById('websearch-limit-slider');
             if (wsLimitSlider) {
-                webSearchResultLimit = Math.min(10, Math.max(3, parseInt(wsLimitSlider.value) || 5));
+                webSearchResultLimit = Math.min(10, Math.max(3, parseInt(wsLimitSlider.value, 10) || 5));
                 localStorage.setItem('snoah_websearch_limit', webSearchResultLimit);
             }
 
@@ -4582,7 +4586,7 @@
             // Save chat history limit
             const chatLimitEl = document.getElementById('chat-history-limit-slider');
             if (chatLimitEl) {
-                chatHistoryLimit = Math.min(100, Math.max(10, parseInt(chatLimitEl.value) || 30));
+                chatHistoryLimit = Math.min(100, Math.max(10, parseInt(chatLimitEl.value, 10) || 30));
                 localStorage.setItem('snoah_chat_limit', chatHistoryLimit);
             }
 
@@ -9316,14 +9320,16 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 // Extract text before [BROWSE: url] command (the AI's reasoning/plan text)
                                 const _browseIdx = fullRaw.indexOf(_browseMatch[0]);
                                 let _preBrowseRaw = _browseIdx > 0 ? _normalizeThinkTags(fullRaw.slice(0, _browseIdx)).replace(/<think>[\s\S]*?<\/think>/gi, '').trim() : '';
-                                let _browseKey = (_browseUrl || '').replace(/\/+$/, '').toLowerCase();
+                                let _browseKey = (_browseUrl || '').toLowerCase();
                                 try {
                                     const _u = new URL(_browseUrl);
                                     const _host = (_u.hostname || '').replace(/^www\./i, '').toLowerCase();
                                     const _path = (_u.pathname || '/').replace(/\/+$/, '') || '/';
                                     const _query = _u.search || '';
                                     _browseKey = _host + _path + _query;
-                                } catch (_) {}
+                                } catch (_) {
+                                    _browseKey = _browseKey.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/+$/, '');
+                                }
 
                                 // Create a permanent "Search Process" block showing the intermediate steps
                                 const _agentBlock = document.createElement('div');
