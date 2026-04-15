@@ -904,6 +904,17 @@
                             </div>
                         </div>
 
+                        <div class="mt-4">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-[12px] font-semibold text-[#5B5951]">Search Results Limit</span>
+                                <span id="websearch-limit-val" class="text-[12px] font-mono text-[#A3A095]">5 results</span>
+                            </div>
+                            <input type="range" id="websearch-limit-slider" min="3" max="10" step="1" value="5"
+                                oninput="updateWebSearchLimitDisplay(this.value)"
+                                class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
+                            <p class="text-[10px] text-[#A3A095] mt-0.5">How many web search results are injected into AI context (3-10).</p>
+                        </div>
+
                         <!-- Agentic Web Search toggle -->
                         <div class="mt-4 border-t border-[#F2F0E9] pt-4">
                             <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
@@ -1286,6 +1297,29 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Plugin / Extension System -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Plugin / Extension System</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Enable built-in extensions that augment AI behavior with focused capabilities.</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" id="plugin-source-citer" onchange="togglePlugin('source_citer', this.checked)" class="accent-[#D25D38] w-4 h-4">
+                                <span class="text-[13px] text-[#2C2B29] font-medium">Source Citer — adds source references when possible</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" id="plugin-code-guard" onchange="togglePlugin('code_guard', this.checked)" class="accent-[#D25D38] w-4 h-4">
+                                <span class="text-[13px] text-[#2C2B29] font-medium">Code Guard — emphasizes safe, robust code output</span>
+                            </label>
+                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
+                                <input type="checkbox" id="plugin-learning-coach" onchange="togglePlugin('learning_coach', this.checked)" class="accent-[#D25D38] w-4 h-4">
+                                <span class="text-[13px] text-[#2C2B29] font-medium">Learning Coach — explains with short checkpoints</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- App Config Tab -->
@@ -1344,6 +1378,22 @@
                                 <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Chat History Limit -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Chat History Limit</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Control how many chats are kept in local history before older ones are trimmed.</p>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[12px] font-semibold text-[#5B5951]">Saved Chats</span>
+                            <span id="chat-history-limit-val" class="text-[12px] font-mono text-[#A3A095]">30 chats</span>
+                        </div>
+                        <input type="range" id="chat-history-limit-slider" min="10" max="100" step="5" value="30"
+                            oninput="updateChatHistoryLimitDisplay(this.value)"
+                            class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
                     </div>
 
                     <!-- Divider -->
@@ -2063,6 +2113,15 @@
                                     <span class="text-[11px] text-[#A3A095]">AI summary of the conversation</span>
                                 </div>
                             </button>
+                            <button onclick="closePreferencesModal();createChatBranch();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F2F0E9] text-left transition-colors group">
+                                <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] group-hover:bg-[#EAE8E0] flex items-center justify-center shrink-0 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C897D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><path d="M6 3v12"/><path d="M18 9v12"/><path d="M6 15c0-3.314 2.686-6 6-6h6"/><path d="m12 5 4 4-4 4"/></svg>
+                                </div>
+                                <div>
+                                    <span class="text-[14px] text-[#2C2B29] font-medium block">Create Chat Branch</span>
+                                    <span class="text-[11px] text-[#A3A095]">Duplicate this chat into a new branch</span>
+                                </div>
+                            </button>
                         </div>
                     </div>
 
@@ -2182,12 +2241,22 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.0</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.1</span>
                     </div>
 
                     <div>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New</h3>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.1</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Smarter Agentic URL Deduplication 🔗</strong> — The agentic web search no longer visits the same page twice. URLs are now normalized before deduplication — stripping <code>http://</code>/<code>https://</code>, <code>www.</code> prefix, and trailing slashes — so <em>https://example.com/</em> and <em>http://www.example.com</em> are correctly treated as identical. Saves browse-depth budget for genuinely new sources.</li>
+                            <li><strong>Agentic Log Size Safeguards 💾</strong> — Agentic search logs saved to chat history are now capped at 8 entries per response, with each reasoning preface limited to 500 characters. This prevents the chat history from filling up browser localStorage on long multi-URL research sessions.</li>
+                            <li><strong>Consistent Branch Naming 🌿</strong> — Branched conversations are now always numbered from the first branch (e.g. "Branch 1", "Branch 2", …) for clarity in the sidebar history.</li>
+                        </ul>
+                    </div>
+
+                    <!-- v4.0 section -->
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">v4.0 — Previous Release</h3>
+                        <ul class="list-disc list-inside space-y-1.5 text-[13px]">
                             <li><strong>Agentic Search Process Log 🔍</strong> — The agentic web search now shows a collapsible "Search Process" block in chat. When the AI visits a URL, you see the AI's reasoning text, a live "🌐 Visiting…" indicator, and a "✅ Read" confirmation — all preserved above the final answer. The process block auto-collapses after the visit completes so only the final response is prominent.</li>
                             <li><strong>Agentic Browse Depth 🌐</strong> — New slider in Settings → API → Agentic Web Search. Control how many URLs the AI can visit per response (1–3 pages). Increase to 3 for deep multi-page research; keep at 1 for faster single-source lookups. Saved in localStorage as <code>snoah_agent_browse_depth</code>.</li>
                             <li><strong>Follow-Up Suggestions 💬</strong> — New toggle in Settings → AI. When ON, the AI automatically appends 3 clickable follow-up questions at the end of each response. Tap any question to instantly fill the input bar and send it — great for exploring topics deeper without retyping.</li>
@@ -2782,10 +2851,18 @@
         let useAgent = false;
         let smartMode = false;
         let webSearchPlatform = localStorage.getItem('snoah_websearch_platform') || 'gemini';
+        let webSearchResultLimit = Math.min(10, Math.max(3, parseInt(localStorage.getItem('snoah_websearch_limit') || '5', 10) || 5));
         let agenticWebSearch = localStorage.getItem('snoah_agentic_ws') === '1';
         let agentBrowseDepth = parseInt(localStorage.getItem('snoah_agent_browse_depth') || '1');
         let followUpSuggestions = localStorage.getItem('snoah_followup_suggestions') === 'true';
+        let enabledPlugins = (() => {
+            try {
+                const parsed = JSON.parse(localStorage.getItem('snoah_plugins') || '[]');
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (_) { return []; }
+        })();
         let responseSound = localStorage.getItem('snoah_response_sound') === 'true';
+        let chatHistoryLimit = Math.min(100, Math.max(10, parseInt(localStorage.getItem('snoah_chat_limit') || '30', 10) || 30));
         let focusModeActive = false;
         let tavilyKeys = _loadKeys('snoah_tavily_keys');
         let braveKeys = _loadKeys('snoah_brave_keys');
@@ -3865,7 +3942,12 @@
                 text: m.text || '',
                 originalText: m.originalText || m.text || '',
                 thinking: m.thinking || null,
-                sources: m.sources || []
+                sources: m.sources || [],
+                agenticLogs: (m.agenticLogs || []).slice(0, 8).map(l => ({
+                    preface: (l.preface || '').slice(0, 500),
+                    url: l.url || '',
+                    status: l.status || 'read'
+                }))
                 // skip image data — too large for localStorage
             }));
             const idx = allChats.findIndex(c => c.id === currentChatId);
@@ -3877,8 +3959,8 @@
             const entry = { id: currentChatId, title, updatedAt: Date.now(), messages: saveable, tag: existingTag, pinned: existingPinned };
             if (idx >= 0) allChats[idx] = entry;
             else allChats.unshift(entry);
-            // Keep only 30 chats to avoid localStorage overflow
-            allChats = allChats.slice(0, 30);
+            // Keep only configured number of chats to avoid localStorage overflow
+            allChats = allChats.slice(0, chatHistoryLimit);
             try {
                 localStorage.setItem('snoah_all_chats', JSON.stringify(allChats));
             } catch(e) {
@@ -4015,6 +4097,39 @@
             if (isSidebarOpen) toggleSidebar();
         }
 
+        function createChatBranch() {
+            if (!messages.length) {
+                showToast('No chat to branch yet');
+                return;
+            }
+            saveCurrentChat();
+            const sourceChat = allChats.find(c => c.id === currentChatId);
+            const branchId = generateChatId();
+            const branchBaseTitle = (sourceChat?.title || 'Conversation') + ' (Branch)';
+            const existingBranchCount = allChats.filter(c => (c.title || '') === branchBaseTitle || (c.title || '').startsWith(branchBaseTitle + ' ')).length;
+            const branchTitle = branchBaseTitle + ' ' + (existingBranchCount + 1);
+            const branchMessages = messages.map(m => ({ ...m }));
+            allChats.unshift({
+                id: branchId,
+                title: branchTitle,
+                updatedAt: Date.now(),
+                messages: branchMessages.filter(m => !m.isError).map(m => ({
+                    role: m.role,
+                    text: m.text || '',
+                    originalText: m.originalText || m.text || '',
+                    thinking: m.thinking || null,
+                    sources: m.sources || [],
+                    agenticLogs: m.agenticLogs || []
+                })),
+                tag: sourceChat?.tag || null,
+                pinned: false
+            });
+            allChats = allChats.slice(0, chatHistoryLimit);
+            try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch (_) {}
+            loadChat(branchId);
+            showToast('🌿 Chat branch created');
+        }
+
         // Init on load
         currentChatId = generateChatId();
         renderChatHistoryList();
@@ -4149,6 +4264,11 @@
             // Load web search platform
             const wsPlat = document.getElementById('settings-websearch-platform');
             if (wsPlat) { wsPlat.value = webSearchPlatform; switchWebSearchPlatform(webSearchPlatform, true); }
+            const wsLimitSlider = document.getElementById('websearch-limit-slider');
+            if (wsLimitSlider) {
+                wsLimitSlider.value = webSearchResultLimit;
+                updateWebSearchLimitDisplay(webSearchResultLimit);
+            }
             // Load agentic web search toggle
             const agWsCb = document.getElementById('settings-agentic-websearch');
             if (agWsCb) agWsCb.checked = agenticWebSearch;
@@ -4171,8 +4291,15 @@
             updateConvStyleUI();
             // Load follow-up suggestions
             updateFollowUpUI();
+            // Load plugins
+            updatePluginUI();
             // Load response sound
             updateResponseSoundUI();
+            const chLimitSlider = document.getElementById('chat-history-limit-slider');
+            if (chLimitSlider) {
+                chLimitSlider.value = chatHistoryLimit;
+                updateChatHistoryLimitDisplay(chatHistoryLimit);
+            }
             // Refresh storage stats
             refreshStorageStats();
             switchSettingsTab('api');
@@ -4244,6 +4371,13 @@
             // Reset multi-AI
             multiAIEnabled = false; multiAIPlatforms = [];
             localStorage.removeItem('snoah_multi_ai'); localStorage.removeItem('snoah_multi_ai_platforms');
+            // Reset plugins and extra limits
+            enabledPlugins = [];
+            webSearchResultLimit = 5;
+            chatHistoryLimit = 30;
+            localStorage.removeItem('snoah_plugins');
+            localStorage.removeItem('snoah_websearch_limit');
+            localStorage.removeItem('snoah_chat_limit');
             // Reload settings panel to reflect defaults
             closeSettings();
             updateModelLabels();
@@ -4445,11 +4579,25 @@
                 streamTimeoutMs = secs * 1000;
             }
 
+             // Save web search result limit
+            const wsLimitSlider = document.getElementById('websearch-limit-slider');
+            if (wsLimitSlider) {
+                webSearchResultLimit = Math.min(10, Math.max(3, parseInt(wsLimitSlider.value, 10) || 5));
+                localStorage.setItem('snoah_websearch_limit', webSearchResultLimit);
+            }
+
             // Save agentic browse depth
             const browseDepthEl = document.getElementById('agent-browse-depth-slider');
             if (browseDepthEl) {
                 agentBrowseDepth = parseInt(browseDepthEl.value);
                 localStorage.setItem('snoah_agent_browse_depth', agentBrowseDepth);
+            }
+
+            // Save chat history limit
+            const chatLimitEl = document.getElementById('chat-history-limit-slider');
+            if (chatLimitEl) {
+                chatHistoryLimit = Math.min(100, Math.max(10, parseInt(chatLimitEl.value, 10) || 30));
+                localStorage.setItem('snoah_chat_limit', chatHistoryLimit);
             }
 
             // Save custom search URL
@@ -4837,11 +4985,11 @@
                 try {
                     const r = await fetch(
                         'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' +
-                        encodeURIComponent(query) + '&format=json&origin=*&utf8=1&srlimit=5'
+                        encodeURIComponent(query) + '&format=json&origin=*&utf8=1&srlimit=' + webSearchResultLimit
                     );
                     if (!r.ok) throw new Error('Wikipedia HTTP ' + r.status);
                     const d = await r.json();
-                    const results = (d.query?.search || []).slice(0, 5);
+                    const results = (d.query?.search || []).slice(0, webSearchResultLimit);
                     const text = results.map(x => {
                         const snippet = (x.snippet || '').replace(/<[^>]*>/gi, '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                         const url = 'https://en.wikipedia.org/wiki/' + encodeURIComponent((x.title || '').replace(/ /g, '_'));
@@ -4856,7 +5004,7 @@
                     const r = await fetch('/api/browser?q=' + encodeURIComponent(query));
                     if (!r.ok) throw new Error('DuckDuckGo HTTP ' + r.status);
                     const d = await r.json();
-                    const results = (d.results || []).slice(0, 5);
+                    const results = (d.results || []).slice(0, webSearchResultLimit);
                     const text = results.map(x => '**' + (x.title||'') + '**\n' + (x.snippet||'') + '\nSource: ' + (x.url||'')).join('\n\n');
                     return { text: text || 'No DuckDuckGo results found.', sources: results.map(x => ({ uri: x.url||'', title: x.title||'' })), queries: [query] };
                 } catch(e) { console.warn('DuckDuckGo search error:', e.message); }
@@ -4868,7 +5016,7 @@
                     const r = await fetch('https://api.tavily.com/search', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-                        body: JSON.stringify({ query, max_results: 5, search_depth: 'basic' })
+                        body: JSON.stringify({ query, max_results: webSearchResultLimit, search_depth: 'basic' })
                     });
                     if (!r.ok) throw new Error('Tavily HTTP ' + r.status);
                     const d = await r.json();
@@ -4884,7 +5032,7 @@
                     const r = await fetch('/api/brave-search?q=' + encodeURIComponent(query), { headers: { 'x-api-key': key } });
                     if (!r.ok) throw new Error('Brave HTTP ' + r.status);
                     const d = await r.json();
-                    const results = (d.web?.results || []).slice(0, 5);
+                    const results = (d.web?.results || []).slice(0, webSearchResultLimit);
                     const text = results.map(x => '**' + (x.title||'') + '**\n' + (x.description||'') + '\nSource: ' + x.url).join('\n\n');
                     return { text: text || 'No results.', sources: results.map(x => ({ uri: x.url, title: x.title })), queries: [query] };
                 } catch(e) { console.warn('Brave search error:', e.message); }
@@ -4896,11 +5044,11 @@
                     const r = await fetch('https://google.serper.dev/search', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-API-KEY': key },
-                        body: JSON.stringify({ q: query, num: 5 })
+                        body: JSON.stringify({ q: query, num: webSearchResultLimit })
                     });
                     if (!r.ok) throw new Error('Serper HTTP ' + r.status);
                     const d = await r.json();
-                    const results = (d.organic || []).slice(0, 5);
+                    const results = (d.organic || []).slice(0, webSearchResultLimit);
                     const text = results.map(x => '**' + (x.title||'') + '**\n' + (x.snippet||'') + '\nSource: ' + x.link).join('\n\n');
                     return { text: text || 'No results.', sources: results.map(x => ({ uri: x.link, title: x.title })), queries: [query] };
                 } catch(e) { console.warn('Serper search error:', e.message); }
@@ -4916,7 +5064,7 @@
                     });
                     if (!r.ok) throw new Error('Custom search HTTP ' + r.status);
                     const d = await r.json();
-                    const results = (d.results || []).slice(0, 5);
+                    const results = (d.results || []).slice(0, webSearchResultLimit);
                     const text = results.map(x => '**' + (x.title||'') + '**\n' + (x.snippet||x.description||'') + '\nSource: ' + (x.url||x.link||'')).join('\n\n');
                     return { text: text || 'No results.', sources: results.map(x => ({ uri: x.url||x.link||'', title: x.title||'' })), queries: [query] };
                 } catch(e) { console.warn('Custom search error:', e.message); }
@@ -5495,6 +5643,18 @@
             if (el) el.textContent = v + ' page' + (v > 1 ? 's' : '');
         }
 
+        function updateWebSearchLimitDisplay(val) {
+            const v = parseInt(val);
+            const el = document.getElementById('websearch-limit-val');
+            if (el) el.textContent = v + ' result' + (v > 1 ? 's' : '');
+        }
+
+        function updateChatHistoryLimitDisplay(val) {
+            const v = parseInt(val);
+            const el = document.getElementById('chat-history-limit-val');
+            if (el) el.textContent = v + ' chat' + (v > 1 ? 's' : '');
+        }
+
         function toggleFollowUpSuggestions() {
             followUpSuggestions = !followUpSuggestions;
             localStorage.setItem('snoah_followup_suggestions', followUpSuggestions);
@@ -5514,6 +5674,29 @@
                 toggle.classList.add('bg-[#D9D6CE]');
                 if (knob) knob.style.transform = 'translateX(0)';
             }
+        }
+
+        const PLUGIN_INSTRUCTIONS = {
+            source_citer: 'PLUGIN: Source Citer is enabled. When making factual claims, include concise source references (URL or source name) when available.',
+            code_guard: 'PLUGIN: Code Guard is enabled. Prioritize secure, tested, robust code; mention key edge cases and avoid unsafe patterns.',
+            learning_coach: 'PLUGIN: Learning Coach is enabled. Teach step-by-step with short checkpoints and quick understanding prompts.'
+        };
+
+        function togglePlugin(pluginId, checked) {
+            if (!pluginId) return;
+            enabledPlugins = enabledPlugins.filter(p => p !== pluginId);
+            if (checked) enabledPlugins.push(pluginId);
+            localStorage.setItem('snoah_plugins', JSON.stringify(enabledPlugins));
+            updatePluginUI();
+        }
+
+        function updatePluginUI() {
+            const sourceCb = document.getElementById('plugin-source-citer');
+            if (sourceCb) sourceCb.checked = enabledPlugins.includes('source_citer');
+            const codeCb = document.getElementById('plugin-code-guard');
+            if (codeCb) codeCb.checked = enabledPlugins.includes('code_guard');
+            const coachCb = document.getElementById('plugin-learning-coach');
+            if (coachCb) coachCb.checked = enabledPlugins.includes('learning_coach');
         }
 
         function playResponseChime() {
@@ -5570,11 +5753,17 @@
         }
 
         function fillInputBar(text) {
-            const inp = document.getElementById('message-input');
+            const inp = document.getElementById('chat-input') || document.getElementById('message-input');
             if (!inp) return;
             inp.value = text;
             inp.dispatchEvent(new Event('input'));
             inp.focus();
+        }
+
+        function sendFollowUpSuggestion(text) {
+            const query = (text || '').trim();
+            if (!query) return;
+            submitMessage(query);
         }
 
         async function autoSaveToNotion(text) {
@@ -7964,7 +8153,8 @@
 
             const lengthDirective = responseLength === 'short' ? 'Be brief and concise — 2-4 sentences max. ' : responseLength === 'detailed' ? 'Be thorough and detailed. ' : '';
             const _convStyleExtra = (convStyle && convStyle !== 'standard' && CONV_STYLE_INSTRUCTIONS[convStyle]) ? '\n\nCONVERSATION STYLE: ' + CONV_STYLE_INSTRUCTIONS[convStyle] : '';
-            const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + lengthDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '') + _convStyleExtra + (responseLang ? '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language.' : '');
+            const _pluginExtra = enabledPlugins.map(p => PLUGIN_INSTRUCTIONS[p]).filter(Boolean).join('\n');
+            const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + lengthDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '') + _convStyleExtra + (responseLang ? '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language.' : '') + (_pluginExtra ? '\n\n' + _pluginExtra : '');
 
             try {
                 const results = await Promise.all(platforms.map(p => multiAIFetchSingle(p, textToSend, sysInstruction)));
@@ -8516,8 +8706,8 @@ FEATURES:
 87. API REQUEST TIMEOUT: Settings → API tab → API Request Timeout slider. Configurable from 15 to 120 seconds (default 45s). Controls how long SnoahAI waits without receiving any data before cancelling a streaming request. Useful for slow connections or very long responses.
 88. CONVERSATION STYLE: Settings → AI tab → Conversation Style presets. Six styles: Standard (default, balanced), Friendly (warm, encouraging), Concise (short, direct), Detailed (thorough with examples), Academic (formal, precise), Casual (relaxed, plain language). The selected style injects a tone instruction into the system prompt, applied on top of any Custom Instructions. Stored in localStorage as snoah_conv_style.
 89. WIKIPEDIA & DUCKDUCKGO WEB SEARCH: Two new search platforms added to Web Search: (1) Wikipedia Search — uses Wikipedia's public API, no API key required, returns article summaries and excerpts. Great for factual and encyclopedic queries. (2) DuckDuckGo Search — uses DuckDuckGo's Instant Answers public API, no API key required, routed through the SnoahAI backend (/api/browser). Returns instant answers, definitions, and related topics.
-90. AGENTIC WEB SEARCH (LIVE BROWSER AGENT): When "Agentic Web Search" is toggled ON in Settings alongside Web Search, the AI can visit URLs and read full page content. The AI uses [BROWSE: url] command to trigger a page visit. The backend /api/browser serverless function uses Jina AI Reader to fetch and clean any URL into Markdown text. The full page content is fed back to the AI as a [SYSTEM OBSERVATION]. A collapsible "🔍 Search Process" block appears in chat showing: the AI's pre-browse reasoning text, a live "🌐 Visiting…" indicator, and a "✅ Read" confirmation once done. The block auto-collapses after the visit completes, then the final response appears below. Agentic mode is toggled per-session and stored in localStorage (snoah_agentic_ws).
-91. AGENTIC BROWSE DEPTH: Settings → API tab → Agentic Web Search → Browse Depth slider (1–3). Controls how many URLs the AI can visit per response when Agentic Web Search is ON. Default: 1 page. Higher values (2–3) allow deeper multi-page research. Stored in localStorage as snoah_agent_browse_depth.
+90. AGENTIC WEB SEARCH (LIVE BROWSER AGENT): When "Agentic Web Search" is toggled ON in Settings alongside Web Search, the AI can visit URLs and read full page content. The AI uses [BROWSE: url] command to trigger a page visit. The backend /api/browser serverless function uses Jina AI Reader to fetch and clean any URL into Markdown text. The full page content is fed back to the AI as a [SYSTEM OBSERVATION]. A collapsible "🔍 Search Process" block appears in chat showing: the AI's pre-browse reasoning text, a live "🌐 Visiting…" indicator, and a "✅ Read" confirmation once done. The block auto-collapses after the visit completes, then the final response appears below. Agentic mode is toggled per-session and stored in localStorage (snoah_agentic_ws). URL deduplication is normalized (http/https, www prefix, and trailing slashes are stripped before comparison) so the same page is never visited twice per response even if referenced with slightly different URL formats.
+91. AGENTIC BROWSE DEPTH: Settings → API tab → Agentic Web Search → Browse Depth slider (1–3). Controls how many URLs the AI can visit per response when Agentic Web Search is ON. Default: 1 page. Higher values (2–3) allow deeper multi-page research. Stored in localStorage as snoah_agent_browse_depth. Agentic search logs saved to chat history are capped at 8 entries per response (each preface limited to 500 characters) to prevent localStorage overflow on long research sessions.
 92. FOLLOW-UP SUGGESTIONS: Settings → AI tab → Follow-Up Suggestions toggle. When ON, the AI appends 3 tappable follow-up questions at the end of each response. They appear as rounded chip buttons below the response — tap any to instantly fill the chat input and send it. The questions are AI-generated based on the conversation context. Stored in localStorage as snoah_followup_suggestions.
 93. RESPONSE SOUND: Settings → App tab → Response Sound toggle. When ON, a subtle two-tone chime plays via the Web Audio API (no external audio file needed) when the AI finishes streaming. Useful for knowing when a long response is complete without watching the screen. Toggling ON plays a preview of the sound. Stored in localStorage as snoah_response_sound.
 94. FOCUS MODE: Preferences → App & Info → Focus Mode button. Toggles a distraction-free mode that hides the app header (app name, model badge, top buttons), giving the full viewport height to the chat thread. Tap "Exit Focus Mode" in Preferences to restore the header. Runtime only — not persisted.
@@ -8618,6 +8808,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Inject response language directive if set
                 if (responseLang) {
                     systemInstruction += '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language, regardless of the language the user writes in. This is a mandatory user preference.';
+                }
+                const _pluginExtra = enabledPlugins.map(p => PLUGIN_INSTRUCTIONS[p]).filter(Boolean).join('\n');
+                if (_pluginExtra) {
+                    systemInstruction += '\n\n' + _pluginExtra;
                 }
 
                 const formattedContents = [];
@@ -8806,6 +9000,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const totalKeys = platform === 'openrouter' ? orKeys.length : platform === 'groq' ? groqKeys.length : platform === 'together' ? togetherKeys.length : platform === 'mistral' ? mistralKeys.length : platform === 'nvidia' ? nvidiaKeys.length : platform === 'huggingface' ? hfKeys.length : platform === 'githubmodels' ? ghKeys.length : geminiKeys.length;
                 let attempts = 0;
                 let _browsesDone = 0; // separate counter for agentic browse retries (must not share with key-rotation counter)
+                const _agenticProcessLogs = [];
+                const _visitedUrlsInCurrentResponse = new Set();
                 while (attempts <= totalKeys) {
                     try {
                         // ── READ SSE STREAM (with timeout) ──
@@ -9134,6 +9330,16 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 // Extract text before [BROWSE: url] command (the AI's reasoning/plan text)
                                 const _browseIdx = fullRaw.indexOf(_browseMatch[0]);
                                 let _preBrowseRaw = _browseIdx > 0 ? _normalizeThinkTags(fullRaw.slice(0, _browseIdx)).replace(/<think>[\s\S]*?<\/think>/gi, '').trim() : '';
+                                let _browseKey = (_browseUrl || '').toLowerCase();
+                                try {
+                                    const _u = new URL(_browseUrl);
+                                    const _host = (_u.hostname || '').replace(/^www\./i, '').toLowerCase();
+                                    const _path = (_u.pathname || '/').replace(/\/+$/, '') || '/';
+                                    const _query = _u.search || '';
+                                    _browseKey = _host + _path + _query;
+                                } catch (_) {
+                                    _browseKey = _browseKey.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/+$/, '');
+                                }
 
                                 // Create a permanent "Search Process" block showing the intermediate steps
                                 const _agentBlock = document.createElement('div');
@@ -9159,6 +9365,21 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 messagesWrapper.appendChild(_agentBlock);
                                 if (floatingLoadingText) floatingLoadingText.innerText = '🌐 Visiting page…';
                                 scrollToBottom();
+                                if (_visitedUrlsInCurrentResponse.has(_browseKey)) {
+                                    const _visitSkipEl = document.getElementById(_agentUID + '-visit');
+                                    if (_visitSkipEl) _visitSkipEl.innerHTML = '<span class="text-base">⏭️</span><span>Skipped duplicate visit to <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
+                                    const _detailsSkip = document.getElementById(_agentUID);
+                                    if (_detailsSkip) _detailsSkip.removeAttribute('open');
+                                    _agenticProcessLogs.push({ preface: _preBrowseRaw, url: _browseUrl, status: 'skipped_duplicate' });
+                                    systemInstruction += '\n\n[SYSTEM OBSERVATION] You already visited ' + _browseUrl + ' in this same response cycle. Do not browse it again; use previous observations and provide the final answer now.';
+                                    fullRaw = '';
+                                    if (liveAppended) { liveWrapper.remove(); liveAppended = false; }
+                                    _browsesDone++;
+                                    continue;
+                                }
+                                _visitedUrlsInCurrentResponse.add(_browseKey);
+                                const _logEntry = { preface: _preBrowseRaw, url: _browseUrl, status: 'visiting' };
+                                _agenticProcessLogs.push(_logEntry);
                                 try {
                                     const _bRes = await fetch('/api/browser?url=' + encodeURIComponent(_browseUrl), { signal: AbortSignal.timeout(28000) });
                                     if (_bRes.ok) {
@@ -9169,6 +9390,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                             if (_visitEl) _visitEl.innerHTML = '<span class="text-base">✅</span><span>Read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
                                             const _detailsEl = document.getElementById(_agentUID);
                                             if (_detailsEl) _detailsEl.removeAttribute('open');
+                                            _logEntry.status = 'read';
                                             systemInstruction += '\n\n[SYSTEM OBSERVATION — Visited URL: ' + _browseUrl + ']\n' + _bData.content + '\n[END OF PAGE CONTENT]\nUsing the above page content, now answer the user\'s question fully and accurately.';
                                             fullRaw = '';
                                             liveWrapper.remove(); liveAppended = false;
@@ -9179,10 +9401,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                     // Fetch failed or returned no content — show error and count as a browse attempt
                                     const _visitEl2 = document.getElementById(_agentUID + '-visit');
                                     if (_visitEl2) _visitEl2.innerHTML = '<span class="text-base">❌</span><span>Failed to read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
+                                    _logEntry.status = 'failed';
                                     _browsesDone++; // count failed attempts to prevent infinite loops
                                 } catch(_bErr) {
                                     const _visitEl3 = document.getElementById(_agentUID + '-visit');
                                     if (_visitEl3) _visitEl3.innerHTML = '<span class="text-base">❌</span><span>Error visiting <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
+                                    _logEntry.status = 'error';
                                     _browsesDone++; // count failed attempts to prevent infinite loops
                                     console.warn('Browser agent error:', _bErr.message);
                                 }
@@ -9380,6 +9604,30 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         '</div>';
                 }
 
+                if (_agenticProcessLogs.length > 0 && innerCol) {
+                    const agentUID = 'agent_hist_' + liveUID;
+                    const agentDiv = document.createElement('div');
+                    agentDiv.className = 'mb-3';
+                    const _rows = _agenticProcessLogs.map((log, i) => {
+                        const _icon = log.status === 'read' ? '✅' : log.status === 'skipped_duplicate' ? '⏭️' : '❌';
+                        const _label = log.status === 'read' ? 'Read' : log.status === 'skipped_duplicate' ? 'Skipped duplicate' : 'Failed';
+                        const _preface = log.preface ? '<div class="text-[12px] text-[#5B5951] leading-relaxed whitespace-pre-wrap">' + escapeHTML(log.preface) + '</div>' : '';
+                        return '<div class="bg-white border border-[#E5E3DB] rounded-xl p-2.5 space-y-1">' +
+                            (_preface || '') +
+                            '<div class="text-[12px] text-[#737166]"><span class="mr-1">' + _icon + '</span>' + _label + ' <a href="' + escapeHTML(log.url || '') + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(log.url || '') + '</a></div>' +
+                        '</div>';
+                    }).join('');
+                    agentDiv.innerHTML =
+                        '<details id="' + agentUID + '" class="rounded-xl border border-[#E5E3DB] bg-[#F2F0E9] overflow-hidden">' +
+                            '<summary class="flex items-center gap-2 px-4 py-2.5 border-b border-[#E5E3DB] cursor-pointer select-none list-none">' +
+                                '<span class="text-[13px]">🔍</span>' +
+                                '<span class="text-[12px] font-semibold text-[#8C897D]">Search Process (' + _agenticProcessLogs.length + ' step' + (_agenticProcessLogs.length > 1 ? 's' : '') + ')</span>' +
+                            '</summary>' +
+                            '<div class="px-3 py-2.5 space-y-2">' + _rows + '</div>' +
+                        '</details>';
+                    innerCol.appendChild(agentDiv);
+                }
+
                 // Add action buttons
                 const tempActionsDiv = document.createElement('div');
                 tempActionsDiv.innerHTML = buildActionsDivHTML('', false);
@@ -9393,7 +9641,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     const fuDiv = document.createElement('div');
                     fuDiv.className = 'mt-3 flex flex-wrap gap-2';
                     fuDiv.innerHTML = _followUpQuestions.map(q =>
-                        '<button onclick="fillInputBar(' + JSON.stringify(q) + ')" class="text-[12px] text-[#5B5951] bg-[#F2F0E9] border border-[#E5E3DB] px-3 py-1.5 rounded-full hover:bg-[#EAE8E0] hover:text-[#D25D38] transition-colors text-left active:scale-95">' +
+                        '<button onclick="sendFollowUpSuggestion(decodeURIComponent(\'' + encodeURIComponent(q) + '\'))" class="text-[12px] text-[#5B5951] bg-[#F2F0E9] border border-[#E5E3DB] px-3 py-1.5 rounded-full hover:bg-[#EAE8E0] hover:text-[#D25D38] transition-colors text-left active:scale-95">' +
                         escapeHTML(q) + '</button>'
                     ).join('');
                     innerCol.appendChild(fuDiv);
@@ -9403,7 +9651,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Play response completion sound if enabled
                 playResponseChime();
 
-                const aiMsg = { role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries };
+                const aiMsg = { role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries, agenticLogs: _agenticProcessLogs };
                 messages.push(aiMsg);
                 saveCurrentChat();
                 autoSaveToNotion(mainTextClean);
@@ -9603,6 +9851,25 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         '<i data-lucide="external-link" class="w-3.5 h-3.5 text-[#A3A095] mt-0.5 shrink-0 group-hover:text-[#D25D38]"></i>' +
                         '<span class="text-[12px] text-[#5B5951] line-clamp-1 group-hover:text-[#D25D38] transition-colors">' + escapeHTML(s.title || s.uri) + '</span></a>').join('') +
                     '</div></div>';
+            }
+
+            if (msg.agenticLogs && msg.agenticLogs.length > 0) {
+                const _logRows = msg.agenticLogs.map(log => {
+                    const _icon = log.status === 'read' ? '✅' : log.status === 'skipped_duplicate' ? '⏭️' : '❌';
+                    const _label = log.status === 'read' ? 'Read' : log.status === 'skipped_duplicate' ? 'Skipped duplicate' : 'Failed';
+                    const _preface = log.preface ? '<div class="text-[12px] text-[#5B5951] leading-relaxed whitespace-pre-wrap">' + escapeHTML(log.preface) + '</div>' : '';
+                    return '<div class="bg-white border border-[#E5E3DB] rounded-xl p-2.5 space-y-1">' +
+                        (_preface || '') +
+                        '<div class="text-[12px] text-[#737166]"><span class="mr-1">' + _icon + '</span>' + _label + ' <a href="' + escapeHTML(log.url || '') + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(log.url || '') + '</a></div>' +
+                    '</div>';
+                }).join('');
+                htmlContent += '<details class="mb-3 rounded-xl border border-[#E5E3DB] bg-[#F2F0E9] overflow-hidden">' +
+                    '<summary class="flex items-center gap-2 px-4 py-2.5 border-b border-[#E5E3DB] cursor-pointer select-none list-none">' +
+                        '<span class="text-[13px]">🔍</span>' +
+                        '<span class="text-[12px] font-semibold text-[#8C897D]">Search Process (' + msg.agenticLogs.length + ' step' + (msg.agenticLogs.length > 1 ? 's' : '') + ')</span>' +
+                    '</summary>' +
+                    '<div class="px-3 py-2.5 space-y-2">' + _logRows + '</div>' +
+                '</details>';
             }
 
             htmlContent += '<div id="text-content-' + uniqueId + '" class="md-content prose-custom text-[#2C2B29] leading-relaxed"></div>' +
