@@ -5823,18 +5823,75 @@
             };
         }
 
-        function compilePluginFromCode(code) {
-            const fn = new Function('"use strict";\n' + code + '\n;return (typeof pluginExample !== "undefined" ? pluginExample : (typeof plugin !== "undefined" ? plugin : null));');
-            return fn();
+        async function runPluginSandbox(code, payload, mode = 'execute') {
+            const workerCode = `
+self.onmessage = async (e) => {
+  const { code, payload, mode } = e.data || {};
+  try {
+    const plugin = (new Function('"use strict";\n' + code + '\n;return (typeof pluginExample !== "undefined" ? pluginExample : (typeof plugin !== "undefined" ? plugin : null));'))();
+    if (!plugin || typeof plugin !== 'object') throw new Error('Plugin object not found');
+    const info = {
+      id: String(plugin.id || '').trim(),
+      name: String(plugin.name || '').trim(),
+      version: String(plugin.version || '1.0.0').trim(),
+      description: String(plugin.description || '').trim(),
+      author: String(plugin.author || 'Unknown').trim(),
+      triggers: Array.isArray(plugin.triggers) ? plugin.triggers.map(t => String(t || '').trim()).filter(Boolean) : [],
+      hasExecute: typeof plugin.execute === 'function'
+    };
+    if (!info.id || !info.name || !info.hasExecute) throw new Error('Required fields missing: id, name, execute()');
+    if (mode === 'validate') {
+      self.postMessage({ ok: true, info });
+      return;
+    }
+    const result = await Promise.resolve(plugin.execute(payload || {}));
+    self.postMessage({ ok: true, info, result });
+  } catch (err) {
+    self.postMessage({ ok: false, error: err && err.message ? err.message : String(err) });
+  }
+};`;
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            const workerUrl = URL.createObjectURL(blob);
+            const worker = new Worker(workerUrl);
+            return await new Promise((resolve, reject) => {
+                const timer = setTimeout(() => {
+                    worker.terminate();
+                    URL.revokeObjectURL(workerUrl);
+                    reject(new Error('Plugin execution timeout'));
+                }, 2500);
+                worker.onmessage = (e) => {
+                    clearTimeout(timer);
+                    worker.terminate();
+                    URL.revokeObjectURL(workerUrl);
+                    const data = e.data || {};
+                    if (!data.ok) reject(new Error(data.error || 'Plugin failed'));
+                    else resolve(data);
+                };
+                worker.onerror = () => {
+                    clearTimeout(timer);
+                    worker.terminate();
+                    URL.revokeObjectURL(workerUrl);
+                    reject(new Error('Plugin worker error'));
+                };
+                worker.postMessage({ code, payload, mode });
+            });
         }
 
-        function parsePluginFromText(rawCode) {
+        async function parsePluginFromText(rawCode) {
             const code = (rawCode || '').trim();
             if (!code) throw new Error('Plugin code is empty');
-            const plugin = compilePluginFromCode(code);
-            const normalized = normalizePluginRecord(plugin, code);
-            if (!normalized) throw new Error('Invalid plugin module. Required: id, name, execute()');
-            return normalized;
+            const validated = await runPluginSandbox(code, {}, 'validate');
+            const info = validated.info || {};
+            return {
+                id: info.id,
+                name: info.name,
+                version: info.version || '1.0.0',
+                description: info.description || '',
+                author: info.author || 'Unknown',
+                triggers: Array.isArray(info.triggers) ? info.triggers : [],
+                code,
+                active: true
+            };
         }
 
         function migrateLegacyPlugins() {
@@ -5863,11 +5920,11 @@
             installedPlugins = installedPlugins.filter(p => p && typeof p === 'object' && p.id && p.code).map(p => ({ ...p, active: p.active !== false, triggers: Array.isArray(p.triggers) ? p.triggers : [] }));
         }
 
-        function installPluginFromInput() {
+        async function installPluginFromInput() {
             const ta = document.getElementById('plugin-install-code');
             if (!ta) return;
             try {
-                const parsed = parsePluginFromText(ta.value);
+                const parsed = await parsePluginFromText(ta.value);
                 const existingIdx = installedPlugins.findIndex(p => p.id === parsed.id);
                 if (existingIdx >= 0) installedPlugins[existingIdx] = parsed;
                 else installedPlugins.push(parsed);
@@ -5961,14 +6018,13 @@
             for (const p of active) {
                 if (!isPluginTriggered(p, nextText)) continue;
                 try {
-                    const mod = compilePluginFromCode(p.code);
-                    if (!mod || typeof mod.execute !== 'function') continue;
-                    const result = await Promise.resolve(mod.execute({
+                    const executed = await runPluginSandbox(p.code, {
                         message: nextText,
                         chatId: currentChatId,
                         branchId: currentBranchId,
                         messages: messages.map(m => ({ ...m }))
-                    }));
+                    }, 'execute');
+                    const result = executed.result;
                     if (typeof result === 'string') {
                         nextText = result;
                     } else if (result && typeof result === 'object') {
@@ -8253,7 +8309,7 @@
             const idAttr = id ? ' id="' + id + '"' : '';
             const hiddenCls = hidden ? ' hidden' : '';
             const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-            const msgAttr = Number.isInteger(msgIdx) ? ' data-msg-idx= + msgIdx + ' : '';
+            const msgAttr = Number.isInteger(msgIdx) ? ' data-msg-idx="' + msgIdx + '"' : '';
             const btnCls = 'flex items-center gap-1.5 px-2.5 py-2 text-[11px] font-medium text-[#5B5951] hover:bg-[#F2F0E9] rounded-xl transition-colors';
             const notionSvg = '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg>';
             return '<div class="msg-actions flex items-center gap-1.5 mt-2.5' + hiddenCls + '"' + idAttr + msgAttr + '>' +
