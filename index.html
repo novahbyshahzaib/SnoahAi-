@@ -481,10 +481,10 @@
             <button onclick="dismissPWA()" class="text-white opacity-70 text-[20px] leading-none px-1">&times;</button>
         </div>
     </div>
-<body class="bg-[#EAE8E0] min-h-screen flex items-center justify-center font-sans sm:p-4 selection:bg-[#D25D38] selection:text-white relative overflow-hidden text-[#2C2B29]">
+<body class="bg-[#EAE8E0] min-h-screen flex items-center justify-center font-sans sm:p-4 selection:bg-[#D25D38] selection:text-white relative overflow-hidden overscroll-x-none text-[#2C2B29]">
 
     <!-- App Container -->
-    <div class="w-full h-[100dvh] sm:h-[90vh] sm:max-w-[420px] sm:rounded-[40px] shadow-[0_0_50px_rgba(0,0,0,0.15)] bg-[#FAF9F6] app-bg flex flex-col relative overflow-hidden sm:border-[8px] sm:border-[#2C2B29]">
+    <div class="w-full h-[100dvh] sm:h-[90vh] sm:max-w-[420px] sm:rounded-[40px] shadow-[0_0_50px_rgba(0,0,0,0.15)] bg-[#FAF9F6] app-bg flex flex-col relative overflow-hidden overflow-x-hidden sm:border-[8px] sm:border-[#2C2B29]">
         
         <!-- Fake Notch (Desktop) -->
         <div class="h-7 w-full bg-[#FAF9F6] justify-center items-end hidden sm:flex pb-1.5 shrink-0 z-20 relative">
@@ -1304,20 +1304,14 @@
                     <!-- Plugin / Extension System -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Plugin / Extension System</label>
-                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Enable built-in extensions that augment AI behavior with focused capabilities.</p>
-                        <div class="space-y-2">
-                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
-                                <input type="checkbox" id="plugin-source-citer" onchange="togglePlugin('source_citer', this.checked)" class="accent-[#D25D38] w-4 h-4">
-                                <span class="text-[13px] text-[#2C2B29] font-medium">Source Citer — adds source references when possible</span>
-                            </label>
-                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
-                                <input type="checkbox" id="plugin-code-guard" onchange="togglePlugin('code_guard', this.checked)" class="accent-[#D25D38] w-4 h-4">
-                                <span class="text-[13px] text-[#2C2B29] font-medium">Code Guard — emphasizes safe, robust code output</span>
-                            </label>
-                            <label class="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E3DB] rounded-xl cursor-pointer hover:bg-[#F2F0E9] transition-colors">
-                                <input type="checkbox" id="plugin-learning-coach" onchange="togglePlugin('learning_coach', this.checked)" class="accent-[#D25D38] w-4 h-4">
-                                <span class="text-[13px] text-[#2C2B29] font-medium">Learning Coach — explains with short checkpoints</span>
-                            </label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Install custom plugins (JSON + JS module object) that can trigger on keywords, modify prompts, and add plugin output cards.</p>
+                        <div class="bg-white border border-[#E5E3DB] rounded-2xl p-3 space-y-3">
+                            <textarea id="plugin-install-code" rows="5" class="w-full px-3 py-2 rounded-xl border border-[#E5E3DB] text-[12px] text-[#2C2B29] placeholder:text-[#A3A095] bg-[#FAF9F6] focus:outline-none focus:border-[#D25D38]" placeholder="Paste plugin JS code here. Example variable: const pluginExample = { id, name, version, description, author, triggers: [], execute() }"></textarea>
+                            <div class="flex gap-2">
+                                <button onclick="installPluginFromInput()" class="flex-1 py-2 rounded-xl bg-[#D25D38] text-white text-[12px] font-semibold hover:bg-[#B84E2E] transition-colors">Install Plugin</button>
+                                <button onclick="document.getElementById('plugin-install-code').value='';" class="px-3 py-2 rounded-xl border border-[#E5E3DB] text-[12px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors">Clear</button>
+                            </div>
+                            <div id="plugin-list" class="space-y-2"></div>
                         </div>
                     </div>
                 </div>
@@ -1462,7 +1456,7 @@
         </div>
 
         <!-- ===== SLIDE-OUT SIDEBAR ===== -->
-        <div id="sidebar" class="absolute top-0 left-0 bottom-0 w-[280px] bg-[#FAF9F6] z-40 transform -translate-x-full transition-transform duration-300 ease-in-out border-r border-[#EAE8E0] shadow-2xl flex flex-col">
+        <div id="sidebar" class="absolute top-0 left-0 bottom-0 w-[280px] max-w-[86vw] bg-[#FAF9F6] z-40 transform -translate-x-full transition-transform duration-300 ease-in-out border-r border-[#EAE8E0] shadow-2xl flex flex-col overflow-x-hidden">
             <div class="flex items-center justify-between p-5 border-b border-[#EAE8E0]">
                 <h2 class="font-serif font-semibold text-[18px]">Menu</h2>
                 <button onclick="toggleSidebar()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
@@ -1583,6 +1577,18 @@
                     <i data-lucide="clock" class="w-3.5 h-3.5"></i>
                     <span>Temp Chat — this conversation won't be saved</span>
                 </div>
+            </div>
+
+            <div id="branch-controls" class="hidden w-full mb-3 rounded-2xl border border-[#E5E3DB] bg-white/90 backdrop-blur-sm p-3 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="text-[11px] text-[#8C897D] uppercase font-bold tracking-widest">Chat Branch</div>
+                    <div id="active-branch-indicator" class="text-[11px] px-2 py-1 rounded-full bg-[#F2F0E9] text-[#5B5951] border border-[#E5E3DB]">Main</div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select id="branch-selector" onchange="switchBranch(currentChatId, this.value)" class="flex-1 px-3 py-2 rounded-xl border border-[#E5E3DB] bg-[#FAF9F6] text-[12px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38]"></select>
+                    <button onclick="createBranch(currentChatId, messages.length - 1)" class="px-3 py-2 rounded-xl border border-[#E5E3DB] text-[12px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors">New</button>
+                </div>
+                <div id="branch-tree" class="text-[11px] text-[#737166] space-y-1"></div>
             </div>
 
             <!-- Messages go here -->
@@ -2855,7 +2861,7 @@
         let agenticWebSearch = localStorage.getItem('snoah_agentic_ws') === '1';
         let agentBrowseDepth = parseInt(localStorage.getItem('snoah_agent_browse_depth') || '1');
         let followUpSuggestions = localStorage.getItem('snoah_followup_suggestions') === 'true';
-        let enabledPlugins = (() => {
+        let installedPlugins = (() => {
             try {
                 const parsed = JSON.parse(localStorage.getItem('snoah_plugins') || '[]');
                 return Array.isArray(parsed) ? parsed : [];
@@ -3916,12 +3922,58 @@
         }, { passive: true });
 
         // ── CHAT HISTORY ENGINE ─────────────────────────────────────────
+        const MAIN_BRANCH_ID = 'main';
+        let currentBranchId = MAIN_BRANCH_ID;
+        function generateChatId() { return 'chat_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+        function generateMessageId() { return 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
+
+        function sanitizeStoredMessage(m) {
+            return {
+                id: m?.id || generateMessageId(),
+                role: m?.role || 'user',
+                text: m?.text || '',
+                originalText: m?.originalText || m?.text || '',
+                thinking: m?.thinking || null,
+                sources: Array.isArray(m?.sources) ? m.sources : [],
+                agenticLogs: Array.isArray(m?.agenticLogs)
+                    ? m.agenticLogs.slice(0, 8).map(l => ({ preface: (l.preface || '').slice(0, 500), url: l.url || '', status: l.status || 'read' }))
+                    : []
+            };
+        }
+
+        function ensureChatBranches(chat) {
+            if (!chat || typeof chat !== 'object') return null;
+            const baseMessages = (Array.isArray(chat.messages) ? chat.messages : []).map(sanitizeStoredMessage);
+            const branches = (chat.branches && typeof chat.branches === 'object' && !Array.isArray(chat.branches)) ? chat.branches : {};
+            const normalized = {};
+            Object.entries(branches).forEach(([bid, b]) => {
+                if (!b || typeof b !== 'object') return;
+                normalized[bid] = {
+                    name: b.name || (bid === MAIN_BRANCH_ID ? 'Main' : ('Branch ' + bid.slice(-4))),
+                    parentMessageId: b.parentMessageId || null,
+                    parentBranchId: b.parentBranchId || null,
+                    messages: (Array.isArray(b.messages) ? b.messages : []).map(sanitizeStoredMessage)
+                };
+            });
+            if (!normalized[MAIN_BRANCH_ID]) {
+                normalized[MAIN_BRANCH_ID] = { name: 'Main', parentMessageId: null, parentBranchId: null, messages: baseMessages };
+            }
+            if (!chat.activeBranch || !normalized[chat.activeBranch]) {
+                chat.activeBranch = normalized[MAIN_BRANCH_ID] ? MAIN_BRANCH_ID : Object.keys(normalized)[0];
+            }
+            chat.branches = normalized;
+            currentBranchId = chat.activeBranch;
+            chat.messages = (chat.branches[chat.activeBranch]?.messages || []).map(sanitizeStoredMessage);
+            return chat;
+        }
+
         let allChats = (() => {
             try {
                 const raw = localStorage.getItem('snoah_all_chats');
                 if (!raw) return [];
                 const parsed = JSON.parse(raw);
-                return Array.isArray(parsed) ? parsed : [];
+                const arr = Array.isArray(parsed) ? parsed : [];
+                return arr.map(c => ensureChatBranches(c)).filter(Boolean);
             } catch(e) {
                 console.warn('[SnoahAI] Chat history corrupted, resetting:', e);
                 try { localStorage.removeItem('snoah_all_chats'); } catch(_) {}
@@ -3930,48 +3982,103 @@
         })();
         let currentChatId = null;
 
-        function generateChatId() {
-            return 'chat_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-        }
-
-        function saveCurrentChat() {
-            if (isTempChat) return;
-            if (!currentChatId || messages.length === 0) return;
-            const saveable = messages.filter(m => !m.isError).map(m => ({
-                role: m.role,
-                text: m.text || '',
-                originalText: m.originalText || m.text || '',
-                thinking: m.thinking || null,
-                sources: m.sources || [],
-                agenticLogs: (m.agenticLogs || []).slice(0, 8).map(l => ({
-                    preface: (l.preface || '').slice(0, 500),
-                    url: l.url || '',
-                    status: l.status || 'read'
-                }))
-                // skip image data — too large for localStorage
-            }));
-            const idx = allChats.findIndex(c => c.id === currentChatId);
-            const firstUserText = saveable.find(m => m.role === 'user')?.text || 'Conversation';
-            const words = firstUserText.trim().split(/\s+/);
-            const title = words.slice(0, 2).join(' ') + (words.length > 2 ? '...' : '');
-            const existingTag = idx >= 0 ? allChats[idx].tag : null;
-            const existingPinned = idx >= 0 ? allChats[idx].pinned : false;
-            const entry = { id: currentChatId, title, updatedAt: Date.now(), messages: saveable, tag: existingTag, pinned: existingPinned };
-            if (idx >= 0) allChats[idx] = entry;
-            else allChats.unshift(entry);
-            // Keep only configured number of chats to avoid localStorage overflow
-            allChats = allChats.slice(0, chatHistoryLimit);
+        function persistAllChats() {
             try {
                 localStorage.setItem('snoah_all_chats', JSON.stringify(allChats));
             } catch(e) {
                 if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                    // Storage full — prune to 10 most-recent chats and retry
                     allChats = allChats.slice(0, 10);
                     try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(_) {}
                     showToast('⚠️ Storage almost full — older chats trimmed');
                 }
             }
+        }
+
+        function getChatById(chatId) {
+            const chat = allChats.find(c => c.id === chatId);
+            return chat ? ensureChatBranches(chat) : null;
+        }
+
+        function getActiveBranch(chat) {
+            if (!chat) return null;
+            ensureChatBranches(chat);
+            return chat.branches[chat.activeBranch] || null;
+        }
+
+        function syncCurrentMessagesToDOM() {
+            messagesWrapper.innerHTML = '';
+            welcomeScreen.classList.toggle('hidden', messages.length > 0);
+            messages.forEach((m, idx) => {
+                if (m.role === 'user') {
+                    messagesWrapper.appendChild(buildUserMessageDiv(m.text || '', m.images || [], idx));
+                } else {
+                    renderAIResponse(m, true, idx);
+                }
+            });
+            scrollToBottom();
+        }
+
+        function updateBranchControls() {
+            const controls = document.getElementById('branch-controls');
+            const selector = document.getElementById('branch-selector');
+            const indicator = document.getElementById('active-branch-indicator');
+            const tree = document.getElementById('branch-tree');
+            const chat = getChatById(currentChatId);
+            if (!controls || !selector || !indicator || !tree || !chat) {
+                if (controls) controls.classList.add('hidden');
+                return;
+            }
+            ensureChatBranches(chat);
+            controls.classList.remove('hidden');
+            const branchEntries = Object.entries(chat.branches);
+            selector.innerHTML = branchEntries.map(([id, b]) => '<option value="' + id + '">' + escapeHTML(b.name || id) + '</option>').join('');
+            selector.value = chat.activeBranch;
+            const active = chat.branches[chat.activeBranch];
+            indicator.textContent = active ? active.name : 'Main';
+
+            const depthCache = {};
+            const depthOf = (id, seen = new Set()) => {
+                if (depthCache[id] != null) return depthCache[id];
+                const b = chat.branches[id];
+                if (!b || !b.parentBranchId || !chat.branches[b.parentBranchId] || seen.has(id)) return depthCache[id] = 0;
+                seen.add(id);
+                return depthCache[id] = Math.min(5, depthOf(b.parentBranchId, seen) + 1);
+            };
+            tree.innerHTML = branchEntries.map(([id, b]) => {
+                const depth = depthOf(id);
+                const activeCls = id === chat.activeBranch ? ' text-[#D25D38] font-semibold' : ' text-[#737166]';
+                const parentText = b.parentBranchId ? (' ↳ ' + (chat.branches[b.parentBranchId]?.name || b.parentBranchId)) : '';
+                return '<button onclick="switchBranch(\'' + chat.id + '\',\'' + id + '\')" class="w-full text-left px-2 py-1 rounded-lg hover:bg-[#F2F0E9] transition-colors' + activeCls + '" style="padding-left:' + (8 + depth * 14) + 'px">' + escapeHTML(b.name || id) + '<span class="text-[#A3A095]">' + escapeHTML(parentText) + '</span></button>';
+            }).join('');
+        }
+
+        function saveCurrentChat() {
+            if (isTempChat) return;
+            if (!currentChatId) return;
+            const idx = allChats.findIndex(c => c.id === currentChatId);
+            if (idx < 0 && messages.length === 0) return;
+            const existing = idx >= 0 ? ensureChatBranches(allChats[idx]) : { id: currentChatId, title: 'Conversation', updatedAt: Date.now(), branches: { [MAIN_BRANCH_ID]: { name: 'Main', parentMessageId: null, parentBranchId: null, messages: [] } }, activeBranch: MAIN_BRANCH_ID, tag: null, pinned: false };
+            const saveable = messages.filter(m => !m.isError).map(sanitizeStoredMessage);
+            const firstUserText = saveable.find(m => m.role === 'user')?.text || existing.title || 'Conversation';
+            const words = firstUserText.trim().split(/\s+/).filter(Boolean);
+            const title = words.length ? (words.slice(0, 2).join(' ') + (words.length > 2 ? '...' : '')) : (existing.title || 'Conversation');
+
+            ensureChatBranches(existing);
+            if (!existing.branches[currentBranchId]) {
+                existing.branches[currentBranchId] = { name: currentBranchId === MAIN_BRANCH_ID ? 'Main' : ('Branch ' + currentBranchId.slice(-4)), parentMessageId: null, parentBranchId: null, messages: [] };
+            }
+            existing.activeBranch = currentBranchId;
+            existing.branches[currentBranchId].messages = saveable;
+            existing.messages = saveable;
+            existing.title = title;
+            existing.updatedAt = Date.now();
+
+            if (idx >= 0) allChats[idx] = existing;
+            else allChats.unshift(existing);
+            allChats = allChats.slice(0, chatHistoryLimit);
+            persistAllChats();
             renderChatHistoryList();
+            updateBranchControls();
         }
 
         let chatHistoryExpanded = false;
@@ -3990,22 +4097,24 @@
             const unpinned = filtered.filter(c => !c.pinned);
             const orderedFiltered = [...pinned, ...unpinned];
             const showAll = chatHistoryExpanded || orderedFiltered.length <= CHAT_HISTORY_PREVIEW;
-            const pinnedCount = pinned.length;
-            // When collapsed, always show pinned first, then fill remaining slots with unpinned
             const visible = showAll ? orderedFiltered : orderedFiltered.slice(0, CHAT_HISTORY_PREVIEW);
             const chatItemHTML = (chat) => {
+                ensureChatBranches(chat);
                 const isActive = chat.id === currentChatId;
-                const date = new Date(chat.updatedAt);
+                const date = new Date(chat.updatedAt || Date.now());
                 const dateStr = date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+                const activeBranch = chat.branches[chat.activeBranch] || chat.branches[MAIN_BRANCH_ID];
+                const msgCount = (activeBranch?.messages || []).length;
+                const branchCount = Object.keys(chat.branches || {}).length;
                 return `<div class="flex items-center gap-1 group/item">
                     <button onclick="loadChat('${chat.id}')" class="flex-1 flex items-start gap-2.5 px-3 py-2 rounded-lg text-left transition-colors ${isActive ? 'bg-[#FDF4F2] border border-[#F8E3DE]' : 'hover:bg-[#F2F0E9]'}">
                         ${chat.pinned ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="#D25D38" stroke="#D25D38" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-1"><path d="M12 2L9 9H2l5.5 4-2 7L12 16l6.5 4-2-7L22 9h-7z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5 ' + (isActive ? 'text-[#D25D38]' : 'text-[#8C897D]') + '"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'}
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-1.5">
-                                <p class="text-[13px] ${isActive ? 'text-[#D25D38] font-semibold' : 'text-[#5B5951] font-medium'} truncate">${escapeHTML(chat.title)}</p>
+                                <p class="text-[13px] ${isActive ? 'text-[#D25D38] font-semibold' : 'text-[#5B5951] font-medium'} truncate">${escapeHTML(chat.title || 'Conversation')}</p>
                                 ${chat.tag ? (() => { const t = CHAT_TAGS.find(x=>x.id===chat.tag); return t ? '<span style="background:'+t.bg+';color:'+t.color+'" class="tag-pill shrink-0">'+t.label+'</span>' : ''; })() : ''}
                             </div>
-                            <p class="text-[10px] text-[#A3A095] mt-0.5">${dateStr} · ${chat.messages.length} msgs</p>
+                            <p class="text-[10px] text-[#A3A095] mt-0.5">${dateStr} · ${msgCount} msgs · ${branchCount} branch${branchCount > 1 ? 'es' : ''}</p>
                         </div>
                     </button>
                     <div class="flex opacity-0 group-hover/item:opacity-100 transition-all">
@@ -4042,45 +4151,87 @@
         }
 
         function loadChat(chatId) {
-            const chat = allChats.find(c => c.id === chatId);
+            const chat = getChatById(chatId);
             if (!chat) return;
-            // Save current before switching
             saveCurrentChat();
             currentChatId = chatId;
-            messages = chat.messages.map(m => ({...m}));
-            messagesWrapper.innerHTML = '';
-            welcomeScreen.classList.add('hidden');
-            // Re-render all messages
-            messages.forEach((m, idx) => {
-                if (m.role === 'user') {
-                    const userDiv = buildUserMessageDiv(m.text || '', m.images || [], idx);
-                    messagesWrapper.appendChild(userDiv);
-                } else {
-                    renderAIResponse(m, true);
-                }
-            });
+            currentBranchId = chat.activeBranch || MAIN_BRANCH_ID;
+            messages = (chat.branches[currentBranchId]?.messages || []).map(sanitizeStoredMessage);
+            syncCurrentMessagesToDOM();
             renderChatHistoryList();
+            updatePinBadge();
+            updateBranchControls();
             if (isSidebarOpen) toggleSidebar();
-            scrollToBottom();
+        }
+
+        function switchBranch(chatId, branchId) {
+            const chat = getChatById(chatId);
+            if (!chat || !chat.branches[branchId]) return;
+            if (chatId === currentChatId) saveCurrentChat();
+            chat.activeBranch = branchId;
+            currentChatId = chatId;
+            currentBranchId = branchId;
+            messages = (chat.branches[branchId].messages || []).map(sanitizeStoredMessage);
+            chat.messages = messages.map(sanitizeStoredMessage);
+            chat.updatedAt = Date.now();
+            persistAllChats();
+            syncCurrentMessagesToDOM();
+            renderChatHistoryList();
+            updateBranchControls();
+            showToast('Switched to ' + (chat.branches[branchId].name || branchId));
+        }
+
+        function createBranch(chatId, fromMessageIndex) {
+            const chat = getChatById(chatId || currentChatId);
+            if (!chat) { showToast('No chat to branch'); return; }
+            saveCurrentChat();
+            const activeBranchId = chat.activeBranch || currentBranchId || MAIN_BRANCH_ID;
+            const branch = chat.branches[activeBranchId];
+            if (!branch || !Array.isArray(branch.messages) || branch.messages.length === 0) {
+                showToast('No messages to branch from');
+                return;
+            }
+            const idx = Math.max(0, Math.min(parseInt(fromMessageIndex, 10) || 0, branch.messages.length - 1));
+            const parentMsg = branch.messages[idx] || sanitizeStoredMessage({ role: 'user', text: '' });
+            const branchId = 'branch_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+            const existingBranchCount = Object.keys(chat.branches).length;
+            chat.branches[branchId] = {
+                name: 'Branch ' + existingBranchCount,
+                parentMessageId: parentMsg.id || generateMessageId(),
+                parentBranchId: activeBranchId,
+                messages: branch.messages.slice(0, idx + 1).map(sanitizeStoredMessage)
+            };
+            chat.activeBranch = branchId;
+            chat.updatedAt = Date.now();
+            currentBranchId = branchId;
+            messages = chat.branches[branchId].messages.map(sanitizeStoredMessage);
+            chat.messages = messages.map(sanitizeStoredMessage);
+            persistAllChats();
+            syncCurrentMessagesToDOM();
+            renderChatHistoryList();
+            updateBranchControls();
+            showToast('🌿 Branch created');
         }
 
         function deleteSingleChat(chatId) {
             allChats = allChats.filter(c => c.id !== chatId);
-            try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(e) {}
+            persistAllChats();
             if (currentChatId === chatId) {
                 currentChatId = null;
+                currentBranchId = MAIN_BRANCH_ID;
                 messages = [];
                 messagesWrapper.innerHTML = '';
                 welcomeScreen.classList.remove('hidden');
             }
             renderChatHistoryList();
+            updateBranchControls();
         }
 
         function toggleChatPin(chatId) {
-            const chat = allChats.find(c => c.id === chatId);
+            const chat = getChatById(chatId);
             if (!chat) return;
             chat.pinned = !chat.pinned;
-            try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch(e) {}
+            persistAllChats();
             renderChatHistoryList();
             showToast(chat.pinned ? '📌 Chat pinned' : 'Chat unpinned');
         }
@@ -4088,51 +4239,27 @@
         function startNewChat() {
             saveCurrentChat();
             currentChatId = generateChatId();
+            currentBranchId = MAIN_BRANCH_ID;
             messages = [];
             messagesWrapper.innerHTML = '';
             welcomeScreen.classList.remove('hidden');
             isTempChat = false;
             updateTempChatUI();
             renderChatHistoryList();
+            updatePinBadge();
+            updateBranchControls();
             if (isSidebarOpen) toggleSidebar();
         }
 
         function createChatBranch() {
-            if (!messages.length) {
-                showToast('No chat to branch yet');
-                return;
-            }
-            saveCurrentChat();
-            const sourceChat = allChats.find(c => c.id === currentChatId);
-            const branchId = generateChatId();
-            const branchBaseTitle = (sourceChat?.title || 'Conversation') + ' (Branch)';
-            const existingBranchCount = allChats.filter(c => (c.title || '') === branchBaseTitle || (c.title || '').startsWith(branchBaseTitle + ' ')).length;
-            const branchTitle = branchBaseTitle + ' ' + (existingBranchCount + 1);
-            const branchMessages = messages.map(m => ({ ...m }));
-            allChats.unshift({
-                id: branchId,
-                title: branchTitle,
-                updatedAt: Date.now(),
-                messages: branchMessages.filter(m => !m.isError).map(m => ({
-                    role: m.role,
-                    text: m.text || '',
-                    originalText: m.originalText || m.text || '',
-                    thinking: m.thinking || null,
-                    sources: m.sources || [],
-                    agenticLogs: m.agenticLogs || []
-                })),
-                tag: sourceChat?.tag || null,
-                pinned: false
-            });
-            allChats = allChats.slice(0, chatHistoryLimit);
-            try { localStorage.setItem('snoah_all_chats', JSON.stringify(allChats)); } catch (_) {}
-            loadChat(branchId);
-            showToast('🌿 Chat branch created');
+            createBranch(currentChatId, messages.length - 1);
         }
 
         // Init on load
         currentChatId = generateChatId();
+        currentBranchId = MAIN_BRANCH_ID;
         renderChatHistoryList();
+        updateBranchControls();
 
         function updateModelLabels() {
             const badge = document.getElementById('header-model-badge');
@@ -4372,7 +4499,7 @@
             multiAIEnabled = false; multiAIPlatforms = [];
             localStorage.removeItem('snoah_multi_ai'); localStorage.removeItem('snoah_multi_ai_platforms');
             // Reset plugins and extra limits
-            enabledPlugins = [];
+            installedPlugins = [];
             webSearchResultLimit = 5;
             chatHistoryLimit = 30;
             localStorage.removeItem('snoah_plugins');
@@ -5676,27 +5803,248 @@
             }
         }
 
-        const PLUGIN_INSTRUCTIONS = {
-            source_citer: 'PLUGIN: Source Citer is enabled. When making factual claims, include concise source references (URL or source name) when available.',
-            code_guard: 'PLUGIN: Code Guard is enabled. Prioritize secure, tested, robust code; mention key edge cases and avoid unsafe patterns.',
-            learning_coach: 'PLUGIN: Learning Coach is enabled. Teach step-by-step with short checkpoints and quick understanding prompts.'
-        };
+        function savePlugins() {
+            try { localStorage.setItem('snoah_plugins', JSON.stringify(installedPlugins)); } catch (_) {}
+        }
+
+        function normalizePluginRecord(plugin, codeFallback = '') {
+            if (!plugin || typeof plugin !== 'object') return null;
+            const triggers = Array.isArray(plugin.triggers) ? plugin.triggers.map(t => String(t || '').trim()).filter(Boolean) : [];
+            if (!plugin.id || !plugin.name || typeof plugin.execute !== 'function') return null;
+            return {
+                id: String(plugin.id).trim(),
+                name: String(plugin.name).trim(),
+                version: String(plugin.version || '1.0.0').trim(),
+                description: String(plugin.description || '').trim(),
+                author: String(plugin.author || 'Unknown').trim(),
+                triggers,
+                code: codeFallback,
+                active: true
+            };
+        }
+
+        async function runPluginSandbox(code, payload, mode = 'execute') {
+            const workerCode = `
+self.onmessage = async (e) => {
+  const { code, payload, mode } = e.data || {};
+  try {
+    const plugin = (new Function('"use strict";\n' + code + '\n;return (typeof pluginExample !== "undefined" ? pluginExample : (typeof plugin !== "undefined" ? plugin : null));'))();
+    if (!plugin || typeof plugin !== 'object') throw new Error('Plugin object not found');
+    const info = {
+      id: String(plugin.id || '').trim(),
+      name: String(plugin.name || '').trim(),
+      version: String(plugin.version || '1.0.0').trim(),
+      description: String(plugin.description || '').trim(),
+      author: String(plugin.author || 'Unknown').trim(),
+      triggers: Array.isArray(plugin.triggers) ? plugin.triggers.map(t => String(t || '').trim()).filter(Boolean) : [],
+      hasExecute: typeof plugin.execute === 'function'
+    };
+    if (!info.id || !info.name || !info.hasExecute) throw new Error('Required fields missing: id, name, execute()');
+    if (mode === 'validate') {
+      self.postMessage({ ok: true, info });
+      return;
+    }
+    const result = await Promise.resolve(plugin.execute(payload || {}));
+    self.postMessage({ ok: true, info, result });
+  } catch (err) {
+    self.postMessage({ ok: false, error: err && err.message ? err.message : String(err) });
+  }
+};`;
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            const workerUrl = URL.createObjectURL(blob);
+            const worker = new Worker(workerUrl);
+            return await new Promise((resolve, reject) => {
+                const timer = setTimeout(() => {
+                    worker.terminate();
+                    URL.revokeObjectURL(workerUrl);
+                    reject(new Error('Plugin execution timeout'));
+                }, 2500);
+                worker.onmessage = (e) => {
+                    clearTimeout(timer);
+                    worker.terminate();
+                    URL.revokeObjectURL(workerUrl);
+                    const data = e.data || {};
+                    if (!data.ok) reject(new Error(data.error || 'Plugin failed'));
+                    else resolve(data);
+                };
+                worker.onerror = () => {
+                    clearTimeout(timer);
+                    worker.terminate();
+                    URL.revokeObjectURL(workerUrl);
+                    reject(new Error('Plugin worker error'));
+                };
+                worker.postMessage({ code, payload, mode });
+            });
+        }
+
+        async function parsePluginFromText(rawCode) {
+            const code = (rawCode || '').trim();
+            if (!code) throw new Error('Plugin code is empty');
+            const validated = await runPluginSandbox(code, {}, 'validate');
+            const info = validated.info || {};
+            return {
+                id: info.id,
+                name: info.name,
+                version: info.version || '1.0.0',
+                description: info.description || '',
+                author: info.author || 'Unknown',
+                triggers: Array.isArray(info.triggers) ? info.triggers : [],
+                code,
+                active: true
+            };
+        }
+
+        function migrateLegacyPlugins() {
+            if (!Array.isArray(installedPlugins)) installedPlugins = [];
+            if (installedPlugins.every(p => typeof p === 'string')) {
+                const legacyMap = {
+                    source_citer: {
+                        id: 'source-citer', name: 'Source Citer', version: '1.0.0', description: 'Adds source request instruction when triggered', author: 'SnoahAI', triggers: ['source', 'citation'],
+                        code: 'const pluginExample = { id:"source-citer", name:"Source Citer", version:"1.0.0", description:"Adds source request instruction when triggered", author:"SnoahAI", triggers:["source","citation"], execute(ctx){ return { message: ctx.message + "\n\nPlease include concise source references where possible." }; } };',
+                        active: true
+                    },
+                    code_guard: {
+                        id: 'code-guard', name: 'Code Guard', version: '1.0.0', description: 'Emphasizes secure robust code', author: 'SnoahAI', triggers: ['code', 'script'],
+                        code: 'const pluginExample = { id:"code-guard", name:"Code Guard", version:"1.0.0", description:"Emphasizes secure robust code", author:"SnoahAI", triggers:["code","script"], execute(ctx){ return { message: ctx.message + "\n\nPrioritize secure, tested, robust code and mention key edge cases." }; } };',
+                        active: true
+                    },
+                    learning_coach: {
+                        id: 'learning-coach', name: 'Learning Coach', version: '1.0.0', description: 'Step-by-step coaching tone', author: 'SnoahAI', triggers: ['learn', 'explain'],
+                        code: 'const pluginExample = { id:"learning-coach", name:"Learning Coach", version:"1.0.0", description:"Step-by-step coaching tone", author:"SnoahAI", triggers:["learn","explain"], execute(ctx){ return { message: ctx.message + "\n\nTeach this in short step-by-step checkpoints." }; } };',
+                        active: true
+                    }
+                };
+                installedPlugins = installedPlugins.map(id => legacyMap[id]).filter(Boolean);
+                savePlugins();
+            }
+            installedPlugins = installedPlugins.filter(p => p && typeof p === 'object' && p.id && p.code).map(p => ({ ...p, active: p.active !== false, triggers: Array.isArray(p.triggers) ? p.triggers : [] }));
+        }
+
+        async function installPluginFromInput() {
+            const ta = document.getElementById('plugin-install-code');
+            if (!ta) return;
+            try {
+                const parsed = await parsePluginFromText(ta.value);
+                const existingIdx = installedPlugins.findIndex(p => p.id === parsed.id);
+                if (existingIdx >= 0) installedPlugins[existingIdx] = parsed;
+                else installedPlugins.push(parsed);
+                savePlugins();
+                updatePluginUI();
+                showToast('Plugin installed: ' + parsed.name);
+                ta.value = '';
+            } catch (e) {
+                showToast('Plugin install failed: ' + e.message);
+            }
+        }
 
         function togglePlugin(pluginId, checked) {
-            if (!pluginId) return;
-            enabledPlugins = enabledPlugins.filter(p => p !== pluginId);
-            if (checked) enabledPlugins.push(pluginId);
-            localStorage.setItem('snoah_plugins', JSON.stringify(enabledPlugins));
+            const idx = installedPlugins.findIndex(p => p.id === pluginId);
+            if (idx < 0) return;
+            installedPlugins[idx].active = !!checked;
+            savePlugins();
             updatePluginUI();
         }
 
+        function removePlugin(pluginId) {
+            installedPlugins = installedPlugins.filter(p => p.id !== pluginId);
+            savePlugins();
+            updatePluginUI();
+            showToast('Plugin removed');
+        }
+
         function updatePluginUI() {
-            const sourceCb = document.getElementById('plugin-source-citer');
-            if (sourceCb) sourceCb.checked = enabledPlugins.includes('source_citer');
-            const codeCb = document.getElementById('plugin-code-guard');
-            if (codeCb) codeCb.checked = enabledPlugins.includes('code_guard');
-            const coachCb = document.getElementById('plugin-learning-coach');
-            if (coachCb) coachCb.checked = enabledPlugins.includes('learning_coach');
+            migrateLegacyPlugins();
+            const list = document.getElementById('plugin-list');
+            if (!list) return;
+            if (!installedPlugins.length) {
+                list.innerHTML = '<p class="text-[12px] text-[#A3A095]">No plugins installed yet.</p>';
+                return;
+            }
+            list.innerHTML = installedPlugins.map(p => {
+                const trig = (p.triggers || []).slice(0, 4).map(t => '<span class="px-2 py-0.5 rounded-full bg-[#F2F0E9] border border-[#E5E3DB] text-[10px]">' + escapeHTML(t) + '</span>').join(' ');
+                return '<div class="border border-[#E5E3DB] rounded-xl p-2.5 bg-[#FAF9F6]">' +
+                    '<div class="flex items-start justify-between gap-2">' +
+                        '<div class="min-w-0">' +
+                            '<p class="text-[12px] font-semibold text-[#2C2B29] truncate">' + escapeHTML(p.name) + ' <span class="text-[#A3A095]">v' + escapeHTML(p.version || '1.0.0') + '</span></p>' +
+                            '<p class="text-[11px] text-[#737166] leading-relaxed">' + escapeHTML(p.description || 'No description') + '</p>' +
+                            '<p class="text-[10px] text-[#A3A095] mt-1">by ' + escapeHTML(p.author || 'Unknown') + '</p>' +
+                        '</div>' +
+                        '<div class="flex items-center gap-1.5 shrink-0">' +
+                            '<label class="text-[10px] text-[#737166] flex items-center gap-1"><input type="checkbox" ' + (p.active ? 'checked' : '') + ' onchange="togglePlugin(\'' + p.id + '\', this.checked)" class="accent-[#D25D38] w-3.5 h-3.5">On</label>' +
+                            '<button onclick="removePlugin(\'' + p.id + '\')" class="px-2 py-1 rounded-lg border border-[#F8E3DE] text-[10px] text-[#D25D38] hover:bg-[#FDF4F2]">Remove</button>' +
+                        '</div>' +
+                    '</div>' +
+                    (trig ? '<div class="mt-2 flex flex-wrap gap-1">' + trig + '</div>' : '') +
+                '</div>';
+            }).join('');
+        }
+
+        function isPluginTriggered(plugin, text) {
+            const triggers = Array.isArray(plugin.triggers) ? plugin.triggers : [];
+            if (!triggers.length) return true;
+            const src = String(text || '');
+            return triggers.some(t => {
+                const tr = String(t || '').trim();
+                if (!tr) return false;
+                if (tr.startsWith('/') && tr.lastIndexOf('/') > 0) {
+                    try {
+                        const last = tr.lastIndexOf('/');
+                        const body = tr.slice(1, last);
+                        const flags = tr.slice(last + 1);
+                        return new RegExp(body, flags).test(src);
+                    } catch (_) { return false; }
+                }
+                return src.toLowerCase().includes(tr.toLowerCase());
+            });
+        }
+
+        function renderPluginOutputCard(pluginName, text) {
+            if (!text) return;
+            const card = document.createElement('div');
+            card.className = 'flex w-full justify-start animate-slide-up';
+            card.innerHTML = '<div class="max-w-[95%] rounded-2xl border border-[#E5E3DB] bg-[#F2F0E9] px-4 py-3">' +
+                '<p class="text-[11px] font-bold tracking-widest text-[#8C897D] uppercase mb-1">Plugin · ' + escapeHTML(pluginName || 'Extension') + '</p>' +
+                '<p class="text-[13px] text-[#5B5951] leading-relaxed whitespace-pre-wrap">' + escapeHTML(text) + '</p>' +
+                '</div>';
+            messagesWrapper.appendChild(card);
+            scrollToBottom();
+        }
+
+        async function runPluginsOnMessage(userText) {
+            migrateLegacyPlugins();
+            let nextText = String(userText || '');
+            const outputs = [];
+            const active = installedPlugins.filter(p => p.active !== false);
+            for (const p of active) {
+                if (!isPluginTriggered(p, nextText)) continue;
+                try {
+                    const executed = await runPluginSandbox(p.code, {
+                        message: nextText,
+                        chatId: currentChatId,
+                        branchId: currentBranchId,
+                        messages: messages.map(m => ({ ...m }))
+                    }, 'execute');
+                    const result = executed.result;
+                    if (typeof result === 'string') {
+                        nextText = result;
+                    } else if (result && typeof result === 'object') {
+                        if (typeof result.message === 'string') nextText = result.message;
+                        if (typeof result.output === 'string' && result.output.trim()) outputs.push({ plugin: p.name, text: result.output.trim() });
+                    }
+                } catch (e) {
+                    console.warn('[SnoahAI] Plugin execution error:', p.id, e);
+                    outputs.push({ plugin: p.name, text: 'Plugin error: ' + e.message });
+                }
+            }
+            return { message: nextText, outputs };
+        }
+
+        function buildPluginPromptExtra() {
+            migrateLegacyPlugins();
+            return installedPlugins.filter(p => p.active !== false).map(p => {
+                const triggers = Array.isArray(p.triggers) && p.triggers.length ? ' Triggers: ' + p.triggers.join(', ') + '.' : '';
+                return 'PLUGIN ACTIVE: ' + p.name + ' — ' + (p.description || 'Custom plugin') + '.' + triggers;
+            }).join('\n');
         }
 
         function playResponseChime() {
@@ -6137,10 +6485,12 @@
             allChats = [];
             try { localStorage.removeItem('snoah_all_chats'); } catch(e) {}
             currentChatId = generateChatId();
+            currentBranchId = MAIN_BRANCH_ID;
             messages = [];
             messagesWrapper.innerHTML = '';
             welcomeScreen.classList.remove('hidden');
             renderChatHistoryList();
+            updateBranchControls();
             closeDeleteModal();
             showToast('All chat history deleted');
         }
@@ -6478,13 +6828,16 @@
             if (!query) { resultsEl.innerHTML = '<p class="text-[13px] text-[#A3A095] text-center mt-8">Type to search across all chats</p>'; return; }
             const results = [];
             allChats.forEach(chat => {
-                chat.messages.forEach(m => {
-                    if (!m.text) return;
-                    const pos = m.text.toLowerCase().indexOf(query);
-                    if (pos === -1) return;
-                    const start = Math.max(0, pos - 30);
-                    const excerpt = m.text.substring(start, start + 120);
-                    results.push({ chat, excerpt, pos: start > 0 ? pos - start : pos });
+                ensureChatBranches(chat);
+                Object.entries(chat.branches || {}).forEach(([branchId, branch]) => {
+                    (branch.messages || []).forEach(m => {
+                        if (!m.text) return;
+                        const pos = m.text.toLowerCase().indexOf(query);
+                        if (pos === -1) return;
+                        const start = Math.max(0, pos - 30);
+                        const excerpt = m.text.substring(start, start + 120);
+                        results.push({ chat, branchId, excerpt, pos: start > 0 ? pos - start : pos });
+                    });
                 });
             });
             if (!results.length) { resultsEl.innerHTML = '<p class="text-[13px] text-[#A3A095] text-center mt-8">No results found</p>'; return; }
@@ -6492,8 +6845,8 @@
                 const before = escapeHTML(r.excerpt.substring(0, r.pos));
                 const match = escapeHTML(r.excerpt.substring(r.pos, r.pos + query.length));
                 const after = escapeHTML(r.excerpt.substring(r.pos + query.length));
-                return '<button onclick="loadChat(\'' + r.chat.id + '\');closeSearchModal();" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#F2F0E9] transition-colors border border-transparent hover:border-[#E5E3DB]">' +
-                    '<p class="text-[12px] font-semibold text-[#5B5951] mb-0.5 truncate">' + escapeHTML(r.chat.title) + '</p>' +
+                return '<button onclick="loadChat(\'' + r.chat.id + '\');setTimeout(function(){switchBranch(\'' + r.chat.id + '\',\'' + r.branchId + '\');},40);closeSearchModal();" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#F2F0E9] transition-colors border border-transparent hover:border-[#E5E3DB]">' +
+                    '<p class="text-[12px] font-semibold text-[#5B5951] mb-0.5 truncate">' + escapeHTML(r.chat.title) + ' <span class="text-[#A3A095]">· ' + escapeHTML((r.chat.branches && r.chat.branches[r.branchId] ? r.chat.branches[r.branchId].name : 'Main')) + '</span></p>' +
                     '<p class="text-[12px] text-[#737166] leading-relaxed">' + before + '<mark class="bg-[#FFF3CD] text-[#2C2B29] rounded px-0.5">' + match + '</mark>' + after + '</p>' +
                     '</button>';
             }).join('');
@@ -6778,7 +7131,7 @@
                 const sumPrompt = 'Write a concise summary of this conversation in 3-5 bullet points. Focus on key topics and conclusions.\n\n' + transcript;
                 const summary = await helperFetch(sumPrompt);
                 if (!summary) { showToast('No summary returned'); return; }
-                const sumMsg = { role:'model', text: '**Conversation Summary**\n\n' + summary, thinking:null, sources:[] };
+                const sumMsg = { id: generateMessageId(), role:'model', text: '**Conversation Summary**\n\n' + summary, thinking:null, sources:[] };
                 messages.push(sumMsg);
                 renderAIResponse(sumMsg);
                 scrollToBottom();
@@ -7706,10 +8059,16 @@
                         bubbleContent +
                     '</div>' +
                     '<span class="msg-timestamp text-right">' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</span>' +
-                    '<button onclick="editUserMessage(' + msgIdx + ')" class="flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#A3A095] hover:text-[#D25D38] transition-colors">' +
-                        '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
-                        'Edit' +
-                    '</button>' +
+                    '<div class="flex items-center gap-1">' +
+                        '<button onclick="createBranch(currentChatId, ' + msgIdx + ')" class="flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#A3A095] hover:text-[#D25D38] transition-colors" title="Create branch from this message">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v12a3 3 0 0 0 3 3h9"/><path d="m15 6 3-3 3 3"/><path d="m15 18 3 3 3-3"/></svg>' +
+                            'Branch' +
+                        '</button>' +
+                        '<button onclick="editUserMessage(' + msgIdx + ')" class="flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#A3A095] hover:text-[#D25D38] transition-colors">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+                            'Edit' +
+                        '</button>' +
+                    '</div>' +
                 '</div>';
             return userDiv;
         }
@@ -7946,13 +8305,14 @@
         }
 
         // --- Action buttons HTML builder ---
-        function buildActionsDivHTML(id, hidden) {
+        function buildActionsDivHTML(id, hidden, msgIdx) {
             const idAttr = id ? ' id="' + id + '"' : '';
             const hiddenCls = hidden ? ' hidden' : '';
             const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+            const msgAttr = Number.isInteger(msgIdx) ? ' data-msg-idx="' + msgIdx + '"' : '';
             const btnCls = 'flex items-center gap-1.5 px-2.5 py-2 text-[11px] font-medium text-[#5B5951] hover:bg-[#F2F0E9] rounded-xl transition-colors';
             const notionSvg = '<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'11\' height=\'11\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\'/><polyline points=\'14 2 14 8 20 8\'/></svg>';
-            return '<div class="msg-actions flex items-center gap-1.5 mt-2.5' + hiddenCls + '"' + idAttr + '>' +
+            return '<div class="msg-actions flex items-center gap-1.5 mt-2.5' + hiddenCls + '"' + idAttr + msgAttr + '>' +
                 '<button onclick="copyMsgText(this)" data-text="" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="clipboard" class="w-3 h-3"></i> Copy</button>' +
                 '<button onclick="regenerateLastResponse()" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Retry</button>' +
                 '<button class="tts-btn flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#8C897D] bg-[#F2F0E9] border border-[#E5E3DB] rounded-full hover:bg-[#EAE8E0] hover:text-[#2C2B29] transition-colors" title="Read aloud"><i data-lucide="volume-2" class="w-3 h-3"></i> Read</button>' +
@@ -7968,13 +8328,14 @@
                 '<button class="download-btn ' + btnCls + '"><i data-lucide="download" class="w-3 h-3 text-[#8C897D]"></i> Download</button>' +
                 '<button class="summarize-btn ' + btnCls + '"><i data-lucide="list" class="w-3 h-3 text-[#8C897D]"></i> Summarize</button>' +
                 '<button class="followup-btn ' + btnCls + '"><i data-lucide="corner-down-right" class="w-3 h-3 text-[#8C897D]"></i> Follow-up</button>' +
-                '<button class="bookmark-btn ' + btnCls + ' col-span-2"><i data-lucide="bookmark" class="w-3 h-3 text-[#8C897D]"></i> Bookmark</button>' +
+                '<button class="bookmark-btn ' + btnCls + '"><i data-lucide="bookmark" class="w-3 h-3 text-[#8C897D]"></i> Bookmark</button>' +
+                '<button class="branch-btn ' + btnCls + '"><i data-lucide="corner-up-left" class="w-3 h-3 text-[#8C897D]"></i> Branch</button>' +
                 '</div></div></div>' +
                 '<span class="msg-timestamp ml-auto">' + ts + '</span>' +
                 '</div>';
         }
 
-        function wireActionsDiv(actionsDiv, text) {
+        function wireActionsDiv(actionsDiv, text, msgIdx) {
             const copyBtn = actionsDiv.querySelector('[data-text]');
             if (copyBtn) copyBtn.dataset.text = encodeURIComponent(text);
             const ttsBtn = actionsDiv.querySelector('.tts-btn');
@@ -8007,6 +8368,9 @@
             if (followupBtn) followupBtn.onclick = () => { askFollowUp(text); close(); };
             const bookmarkBtn = actionsDiv.querySelector('.bookmark-btn');
             if (bookmarkBtn) bookmarkBtn.onclick = () => { bookmarkResponse(text, bookmarkBtn); close(); };
+            const branchBtn = actionsDiv.querySelector('.branch-btn');
+            const branchIdx = Number.isInteger(msgIdx) ? msgIdx : parseInt(actionsDiv.dataset.msgIdx || '-1', 10);
+            if (branchBtn) branchBtn.onclick = () => { if (branchIdx >= 0) createBranch(currentChatId, branchIdx); close(); };
         }
 
         // Close all more menus on outside click
@@ -8129,19 +8493,20 @@
             }
         }
 
-        async function submitMultiAI(textToSubmit) {
+        async function submitMultiAI(textToSubmit, pluginOutputs = []) {
             const hasText = textToSubmit && textToSubmit.trim() !== '';
             if (!hasText || isLoading || isStreaming) return;
             const platforms = multiAIPlatforms.filter(p => p === 'puter' || p === 'ollama' || getMultiAIKey(p));
             if (platforms.length === 0) { showToast('⚠️ Select at least one platform with a valid API key for Multi-AI.'); return; }
 
             welcomeScreen.classList.add('hidden');
+            pluginOutputs.forEach(o => renderPluginOutputCard(o.plugin, o.text));
             const textToSend = textToSubmit.trim();
             chatInput.value = '';
             chatInput.style.height = 'auto';
             updateSendButton();
 
-            const userMsg = { role: 'user', text: textToSend };
+            const userMsg = { id: generateMessageId(), role: 'user', text: textToSend };
             messages.push(userMsg);
             if (messages.length === 1) saveCurrentChat();
 
@@ -8153,7 +8518,7 @@
 
             const lengthDirective = responseLength === 'short' ? 'Be brief and concise — 2-4 sentences max. ' : responseLength === 'detailed' ? 'Be thorough and detailed. ' : '';
             const _convStyleExtra = (convStyle && convStyle !== 'standard' && CONV_STYLE_INSTRUCTIONS[convStyle]) ? '\n\nCONVERSATION STYLE: ' + CONV_STYLE_INSTRUCTIONS[convStyle] : '';
-            const _pluginExtra = enabledPlugins.map(p => PLUGIN_INSTRUCTIONS[p]).filter(Boolean).join('\n');
+            const _pluginExtra = buildPluginPromptExtra();
             const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + lengthDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '') + _convStyleExtra + (responseLang ? '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language.' : '') + (_pluginExtra ? '\n\n' + _pluginExtra : '');
 
             try {
@@ -8190,7 +8555,7 @@
 
                 // Save the first response to messages (for chat history)
                 const bestResult = results.find(r => !r.error) || results[0];
-                const aiMsg = { role: 'model', text: bestResult.text, originalText: bestResult.text, multiAI: results.map(r => ({ platform: r.platform, text: r.text, error: r.error })) };
+                const aiMsg = { id: generateMessageId(), role: 'model', text: bestResult.text, originalText: bestResult.text, multiAI: results.map(r => ({ platform: r.platform, text: r.text, error: r.error })) };
                 messages.push(aiMsg);
                 saveCurrentChat();
                 if (messages.filter(m => m.role === 'user').length === 1) autoTitleChat();
@@ -8483,26 +8848,37 @@
         }
 
         async function submitMessage(textToSubmit) {
+            const rawText = (textToSubmit || '').trim();
+            const hasImage = uploadedImages.length > 0 || uploadedImage !== null;
+            if ((!rawText && !hasImage) || isLoading || isStreaming) return;
+
+            let processedText = rawText;
+            let pluginOutputs = [];
+            if (rawText) {
+                const pluginResult = await runPluginsOnMessage(rawText);
+                processedText = (pluginResult.message || '').trim();
+                pluginOutputs = Array.isArray(pluginResult.outputs) ? pluginResult.outputs : [];
+            }
+
             // Delegate to multi-AI if enabled
             if (multiAIEnabled && multiAIPlatforms.length > 0) {
-                return submitMultiAI(textToSubmit);
+                return submitMultiAI(processedText, pluginOutputs);
             }
-            const hasText = textToSubmit && textToSubmit.trim() !== '';
-            const hasImage = uploadedImages.length > 0 || uploadedImage !== null;
-            if ((!hasText && !hasImage) || isLoading || isStreaming) return;
+
+            const hasText = processedText !== '';
 
             // Detect image generation request — handle before normal LLM flow
             if (hasText && !hasImage) {
-                const imgPrompt = detectImageRequest(textToSubmit.trim());
+                const imgPrompt = detectImageRequest(processedText);
                 if (imgPrompt !== null) {
                     welcomeScreen.classList.add('hidden');
                     chatInput.value = '';
                     chatInput.style.height = 'auto';
                     updateSendButton();
-                    const userMsg = { role: 'user', text: textToSubmit.trim(), images: [] };
+                    const userMsg = { id: generateMessageId(), role: 'user', text: processedText, images: [] };
                     messages.push(userMsg);
                     if (messages.length === 1) saveCurrentChat();
-                    const userDiv = buildUserMessageDiv(textToSubmit.trim(), [], messages.length - 1);
+                    const userDiv = buildUserMessageDiv(processedText, [], messages.length - 1);
                     messagesWrapper.appendChild(userDiv);
                     // Show loading spinner card
                     const cardDiv = document.createElement('div');
@@ -8522,7 +8898,7 @@
 
             // Detect Notion natural language commands — show action card instead of executing silently
             if (hasText && notionKey) {
-                const notionCmd = detectNotionCommand(textToSubmit.trim());
+                const notionCmd = detectNotionCommand(processedText);
                 if (notionCmd) {
                     showNotionActionCard(notionCmd.type, notionCmd.payload || '');
                     chatInput.value = '';
@@ -8553,16 +8929,17 @@
             }
 
             welcomeScreen.classList.add('hidden');
+            pluginOutputs.forEach(o => renderPluginOutputCard(o.plugin, o.text));
 
             const imagesToSend = uploadedImages.length > 0 ? [...uploadedImages] : (uploadedImage ? [uploadedImage] : []);
-            const textToSend = (textToSubmit || '').trim();
+            const textToSend = processedText;
 
             chatInput.value = "";
             chatInput.style.height = 'auto';
             clearImage();
             updateSendButton();
 
-            const userMsg = { role: 'user', text: textToSend, images: imagesToSend };
+            const userMsg = { id: generateMessageId(), role: 'user', text: textToSend, images: imagesToSend };
             messages.push(userMsg);
 
             if (messages.length === 1) saveCurrentChat();
@@ -8809,7 +9186,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 if (responseLang) {
                     systemInstruction += '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language, regardless of the language the user writes in. This is a mandatory user preference.';
                 }
-                const _pluginExtra = enabledPlugins.map(p => PLUGIN_INSTRUCTIONS[p]).filter(Boolean).join('\n');
+                const _pluginExtra = buildPluginPromptExtra();
                 if (_pluginExtra) {
                     systemInstruction += '\n\n' + _pluginExtra;
                 }
@@ -9630,10 +10007,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
                 // Add action buttons
                 const tempActionsDiv = document.createElement('div');
-                tempActionsDiv.innerHTML = buildActionsDivHTML('', false);
+                tempActionsDiv.innerHTML = buildActionsDivHTML('', false, messages.length);
                 const actionsDiv = tempActionsDiv.firstElementChild;
                 innerCol.appendChild(actionsDiv);
-                wireActionsDiv(actionsDiv, mainTextClean);
+                wireActionsDiv(actionsDiv, mainTextClean, messages.length);
                 lucide.createIcons({ nodes: [actionsDiv] });
 
                 // Add follow-up suggestion chips
@@ -9651,7 +10028,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Play response completion sound if enabled
                 playResponseChime();
 
-                const aiMsg = { role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries, agenticLogs: _agenticProcessLogs };
+                const aiMsg = { id: generateMessageId(), role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries, agenticLogs: _agenticProcessLogs };
                 messages.push(aiMsg);
                 saveCurrentChat();
                 autoSaveToNotion(mainTextClean);
@@ -9677,14 +10054,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         if (mainTextClean) {
                             // Save partial response to message history (isPartial: true marks it as incomplete,
                             // so continueLastResponse() can send "continue" and the AI will resume from here)
-                            messages.push({ role: 'model', text: mainTextClean, originalText: _streamPartialRaw, isPartial: true });
+                            messages.push({ id: generateMessageId(), role: 'model', text: mainTextClean, originalText: _streamPartialRaw, isPartial: true });
                             saveCurrentChat();
                             const innerCol = _streamPartialWrapper.querySelector('.flex.flex-col');
                             if (innerCol) {
                                 const tempActionsDiv = document.createElement('div');
-                                tempActionsDiv.innerHTML = buildActionsDivHTML('', false);
+                                tempActionsDiv.innerHTML = buildActionsDivHTML('', false, messages.length);
                                 const actionsDiv = tempActionsDiv.firstElementChild;
-                                wireActionsDiv(actionsDiv, mainTextClean);
+                                wireActionsDiv(actionsDiv, mainTextClean, messages.length);
                                 innerCol.appendChild(actionsDiv);
                                 const contDiv = document.createElement('div');
                                 contDiv.className = 'mt-2 flex items-center gap-2';
@@ -9802,12 +10179,13 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
         // --- Rendering & Streaming AI Message ---
 
-        function renderAIResponse(msg, instant = false) {
+        function renderAIResponse(msg, instant = false, msgIdxHint = null) {
             const wrapper = document.createElement('div');
             wrapper.className = "flex w-full justify-start animate-slide-up";
 
             let htmlContent = '<div class="flex flex-col w-full max-w-[95%]">';
             const uniqueId = Date.now();
+            const msgIdx = Number.isInteger(msgIdxHint) ? msgIdxHint : messages.indexOf(msg);
 
             // Resolve thinking content — use stored thinking field, or extract from text for legacy messages
             const THINK_RE = /<think>([\s\S]*?)(?:<\/think>|$)/i;
@@ -9875,7 +10253,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
             htmlContent += '<div id="text-content-' + uniqueId + '" class="md-content prose-custom text-[#2C2B29] leading-relaxed"></div>' +
                 '<span id="cursor-' + uniqueId + '" class="streaming-cursor"></span>';
 
-            htmlContent += buildActionsDivHTML('actions-' + uniqueId, true);
+            htmlContent += buildActionsDivHTML('actions-' + uniqueId, true, msgIdx);
 
             htmlContent += '</div>';
 
@@ -9895,7 +10273,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 updateSendButton();
                 if (actionsDiv) {
                     actionsDiv.classList.remove('hidden');
-                    wireActionsDiv(actionsDiv, fullText);
+                    wireActionsDiv(actionsDiv, fullText, msgIdx);
                 }
                 lucide.createIcons();
                 renderMermaidDiagrams();
@@ -9942,42 +10320,6 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
         function scrollToBottom() {
             const anchor = document.getElementById('scroll-anchor');
             if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }
-
-        // ── CHAT HISTORY ───────────────────────────────────────────────
-        function generateChatId() { return 'chat_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
-
-        function startNewChat() {
-            if (messages.length > 0) saveCurrentChat();
-            currentChatId = generateChatId();
-            messages = [];
-            messagesWrapper.innerHTML = '';
-            welcomeScreen.classList.remove('hidden');
-            isTempChat = false;
-            updateTempChatUI();
-            updatePinBadge();
-            if (isSidebarOpen) toggleSidebar();
-        }
-
-        function loadChat(chatId) {
-            const chat = allChats.find(c => c.id === chatId);
-            if (!chat) return;
-            if (messages.length > 0) saveCurrentChat();
-            currentChatId = chatId;
-            messages = chat.messages.map(m => ({...m}));
-            messagesWrapper.innerHTML = '';
-            welcomeScreen.classList.add('hidden');
-            messages.forEach((m, idx) => {
-                if (m.role === 'user') {
-                    const userDiv = buildUserMessageDiv(m.text || '', m.images || [], idx);
-                    messagesWrapper.appendChild(userDiv);
-                } else {
-                    renderAIResponse(m, true);
-                }
-            });
-            updatePinBadge();
-            if (isSidebarOpen) toggleSidebar();
-            scrollToBottom();
         }
 
         // ── SLASH COMMANDS ─────────────────────────────────────────────
