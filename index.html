@@ -1583,7 +1583,7 @@
                 <div class="flex items-center gap-2">
                     <select id="branch-selector" onchange="switchBranch(currentChatId, this.value)" class="flex-1 px-3 py-2 rounded-xl border border-[#E5E3DB] bg-[#FAF9F6] text-[12px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38]"></select>
                     <button onclick="createBranch(currentChatId, messages.length - 1)" class="px-3 py-2 rounded-xl border border-[#E5E3DB] text-[12px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors">New</button>
-                    <button id="delete-branch-btn" onclick="deleteBranch(currentChatId, document.getElementById('branch-selector').value)" class="px-3 py-2 rounded-xl border border-[#F8E3DE] text-[12px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors">Delete</button>
+                    <button id="delete-branch-btn" aria-label="Delete selected branch" onclick="deleteBranch(currentChatId, document.getElementById('branch-selector').value)" class="px-3 py-2 rounded-xl border border-[#F8E3DE] text-[12px] text-[#D25D38] hover:bg-[#FDF4F2] transition-colors">Delete</button>
                 </div>
                 <div id="branch-tree" class="text-[11px] text-[#737166] space-y-1"></div>
             </div>
@@ -4220,8 +4220,9 @@
             const branchIds = Object.keys(chat.branches || {});
             if (branchIds.length <= 1) { showToast('At least one branch is required'); return; }
             if (!confirm('Delete selected branch? This action cannot be undone.')) return;
-            const fallback = chat.branches[branchId].parentBranchId && chat.branches[chat.branches[branchId].parentBranchId]
-                ? chat.branches[branchId].parentBranchId
+            const deletingBranch = chat.branches[branchId];
+            const fallback = deletingBranch.parentBranchId && chat.branches[deletingBranch.parentBranchId]
+                ? deletingBranch.parentBranchId
                 : MAIN_BRANCH_ID;
             delete chat.branches[branchId];
             if (!chat.branches[fallback]) chat.branches[MAIN_BRANCH_ID] = chat.branches[MAIN_BRANCH_ID] || { name: 'Main', parentMessageId: null, parentBranchId: null, messages: [] };
@@ -5823,6 +5824,13 @@
             };
         }
 
+        /**
+         * Run plugin code in an inline Blob worker.
+         * @param {string} pluginCode
+         * @param {string} prompt
+         * @param {object} context
+         * @param {string} mode
+         */
         async function runPluginSandbox(pluginCode, prompt, context = {}, mode = 'execute') {
             const workerCode = `
 self.onmessage = async (event) => {
@@ -6011,13 +6019,32 @@ self.onmessage = async (event) => {
             });
         }
 
+        function sanitizePluginCardStyle(styleText) {
+            if (typeof styleText !== 'string' || !styleText.trim()) return '';
+            const safeProps = new Set(['background', 'background-color', 'color', 'border-color', 'box-shadow']);
+            const out = [];
+            styleText.split(';').forEach(part => {
+                const seg = part.trim();
+                if (!seg) return;
+                const i = seg.indexOf(':');
+                if (i < 1) return;
+                const prop = seg.slice(0, i).trim().toLowerCase();
+                const value = seg.slice(i + 1).trim();
+                if (!safeProps.has(prop)) return;
+                if (!value || /url\s*\(|expression\s*\(|javascript:|@import|behavior\s*:|position\s*:|z-index/i.test(value)) return;
+                if (!/^[#(),.%+\-a-zA-Z0-9\s]+$/.test(value)) return;
+                out.push(prop + ':' + value);
+            });
+            return out.join(';');
+        }
+
         function renderPluginOutputCard(pluginName, text, outputCard) {
             const cardTitle = String(outputCard?.title || ('Plugin · ' + (pluginName || 'Extension')));
             const cardText = String(outputCard?.content || text || '').trim();
             if (!cardText) return;
             const card = document.createElement('div');
             card.className = 'flex w-full justify-start animate-slide-up';
-            const style = outputCard && typeof outputCard.style === 'string' ? outputCard.style : '';
+            const style = sanitizePluginCardStyle(outputCard?.style || '');
             card.innerHTML = '<div style="max-width:95%;border:3px solid #161616;background:#FFE96A;box-shadow:8px 8px 0 #161616;padding:12px 14px;border-radius:12px;' + style + '">' +
                 '<p style="font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#111;margin-bottom:6px;">' + escapeHTML(cardTitle) + '</p>' +
                 '<p style="font-size:13px;line-height:1.45;color:#111;white-space:pre-wrap;margin:0;">' + escapeHTML(cardText) + '</p>' +

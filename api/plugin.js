@@ -3,7 +3,18 @@
 // Provides CORS-safe health + payload echo for plugin diagnostics.
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const reqOrigin = req.headers.origin || '';
+  const allowedOrigins = (process.env.SNOAH_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(v => v.trim())
+    .filter(Boolean);
+  const defaultOrigins = ['https://snoah.ai', 'https://www.snoah.ai'];
+  const isVercelPreview = /\.vercel\.app$/i.test(reqOrigin);
+  const isAllowed = (allowedOrigins.length ? allowedOrigins : defaultOrigins).includes(reqOrigin) || isVercelPreview;
+  const corsOrigin = isAllowed ? reqOrigin : defaultOrigins[0];
+
+  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
