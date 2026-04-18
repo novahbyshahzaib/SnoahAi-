@@ -914,6 +914,30 @@
                             <p class="text-[10px] text-[#A3A095] mt-0.5">How many web search results are injected into AI context (3-10).</p>
                         </div>
 
+                        <div class="mt-4">
+                            <label class="text-[11px] font-semibold text-[#5B5951] mb-1.5 uppercase tracking-wide block">Web Search Language</label>
+                            <p class="text-[11px] text-[#A3A095] mb-2">Bias search queries toward a preferred language by appending a language hint (provider behavior may vary).</p>
+                            <div class="relative">
+                                <select id="settings-websearch-language" class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
+                                    <option value="auto">Auto</option>
+                                    <option value="English">English</option>
+                                    <option value="Spanish">Spanish</option>
+                                    <option value="French">French</option>
+                                    <option value="German">German</option>
+                                    <option value="Arabic">Arabic</option>
+                                    <option value="Chinese">Chinese</option>
+                                    <option value="Hindi">Hindi</option>
+                                    <option value="Japanese">Japanese</option>
+                                    <option value="Portuguese">Portuguese</option>
+                                    <option value="Russian">Russian</option>
+                                    <option value="Korean">Korean</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Agentic Web Search toggle -->
                         <div class="mt-4 border-t border-[#F2F0E9] pt-4">
                             <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
@@ -938,6 +962,16 @@
                                     oninput="updateBrowseDepthDisplay(this.value)"
                                     class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
                                 <p class="text-[10px] text-[#A3A095] mt-0.5">Max URLs the AI can browse per response (1–3). Higher values enable deeper research.</p>
+                            </div>
+                            <div class="mt-3">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[12px] font-semibold text-[#5B5951]">Browse Timeout</span>
+                                    <span id="agent-browse-timeout-val" class="text-[12px] font-mono text-[#A3A095]">28s</span>
+                                </div>
+                                <input type="range" id="agent-browse-timeout-slider" min="10" max="60" step="2" value="28"
+                                    oninput="updateBrowseTimeoutDisplay(this.value)"
+                                    class="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#D25D38] bg-[#E5E3DB]">
+                                <p class="text-[10px] text-[#A3A095] mt-0.5">Max time allowed for each URL visit in agentic mode (10–60s).</p>
                             </div>
                         </div>
                     </div>
@@ -1261,6 +1295,46 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
+                    <!-- AI Response Format -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">AI Response Format</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Default structure preference for AI replies.</p>
+                        <div class="relative">
+                            <select id="settings-ai-response-format" class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
+                                <option value="auto">Auto (best fit)</option>
+                                <option value="bullets">Bullet Points</option>
+                                <option value="steps">Step-by-Step</option>
+                                <option value="table">Table-first (when suitable)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- AI Explanation Level -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">AI Explanation Level</label>
+                        <p class="text-[12px] text-[#737166] mb-2.5 leading-relaxed">Choose how technical replies should be by default.</p>
+                        <div class="relative">
+                            <select id="settings-ai-explain-level" class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
+                                <option value="auto">Auto (adapt to question)</option>
+                                <option value="beginner">Beginner-friendly</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced / Expert</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
                     <!-- Conversation Style -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Conversation Style</label>
@@ -1365,6 +1439,40 @@
                                 <p class="text-[11px] text-[#A3A095]">Subtle chime when AI finishes streaming</p>
                             </div>
                             <button id="response-sound-toggle" onclick="toggleResponseSound()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Send on Enter -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Input Behavior</label>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Send on Enter</p>
+                                <p class="text-[11px] text-[#A3A095]">If ON, press Enter to send and Shift+Enter for newline</p>
+                            </div>
+                            <button id="send-on-enter-toggle" onclick="toggleSendOnEnter()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Auto Focus Input -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Productivity</label>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Auto-Focus Input</p>
+                                <p class="text-[11px] text-[#A3A095]">Focus chat input automatically after opening or creating chats</p>
+                            </div>
+                            <button id="autofocus-input-toggle" onclick="toggleAutoFocusInput()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
                                 <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
                             </button>
                         </div>
@@ -2250,6 +2358,13 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.1</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Plugin Compatibility Fix 🧩</strong> — Plugin execution now normalizes pasted code (supports code fences, smart-quote cleanup, export/module patterns) and improves execute() compatibility so community plugins like Learning Coach/Pomodoro run reliably without syntax-token crashes.</li>
+                            <li><strong>API: Web Search Language 🌍</strong> — New setting in API → Web Search lets you bias queries toward a preferred language (Auto/English/Spanish/etc.) for better localized search results.</li>
+                            <li><strong>API: Agentic Browse Timeout ⏱️</strong> — New slider in API → Agentic Web Search controls per-URL read timeout (10–60s), improving reliability on slow pages and preventing long hangs.</li>
+                            <li><strong>AI: Response Format Preference 🧠</strong> — New AI setting to prefer Auto, Bullet Points, Step-by-Step, or Table-first responses by default.</li>
+                            <li><strong>AI: Explanation Level 🎓</strong> — New AI setting to choose Auto, Beginner, Intermediate, or Advanced technical depth globally.</li>
+                            <li><strong>App: Send on Enter ⌨️</strong> — New App toggle to switch between Enter-to-send mode and newline-first mode (Shift+Enter always does the opposite action).</li>
+                            <li><strong>App: Auto-Focus Input ⚡</strong> — New App toggle to auto-focus the message box after opening or creating chats for faster workflows.</li>
                             <li><strong>Plugin / Extension Worker Refactor 🧩</strong> — Plugin execution is now handled by a robust inline Blob Worker with structured message passing, safer runtime evaluation, and explicit error returns to the main thread for reliable installs and debugging.</li>
                             <li><strong>Chat Branching Upgrade 🌿</strong> — Branch controls now support creating and deleting the selected branch directly from the branch bar, making branch management faster and cleaner during long conversations.</li>
                             <li><strong>Smarter Agentic URL Deduplication 🔗</strong> — The agentic web search no longer visits the same page twice. URLs are now normalized before deduplication — stripping <code>http://</code>/<code>https://</code>, <code>www.</code> prefix, and trailing slashes — so <em>https://example.com/</em> and <em>http://www.example.com</em> are correctly treated as identical. Saves browse-depth budget for genuinely new sources.</li>
@@ -2852,8 +2967,14 @@
         let smartMode = false;
         let webSearchPlatform = localStorage.getItem('snoah_websearch_platform') || 'gemini';
         let webSearchResultLimit = Math.min(10, Math.max(3, parseInt(localStorage.getItem('snoah_websearch_limit') || '5', 10) || 5));
+        let webSearchLanguage = localStorage.getItem('snoah_websearch_lang') || 'auto';
+        if (webSearchLanguage !== 'auto') {
+            const _wsLangNorm = { english: 'English', spanish: 'Spanish', french: 'French', german: 'German', arabic: 'Arabic', chinese: 'Chinese', hindi: 'Hindi', japanese: 'Japanese', portuguese: 'Portuguese', russian: 'Russian', korean: 'Korean' };
+            webSearchLanguage = _wsLangNorm[String(webSearchLanguage).toLowerCase()] || webSearchLanguage;
+        }
         let agenticWebSearch = localStorage.getItem('snoah_agentic_ws') === '1';
         let agentBrowseDepth = parseInt(localStorage.getItem('snoah_agent_browse_depth') || '1');
+        let agentBrowseTimeoutMs = Math.min(60000, Math.max(10000, parseInt(localStorage.getItem('snoah_agent_browse_timeout') || '28000', 10) || 28000));
         let followUpSuggestions = localStorage.getItem('snoah_followup_suggestions') === 'true';
         let installedPlugins = (() => {
             try {
@@ -2863,6 +2984,8 @@
         })();
         let responseSound = localStorage.getItem('snoah_response_sound') === 'true';
         let chatHistoryLimit = Math.min(100, Math.max(10, parseInt(localStorage.getItem('snoah_chat_limit') || '30', 10) || 30));
+        let sendOnEnter = localStorage.getItem('snoah_send_on_enter') === 'true';
+        let autoFocusInput = localStorage.getItem('snoah_autofocus_input') !== 'false';
         let focusModeActive = false;
         let tavilyKeys = _loadKeys('snoah_tavily_keys');
         let braveKeys = _loadKeys('snoah_brave_keys');
@@ -2899,6 +3022,8 @@
         const themeAccents = { default:'#D25D38', ocean:'#1A6EBD', forest:'#2D7A4F', rose:'#C4396B' };
         let customPersona = localStorage.getItem('snoah_persona') || '';
         let userName = localStorage.getItem('snoah_user_name') || '';
+        let aiResponseFormat = localStorage.getItem('snoah_ai_response_format') || 'auto';
+        let aiExplainLevel = localStorage.getItem('snoah_ai_explain_level') || 'auto';
         const SLASH_CMDS = [
             { cmd: '/explain',   label: 'Explain this',         desc: 'Simple explanation' },
             { cmd: '/summarize', label: 'Summarize',            desc: 'Brief summary' },
@@ -3699,10 +3824,16 @@
         });
 
         chatInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && e.shiftKey) {
-                e.preventDefault();
-                hideSlashMenu();
-                handleSendClick();
+            if (e.key === 'Enter') {
+                if (sendOnEnter && !e.shiftKey) {
+                    e.preventDefault();
+                    hideSlashMenu();
+                    handleSendClick();
+                } else if (!sendOnEnter && e.shiftKey) {
+                    e.preventDefault();
+                    hideSlashMenu();
+                    handleSendClick();
+                }
             }
             if (e.key === 'Escape') hideSlashMenu();
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -4162,6 +4293,9 @@
             updatePinBadge();
             updateBranchControls();
             if (isSidebarOpen) toggleSidebar();
+            if (autoFocusInput) {
+                setTimeout(() => { try { chatInput.focus(); } catch (_) {} }, 80);
+            }
         }
 
         function switchBranch(chatId, branchId) {
@@ -4274,6 +4408,9 @@
             updatePinBadge();
             updateBranchControls();
             if (isSidebarOpen) toggleSidebar();
+            if (autoFocusInput) {
+                setTimeout(() => { try { chatInput.focus(); } catch (_) {} }, 80);
+            }
         }
 
         function createChatBranch() {
@@ -4410,10 +4547,16 @@
             updateInstantResponseUI();
             const responseLangSel = document.getElementById('settings-response-lang');
             if (responseLangSel) responseLangSel.value = responseLang;
+            const aiResponseFormatSel = document.getElementById('settings-ai-response-format');
+            if (aiResponseFormatSel) aiResponseFormatSel.value = aiResponseFormat;
+            const aiExplainLevelSel = document.getElementById('settings-ai-explain-level');
+            if (aiExplainLevelSel) aiExplainLevelSel.value = aiExplainLevel;
             updateTimestampsUI();
             // Load web search platform
             const wsPlat = document.getElementById('settings-websearch-platform');
             if (wsPlat) { wsPlat.value = webSearchPlatform; switchWebSearchPlatform(webSearchPlatform, true); }
+            const wsLang = document.getElementById('settings-websearch-language');
+            if (wsLang) wsLang.value = webSearchLanguage;
             const wsLimitSlider = document.getElementById('websearch-limit-slider');
             if (wsLimitSlider) {
                 wsLimitSlider.value = webSearchResultLimit;
@@ -4428,6 +4571,11 @@
                 browseDepthSlider.value = agentBrowseDepth;
                 const browseDepthVal = document.getElementById('agent-browse-depth-val');
                 if (browseDepthVal) browseDepthVal.textContent = agentBrowseDepth + ' page' + (agentBrowseDepth > 1 ? 's' : '');
+            }
+            const browseTimeoutSlider = document.getElementById('agent-browse-timeout-slider');
+            if (browseTimeoutSlider) {
+                browseTimeoutSlider.value = Math.round(agentBrowseTimeoutMs / 1000);
+                updateBrowseTimeoutDisplay(Math.round(agentBrowseTimeoutMs / 1000));
             }
             // Load stream timeout slider
             const timeoutSlider = document.getElementById('stream-timeout-slider');
@@ -4445,6 +4593,8 @@
             updatePluginUI();
             // Load response sound
             updateResponseSoundUI();
+            updateSendOnEnterUI();
+            updateAutoFocusInputUI();
             const chLimitSlider = document.getElementById('chat-history-limit-slider');
             if (chLimitSlider) {
                 chLimitSlider.value = chatHistoryLimit;
@@ -4523,9 +4673,21 @@
             // Reset plugins and extra limits
             installedPlugins = [];
             webSearchResultLimit = 5;
+            webSearchLanguage = 'auto';
             chatHistoryLimit = 30;
+            agentBrowseTimeoutMs = 28000;
+            aiResponseFormat = 'auto';
+            aiExplainLevel = 'auto';
+            sendOnEnter = false;
+            autoFocusInput = true;
             localStorage.removeItem('snoah_plugins');
             localStorage.removeItem('snoah_websearch_limit');
+            localStorage.removeItem('snoah_websearch_lang');
+            localStorage.removeItem('snoah_agent_browse_timeout');
+            localStorage.removeItem('snoah_ai_response_format');
+            localStorage.removeItem('snoah_ai_explain_level');
+            localStorage.removeItem('snoah_send_on_enter');
+            localStorage.removeItem('snoah_autofocus_input');
             localStorage.removeItem('snoah_chat_limit');
             // Reload settings panel to reflect defaults
             closeSettings();
@@ -4639,6 +4801,16 @@
             customPersona = newPersona;
             localStorage.setItem('snoah_instructions', customInstructions);
             localStorage.setItem('snoah_persona', customPersona);
+            const aiResponseFormatSel = document.getElementById('settings-ai-response-format');
+            if (aiResponseFormatSel) {
+                aiResponseFormat = aiResponseFormatSel.value || 'auto';
+                localStorage.setItem('snoah_ai_response_format', aiResponseFormat);
+            }
+            const aiExplainLevelSel = document.getElementById('settings-ai-explain-level');
+            if (aiExplainLevelSel) {
+                aiExplainLevel = aiExplainLevelSel.value || 'auto';
+                localStorage.setItem('snoah_ai_explain_level', aiExplainLevel);
+            }
 
             // Save advanced model parameters
             paramTemperature = parseFloat(document.getElementById('param-temperature').value);
@@ -4730,12 +4902,23 @@
                 webSearchResultLimit = Math.min(10, Math.max(3, parseInt(wsLimitSlider.value, 10) || 5));
                 localStorage.setItem('snoah_websearch_limit', webSearchResultLimit);
             }
+            const wsLangSel = document.getElementById('settings-websearch-language');
+            if (wsLangSel) {
+                webSearchLanguage = wsLangSel.value || 'auto';
+                localStorage.setItem('snoah_websearch_lang', webSearchLanguage);
+            }
 
             // Save agentic browse depth
             const browseDepthEl = document.getElementById('agent-browse-depth-slider');
             if (browseDepthEl) {
                 agentBrowseDepth = parseInt(browseDepthEl.value);
                 localStorage.setItem('snoah_agent_browse_depth', agentBrowseDepth);
+            }
+            const browseTimeoutEl = document.getElementById('agent-browse-timeout-slider');
+            if (browseTimeoutEl) {
+                const secs = Math.min(60, Math.max(10, parseInt(browseTimeoutEl.value, 10) || 28));
+                agentBrowseTimeoutMs = secs * 1000;
+                localStorage.setItem('snoah_agent_browse_timeout', agentBrowseTimeoutMs);
             }
 
             // Save chat history limit
@@ -5116,8 +5299,12 @@
 
         async function performWebSearch(userMessages) {
             const lastUser = [...userMessages].reverse().find(m => m.role === 'user' && !m.isError);
-            const query = (lastUser && (lastUser.text || '')).substring(0, 500);
-            if (!query) return null;
+            const rawQuery = (lastUser && (lastUser.text || '')).substring(0, 500);
+            if (!rawQuery) return null;
+            let query = rawQuery;
+            if (webSearchLanguage && webSearchLanguage !== 'auto') {
+                query = (rawQuery + ' (language: ' + webSearchLanguage + ')').substring(0, 600);
+            }
 
             if (webSearchPlatform === 'wikipedia') {
                 try {
@@ -5771,6 +5958,12 @@
             if (el) el.textContent = v + ' page' + (v > 1 ? 's' : '');
         }
 
+        function updateBrowseTimeoutDisplay(val) {
+            const v = parseInt(val, 10) || 28;
+            const el = document.getElementById('agent-browse-timeout-val');
+            if (el) el.textContent = v + 's';
+        }
+
         function updateWebSearchLimitDisplay(val) {
             const v = parseInt(val);
             const el = document.getElementById('websearch-limit-val');
@@ -5824,6 +6017,19 @@
             };
         }
 
+        function normalizePluginCode(rawCode) {
+            let code = String(rawCode || '').replace(/\uFEFF/g, '').replace(/[\u200B-\u200D\u2060]/g, '').trim();
+            if (!code) return '';
+            const fence = code.match(/```(?:javascript|js|json)?\s*([\s\S]*?)```/i);
+            if (fence && fence[1]) code = fence[1].trim();
+            code = code
+                .replace(/[“”]/g, '"')
+                .replace(/[‘’]/g, "'")
+                .replace(/^\s*module\.exports\s*=\s*/, 'const pluginExample = ')
+                .replace(/^\s*export\s+default\s+/, 'const pluginExample = ');
+            return code.trim();
+        }
+
         /**
          * Run plugin code in an inline Blob worker.
          * @param {string} pluginCode
@@ -5864,7 +6070,15 @@ self.onmessage = async (event) => {
       self.postMessage({ ok: true, info });
       return;
     }
-    const result = await Promise.resolve(plugin.execute(prompt, context));
+    const execContext = Object.assign({}, context, {
+      message: String(prompt || ''),
+      prompt: String(prompt || ''),
+      text: String(prompt || ''),
+      query: String(prompt || '')
+    });
+    const result = plugin.execute.length <= 1
+      ? await Promise.resolve(plugin.execute(execContext))
+      : await Promise.resolve(plugin.execute(prompt, context, execContext));
     self.postMessage({ ok: true, info, result });
   } catch (err) {
     const msg = err && err.message ? err.message : String(err);
@@ -5899,7 +6113,7 @@ self.onmessage = async (event) => {
         }
 
         async function parsePluginFromText(rawCode) {
-            const code = (rawCode || '').trim();
+            const code = normalizePluginCode(rawCode);
             if (!code) throw new Error('Plugin code is empty');
             const validated = await runPluginSandbox(code, '', {}, 'validate');
             const info = validated.info || {};
@@ -5938,7 +6152,10 @@ self.onmessage = async (event) => {
                 installedPlugins = installedPlugins.map(id => legacyMap[id]).filter(Boolean);
                 savePlugins();
             }
-            installedPlugins = installedPlugins.filter(p => p && typeof p === 'object' && p.id && p.code).map(p => ({ ...p, active: p.active !== false, triggers: Array.isArray(p.triggers) ? p.triggers : [] }));
+            installedPlugins = installedPlugins
+                .filter(p => p && typeof p === 'object' && p.id && p.code)
+                .map(p => ({ ...p, code: normalizePluginCode(p.code), active: p.active !== false, triggers: Array.isArray(p.triggers) ? p.triggers : [] }))
+                .filter(p => !!p.code);
         }
 
         async function installPluginFromInput() {
@@ -6126,6 +6343,48 @@ self.onmessage = async (event) => {
             if (!toggle) return;
             const knob = toggle.querySelector('span');
             if (responseSound) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function toggleSendOnEnter() {
+            sendOnEnter = !sendOnEnter;
+            localStorage.setItem('snoah_send_on_enter', sendOnEnter);
+            updateSendOnEnterUI();
+        }
+
+        function updateSendOnEnterUI() {
+            const toggle = document.getElementById('send-on-enter-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (sendOnEnter) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function toggleAutoFocusInput() {
+            autoFocusInput = !autoFocusInput;
+            localStorage.setItem('snoah_autofocus_input', autoFocusInput);
+            updateAutoFocusInputUI();
+        }
+
+        function updateAutoFocusInputUI() {
+            const toggle = document.getElementById('autofocus-input-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (autoFocusInput) {
                 toggle.classList.remove('bg-[#D9D6CE]');
                 toggle.classList.add('bg-[#D25D38]');
                 if (knob) knob.style.transform = 'translateX(20px)';
@@ -6544,7 +6803,7 @@ self.onmessage = async (event) => {
         }
 
         function backupChats() {
-            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_agentic_ws','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
+            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_ai_response_format','snoah_ai_explain_level','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_send_on_enter','snoah_autofocus_input','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_websearch_lang','snoah_agentic_ws','snoah_agent_browse_timeout','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
             const settings = {};
             settingsKeys.forEach(k => { const v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
             const data = { version: 2, app: 'SnoahAI', exported: new Date().toISOString(), chats: allChats, settings };
@@ -9115,7 +9374,7 @@ FEATURES:
 71. CUSTOM ENDPOINT PLATFORM: A new "Custom Endpoint" option in Settings → Platform lets users connect any OpenAI-compatible API. Enter the full endpoint URL (e.g. https://api.openai.com/v1/chat/completions), an optional API key, and a model name. Works with LM Studio, LocalAI, Ollama-remote, or any self-hosted OpenAI-compatible service. Direct fetch (no proxy). Stored in snoah_custom_url, snoah_custom_keys, snoah_custom_model.
 72. CHAT PINNING: Any chat in the sidebar can be pinned. Pinned chats always appear at the top of the chat history list above regular chats, with a 📌 pin icon. Hover/tap a chat item to see the pin button. Pinned state (pinned: true/false) is stored in the chat entry in snoah_all_chats.
 73. FULL BACKUP & RESTORE: Settings → App tab → Full Backup & Restore. "Backup" downloads a v2 JSON file containing ALL chats AND all settings/API keys/preferences/selected AI. "Restore" re-imports everything and reloads the page. Old v1 (chats-only) backup files are also supported — they merge chats without overwriting settings.
-74. ENTER KEY = NEWLINE: Pressing Enter in the chat input inserts a newline. To send, use the Send button or Shift+Enter. This is the standard mobile messaging behavior.
+74. ENTER KEY BEHAVIOR (CONFIGURABLE): Settings → App tab → Send on Enter toggle. When OFF (default), Enter inserts newline and Shift+Enter sends. When ON, Enter sends and Shift+Enter inserts newline.
 75. STORAGE MANAGER: Settings → App tab → Storage Manager. Shows a live breakdown of browser localStorage usage by category: Chat History, API Keys, Settings & Preferences, Memory & Templates, and Total. "↻ Refresh" recalculates. "Clear Keys" removes all API key pools (with confirmation prompt).
 76. SMART / AGENTIC MODE: ⚡ Smart button in the input toolbar. When enabled, SnoahAI automatically detects what the current question needs: enables Web Search for live-data questions (today's news, prices, weather, current events), enables Thinking mode for analytical questions (explain, analyze, compare, code, math), and enables Canvas/Artifact mode for code/creative output questions (build a webpage, create an app, write a script). All overrides reset after each response; manual toggles are unaffected. In Smart mode, the selected AI has full awareness of all active features.
 77. WEB SEARCH PLATFORM: Settings → API tab → Web Search Platform. Choose the search engine that powers the Web (🔍) button. Options: Gemini (default, free — uses Google Search grounding, Gemini key required), Tavily AI Search (free 1000 searches/month), Brave Search (free 2000 queries/month), Google via Serper.dev (free 2500 searches/month), Custom (your own endpoint accepting POST {query, key} → {results:[{title, url, snippet}]}). ALL AI platforms support real-time web search — results are pre-fetched from the configured provider and injected as context. Non-Gemini platforms receive search results in their system context and respond with live data.
@@ -9132,13 +9391,19 @@ FEATURES:
 88. CONVERSATION STYLE: Settings → AI tab → Conversation Style presets. Six styles: Standard (default, balanced), Friendly (warm, encouraging), Concise (short, direct), Detailed (thorough with examples), Academic (formal, precise), Casual (relaxed, plain language). The selected style injects a tone instruction into the system prompt, applied on top of any Custom Instructions. Stored in localStorage as snoah_conv_style.
 89. WIKIPEDIA & DUCKDUCKGO WEB SEARCH: Two new search platforms added to Web Search: (1) Wikipedia Search — uses Wikipedia's public API, no API key required, returns article summaries and excerpts. Great for factual and encyclopedic queries. (2) DuckDuckGo Search — uses DuckDuckGo's Instant Answers public API, no API key required, routed through the SnoahAI backend (/api/browser). Returns instant answers, definitions, and related topics.
 90. AGENTIC WEB SEARCH (LIVE BROWSER AGENT): When "Agentic Web Search" is toggled ON in Settings alongside Web Search, the AI can visit URLs and read full page content. The AI uses [BROWSE: url] command to trigger a page visit. The backend /api/browser serverless function uses Jina AI Reader to fetch and clean any URL into Markdown text. The full page content is fed back to the AI as a [SYSTEM OBSERVATION]. A collapsible "🔍 Search Process" block appears in chat showing: the AI's pre-browse reasoning text, a live "🌐 Visiting…" indicator, and a "✅ Read" confirmation once done. The block auto-collapses after the visit completes, then the final response appears below. Agentic mode is toggled per-session and stored in localStorage (snoah_agentic_ws). URL deduplication is normalized (http/https, www prefix, and trailing slashes are stripped before comparison) so the same page is never visited twice per response even if referenced with slightly different URL formats.
-91. AGENTIC BROWSE DEPTH: Settings → API tab → Agentic Web Search → Browse Depth slider (1–3). Controls how many URLs the AI can visit per response when Agentic Web Search is ON. Default: 1 page. Higher values (2–3) allow deeper multi-page research. Stored in localStorage as snoah_agent_browse_depth. Agentic search logs saved to chat history are capped at 8 entries per response (each preface limited to 500 characters) to prevent localStorage overflow on long research sessions.
+91. AGENTIC BROWSE DEPTH + TIMEOUT: Settings → API tab → Agentic Web Search includes Browse Depth slider (1–3) and Browse Timeout slider (10–60s). Depth controls how many URLs the AI can visit per response; timeout controls max time per URL visit before aborting. Stored as snoah_agent_browse_depth and snoah_agent_browse_timeout. Agentic search logs saved to chat history are capped at 8 entries per response (each preface limited to 500 characters) to prevent localStorage overflow on long research sessions.
 92. FOLLOW-UP SUGGESTIONS: Settings → AI tab → Follow-Up Suggestions toggle. When ON, the AI appends 3 tappable follow-up questions at the end of each response. They appear as rounded chip buttons below the response — tap any to instantly fill the chat input and send it. The questions are AI-generated based on the conversation context. Stored in localStorage as snoah_followup_suggestions.
 93. RESPONSE SOUND: Settings → App tab → Response Sound toggle. When ON, a subtle two-tone chime plays via the Web Audio API (no external audio file needed) when the AI finishes streaming. Useful for knowing when a long response is complete without watching the screen. Toggling ON plays a preview of the sound. Stored in localStorage as snoah_response_sound.
 94. FOCUS MODE: Preferences → App & Info → Focus Mode button. Toggles a distraction-free mode that hides the app header (app name, model badge, top buttons), giving the full viewport height to the chat thread. Tap "Exit Focus Mode" in Preferences to restore the header. Runtime only — not persisted.
 95. PLUGIN / EXTENSION SYSTEM: Settings → AI tab → Plugin / Extension System. Users can paste JavaScript plugin code (plugin object with id, name, triggers, execute()) and install it. Plugin execution runs inside an inline Blob Web Worker with explicit message passing and robust error forwarding.
 96. CHAT BRANCHING: The branch control bar above messages supports creating and switching branches so users can keep alternative conversation paths in a single chat.
 97. BRANCH DELETION: The branch bar includes a Delete action to remove the selected non-main branch. After deletion, SnoahAI automatically switches to a safe fallback branch.
+98. WEB SEARCH LANGUAGE PREFERENCE: Settings → API tab → Web Search Language dropdown. Lets users bias web queries toward a preferred language (Auto/English/Spanish/French/German/Arabic/Chinese/Hindi/Japanese/Portuguese/Russian/Korean). Stored as snoah_websearch_lang.
+99. AI RESPONSE FORMAT PREFERENCE: Settings → AI tab → AI Response Format dropdown. Default output structure can be set to Auto, Bullet Points, Step-by-Step, or Table-first.
+100. AI EXPLANATION LEVEL: Settings → AI tab → AI Explanation Level dropdown. Default technical depth can be set to Auto, Beginner, Intermediate, or Advanced/Expert.
+101. SEND ON ENTER TOGGLE: Settings → App tab → Input Behavior. Toggle between Enter-to-send mode and newline-first mode.
+102. AUTO-FOCUS INPUT TOGGLE: Settings → App tab → Productivity. Automatically focuses the chat input after opening or creating chats when enabled.
+103. HARDENED PLUGIN COMPATIBILITY: Plugin installs and runtime now normalize pasted code (code fences, smart quotes, export/module syntax) and support broader execute() signatures for better compatibility with community plugins.
 
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
@@ -9146,9 +9411,9 @@ APP STRUCTURE & LAYOUT:
 - Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons. Agentic web search shows a collapsible "🔍 Search Process" block above the final response.
 - Bottom bar: Input toolbar with ⚡ Smart, Thinking (🧠), Web Search (🔍), Response Length, Templates, Canvas buttons, main text input (with Attach 📎 plus-icon on the left and Voice 🎤 on the right), Send/Stop button.
 - Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Multi-Key Storage toggle/Dark Mode/Focus Mode/About/Updates/Contact Us), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal). A branch strip appears in active chats with selector + New + Delete branch actions.
-- Settings → API tab sections: Platform & Model (21 AI platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Web Search Platform (Gemini/Tavily/Brave/Serper/Custom with per-provider key pool + Agentic Web Search toggle + Browse Depth slider), Advanced Model Parameters, API Request Timeout (15–120s slider), Token Management, Notion Integration, Response Display.
-- Settings → AI tab sections: AI Persona (system prompt override), Custom Instructions, Multi-AI Response, Auto Memory, Response Language, Conversation Style (Standard/Friendly/Concise/Detailed/Academic/Casual), Follow-Up Suggestions toggle, Plugin / Extension System.
-- Settings → App tab sections: Font Size, Theme, Message Timestamps, Response Sound toggle, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
+- Settings → API tab sections: Platform & Model (21 AI platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Web Search Platform (Gemini/Tavily/Brave/Serper/Custom with per-provider key pool + Web Search Language + Agentic Web Search toggle + Browse Depth + Browse Timeout sliders), Advanced Model Parameters, API Request Timeout (15–120s slider), Token Management, Notion Integration, Response Display.
+- Settings → AI tab sections: AI Persona (system prompt override), Custom Instructions, Multi-AI Response, Auto Memory, Response Language, AI Response Format, AI Explanation Level, Conversation Style (Standard/Friendly/Concise/Detailed/Academic/Casual), Follow-Up Suggestions toggle, Plugin / Extension System.
+- Settings → App tab sections: Font Size, Theme, Message Timestamps, Response Sound toggle, Send on Enter toggle, Auto-Focus Input toggle, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy Text, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
@@ -9194,6 +9459,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     'Agentic Web Search: ' + (agenticWebSearch ? 'ON (AI can visit URLs with [BROWSE: url], browse depth: ' + agentBrowseDepth + ')' : 'OFF'),
                     'Follow-Up Suggestions: ' + (followUpSuggestions ? 'ON (AI appends 3 tappable follow-up questions)' : 'OFF'),
                     'Response Sound: ' + (responseSound ? 'ON (chime plays when streaming completes)' : 'OFF'),
+                    'AI Response Format: ' + aiResponseFormat,
+                    'AI Explanation Level: ' + aiExplainLevel,
+                    'Web Search Language: ' + webSearchLanguage,
+                    'Agentic Browse Timeout: ' + Math.round(agentBrowseTimeoutMs / 1000) + 's',
+                    'Send on Enter: ' + (sendOnEnter ? 'ON' : 'OFF'),
+                    'Auto-Focus Input: ' + (autoFocusInput ? 'ON' : 'OFF'),
                     'Focus Mode: ' + (focusModeActive ? 'ON (header hidden)' : 'OFF'),
                     'Model Parameters: Temperature=' + paramTemperature + ' | Top P=' + paramTopP + ' | Top K=' + paramTopK + ' | Max Tokens=' + paramMaxTokens,
                     'Response Length: ' + responseLength,
@@ -9210,19 +9481,36 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 }
                 if (useAgent) {
                     const now = new Date();
+                    const _wsLangExtra = webSearchLanguage && webSearchLanguage !== 'auto' ? ' Preferred search language: ' + webSearchLanguage + '.' : '';
                     if (platform === 'gemini') {
-                        systemInstruction += "WEB SEARCH IS CURRENTLY ENABLED (Google Search). Today's date is " + now.toDateString() + ". You have access to real-time Google Search results via the google_search tool. Use it to answer questions about current events, today's date, live data, or anything requiring up-to-date information. Do NOT tell the user to enable web search — it is already on. ";
+                        systemInstruction += "WEB SEARCH IS CURRENTLY ENABLED (Google Search). Today's date is " + now.toDateString() + ". You have access to real-time Google Search results via the google_search tool. Use it to answer questions about current events, today's date, live data, or anything requiring up-to-date information. Do NOT tell the user to enable web search — it is already on." + _wsLangExtra + " ";
                     } else {
-                        systemInstruction += "WEB SEARCH IS CURRENTLY ENABLED via " + (_wsProviders[webSearchPlatform] || webSearchPlatform) + ". Today's date is " + new Date().toDateString() + ". Real-time web search results have been injected above as context. Use them to answer the user's question. Do NOT tell the user to enable web search — it is already on. ";
+                        systemInstruction += "WEB SEARCH IS CURRENTLY ENABLED via " + (_wsProviders[webSearchPlatform] || webSearchPlatform) + ". Today's date is " + new Date().toDateString() + ". Real-time web search results have been injected above as context. Use them to answer the user's question. Do NOT tell the user to enable web search — it is already on." + _wsLangExtra + " ";
                     }
                 } else {
                     systemInstruction += "Web search is currently OFF. If the user asks about real-time info (today's date, current events, live data), answer from your training knowledge and suggest they tap the Web (🔍) button to enable real-time search. ";
                 }
                 if (useAgent && agenticWebSearch) {
-                    systemInstruction += "\n\nAGENTIC WEB BROWSING IS ENABLED: You can visit any URL to read its full content. To browse a URL, output [BROWSE: https://example.com] on its own line. The system will fetch the full page content and return it to you as a [PAGE CONTENT] observation. After receiving page content, analyze it and answer the user's question thoroughly. You can use [BROWSE: url] when the user asks you to read a specific URL, or when search results show a promising link you need to read in full. IMPORTANT: Only use [BROWSE: url] when truly needed — once per response at most. ";
+                    systemInstruction += "\n\nAGENTIC WEB BROWSING IS ENABLED: You can visit any URL to read its full content. To browse a URL, output [BROWSE: https://example.com] on its own line. The system will fetch the full page content and return it to you as a [PAGE CONTENT] observation. After receiving page content, analyze it and answer the user's question thoroughly. You can use [BROWSE: url] when the user asks you to read a specific URL, or when search results show a promising link you need to read in full. IMPORTANT: Only use [BROWSE: url] when truly needed — once per response at most. Per-URL browse timeout is set to " + Math.round(agentBrowseTimeoutMs / 1000) + " seconds.";
                 }
                 if (followUpSuggestions) {
                     systemInstruction += "\n\nFOLLOW-UP SUGGESTIONS: After your response, on a new line, add exactly this line: FOLLOW_UP: [First follow-up question?] | [Second follow-up question?] | [Third follow-up question?] — replace the bracket text with 3 concise, relevant follow-up questions. This line is parsed and shown as tappable buttons. Do NOT apply markdown formatting to this line.";
+                }
+                if (aiResponseFormat !== 'auto') {
+                    const _fmt = aiResponseFormat === 'bullets'
+                        ? 'Use clear bullet points for most answers.'
+                        : aiResponseFormat === 'steps'
+                        ? 'Use numbered step-by-step structure for most answers.'
+                        : 'Prefer concise tables when the content is tabular/comparative; otherwise use normal prose.';
+                    systemInstruction += '\n\nAI RESPONSE FORMAT PREFERENCE: ' + _fmt;
+                }
+                if (aiExplainLevel !== 'auto') {
+                    const _lvl = aiExplainLevel === 'beginner'
+                        ? 'Explain in simple, beginner-friendly terms with minimal jargon.'
+                        : aiExplainLevel === 'intermediate'
+                        ? 'Explain at an intermediate level with moderate technical detail.'
+                        : 'Explain at an advanced/expert level using precise technical language and deeper detail.';
+                    systemInstruction += '\n\nAI EXPLANATION LEVEL PREFERENCE: ' + _lvl;
                 }
                 if (customInstructions) systemInstruction += '\n\nUser custom instructions: ' + customInstructions;
                 // Inject conversation style instruction if not standard
@@ -9808,7 +10096,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 const _logEntry = { preface: _preBrowseRaw, url: _browseUrl, status: 'visiting' };
                                 _agenticProcessLogs.push(_logEntry);
                                 try {
-                                    const _bRes = await fetch('/api/browser?url=' + encodeURIComponent(_browseUrl), { signal: AbortSignal.timeout(28000) });
+                                    const _bRes = await fetch('/api/browser?url=' + encodeURIComponent(_browseUrl), { signal: AbortSignal.timeout(agentBrowseTimeoutMs) });
                                     if (_bRes.ok) {
                                         const _bData = await _bRes.json();
                                         if (_bData.content) {
