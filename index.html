@@ -920,17 +920,17 @@
                             <div class="relative">
                                 <select id="settings-websearch-language" class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
                                     <option value="auto">Auto</option>
-                                    <option value="english">English</option>
-                                    <option value="spanish">Spanish</option>
-                                    <option value="french">French</option>
-                                    <option value="german">German</option>
-                                    <option value="arabic">Arabic</option>
-                                    <option value="chinese">Chinese</option>
-                                    <option value="hindi">Hindi</option>
-                                    <option value="japanese">Japanese</option>
-                                    <option value="portuguese">Portuguese</option>
-                                    <option value="russian">Russian</option>
-                                    <option value="korean">Korean</option>
+                                    <option value="English">English</option>
+                                    <option value="Spanish">Spanish</option>
+                                    <option value="French">French</option>
+                                    <option value="German">German</option>
+                                    <option value="Arabic">Arabic</option>
+                                    <option value="Chinese">Chinese</option>
+                                    <option value="Hindi">Hindi</option>
+                                    <option value="Japanese">Japanese</option>
+                                    <option value="Portuguese">Portuguese</option>
+                                    <option value="Russian">Russian</option>
+                                    <option value="Korean">Korean</option>
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
@@ -2968,6 +2968,10 @@
         let webSearchPlatform = localStorage.getItem('snoah_websearch_platform') || 'gemini';
         let webSearchResultLimit = Math.min(10, Math.max(3, parseInt(localStorage.getItem('snoah_websearch_limit') || '5', 10) || 5));
         let webSearchLanguage = localStorage.getItem('snoah_websearch_lang') || 'auto';
+        if (webSearchLanguage !== 'auto') {
+            const _wsLangNorm = { english: 'English', spanish: 'Spanish', french: 'French', german: 'German', arabic: 'Arabic', chinese: 'Chinese', hindi: 'Hindi', japanese: 'Japanese', portuguese: 'Portuguese', russian: 'Russian', korean: 'Korean' };
+            webSearchLanguage = _wsLangNorm[String(webSearchLanguage).toLowerCase()] || webSearchLanguage;
+        }
         let agenticWebSearch = localStorage.getItem('snoah_agentic_ws') === '1';
         let agentBrowseDepth = parseInt(localStorage.getItem('snoah_agent_browse_depth') || '1');
         let agentBrowseTimeoutMs = Math.min(60000, Math.max(10000, parseInt(localStorage.getItem('snoah_agent_browse_timeout') || '28000', 10) || 28000));
