@@ -2983,7 +2983,7 @@
             try {
                 const parsed = JSON.parse(localStorage.getItem('snoah_param_by_platform') || '{}');
                 return parsed && typeof parsed === 'object' ? parsed : {};
-            } catch(_) { return {}; }
+            } catch(e) { console.warn('[SnoahAI] Failed to parse platform params:', e); return {}; }
         })();
         if (!platformParams[platform]) {
             platformParams[platform] = { temperature: paramTemperature, topP: paramTopP, topK: paramTopK, maxTokens: paramMaxTokens };
@@ -4253,7 +4253,7 @@
             const saveable = messages.filter(m => !m.isError).map(sanitizeStoredMessage);
             const firstUserText = saveable.find(m => m.role === 'user')?.text || existing.title || 'Conversation';
             const words = firstUserText.trim().split(/\s+/).filter(Boolean);
-            const title = words.length ? (words.slice(0, 6).join(' ') + (words.length > 6 ? '...' : '')) : (existing.title || 'Conversation');
+            const title = words.length ? (words.slice(0, CHAT_TITLE_WORD_LIMIT).join(' ') + (words.length > CHAT_TITLE_WORD_LIMIT ? '...' : '')) : (existing.title || 'Conversation');
 
             ensureChatBranches(existing);
             if (!existing.branches[currentBranchId]) {
@@ -4275,6 +4275,7 @@
 
         let chatHistoryExpanded = false;
         const CHAT_HISTORY_PREVIEW = 4;
+        const CHAT_TITLE_WORD_LIMIT = 6;
 
         function renderChatHistoryList() {
             const list = document.getElementById('chat-history-list');
@@ -6277,11 +6278,14 @@ self.onmessage = async (event) => {
     if (plugin.execute.length <= 0) {
       result = await Promise.resolve(plugin.execute());
     } else if (plugin.execute.length === 1) {
-      try {
-        result = await Promise.resolve(plugin.execute(String(prompt || '')));
-      } catch (_oneArgErr) {
-        result = await Promise.resolve(plugin.execute(execContext));
-      }
+      const hybridArg = Object.assign(new String(String(prompt || '')), execContext, {
+        toString: () => String(prompt || ''),
+        valueOf: () => String(prompt || ''),
+        toLowerCase: () => String(prompt || '').toLowerCase(),
+        toUpperCase: () => String(prompt || '').toUpperCase(),
+        trim: () => String(prompt || '').trim()
+      });
+      result = await Promise.resolve(plugin.execute(hybridArg));
     } else {
       result = await Promise.resolve(plugin.execute(String(prompt || ''), context, execContext));
     }
@@ -8363,7 +8367,7 @@ self.onmessage = async (event) => {
                 } else if (el.requestFullscreen) {
                     await el.requestFullscreen();
                 }
-            } catch (_) {}
+            } catch (_) { showToast('Fullscreen unavailable on this device/browser'); }
         }
 
         function switchArtifactTab(tab) {
@@ -8803,15 +8807,20 @@ self.onmessage = async (event) => {
             const name = decodeURIComponent(encodedName || '');
             const mime = decodeURIComponent(encodedMime || 'application/octet-stream');
             let blob;
-            if (isBase64) {
-                const b64 = decodeURIComponent(encodedData || '');
-                const bin = atob(b64);
-                const bytes = new Uint8Array(bin.length);
-                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-                blob = new Blob([bytes], { type: mime });
-            } else {
-                const text = decodeURIComponent(encodedData || '');
-                blob = new Blob([text], { type: mime });
+            try {
+                if (isBase64) {
+                    const b64 = decodeURIComponent(encodedData || '');
+                    const bin = atob(b64);
+                    const bytes = new Uint8Array(bin.length);
+                    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                    blob = new Blob([bytes], { type: mime });
+                } else {
+                    const text = decodeURIComponent(encodedData || '');
+                    blob = new Blob([text], { type: mime });
+                }
+            } catch (_) {
+                showToast('Invalid file data — unable to decode');
+                return;
             }
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
