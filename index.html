@@ -3191,7 +3191,6 @@
         applyTheme(currentTheme);
         updatePinBadge();
         updateBookmarkBadge();
-        updateChatBranchingUI();
         if (showTimestamps) document.getElementById('html-root').classList.add('show-timestamps');
         showWelcomeSetupIfNeeded();
         updateSidebarUserName();
@@ -4488,6 +4487,7 @@
         currentBranchId = MAIN_BRANCH_ID;
         renderChatHistoryList();
         updateBranchControls();
+        updateChatBranchingUI();
 
         function updateModelLabels() {
             const badge = document.getElementById('header-model-badge');
