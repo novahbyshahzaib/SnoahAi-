@@ -1481,6 +1481,40 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
+                    <!-- OCR for Image Uploads -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Vision Tools</label>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">OCR on Image Upload</p>
+                                <p class="text-[11px] text-[#A3A095]">Extract text from attached images before sending</p>
+                            </div>
+                            <button id="ocr-toggle" onclick="toggleOCR()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
+                    <!-- Chat Branching Toggle -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Conversation Branches</label>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Enable Chat Branching</p>
+                                <p class="text-[11px] text-[#A3A095]">Show/hide branch controls and branch actions</p>
+                            </div>
+                            <button id="chat-branching-toggle" onclick="toggleChatBranching()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
                     <!-- Chat History Limit -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-1.5">Chat History Limit</label>
@@ -2358,6 +2392,13 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.1</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Smart Mode Behavior Update ⚡</strong> — Smart mode no longer auto-toggles features from keyword detection. The AI now decides and controls feature/tool usage directly.</li>
+                            <li><strong>AI File Output Downloads 📁</strong> — AI can generate downloadable files using structured file blocks, including binary files via Base64 with proper file extensions.</li>
+                            <li><strong>OCR for Image Uploads 👁️</strong> — New App setting to enable free OCR on uploaded images, injecting extracted text into AI context automatically.</li>
+                            <li><strong>Chat Branching Toggle 🌿</strong> — New App setting lets you fully enable/disable chat branching controls and branch actions.</li>
+                            <li><strong>Longer Chat History Titles 📝</strong> — Sidebar chat previews now use more words for clearer history while preserving layout.</li>
+                            <li><strong>Canvas Fullscreen Button 🖥️</strong> — Artifact viewer now includes a fullscreen control alongside close (X) for immersive canvas/code viewing.</li>
+                            <li><strong>Per-Platform AI Parameters 🎛️</strong> — Temperature, Top P, Top K, and Max Tokens are now stored separately per selected platform.</li>
                             <li><strong>Plugin Compatibility Fix 🧩</strong> — Plugin execution now normalizes pasted code (supports code fences, smart-quote cleanup, export/module patterns) and improves execute() compatibility so community plugins like Learning Coach/Pomodoro run reliably without syntax-token crashes.</li>
                             <li><strong>API: Web Search Language 🌍</strong> — New setting in API → Web Search lets you bias queries toward a preferred language (Auto/English/Spanish/etc.) for better localized search results.</li>
                             <li><strong>API: Agentic Browse Timeout ⏱️</strong> — New slider in API → Agentic Web Search controls per-URL read timeout (10–60s), improving reliability on slow pages and preventing long hangs.</li>
@@ -2938,6 +2979,16 @@
         let paramTopP = parseFloat(localStorage.getItem('snoah_param_topp') || '0.9');
         let paramTopK = parseInt(localStorage.getItem('snoah_param_topk') || '40');
         let paramMaxTokens = parseInt(localStorage.getItem('snoah_param_maxtokens') || '4096');
+        let platformParams = (() => {
+            try {
+                const parsed = JSON.parse(localStorage.getItem('snoah_param_by_platform') || '{}');
+                return parsed && typeof parsed === 'object' ? parsed : {};
+            } catch(_) { return {}; }
+        })();
+        if (!platformParams[platform]) {
+            platformParams[platform] = { temperature: paramTemperature, topP: paramTopP, topK: paramTopK, maxTokens: paramMaxTokens };
+            localStorage.setItem('snoah_param_by_platform', JSON.stringify(platformParams));
+        }
         // Multi-AI Response
         let multiAIEnabled = localStorage.getItem('snoah_multi_ai') === 'true';
         let multiAIPlatforms = JSON.parse(localStorage.getItem('snoah_multi_ai_platforms') || '[]');
@@ -2986,6 +3037,11 @@
         let chatHistoryLimit = Math.min(100, Math.max(10, parseInt(localStorage.getItem('snoah_chat_limit') || '30', 10) || 30));
         let sendOnEnter = localStorage.getItem('snoah_send_on_enter') === 'true';
         let autoFocusInput = localStorage.getItem('snoah_autofocus_input') !== 'false';
+        let ocrEnabled = localStorage.getItem('snoah_ocr_enabled') === 'true';
+        let chatBranchingEnabled = localStorage.getItem('snoah_chat_branching_enabled');
+        chatBranchingEnabled = chatBranchingEnabled === null ? true : chatBranchingEnabled === 'true';
+        let _ocrPromise = null;
+        let _tesseractWorkerPromise = null;
         let focusModeActive = false;
         let tavilyKeys = _loadKeys('snoah_tavily_keys');
         let braveKeys = _loadKeys('snoah_brave_keys');
@@ -3135,6 +3191,7 @@
         applyTheme(currentTheme);
         updatePinBadge();
         updateBookmarkBadge();
+        updateChatBranchingUI();
         if (showTimestamps) document.getElementById('html-root').classList.add('show-timestamps');
         showWelcomeSetupIfNeeded();
         updateSidebarUserName();
@@ -3928,7 +3985,7 @@
             if (btn) btn.className = smartMode
                 ? "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]"
                 : "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
-            showToast(smartMode ? '⚡ Smart mode on — AI auto-selects tools' : 'Smart mode off');
+            showToast(smartMode ? '⚡ Smart mode on — AI controls tools directly' : 'Smart mode off');
         }
 
         function updateToggleButtons() {
@@ -4148,6 +4205,10 @@
             const indicator = document.getElementById('active-branch-indicator');
             const tree = document.getElementById('branch-tree');
             const delBtn = document.getElementById('delete-branch-btn');
+            if (!chatBranchingEnabled) {
+                if (controls) controls.classList.add('hidden');
+                return;
+            }
             const chat = getChatById(currentChatId);
             if (!controls || !selector || !indicator || !tree || !chat) {
                 if (controls) controls.classList.add('hidden');
@@ -4192,7 +4253,7 @@
             const saveable = messages.filter(m => !m.isError).map(sanitizeStoredMessage);
             const firstUserText = saveable.find(m => m.role === 'user')?.text || existing.title || 'Conversation';
             const words = firstUserText.trim().split(/\s+/).filter(Boolean);
-            const title = words.length ? (words.slice(0, 2).join(' ') + (words.length > 2 ? '...' : '')) : (existing.title || 'Conversation');
+            const title = words.length ? (words.slice(0, 6).join(' ') + (words.length > 6 ? '...' : '')) : (existing.title || 'Conversation');
 
             ensureChatBranches(existing);
             if (!existing.branches[currentBranchId]) {
@@ -4316,6 +4377,7 @@
         }
 
         function createBranch(chatId, fromMessageIndex) {
+            if (!chatBranchingEnabled) { showToast('Chat branching is disabled'); return; }
             const chat = getChatById(chatId || currentChatId);
             if (!chat) { showToast('No chat to branch'); return; }
             saveCurrentChat();
@@ -4348,6 +4410,7 @@
         }
 
         function deleteBranch(chatId, branchId) {
+            if (!chatBranchingEnabled) { showToast('Chat branching is disabled'); return; }
             const chat = getChatById(chatId || currentChatId);
             if (!chat || !branchId || !chat.branches[branchId]) return;
             if (branchId === MAIN_BRANCH_ID) { showToast('Main branch cannot be deleted'); return; }
@@ -4414,10 +4477,12 @@
         }
 
         function createChatBranch() {
+            if (!chatBranchingEnabled) { showToast('Chat branching is disabled'); return; }
             createBranch(currentChatId, messages.length - 1);
         }
 
         // Init on load
+        applyPlatformParams(platform, false);
         currentChatId = generateChatId();
         currentBranchId = MAIN_BRANCH_ID;
         renderChatHistoryList();
@@ -4528,14 +4593,7 @@
             updateNotionAutoSaveUI();
             updateAutoMemoryUI();
             // Load advanced model parameters
-            const tempSlider = document.getElementById('param-temperature');
-            const topPSlider = document.getElementById('param-top-p');
-            const topKSlider = document.getElementById('param-top-k');
-            const maxTokSlider = document.getElementById('param-max-tokens');
-            if (tempSlider) { tempSlider.value = paramTemperature; document.getElementById('param-temp-val').textContent = paramTemperature; }
-            if (topPSlider) { topPSlider.value = paramTopP; document.getElementById('param-topp-val').textContent = paramTopP; }
-            if (topKSlider) { topKSlider.value = paramTopK; document.getElementById('param-topk-val').textContent = paramTopK; }
-            if (maxTokSlider) { maxTokSlider.value = paramMaxTokens; document.getElementById('param-maxtok-val').textContent = paramMaxTokens; }
+            applyPlatformParams(platform);
             // Load multi-AI state
             updateMultiAIToggleUI();
             const cbs = document.querySelectorAll('.multi-ai-cb');
@@ -4595,6 +4653,8 @@
             updateResponseSoundUI();
             updateSendOnEnterUI();
             updateAutoFocusInputUI();
+            updateOcrUI();
+            updateChatBranchingUI();
             const chLimitSlider = document.getElementById('chat-history-limit-slider');
             if (chLimitSlider) {
                 chLimitSlider.value = chatHistoryLimit;
@@ -4680,6 +4740,8 @@
             aiExplainLevel = 'auto';
             sendOnEnter = false;
             autoFocusInput = true;
+            ocrEnabled = false;
+            chatBranchingEnabled = true;
             localStorage.removeItem('snoah_plugins');
             localStorage.removeItem('snoah_websearch_limit');
             localStorage.removeItem('snoah_websearch_lang');
@@ -4688,6 +4750,9 @@
             localStorage.removeItem('snoah_ai_explain_level');
             localStorage.removeItem('snoah_send_on_enter');
             localStorage.removeItem('snoah_autofocus_input');
+            localStorage.removeItem('snoah_ocr_enabled');
+            localStorage.removeItem('snoah_chat_branching_enabled');
+            localStorage.removeItem('snoah_param_by_platform');
             localStorage.removeItem('snoah_chat_limit');
             // Reload settings panel to reflect defaults
             closeSettings();
@@ -4817,6 +4882,7 @@
             paramTopP = parseFloat(document.getElementById('param-top-p').value);
             paramTopK = parseInt(document.getElementById('param-top-k').value);
             paramMaxTokens = parseInt(document.getElementById('param-max-tokens').value);
+            saveCurrentPlatformParams();
             localStorage.setItem('snoah_param_temp', paramTemperature);
             localStorage.setItem('snoah_param_topp', paramTopP);
             localStorage.setItem('snoah_param_topk', paramTopK);
@@ -4968,6 +5034,7 @@
         }
 
         function selectPlatform(p) {
+            saveCurrentPlatformParams();
             platform = p;
             localStorage.setItem('snoah_platform', p);
             updatePlatformUI();
@@ -5018,6 +5085,7 @@
                 document.getElementById('settings-model').value = modelId;
             }
             document.getElementById('settings-apikey').value = '';
+            applyPlatformParams(p);
             renderKeysList();
         }
 
@@ -5997,6 +6065,124 @@
             }
         }
 
+        function _refreshParamSliderUI() {
+            const tempSlider = document.getElementById('param-temperature');
+            const topPSlider = document.getElementById('param-top-p');
+            const topKSlider = document.getElementById('param-top-k');
+            const maxTokSlider = document.getElementById('param-max-tokens');
+            if (tempSlider) { tempSlider.value = paramTemperature; document.getElementById('param-temp-val').textContent = paramTemperature; }
+            if (topPSlider) { topPSlider.value = paramTopP; document.getElementById('param-topp-val').textContent = paramTopP; }
+            if (topKSlider) { topKSlider.value = paramTopK; document.getElementById('param-topk-val').textContent = paramTopK; }
+            if (maxTokSlider) { maxTokSlider.value = paramMaxTokens; document.getElementById('param-maxtok-val').textContent = paramMaxTokens; }
+        }
+
+        function saveCurrentPlatformParams() {
+            if (!platform) return;
+            platformParams[platform] = {
+                temperature: Number.isFinite(paramTemperature) ? paramTemperature : 0.7,
+                topP: Number.isFinite(paramTopP) ? paramTopP : 0.9,
+                topK: Number.isFinite(paramTopK) ? paramTopK : 40,
+                maxTokens: Number.isFinite(paramMaxTokens) ? paramMaxTokens : 4096
+            };
+            localStorage.setItem('snoah_param_by_platform', JSON.stringify(platformParams));
+        }
+
+        function applyPlatformParams(p, syncUI = true) {
+            const cfg = platformParams[p];
+            if (cfg && typeof cfg === 'object') {
+                paramTemperature = Number.isFinite(parseFloat(cfg.temperature)) ? parseFloat(cfg.temperature) : 0.7;
+                paramTopP = Number.isFinite(parseFloat(cfg.topP)) ? parseFloat(cfg.topP) : 0.9;
+                paramTopK = Number.isFinite(parseInt(cfg.topK, 10)) ? parseInt(cfg.topK, 10) : 40;
+                paramMaxTokens = Number.isFinite(parseInt(cfg.maxTokens, 10)) ? parseInt(cfg.maxTokens, 10) : 4096;
+            } else {
+                paramTemperature = 0.7;
+                paramTopP = 0.9;
+                paramTopK = 40;
+                paramMaxTokens = 4096;
+            }
+            if (syncUI) _refreshParamSliderUI();
+        }
+
+        function updateOcrUI() {
+            const toggle = document.getElementById('ocr-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (ocrEnabled) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function toggleOCR() {
+            ocrEnabled = !ocrEnabled;
+            localStorage.setItem('snoah_ocr_enabled', ocrEnabled);
+            updateOcrUI();
+            showToast(ocrEnabled ? 'OCR enabled' : 'OCR disabled');
+        }
+
+        function updateChatBranchingUI() {
+            const toggle = document.getElementById('chat-branching-toggle');
+            if (toggle) {
+                const knob = toggle.querySelector('span');
+                if (chatBranchingEnabled) {
+                    toggle.classList.remove('bg-[#D9D6CE]');
+                    toggle.classList.add('bg-[#D25D38]');
+                    if (knob) knob.style.transform = 'translateX(20px)';
+                } else {
+                    toggle.classList.remove('bg-[#D25D38]');
+                    toggle.classList.add('bg-[#D9D6CE]');
+                    if (knob) knob.style.transform = 'translateX(0)';
+                }
+            }
+            updateBranchControls();
+            document.querySelectorAll('.branch-inline-action').forEach(el => el.classList.toggle('hidden', !chatBranchingEnabled));
+            document.querySelectorAll('.branch-btn').forEach(el => el.classList.toggle('hidden', !chatBranchingEnabled));
+        }
+
+        function toggleChatBranching() {
+            chatBranchingEnabled = !chatBranchingEnabled;
+            localStorage.setItem('snoah_chat_branching_enabled', chatBranchingEnabled);
+            updateChatBranchingUI();
+            showToast(chatBranchingEnabled ? 'Chat branching enabled' : 'Chat branching disabled');
+        }
+
+        async function _loadTesseract() {
+            if (window.Tesseract) return window.Tesseract;
+            if (_ocrPromise) return _ocrPromise;
+            _ocrPromise = new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+                script.onload = () => resolve(window.Tesseract);
+                script.onerror = () => reject(new Error('Failed to load OCR engine'));
+                document.head.appendChild(script);
+            });
+            return _ocrPromise;
+        }
+
+        async function extractTextWithOCR(file) {
+            if (!ocrEnabled || !file || !file.type || !file.type.startsWith('image/')) return '';
+            try {
+                const TesseractLib = await _loadTesseract();
+                if (!TesseractLib || !TesseractLib.createWorker) return '';
+                if (!_tesseractWorkerPromise) {
+                    _tesseractWorkerPromise = (async () => {
+                        const worker = await TesseractLib.createWorker('eng');
+                        return worker;
+                    })();
+                }
+                const worker = await _tesseractWorkerPromise;
+                const { data } = await worker.recognize(file);
+                return String(data?.text || '').trim();
+            } catch (_) {
+                return '';
+            }
+        }
+
         function savePlugins() {
             try { localStorage.setItem('snoah_plugins', JSON.stringify(installedPlugins)); } catch (_) {}
         }
@@ -6025,8 +6211,19 @@
             code = code
                 .replace(/[“”]/g, '"')
                 .replace(/[‘’]/g, "'")
-                .replace(/^\s*module\.exports\s*=\s*/, 'const pluginExample = ')
-                .replace(/^\s*export\s+default\s+/, 'const pluginExample = ');
+                .replace(/^\s*module\.exports\s*=\s*/i, 'const pluginExample = ')
+                .replace(/^\s*exports\.default\s*=\s*/i, 'const pluginExample = ')
+                .replace(/^\s*export\s+default\s+/i, 'const pluginExample = ')
+                .replace(/^\s*export\s+const\s+pluginExample\s*=\s*/i, 'const pluginExample = ')
+                .replace(/^\s*export\s+const\s+plugin\s*=\s*/i, 'const pluginExample = ')
+                .replace(/^\s*const\s+plugin\s*=\s*/i, 'const pluginExample = ');
+            if (!/pluginExample|module\.exports|export\s+default|const\s+plugin\s*=|let\s+plugin\s*=|var\s+plugin\s*=/i.test(code)) {
+                const trimmed = code.trim();
+                const looksObject = (trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('(') && trimmed.endsWith(')'));
+                if (looksObject) {
+                    code = 'const pluginExample = ' + trimmed.replace(/;+\s*$/, '') + ';';
+                }
+            }
             return code.trim();
         }
 
@@ -6076,9 +6273,18 @@ self.onmessage = async (event) => {
       text: String(prompt || ''),
       query: String(prompt || '')
     });
-    const result = plugin.execute.length <= 1
-      ? await Promise.resolve(plugin.execute(execContext))
-      : await Promise.resolve(plugin.execute(prompt, context, execContext));
+    let result;
+    if (plugin.execute.length <= 0) {
+      result = await Promise.resolve(plugin.execute());
+    } else if (plugin.execute.length === 1) {
+      try {
+        result = await Promise.resolve(plugin.execute(String(prompt || '')));
+      } catch (_oneArgErr) {
+        result = await Promise.resolve(plugin.execute(execContext));
+      }
+    } else {
+      result = await Promise.resolve(plugin.execute(String(prompt || ''), context, execContext));
+    }
     self.postMessage({ ok: true, info, result });
   } catch (err) {
     const msg = err && err.message ? err.message : String(err);
@@ -6803,7 +7009,7 @@ self.onmessage = async (event) => {
         }
 
         function backupChats() {
-            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_ai_response_format','snoah_ai_explain_level','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_send_on_enter','snoah_autofocus_input','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_websearch_lang','snoah_agentic_ws','snoah_agent_browse_timeout','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
+            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_ai_response_format','snoah_ai_explain_level','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_param_by_platform','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_send_on_enter','snoah_autofocus_input','snoah_ocr_enabled','snoah_chat_branching_enabled','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_websearch_lang','snoah_agentic_ws','snoah_agent_browse_timeout','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
             const settings = {};
             settingsKeys.forEach(k => { const v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
             const data = { version: 2, app: 'SnoahAI', exported: new Date().toISOString(), chats: allChats, settings };
@@ -7857,9 +8063,11 @@ self.onmessage = async (event) => {
                 }
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
-                    reader.onload = (e) => {
+                    reader.onload = async (e) => {
                         const full = e.target.result;
-                        uploadedImages.push({ data: full.split(',')[1], mimeType: file.type, previewUrl: full, isImage: true });
+                        const ocrText = await extractTextWithOCR(file);
+                        uploadedImages.push({ data: full.split(',')[1], mimeType: file.type, previewUrl: full, isImage: true, textContent: ocrText, fileName: file.name });
+                        if (ocrText) showToast('OCR extracted text from ' + file.name);
                         loaded++;
                         if (loaded === total) renderImagePreviews();
                     };
@@ -8084,6 +8292,9 @@ self.onmessage = async (event) => {
                         '<span style="font-weight:600;font-size:14px;color:#2C2B29;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHTML(filename) + '</span>' +
                         '<span style="padding:2px 8px;border-radius:9999px;background:#F2F0E9;font-size:10px;font-weight:700;color:#A3A095;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap">' + escapeHTML(langDisplay) + '</span>' +
                     '</div>' +
+                    '<button onclick="toggleArtifactFullscreen()" title="Fullscreen" style="padding:8px;border-radius:50%;background:none;border:none;cursor:pointer;color:#5B5951">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>' +
+                    '</button>' +
                     '<button onclick="closeArtifact()" style="padding:8px;margin-right:-8px;border-radius:50%;background:none;border:none;cursor:pointer;color:#5B5951">' +
                         '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
                     '</button>' +
@@ -8141,6 +8352,18 @@ self.onmessage = async (event) => {
         function closeArtifact() {
             const el = document.getElementById('artifact-viewer-overlay');
             if (el) el.remove();
+        }
+
+        async function toggleArtifactFullscreen() {
+            const el = document.getElementById('artifact-viewer-overlay');
+            if (!el) return;
+            try {
+                if (document.fullscreenElement) {
+                    await document.exitFullscreen();
+                } else if (el.requestFullscreen) {
+                    await el.requestFullscreen();
+                }
+            } catch (_) {}
         }
 
         function switchArtifactTab(tab) {
@@ -8367,7 +8590,7 @@ self.onmessage = async (event) => {
                     '</div>' +
                     '<span class="msg-timestamp text-right">' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</span>' +
                     '<div class="flex items-center gap-1">' +
-                        '<button onclick="createBranch(currentChatId, ' + msgIdx + ')" class="flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#A3A095] hover:text-[#D25D38] transition-colors" title="Create branch from this message">' +
+                        '<button onclick="createBranch(currentChatId, ' + msgIdx + ')" class="branch-inline-action flex items-center gap-1 px-2 py-0.5 text-[11px] text-[#A3A095] hover:text-[#D25D38] transition-colors ' + (chatBranchingEnabled ? '' : 'hidden') + '" title="Create branch from this message">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v12a3 3 0 0 0 3 3h9"/><path d="m15 6 3-3 3 3"/><path d="m15 18 3 3 3-3"/></svg>' +
                             'Branch' +
                         '</button>' +
@@ -8544,6 +8767,63 @@ self.onmessage = async (event) => {
             showToast('Downloaded ✓');
         }
 
+        function _inferFileMimeFromName(name) {
+            const ext = (String(name || '').split('.').pop() || '').toLowerCase();
+            if (ext === 'pdf') return 'application/pdf';
+            if (ext === 'json') return 'application/json';
+            if (ext === 'csv') return 'text/csv';
+            if (ext === 'md') return 'text/markdown';
+            if (ext === 'html') return 'text/html';
+            if (ext === 'xml') return 'application/xml';
+            if (ext === 'txt') return 'text/plain';
+            return 'application/octet-stream';
+        }
+
+        function parseAIGeneratedFiles(text) {
+            const files = [];
+            let next = String(text || '');
+            const b64Matches = [...next.matchAll(/\[FILE_B64:\s*([^\]\n]+)\]([\s\S]*?)\[\/FILE_B64\]/gi)];
+            b64Matches.forEach(m => {
+                const name = (m[1] || 'generated.bin').trim();
+                const b64 = (m[2] || '').replace(/\s+/g, '').trim();
+                if (name && b64) files.push({ name, dataBase64: b64, mimeType: _inferFileMimeFromName(name) });
+            });
+            next = next.replace(/\[FILE_B64:\s*[^\]\n]+\][\s\S]*?\[\/FILE_B64\]/gi, '').trim();
+            const txtMatches = [...next.matchAll(/\[FILE:\s*([^\]\n]+)\]([\s\S]*?)\[\/FILE\]/gi)];
+            txtMatches.forEach(m => {
+                const name = (m[1] || 'generated.txt').trim();
+                const content = (m[2] || '').trim();
+                if (name && content) files.push({ name, text: content, mimeType: _inferFileMimeFromName(name) });
+            });
+            next = next.replace(/\[FILE:\s*[^\]\n]+\][\s\S]*?\[\/FILE\]/gi, '').trim();
+            return { cleanedText: next, files };
+        }
+
+        function downloadGeneratedFile(encodedName, encodedData, encodedMime, isBase64) {
+            const name = decodeURIComponent(encodedName || '');
+            const mime = decodeURIComponent(encodedMime || 'application/octet-stream');
+            let blob;
+            if (isBase64) {
+                const b64 = decodeURIComponent(encodedData || '');
+                const bin = atob(b64);
+                const bytes = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                blob = new Blob([bytes], { type: mime });
+            } else {
+                const text = decodeURIComponent(encodedData || '');
+                blob = new Blob([text], { type: mime });
+            }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name || 'generated-file';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('File downloaded: ' + (name || 'generated-file'));
+        }
+
         function summarizeResponse(text) {
             submitMessage('Summarize the following AI response in 3-5 concise bullet points:\n\n' + text);
         }
@@ -8636,7 +8916,7 @@ self.onmessage = async (event) => {
                 '<button class="summarize-btn ' + btnCls + '"><i data-lucide="list" class="w-3 h-3 text-[#8C897D]"></i> Summarize</button>' +
                 '<button class="followup-btn ' + btnCls + '"><i data-lucide="corner-down-right" class="w-3 h-3 text-[#8C897D]"></i> Follow-up</button>' +
                 '<button class="bookmark-btn ' + btnCls + '"><i data-lucide="bookmark" class="w-3 h-3 text-[#8C897D]"></i> Bookmark</button>' +
-                '<button class="branch-btn ' + btnCls + '"><i data-lucide="corner-up-left" class="w-3 h-3 text-[#8C897D]"></i> Branch</button>' +
+                '<button class="branch-btn ' + btnCls + ' ' + (chatBranchingEnabled ? '' : 'hidden') + '"><i data-lucide="corner-up-left" class="w-3 h-3 text-[#8C897D]"></i> Branch</button>' +
                 '</div></div></div>' +
                 '<span class="msg-timestamp ml-auto">' + ts + '</span>' +
                 '</div>';
@@ -8677,7 +8957,10 @@ self.onmessage = async (event) => {
             if (bookmarkBtn) bookmarkBtn.onclick = () => { bookmarkResponse(text, bookmarkBtn); close(); };
             const branchBtn = actionsDiv.querySelector('.branch-btn');
             const branchIdx = Number.isInteger(msgIdx) ? msgIdx : parseInt(actionsDiv.dataset.msgIdx || '-1', 10);
-            if (branchBtn) branchBtn.onclick = () => { if (branchIdx >= 0) createBranch(currentChatId, branchIdx); close(); };
+            if (branchBtn) {
+                branchBtn.classList.toggle('hidden', !chatBranchingEnabled);
+                branchBtn.onclick = () => { if (branchIdx >= 0 && chatBranchingEnabled) createBranch(currentChatId, branchIdx); close(); };
+            }
         }
 
         // Close all more menus on outside click
@@ -9257,20 +9540,7 @@ self.onmessage = async (event) => {
 
             setIsLoading(true);
 
-            // Smart mode: auto-enable web search, thinking, and/or canvas based on question
-            let _smartWebOverride = false;
-            let _smartThinkOverride = false;
-            let _smartCanvasOverride = false;
-            if (smartMode) {
-                const q = (textToSend || '').toLowerCase();
-                const needsSearch = /\b(today|current|latest|now|recent|news|weather|price|stock|live|real.?time|right now|this (week|month|year)|who (is|are|won)|what (is|are) (happening|the (date|time|weather)))\b/.test(q);
-                const needsThink = /\b(explain|how (do|does|can|should|would)|why|analyze|compare|difference|pros|cons|calculate|math|code|write|create|design|plan|step.?by.?step|algorithm|solve)\b/.test(q);
-                const needsCanvas = /\b(html|css|javascript|react|python|component|webpage|website|page|app|game|animation|dashboard|ui|script|function|diagram|chart|svg)\b/.test(q) && /\b(create|build|make|write|generate|code|design|draw|show)\b/.test(q);
-                if (needsSearch && !useAgent) { useAgent = true; _smartWebOverride = true; }
-                if (needsThink && !useThinking && platform === 'gemini') { useThinking = true; _smartThinkOverride = true; }
-                if (needsCanvas && !canvasMode) { canvasMode = true; localStorage.setItem('snoah_canvas_mode', canvasMode); _smartCanvasOverride = true; }
-                if (_smartWebOverride || _smartThinkOverride || _smartCanvasOverride) updateToggleButtons();
-            }
+            // Smart mode now leaves toggles untouched and lets the AI decide feature usage directly.
 
             try {
                 const lengthDirective = responseLength === 'short'
@@ -9376,7 +9646,7 @@ FEATURES:
 73. FULL BACKUP & RESTORE: Settings → App tab → Full Backup & Restore. "Backup" downloads a v2 JSON file containing ALL chats AND all settings/API keys/preferences/selected AI. "Restore" re-imports everything and reloads the page. Old v1 (chats-only) backup files are also supported — they merge chats without overwriting settings.
 74. ENTER KEY BEHAVIOR (CONFIGURABLE): Settings → App tab → Send on Enter toggle. When OFF (default), Enter inserts newline and Shift+Enter sends. When ON, Enter sends and Shift+Enter inserts newline.
 75. STORAGE MANAGER: Settings → App tab → Storage Manager. Shows a live breakdown of browser localStorage usage by category: Chat History, API Keys, Settings & Preferences, Memory & Templates, and Total. "↻ Refresh" recalculates. "Clear Keys" removes all API key pools (with confirmation prompt).
-76. SMART / AGENTIC MODE: ⚡ Smart button in the input toolbar. When enabled, SnoahAI automatically detects what the current question needs: enables Web Search for live-data questions (today's news, prices, weather, current events), enables Thinking mode for analytical questions (explain, analyze, compare, code, math), and enables Canvas/Artifact mode for code/creative output questions (build a webpage, create an app, write a script). All overrides reset after each response; manual toggles are unaffected. In Smart mode, the selected AI has full awareness of all active features.
+76. SMART / AGENTIC MODE: ⚡ Smart button in the input toolbar. When enabled, SnoahAI gives the AI full awareness of active features and settings so it can decide which features to use directly (web search, canvas, tools, etc.) without keyword-based auto-toggle automation.
 77. WEB SEARCH PLATFORM: Settings → API tab → Web Search Platform. Choose the search engine that powers the Web (🔍) button. Options: Gemini (default, free — uses Google Search grounding, Gemini key required), Tavily AI Search (free 1000 searches/month), Brave Search (free 2000 queries/month), Google via Serper.dev (free 2500 searches/month), Custom (your own endpoint accepting POST {query, key} → {results:[{title, url, snippet}]}). ALL AI platforms support real-time web search — results are pre-fetched from the configured provider and injected as context. Non-Gemini platforms receive search results in their system context and respond with live data.
 78. UNIVERSAL WEB SEARCH: All 21+ AI platforms can now perform real-time web search. Web search is not limited to Gemini. When Web Search is ON, the app pre-fetches results from the configured Web Search Platform (Tavily/Brave/Serper/Custom/Gemini) and injects them into the selected AI's system context. The AI then answers using live data. The selected AI (Groq, NVIDIA, Claude, etc.) handles the actual response with web context.
 79. AI FEATURE CONTROL COMMANDS: The AI can toggle app features by including [SNOAH: feature=value] in its response. Features: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). When the user asks the AI to turn a feature on or off, the AI responds with the appropriate [SNOAH:...] command and the app applies it automatically. Control tags are removed from the displayed text.
@@ -9398,12 +9668,17 @@ FEATURES:
 95. PLUGIN / EXTENSION SYSTEM: Settings → AI tab → Plugin / Extension System. Users can paste JavaScript plugin code (plugin object with id, name, triggers, execute()) and install it. Plugin execution runs inside an inline Blob Web Worker with explicit message passing and robust error forwarding.
 96. CHAT BRANCHING: The branch control bar above messages supports creating and switching branches so users can keep alternative conversation paths in a single chat.
 97. BRANCH DELETION: The branch bar includes a Delete action to remove the selected non-main branch. After deletion, SnoahAI automatically switches to a safe fallback branch.
-98. WEB SEARCH LANGUAGE PREFERENCE: Settings → API tab → Web Search Language dropdown. Lets users bias web queries toward a preferred language (Auto/English/Spanish/French/German/Arabic/Chinese/Hindi/Japanese/Portuguese/Russian/Korean). Stored as snoah_websearch_lang.
-99. AI RESPONSE FORMAT PREFERENCE: Settings → AI tab → AI Response Format dropdown. Default output structure can be set to Auto, Bullet Points, Step-by-Step, or Table-first.
-100. AI EXPLANATION LEVEL: Settings → AI tab → AI Explanation Level dropdown. Default technical depth can be set to Auto, Beginner, Intermediate, or Advanced/Expert.
-101. SEND ON ENTER TOGGLE: Settings → App tab → Input Behavior. Toggle between Enter-to-send mode and newline-first mode.
-102. AUTO-FOCUS INPUT TOGGLE: Settings → App tab → Productivity. Automatically focuses the chat input after opening or creating chats when enabled.
-103. HARDENED PLUGIN COMPATIBILITY: Plugin installs and runtime now normalize pasted code (code fences, smart quotes, export/module syntax) and support broader execute() signatures for better compatibility with community plugins.
+98. CHAT BRANCHING TOGGLE: Settings → App tab includes a Chat Branching toggle. When OFF, branch controls and branch actions are hidden and branch creation is disabled.
+99. WEB SEARCH LANGUAGE PREFERENCE: Settings → API tab → Web Search Language dropdown. Lets users bias web queries toward a preferred language (Auto/English/Spanish/French/German/Arabic/Chinese/Hindi/Japanese/Portuguese/Russian/Korean). Stored as snoah_websearch_lang.
+100. AI RESPONSE FORMAT PREFERENCE: Settings → AI tab → AI Response Format dropdown. Default output structure can be set to Auto, Bullet Points, Step-by-Step, or Table-first.
+101. AI EXPLANATION LEVEL: Settings → AI tab → AI Explanation Level dropdown. Default technical depth can be set to Auto, Beginner, Intermediate, or Advanced/Expert.
+102. SEND ON ENTER TOGGLE: Settings → App tab → Input Behavior. Toggle between Enter-to-send mode and newline-first mode.
+103. AUTO-FOCUS INPUT TOGGLE: Settings → App tab → Productivity. Automatically focuses the chat input after opening or creating chats when enabled.
+104. HARDENED PLUGIN COMPATIBILITY: Plugin installs and runtime now normalize pasted code (code fences, smart quotes, export/module syntax/object syntax) and support broader execute() signatures for better compatibility with community plugins.
+105. OCR FOR ATTACHED IMAGES: Settings → App tab includes OCR toggle. When ON, image uploads are processed with free on-device OCR (Tesseract.js) and extracted text is attached as context automatically.
+106. AI GENERATED DOWNLOAD FILES: The AI can output [FILE: ...] or [FILE_B64: ...] blocks and SnoahAI renders downloadable file cards with correct file extensions.
+107. CANVAS FULLSCREEN CONTROL: Artifact viewer includes a fullscreen button plus close (X) exit, enabling full-screen code/canvas viewing.
+108. PLATFORM-SPECIFIC PARAMETERS: Temperature, Top P, Top K, and Max Tokens are stored per selected AI platform and auto-load when switching platforms.
 
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
@@ -9413,7 +9688,7 @@ APP STRUCTURE & LAYOUT:
 - Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Multi-Key Storage toggle/Dark Mode/Focus Mode/About/Updates/Contact Us), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal). A branch strip appears in active chats with selector + New + Delete branch actions.
 - Settings → API tab sections: Platform & Model (21 AI platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Web Search Platform (Gemini/Tavily/Brave/Serper/Custom with per-provider key pool + Web Search Language + Agentic Web Search toggle + Browse Depth + Browse Timeout sliders), Advanced Model Parameters, API Request Timeout (15–120s slider), Token Management, Notion Integration, Response Display.
 - Settings → AI tab sections: AI Persona (system prompt override), Custom Instructions, Multi-AI Response, Auto Memory, Response Language, AI Response Format, AI Explanation Level, Conversation Style (Standard/Friendly/Concise/Detailed/Academic/Casual), Follow-Up Suggestions toggle, Plugin / Extension System.
-- Settings → App tab sections: Font Size, Theme, Message Timestamps, Response Sound toggle, Send on Enter toggle, Auto-Focus Input toggle, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
+- Settings → App tab sections: Font Size, Theme, Message Timestamps, Response Sound toggle, Send on Enter toggle, Auto-Focus Input toggle, OCR toggle (image text extraction), Chat Branching toggle, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
 - AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy Text, Download, Summarize, Follow-up, Bookmark) after response.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
@@ -9447,7 +9722,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const _featureState = [
                     'Web Search: ' + (useAgent ? 'ON (provider: ' + (_wsProviders[webSearchPlatform] || webSearchPlatform) + ')' : 'OFF'),
                     'Thinking Mode: ' + (useThinking ? 'ON' : 'OFF'),
-                    'Smart / Agentic Mode: ' + (smartMode ? 'ON (auto-selects web search, thinking, and canvas per query)' : 'OFF'),
+                    'Smart / Agentic Mode: ' + (smartMode ? 'ON (AI decides feature/tool usage directly)' : 'OFF'),
                     'Canvas Mode: ' + (canvasMode ? 'ON (code opens in Artifact Viewer)' : 'OFF'),
                     'Multi-AI Mode: ' + (multiAIEnabled ? 'ON (platforms: ' + (multiAIPlatforms.join(', ') || 'none selected') + ')' : 'OFF'),
                     'Instant Response Display: ' + (instantResponseMode ? 'ON (full response shown at once)' : 'OFF (animated character-by-character)'),
@@ -9469,7 +9744,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     'Model Parameters: Temperature=' + paramTemperature + ' | Top P=' + paramTopP + ' | Top K=' + paramTopK + ' | Max Tokens=' + paramMaxTokens,
                     'Response Length: ' + responseLength,
                 ].join(' | ');
-                systemInstruction += '\n\nACTIVE FEATURE STATE: ' + _featureState + '. When the user asks which features are on or off, what mode is active, or what parameters are set, answer accurately from this state.\n\nFEATURE CONTROL: You can toggle app features by including a control tag anywhere in your response: [SNOAH: feature=value] where feature can be: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). These tags are silently processed and removed from the displayed response. Example: if the user says "turn on canvas mode", include [SNOAH: canvas=on] somewhere in your response along with your text reply. MEMORY CONTROL: If the user asks you to save something to memory or remember something, include [MEMORY: fact1. fact2. fact3] in your response — each fact separated by a period. These will be saved and removed from the displayed text.';
+                systemInstruction += '\n\nACTIVE FEATURE STATE: ' + _featureState + '. When the user asks which features are on or off, what mode is active, or what parameters are set, answer accurately from this state.\n\nFEATURE CONTROL: You can toggle app features by including a control tag anywhere in your response: [SNOAH: feature=value] where feature can be: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). These tags are silently processed and removed from the displayed response. Example: if the user says "turn on canvas mode", include [SNOAH: canvas=on] somewhere in your response along with your text reply. In Smart mode, do not request keyword automation — decide and use features directly.\n\nFILE OUTPUT CONTROL: To generate downloadable files, include either [FILE: filename.ext]...content...[/FILE] for text files, or [FILE_B64: filename.ext]...base64...[/FILE_B64] for binary files like PDFs. These file blocks are converted into download cards in chat and removed from visible answer text.\n\nMEMORY CONTROL: If the user asks you to save something to memory or remember something, include [MEMORY: fact1. fact2. fact3] in your response — each fact separated by a period. These will be saved and removed from the displayed text.';
                 if (platform === 'mistral') {
                     systemInstruction += 'You are running on Mistral AI. ';
                 }
@@ -9545,6 +9820,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         msg.images.forEach(img => {
                             if (img.isImage !== false && img.data) {
                                 parts.push({ inlineData: { mimeType: img.mimeType, data: img.data } });
+                                if (img.textContent) {
+                                    const ocrLabel = img.fileName ? '[OCR text: ' + img.fileName + ']\n' : '[OCR text]\n';
+                                    parts.push({ text: ocrLabel + img.textContent });
+                                }
                             } else if (img.textContent) {
                                 const docLabel = img.fileName ? '[Attached file: ' + img.fileName + ']\n' : '';
                                 parts.push({ text: docLabel + img.textContent });
@@ -9862,8 +10141,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 // Append document text content for non-image files
                                 if (msg.images && msg === messages[messages.length - 1]) {
                                     msg.images.forEach(img => {
-                                        if (img.isImage === false && img.textContent) {
-                                            const docLabel = img.fileName ? '\n\n[Attached file: ' + img.fileName + ']\n' : '\n\n[Attached document]\n';
+                                        if (img.textContent) {
+                                            const docLabel = img.isImage === false
+                                                ? (img.fileName ? '\n\n[Attached file: ' + img.fileName + ']\n' : '\n\n[Attached document]\n')
+                                                : (img.fileName ? '\n\n[OCR text: ' + img.fileName + ']\n' : '\n\n[OCR text from image]\n');
                                             content += docLabel + img.textContent;
                                         }
                                     });
@@ -10196,6 +10477,9 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 mainText = mainText.replace(/\[MEMORY:[^\]]*\]/gi, '').trim();
                 // Strip any leftover [BROWSE: url] commands from the visible text
                 mainText = mainText.replace(/\[BROWSE:\s*https?:\/\/[^\]]*\]/gi, '').trim();
+                const _fileParse = parseAIGeneratedFiles(mainText);
+                mainText = _fileParse.cleanedText;
+                const _generatedFiles = Array.isArray(_fileParse.files) ? _fileParse.files : [];
 
                 // Extract FOLLOW_UP suggestions line from AI response
                 let _followUpQuestions = [];
@@ -10278,6 +10562,26 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     liveTextEl.className = 'md-content text-[#2C2B29] leading-relaxed';
                     liveTextEl.innerHTML = formatMarkdown(mainTextClean);
                     renderMermaidDiagrams();
+                }
+                if (_generatedFiles.length > 0) {
+                    const filesWrap = document.createElement('div');
+                    filesWrap.className = 'mt-3 space-y-2';
+                    filesWrap.innerHTML = _generatedFiles.map((f, i) => {
+                        const safeName = escapeHTML(f.name || ('generated-' + (i + 1)));
+                        const encodedName = encodeURIComponent(f.name || ('generated-' + (i + 1)));
+                        const encodedMime = encodeURIComponent(f.mimeType || 'application/octet-stream');
+                        if (f.dataBase64) {
+                            return '<div class="bg-white border border-[#E5E3DB] rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">' +
+                                '<div class="min-w-0"><p class="text-[12px] font-semibold text-[#2C2B29] truncate">📄 ' + safeName + '</p><p class="text-[10px] text-[#A3A095]">AI generated file</p></div>' +
+                                '<button onclick="downloadGeneratedFile(\'' + encodedName + '\',\'' + encodeURIComponent(f.dataBase64) + '\',\'' + encodedMime + '\',true)" class="px-3 py-1.5 rounded-lg bg-[#D25D38] text-white text-[11px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Download</button>' +
+                            '</div>';
+                        }
+                        return '<div class="bg-white border border-[#E5E3DB] rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">' +
+                            '<div class="min-w-0"><p class="text-[12px] font-semibold text-[#2C2B29] truncate">📄 ' + safeName + '</p><p class="text-[10px] text-[#A3A095]">AI generated file</p></div>' +
+                            '<button onclick="downloadGeneratedFile(\'' + encodedName + '\',\'' + encodeURIComponent(f.text || '') + '\',\'' + encodedMime + '\',false)" class="px-3 py-1.5 rounded-lg bg-[#D25D38] text-white text-[11px] font-semibold hover:bg-[#B84E2E] transition-colors shrink-0">Download</button>' +
+                        '</div>';
+                    }).join('');
+                    liveTextEl.appendChild(filesWrap);
                 }
 
                 // Update thinking block to final state
@@ -10374,11 +10678,6 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
                 if (lastUserMsg) extractAndSaveMemory(lastUserMsg.text || '', mainTextClean);
                 if (messages.filter(m=>m.role==='user').length === 1) autoTitleChat();
-                // Reset smart mode overrides
-                if (_smartWebOverride) { useAgent = false; }
-                if (_smartThinkOverride) { useThinking = false; }
-                if (_smartCanvasOverride) { canvasMode = false; localStorage.setItem('snoah_canvas_mode', false); }
-                if (_smartWebOverride || _smartThinkOverride || _smartCanvasOverride) updateToggleButtons();
 
             } catch (error) {
                 // User-initiated abort (stop button) — save partial content and show Continue button
@@ -10475,10 +10774,6 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 abortController = null;
                 _streamPartialRaw = '';
                 _streamPartialWrapper = null;
-                // Reset any smart mode overrides
-                if (_smartWebOverride) { useAgent = false; _smartWebOverride = false; }
-                if (_smartThinkOverride) { useThinking = false; _smartThinkOverride = false; }
-                if (_smartCanvasOverride) { canvasMode = false; localStorage.setItem('snoah_canvas_mode', false); _smartCanvasOverride = false; updateToggleButtons(); }
                 setIsLoading(false);
                 isStreaming = false;
                 streamingBarIndicator.classList.add('hidden');
