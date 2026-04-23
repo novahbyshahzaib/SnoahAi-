@@ -1783,6 +1783,24 @@
             <div id="scroll-anchor" class="h-2 shrink-0"></div>
         </div>
 
+        <!-- ===== TEXT SELECTION QUICK ACTIONS TOOLBAR ===== -->
+        <div id="selection-toolbar" class="hidden fixed z-[200] bg-[#2C2B29] text-white rounded-xl shadow-2xl border border-[#444340] flex items-center gap-0.5 p-1 pointer-events-auto" style="transform:translateX(-50%);">
+            <button id="sel-btn-copy" title="Copy selection" onclick="selectionToolbarCopy()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-[#444340] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                Copy
+            </button>
+            <div class="w-px h-4 bg-[#444340]"></div>
+            <button id="sel-btn-ask" title="Ask AI about selected text" onclick="selectionToolbarAsk()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-[#444340] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                Ask AI
+            </button>
+            <div class="w-px h-4 bg-[#444340]"></div>
+            <button id="sel-btn-simplify" title="Simplify selected text" onclick="selectionToolbarSimplify()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-[#444340] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Simplify
+            </button>
+        </div>
+
         <!-- Hidden image file input (multiple) -->
         <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.md" multiple class="hidden" onchange="handleFileUpload(event)">
 
@@ -2431,6 +2449,7 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.1</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Text Selection Quick Actions 🎯</strong> — Select any text in an AI response and a floating toolbar instantly appears with Copy, Ask AI, and Simplify buttons. No need to copy-paste into the input — instantly send follow-up questions from selected text.</li>
                             <li><strong>Thinking Modes + Smart Access ⚡🧠</strong> — Thinking depth now supports Auto/Normal/Detailed/Short and Smart mode now grants background access to thinking, web search, and canvas automatically.</li>
                             <li><strong>Contact Feedback + Feature Polls 📝</strong> — Contact tab now supports structured feedback submissions and feature request polls, both visible in the admin panel.</li>
                             <li><strong>AI Workflow Slash Command ✅</strong> — New <code>/workflow</code> slash command builds practical AI workflows; new <code>/checklist</code> command creates actionable checklists.</li>
@@ -4144,7 +4163,7 @@
             if (!container) { scrollAnchor.scrollIntoView({ behavior: 'smooth' }); return; }
             if (isStreaming) {
                 // Don't auto-scroll if the user has manually scrolled away during this stream
-                if (!force && (userPausedAutoScroll || (Date.now() - lastUserScrollAt) < 900)) return;
+                if (!force && (userPausedAutoScroll || (Date.now() - lastUserScrollAt) < AUTO_SCROLL_RESUME_DELAY_MS)) return;
                 const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
                 if (force || distFromBottom < 40) {
                     // Scroll container to absolute bottom — padding-bottom handles clearance
@@ -4192,6 +4211,7 @@
         }
 
         const AUTO_SCROLL_THRESHOLD_PX = 48; // pixels from bottom to detect manual scroll-up during streaming
+        const AUTO_SCROLL_RESUME_DELAY_MS = 900; // ms after manual scroll-up before auto-scroll can resume
 
         // Listen to scroll events on chat container
         document.getElementById('chat-container').addEventListener('scroll', function() {
@@ -4201,6 +4221,7 @@
                 // If user scrolled beyond threshold, pause auto-scroll
                 if (distFromBottom > AUTO_SCROLL_THRESHOLD_PX) {
                     userPausedAutoScroll = true;
+                    lastUserScrollAt = Date.now(); // record time of manual scroll-up
                 } else {
                     // Near bottom again — resume auto-scroll
                     userPausedAutoScroll = false;
@@ -4208,6 +4229,97 @@
             }
             updateScrollJumpBtn();
         }, { passive: true });
+
+        // ── TEXT SELECTION QUICK ACTIONS TOOLBAR ─────────────────────
+        (function() {
+            const toolbar = document.getElementById('selection-toolbar');
+            if (!toolbar) return;
+            let _selText = '';
+
+            function positionAndShow(rect) {
+                const cx = rect.left + rect.width / 2 + window.scrollX;
+                const top = rect.top + window.scrollY - toolbar.offsetHeight - 10;
+                toolbar.style.left = Math.max(80, Math.min(cx, window.innerWidth - 80)) + 'px';
+                toolbar.style.top = Math.max(8, top) + 'px';
+                toolbar.classList.remove('hidden');
+            }
+
+            function hideToolbar() {
+                toolbar.classList.add('hidden');
+                _selText = '';
+            }
+
+            function handleSelectionChange() {
+                const sel = window.getSelection();
+                if (!sel || sel.isCollapsed || !sel.rangeCount) { hideToolbar(); return; }
+                const text = sel.toString().trim();
+                if (!text || text.length < 3) { hideToolbar(); return; }
+                // Only show toolbar if selection is inside an AI message
+                const node = sel.getRangeAt(0).commonAncestorContainer;
+                const msgWrapper = document.getElementById('messages-wrapper');
+                if (!msgWrapper) return;
+                let el = node.nodeType === 3 ? node.parentElement : node;
+                let inAI = false;
+                while (el && el !== document.body) {
+                    if (el.dataset && el.dataset.role === 'model') { inAI = true; break; }
+                    if (el.classList && el.classList.contains('ai-msg-bubble')) { inAI = true; break; }
+                    if (el === msgWrapper) break;
+                    el = el.parentElement;
+                }
+                if (!inAI) { hideToolbar(); return; }
+                _selText = text;
+                const range = sel.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                positionAndShow(rect);
+            }
+
+            document.addEventListener('mouseup', function(e) {
+                if (toolbar.contains(e.target)) return;
+                setTimeout(handleSelectionChange, 10);
+            });
+            document.addEventListener('touchend', function(e) {
+                if (toolbar.contains(e.target)) return;
+                setTimeout(handleSelectionChange, 80);
+            });
+            document.addEventListener('mousedown', function(e) {
+                if (!toolbar.contains(e.target)) hideToolbar();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') hideToolbar();
+            });
+
+            window.selectionToolbarCopy = function() {
+                if (!_selText) return;
+                navigator.clipboard.writeText(_selText).then(function() {
+                    showToast('Copied ✓');
+                }).catch(function() {
+                    const ta = document.createElement('textarea');
+                    ta.value = _selText; document.body.appendChild(ta);
+                    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                    showToast('Copied ✓');
+                });
+                hideToolbar();
+                window.getSelection().removeAllRanges();
+            };
+
+            window.selectionToolbarAsk = function() {
+                if (!_selText) return;
+                const snippet = _selText.length > 220 ? _selText.slice(0, 220) + '…' : _selText;
+                const inp = document.getElementById('chat-input');
+                if (inp) { inp.value = 'Explain this: "' + snippet + '"'; inp.focus(); inp.dispatchEvent(new Event('input')); }
+                hideToolbar();
+                window.getSelection().removeAllRanges();
+            };
+
+            window.selectionToolbarSimplify = function() {
+                if (!_selText) return;
+                const snippet = _selText.length > 220 ? _selText.slice(0, 220) + '…' : _selText;
+                const inp = document.getElementById('chat-input');
+                if (inp) { inp.value = 'Simplify this in plain language: "' + snippet + '"'; inp.focus(); inp.dispatchEvent(new Event('input')); }
+                hideToolbar();
+                window.getSelection().removeAllRanges();
+            };
+        })();
 
         // ── CHAT HISTORY ENGINE ─────────────────────────────────────────
         const MAIN_BRANCH_ID = 'main';
@@ -9302,6 +9414,7 @@ self.onmessage = async (event) => {
                 const multiUID = 'multi_' + Date.now();
                 const multiWrapper = document.createElement('div');
                 multiWrapper.className = 'flex w-full justify-start animate-slide-up';
+                multiWrapper.dataset.role = 'model';
                 let dropdownOpts = results.map((r, i) => '<option value="' + i + '">' + MULTI_AI_LABELS[r.platform] + (r.error ? ' ⚠️' : '') + '</option>').join('');
                 multiWrapper.innerHTML =
                     '<div class="flex flex-col w-full max-w-[95%]">' +
@@ -9859,6 +9972,7 @@ FEATURES:
 106. AI GENERATED DOWNLOAD FILES: The AI can output [FILE: ...] or [FILE_B64: ...] blocks and SnoahAI renders downloadable file cards with correct file extensions.
 107. CANVAS FULLSCREEN CONTROL: Artifact viewer includes a fullscreen button plus close (X) exit, enabling full-screen code/canvas viewing.
 108. PLATFORM-SPECIFIC PARAMETERS: Temperature, Top P, Top K, and Max Tokens are stored per selected AI platform and auto-load when switching platforms.
+109. TEXT SELECTION QUICK ACTIONS: When the user selects text inside any AI response, a floating dark toolbar appears above the selection with three buttons: Copy (copies the selected text), Ask AI (fills the chat input with "Explain this: [selected text]" ready to send), and Simplify (fills the chat input with "Simplify this in plain language: [selected text]" ready to send). The toolbar hides on click-outside, Escape, or after using an action. Only appears on AI message bubbles, not user messages.
 
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
@@ -9870,7 +9984,7 @@ APP STRUCTURE & LAYOUT:
 - Settings → AI tab sections: AI Persona (system prompt override), Custom Instructions, Multi-AI Response, Auto Memory, Response Language, AI Response Format, AI Explanation Level, Conversation Style (Standard/Friendly/Concise/Detailed/Academic/Casual), Follow-Up Suggestions toggle, Plugin / Extension System.
 - Settings → App tab sections: Font Size, Theme, Message Timestamps, Response Sound toggle, Send on Enter toggle, Auto-Focus Input toggle, OCR toggle (image text extraction), Chat Branching toggle, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
 - Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact & Feedback tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
-- AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy Text, Download, Summarize, Follow-up, Bookmark) after response.
+- AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy Text, Download, Summarize, Follow-up, Bookmark) after response. Selecting text inside an AI message shows a floating Text Selection toolbar with Copy, Ask AI, and Simplify actions.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
 - New user onboarding: Welcome modal with name input, required Terms & Conditions checkbox, and optional Multi-Key Storage (cookies) checkbox.
 
@@ -9925,10 +10039,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     'Thinking Profile: ' + (_effectiveUseThinking ? (thinkingModeLabels[thinkingMode] || 'Auto') : 'Off'),
                     'AI Download Files: ' + (aiFileDownloadsEnabled ? 'ON' : 'OFF'),
                 ].join(' | ');
-                const _fileOutputInstruction = aiFileDownloadsEnabled
+                const fileOutputInstruction = aiFileDownloadsEnabled
                     ? 'FILE OUTPUT CONTROL: To generate downloadable files, include either [FILE: filename.ext]...content...[/FILE] for text files, or [FILE_B64: filename.ext]...base64...[/FILE_B64] for binary files like PDFs. These file blocks are converted into download cards in chat and removed from visible answer text.'
                     : 'FILE OUTPUT CONTROL: Downloadable file blocks are disabled right now. Do NOT use [FILE] or [FILE_B64] tags. Return normal text/code only.';
-                systemInstruction += '\n\nACTIVE FEATURE STATE: ' + _featureState + '. When the user asks which features are on or off, what mode is active, or what parameters are set, answer accurately from this state.\n\nFEATURE CONTROL: You can toggle app features by including a control tag anywhere in your response: [SNOAH: feature=value] where feature can be: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). These tags are silently processed and removed from the displayed response. Example: if the user says "turn on canvas mode", include [SNOAH: canvas=on] somewhere in your response along with your text reply. In Smart mode, do not request keyword automation — decide and use features directly.\n\n' + _fileOutputInstruction + '\n\nMEMORY CONTROL: If the user asks you to save something to memory or remember something, include [MEMORY: fact1. fact2. fact3] in your response — each fact separated by a period. These will be saved and removed from the displayed text.';
+                systemInstruction += '\n\nACTIVE FEATURE STATE: ' + _featureState + '. When the user asks which features are on or off, what mode is active, or what parameters are set, answer accurately from this state.\n\nFEATURE CONTROL: You can toggle app features by including a control tag anywhere in your response: [SNOAH: feature=value] where feature can be: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). These tags are silently processed and removed from the displayed response. Example: if the user says "turn on canvas mode", include [SNOAH: canvas=on] somewhere in your response along with your text reply. In Smart mode, do not request keyword automation — decide and use features directly.\n\n' + fileOutputInstruction + '\n\nMEMORY CONTROL: If the user asks you to save something to memory or remember something, include [MEMORY: fact1. fact2. fact3] in your response — each fact separated by a period. These will be saved and removed from the displayed text.';
                 if (platform === 'mistral') {
                     systemInstruction += 'You are running on Mistral AI. ';
                 }
@@ -10046,6 +10160,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // ── Build live response bubble immediately ──
                 const liveWrapper = document.createElement('div');
                 liveWrapper.className = 'flex w-full justify-start animate-slide-up';
+                liveWrapper.dataset.role = 'model';
                 const liveUID = 'live_' + Date.now();
                 liveWrapper.innerHTML =
                     '<div class="flex flex-col w-full max-w-[95%]">' +
@@ -10993,6 +11108,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
         function renderAIResponse(msg, instant = false, msgIdxHint = null) {
             const wrapper = document.createElement('div');
             wrapper.className = "flex w-full justify-start animate-slide-up";
+            wrapper.dataset.role = 'model';
 
             let htmlContent = '<div class="flex flex-col w-full max-w-[95%]">';
             const uniqueId = Date.now();
