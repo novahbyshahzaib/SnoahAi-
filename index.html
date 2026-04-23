@@ -5175,7 +5175,7 @@
                 : 'Get your key at <a href="https://aistudio.google.com" target="_blank" class="underline">aistudio.google.com</a>';
             // Show/hide custom endpoint section
             const customSection = document.getElementById('custom-endpoint-section');
-            if (customSection) { customSection.style.display = isCUSTOM ? '' : 'none'; if (isCUSTOM && customEndpointUrl) { const urlInput = document.getElementById('settings-custom-url'); if (urlInput) urlInput.value = customEndpointUrl; } }
+            if (customSection) { customSection.style.display = isCUSTOM ? 'block' : 'none'; if (isCUSTOM && customEndpointUrl) { const urlInput = document.getElementById('settings-custom-url'); if (urlInput) urlInput.value = customEndpointUrl; } }
             if (mhint) mhint.innerHTML = isOR
                 ? 'Default: <span class="font-mono text-[#5B5951]">z-ai/glm-4.5-air:free</span>'
                 : isGQ
