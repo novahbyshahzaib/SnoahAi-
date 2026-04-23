@@ -466,6 +466,28 @@
             const snap = await getDoc(doc(_db, 'community_usernames', username));
             return snap.exists() && snap.data().banned === true;
         };
+        window._submitContactFeedback = async function(payload) {
+            await _ensureAuth();
+            const safe = payload && typeof payload === 'object' ? payload : {};
+            const type = safe.type === 'feature_poll' ? 'feature_poll' : 'feedback';
+            const category = String(safe.category || (type === 'feature_poll' ? 'feature' : 'general')).slice(0, 30);
+            const message = String(safe.message || '').trim().slice(0, 2000);
+            if (!message) throw new Error('Message is required');
+            const senderName = String(safe.senderName || localStorage.getItem('snoah_comm_username') || localStorage.getItem('snoah_user_name') || 'User').slice(0, 40);
+            const priority = String(safe.priority || '').slice(0, 20);
+            const workflowType = String(safe.workflowType || '').slice(0, 40);
+            return addDoc(collection(_db, 'contact_feedback'), {
+                type,
+                category,
+                message,
+                senderName,
+                priority,
+                workflowType,
+                uid: _currentUid || 'anon',
+                status: 'new',
+                ts: serverTimestamp()
+            });
+        };
     </script>
 </head>
 <div id="pwa-banner" class="hidden fixed top-0 left-0 right-0 z-[9999] bg-[#D25D38] text-white px-4 py-2.5 flex items-center justify-between shadow-lg">
@@ -1447,6 +1469,23 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
+                    <!-- AI Downloadable Files -->
+                    <div>
+                        <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">AI File Output</label>
+                        <div class="flex items-center justify-between bg-[#F2F0E9] rounded-xl px-3 py-2.5 border border-[#E5E3DB]">
+                            <div>
+                                <p class="text-[12px] font-semibold text-[#2C2B29]">Enable Downloadable AI Files</p>
+                                <p class="text-[11px] text-[#A3A095]">When OFF, AI responds with normal text instead of [FILE] download blocks</p>
+                            </div>
+                            <button id="ai-file-download-toggle" onclick="toggleAIDownloadableFiles()" class="w-10 h-5 rounded-full transition-colors duration-300 relative flex-shrink-0 bg-[#D9D6CE]">
+                                <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-[#EAE8E0]"></div>
+
                     <!-- Send on Enter -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Input Behavior</label>
@@ -1744,6 +1783,24 @@
             <div id="scroll-anchor" class="h-2 shrink-0"></div>
         </div>
 
+        <!-- ===== TEXT SELECTION QUICK ACTIONS TOOLBAR ===== -->
+        <div id="selection-toolbar" class="hidden fixed z-[200] bg-[#2C2B29] text-white rounded-xl shadow-2xl border border-[#444340] flex items-center gap-0.5 p-1 pointer-events-auto" style="transform:translateX(-50%);">
+            <button id="sel-btn-copy" title="Copy selection" onclick="selectionToolbarCopy()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-[#444340] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                Copy
+            </button>
+            <div class="w-px h-4 bg-[#444340]"></div>
+            <button id="sel-btn-ask" title="Ask AI about selected text" onclick="selectionToolbarAsk()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-[#444340] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                Ask AI
+            </button>
+            <div class="w-px h-4 bg-[#444340]"></div>
+            <button id="sel-btn-simplify" title="Simplify selected text" onclick="selectionToolbarSimplify()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-[#444340] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Simplify
+            </button>
+        </div>
+
         <!-- Hidden image file input (multiple) -->
         <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.xml,.md" multiple class="hidden" onchange="handleFileUpload(event)">
 
@@ -1776,8 +1833,8 @@
                     <button id="btn-agent" onclick="toggleFeature('agent')" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="search" class="w-3.5 h-3.5"></i> Web
                     </button>
-                    <button id="btn-length" onclick="cycleLength()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
-                        <i data-lucide="align-left" class="w-3.5 h-3.5"></i> <span id="length-label">Normal</span>
+                    <button id="btn-length" onclick="cycleThinkingMode()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
+                        <i data-lucide="brain" class="w-3.5 h-3.5"></i> <span id="thinking-mode-label">Auto</span>
                     </button>
                     <button onclick="openTemplatesModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                         <i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Templates
@@ -2392,6 +2449,11 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.1</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Text Selection Quick Actions 🎯</strong> — Select any text in an AI response and a floating toolbar instantly appears with Copy, Ask AI, and Simplify buttons. No need to copy-paste into the input — instantly send follow-up questions from selected text.</li>
+                            <li><strong>Thinking Modes + Smart Access ⚡🧠</strong> — Thinking depth now supports Auto/Normal/Detailed/Short and Smart mode now grants background access to thinking, web search, and canvas automatically.</li>
+                            <li><strong>Contact Feedback + Feature Polls 📝</strong> — Contact tab now supports structured feedback submissions and feature request polls, both visible in the admin panel.</li>
+                            <li><strong>AI Workflow Slash Command ✅</strong> — New <code>/workflow</code> slash command builds practical AI workflows; new <code>/checklist</code> command creates actionable checklists.</li>
+                            <li><strong>Optional AI File Downloads 📁</strong> — New App setting lets users enable/disable downloadable [FILE]/[FILE_B64] output mode.</li>
                             <li><strong>Smart Mode Behavior Update ⚡</strong> — Smart mode no longer auto-toggles features from keyword detection. The AI now decides and controls feature/tool usage directly.</li>
                             <li><strong>AI File Output Downloads 📁</strong> — AI can generate downloadable files using structured file blocks, including binary files via Base64 with proper file extensions.</li>
                             <li><strong>OCR for Image Uploads 👁️</strong> — New App setting to enable free OCR on uploaded images, injecting extracted text into AI context automatically.</li>
@@ -2478,7 +2540,7 @@
                             <li><strong>Sidebar Redesign 🗂️</strong> — "Contact Us" removed from sidebar and added inside Preferences. A new "Updates" button now lives in the sidebar below Community for quick access to What's New.</li>
                             <li><strong>Sidebar Polish &amp; Preferences ✨</strong> — Sidebar now shows only 4 clean action buttons: Settings, Preferences, Community, and Updates. All other features (Export, Share, Summarize, Pinned Messages, Bookmarks, Dark Mode, About, Contact Us, Delete History) are neatly organised inside the <em>Preferences</em> panel.</li>
                             <li><strong>Chat History Pagination 📋</strong> — The sidebar chat list now shows your 4 most recent chats. Tap the "X more chats" button to expand the full history, and "Show less" to collapse it again — keeping the sidebar clean and compact.</li>
-                            <li><strong>Global Community Chat 🌍</strong> — Tap "Community" in the sidebar to join a live global chat room shared by all SnoahAI users worldwide. Messages are stored in Firebase and appear in real-time for everyone. Full-screen experience with 💬 Live Chat and 📬 Contact Dev tabs.</li>
+                            <li><strong>Global Community Chat 🌍</strong> — Tap "Community" in the sidebar to join a live global chat room shared by all SnoahAI users worldwide. Messages are stored in Firebase and appear in real-time for everyone. Full-screen experience with 💬 Live Chat and 📬 Contact & Feedback tabs.</li>
                             <li><strong>Chemistry Rendering ⚗️</strong> — KaTeX mhchem extension added. Chemistry equations using <code>\ce{"{"}...{"}"}</code> notation now render beautifully: e.g. <code>\ce{"{"}H2O{"}"}</code>, <code>\ce{"{"}2H2 + O2 -&gt; 2H2O{"}"}</code>. Works in inline ($) and display ($$) math blocks.</li>
                             <li><strong>Math &amp; Markdown Rendering Fix 🔧</strong> — Fixed a bug where chemistry/physics expressions and raw <code>$$...$$</code> could display as raw text instead of rendered math. Surrounding inline Markdown (bold, italic, code) now also renders correctly in the same line as math.</li>
                             <li><strong>Compact Response Actions ⋮</strong> — AI response action buttons now show only 3 at a time (Copy, Retry, Read) plus a vertical three-dots (⋮) button. Tapping ⋮ opens a neat popup card with all available actions — no more layout-breaking button rows.</li>
@@ -2544,7 +2606,7 @@
                             <li><strong>Web Search</strong> — 🔍 Real-time Google Search grounding via Gemini. Works from any platform when enabled.</li>
                             <li><strong>File Attachments &amp; Vision</strong> — 📎 Upload images (vision supported on all OpenAI-compatible platforms) or documents (PDFs, text files, CSVs, JSON, Markdown, and more). Multi-file support with preview strip. Vision requires a model that supports image input.</li>
                             <li><strong>Temp Chat</strong> — 🕐 Temporary conversations that won't be saved to history.</li>
-                            <li><strong>Response Length</strong> — Cycle between Normal, Short, and Detailed response lengths.</li>
+                            <li><strong>Thinking Modes</strong> — Cycle thinking profile between Auto, Normal, Detailed, and Short. These modes control hidden reasoning depth only.</li>
                             <li><strong>Templates</strong> — 🔖 Pre-saved prompt starters with custom template support.</li>
                             <li><strong>Dark Mode</strong> — Full dark theme via ☰ menu toggle.</li>
                             <li><strong>Chat History</strong> — Auto-saved locally with auto-titling.</li>
@@ -2568,7 +2630,7 @@
                             <li><strong>Multi-Key Pool</strong> — Add multiple API keys per platform with auto-rotation on rate limits.</li>
                             <li><strong>Token Usage Tracking</strong> — Monitor your token usage per platform in Settings.</li>
                             <li><strong>PWA Install</strong> — Install as a native-like app on Android home screen.</li>
-                            <li><strong>Global Community Chat 🌍</strong> — Join a live global chat room with all SnoahAI users. Tap "Community" in the sidebar. Real-time Firebase messages, full-screen, with a Contact Dev tab.</li>
+                            <li><strong>Global Community Chat 🌍</strong> — Join a live global chat room with all SnoahAI users. Tap "Community" in the sidebar. Real-time Firebase messages, full-screen, with a Contact & Feedback tab.</li>
                             <li><strong>Chemistry Rendering ⚗️</strong> — KaTeX mhchem extension renders chemical equations beautifully. Use \ce{"{"}H2O{"}"}, \ce{"{"}2H2 + O2 -&gt; 2H2O{"}"} etc. in math blocks.</li>
                             <li><strong>User Name Personalization</strong> — Your name is shown in the sidebar and saved locally on your device.</li>
                             <li><strong>Advanced Model Parameters</strong> — ⚙️ Tune Temperature, Top P, Top K, and Max Tokens in Settings for fine-grained control over AI responses.</li>
@@ -2650,7 +2712,7 @@
             <!-- Tabs -->
             <div class="flex gap-1.5 px-4 py-2.5 border-b border-[#EAE8E0] bg-white shrink-0">
                 <button id="comm-tab-btn-chat" onclick="switchCommTab('chat')" class="flex-1 py-1.5 rounded-xl text-[13px] font-semibold transition-colors bg-[#D25D38] text-white">💬 Live Chat</button>
-                <button id="comm-tab-btn-contact" onclick="switchCommTab('contact')" class="flex-1 py-1.5 rounded-xl text-[13px] font-semibold transition-colors text-[#8C897D] hover:bg-[#F2F0E9]">📬 Contact Dev</button>
+                <button id="comm-tab-btn-contact" onclick="switchCommTab('contact')" class="flex-1 py-1.5 rounded-xl text-[13px] font-semibold transition-colors text-[#8C897D] hover:bg-[#F2F0E9]">📬 Contact & Feedback</button>
             </div>
             <!-- Live Chat Panel -->
             <div id="comm-panel-chat" class="flex-1 flex flex-col overflow-hidden">
@@ -2670,42 +2732,60 @@
                     <p class="text-[10px] text-[#A3A095] mt-1.5 text-center">Be respectful · No spam · Max 500 chars · Messages are public</p>
                 </div>
             </div>
-            <!-- Contact Dev Panel (hidden by default) -->
+            <!-- Contact & Feedback Panel (hidden by default) -->
             <div id="comm-panel-contact" class="flex-1 overflow-y-auto p-5 space-y-4 hidden">
                 <div class="text-center space-y-2 mb-1">
-                    <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">Get in Touch</h3>
-                    <p class="text-[12px] text-[#A3A095]">Reach out to Shahzaib Muzaffar through any of the channels below</p>
+                    <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">Contact & Feedback</h3>
+                    <p class="text-[12px] text-[#A3A095]">Share bugs, improvements, workflow requests, and feature votes directly with the SnoahAI team</p>
                 </div>
-                <a href="https://t.me/Owner_Of_Crypton" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
-                    <div class="w-10 h-10 rounded-xl bg-[#E3F2FD] flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A6EBD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+
+                <div class="bg-white border border-[#E5E3DB] rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center gap-2"><span class="text-lg">💬</span><h4 class="text-[14px] font-semibold text-[#2C2B29]">Send Feedback</h4></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="contact-feedback-category" class="bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[12px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38]">
+                            <option value="general">General</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="ui">UI / UX</option>
+                            <option value="performance">Performance</option>
+                        </select>
+                        <input id="contact-feedback-workflow" type="text" maxlength="40" placeholder="Workflow area (optional)" class="bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[12px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38]">
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">Telegram</p>
-                        <p class="text-[12px] text-[#A3A095]">@Owner_Of_Crypton</p>
+                    <textarea id="contact-feedback-message" rows="4" maxlength="2000" placeholder="Write your feedback..." class="w-full bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38] resize-none"></textarea>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-[10px] text-[#A3A095]">Visible in admin panel for review</p>
+                        <button onclick="submitContactFeedback()" class="px-3 py-1.5 rounded-lg bg-[#D25D38] text-white text-[12px] font-semibold hover:bg-[#B84E2E] transition-colors">Submit Feedback</button>
                     </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                </a>
-                <a href="https://instagram.com/shahzaib_muzaffar_7" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
-                    <div class="w-10 h-10 rounded-xl bg-[#FCE4EC] flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C4396B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                </div>
+
+                <div class="bg-white border border-[#E5E3DB] rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center gap-2"><span class="text-lg">🗳️</span><h4 class="text-[14px] font-semibold text-[#2C2B29]">Feature Request Poll</h4></div>
+                    <input id="contact-poll-feature" type="text" maxlength="120" placeholder="Suggested feature (e.g. better study planner workflow)" class="w-full bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38]">
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="contact-poll-priority" class="bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[12px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38]">
+                            <option value="high">High Priority</option>
+                            <option value="medium">Medium Priority</option>
+                            <option value="low">Low Priority</option>
+                        </select>
+                        <select id="contact-poll-workflow" class="bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[12px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38]">
+                            <option value="general">General Workflow</option>
+                            <option value="chat">Chat Workflow</option>
+                            <option value="research">Research Workflow</option>
+                            <option value="coding">Coding Workflow</option>
+                            <option value="study">Study Workflow</option>
+                        </select>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">Instagram</p>
-                        <p class="text-[12px] text-[#A3A095]">@shahzaib_muzaffar_7</p>
+                    <textarea id="contact-poll-details" rows="3" maxlength="1200" placeholder="Optional details: why this feature matters..." class="w-full bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38] resize-none"></textarea>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-[10px] text-[#A3A095]">Poll entries are tracked in admin feedback panel</p>
+                        <button onclick="submitFeaturePoll()" class="px-3 py-1.5 rounded-lg bg-[#D25D38] text-white text-[12px] font-semibold hover:bg-[#B84E2E] transition-colors">Submit Poll</button>
                     </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                </a>
-                <a href="https://github.com/novahbyshahzaib" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 p-4 rounded-2xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors group">
-                    <div class="w-10 h-10 rounded-xl bg-[#F3F0FF] flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-[14px] font-semibold text-[#2C2B29] group-hover:text-[#D25D38] transition-colors">GitHub</p>
-                        <p class="text-[12px] text-[#A3A095]">@novahbyshahzaib</p>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 group-hover:stroke-[#D25D38] transition-colors"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                </a>
+                </div>
+
+                <div class="grid gap-2">
+                    <a href="https://t.me/Owner_Of_Crypton" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors"><span class="text-[13px] font-semibold text-[#2C2B29]">Telegram</span><span class="text-[11px] text-[#A3A095]">@Owner_Of_Crypton</span></a>
+                    <a href="https://instagram.com/shahzaib_muzaffar_7" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors"><span class="text-[13px] font-semibold text-[#2C2B29]">Instagram</span><span class="text-[11px] text-[#A3A095]">@shahzaib_muzaffar_7</span></a>
+                    <a href="https://github.com/novahbyshahzaib" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors"><span class="text-[13px] font-semibold text-[#2C2B29]">GitHub</span><span class="text-[11px] text-[#A3A095]">@novahbyshahzaib</span></a>
+                </div>
             </div>
             <!-- ── Username Setup Overlay ── -->
             <div id="comm-username-overlay" class="absolute inset-0 z-10 bg-[#FAF9F6] flex flex-col hidden">
@@ -3050,9 +3130,11 @@
         let customSearchUrl = localStorage.getItem('snoah_custom_search_url') || '';
         let isSidebarOpen = false;
         let isDarkMode = localStorage.getItem('snoah_dark') === 'true';
-        let responseLength = localStorage.getItem('snoah_length') || 'normal'; // short | normal | detailed
-        const lengthCycle = ['short','normal','detailed'];
-        const lengthLabels = {short:'Short', normal:'Normal', detailed:'Detailed'};
+        let thinkingMode = localStorage.getItem('snoah_thinking_mode') || localStorage.getItem('snoah_length') || 'auto'; // auto | short | normal | detailed
+        const thinkingModeCycle = ['auto','normal','detailed','short'];
+        const thinkingModeLabels = {auto:'Auto', short:'Short', normal:'Normal', detailed:'Detailed'};
+        if (!thinkingModeLabels[thinkingMode]) thinkingMode = 'auto';
+        let aiFileDownloadsEnabled = localStorage.getItem('snoah_ai_file_downloads') !== 'false';
         let promptTemplates = JSON.parse(localStorage.getItem('snoah_templates') || '[]');
         let ttsUtterance = null;
         let ttsActive = false;
@@ -3089,6 +3171,8 @@
             { cmd: '/bullets',   label: 'Convert to bullet points', desc: 'List format' },
             { cmd: '/code',      label: 'Write code for this',  desc: 'Programming help' },
             { cmd: '/compare',   label: 'Compare these',        desc: 'Side-by-side comparison' },
+            { cmd: '/workflow',  label: 'Build AI workflow',    desc: 'Step-by-step workflow plan' },
+            { cmd: '/checklist', label: 'Create checklist',     desc: 'Actionable task checklist' },
         ];
         let isListening = false;
         let speechRecognition = null;
@@ -3185,7 +3269,7 @@
         // Initialize Icons & update UI labels
         lucide.createIcons();
         updateModelLabels();
-        updateLengthBtn();
+        updateThinkingModeBtn();
         updatePlatformUI();
         applyFontSize(fontSize);
         applyTheme(currentTheme);
@@ -3661,6 +3745,46 @@
             });
         }
 
+        async function submitContactFeedback() {
+            const msgEl = document.getElementById('contact-feedback-message');
+            if (!msgEl) return;
+            const message = (msgEl.value || '').trim();
+            if (!message) { showToast('Please enter feedback first'); return; }
+            const category = (document.getElementById('contact-feedback-category')?.value || 'general').trim();
+            const workflowType = (document.getElementById('contact-feedback-workflow')?.value || '').trim();
+            const senderName = localStorage.getItem('snoah_comm_username') || localStorage.getItem('snoah_user_name') || 'User';
+            try {
+                await window._submitContactFeedback({ type: 'feedback', category, message, workflowType, senderName });
+                msgEl.value = '';
+                const wfEl = document.getElementById('contact-feedback-workflow');
+                if (wfEl) wfEl.value = '';
+                showToast('Feedback sent ✓');
+            } catch (e) {
+                showToast('Could not send feedback: ' + (e.message || 'error'));
+            }
+        }
+
+        async function submitFeaturePoll() {
+            const featureEl = document.getElementById('contact-poll-feature');
+            const detailsEl = document.getElementById('contact-poll-details');
+            if (!featureEl || !detailsEl) return;
+            const feature = (featureEl.value || '').trim();
+            if (!feature) { showToast('Enter a feature request first'); return; }
+            const priority = (document.getElementById('contact-poll-priority')?.value || 'medium').trim();
+            const workflowType = (document.getElementById('contact-poll-workflow')?.value || 'general').trim();
+            const details = (detailsEl.value || '').trim();
+            const senderName = localStorage.getItem('snoah_comm_username') || localStorage.getItem('snoah_user_name') || 'User';
+            const message = details ? (feature + '\n\nDetails: ' + details) : feature;
+            try {
+                await window._submitContactFeedback({ type: 'feature_poll', category: 'feature', message, priority, workflowType, senderName });
+                featureEl.value = '';
+                detailsEl.value = '';
+                showToast('Feature poll submitted ✓');
+            } catch (e) {
+                showToast('Could not submit poll: ' + (e.message || 'error'));
+            }
+        }
+
         function toggleTempChat() {
             isTempChat = !isTempChat;
             updateTempChatUI();
@@ -3984,24 +4108,26 @@
             if (btn) btn.className = smartMode
                 ? "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]"
                 : "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
-            showToast(smartMode ? '⚡ Smart mode on — AI controls tools directly' : 'Smart mode off');
+            updateToggleButtons();
+            showToast(smartMode ? '⚡ Smart mode on — thinking, web search, and canvas are available automatically' : 'Smart mode off');
         }
 
         function updateToggleButtons() {
+            const _flags = getEffectiveFeatureFlags();
             const btnSmart = document.getElementById('btn-smart');
             if (btnSmart) btnSmart.className = smartMode
                 ? "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]"
                 : "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
             const btnThinking = document.getElementById('btn-thinking');
             const btnAgent = document.getElementById('btn-agent');
-            if (btnThinking) btnThinking.className = useThinking
+            if (btnThinking) btnThinking.className = _flags.thinking
                 ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#FDF4F2] text-[#D25D38] border border-[#F8E3DE]"
                 : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
-            if (btnAgent) btnAgent.className = useAgent
+            if (btnAgent) btnAgent.className = _flags.web
                 ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#E8F0FE] text-[#1967D2] border border-[#D2E3FC]"
                 : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
             const btnCanvas = document.getElementById('btn-canvas');
-            if (btnCanvas) btnCanvas.className = canvasMode
+            if (btnCanvas) btnCanvas.className = _flags.canvas
                 ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#EEF4FF] text-[#3B5BDB] border border-[#C5D8FF]"
                 : "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]";
         }
@@ -4029,6 +4155,7 @@
         }
 
         let userPausedAutoScroll = false; // set true when user manually scrolls up during streaming
+        let lastUserScrollAt = 0;
 
         function scrollToBottom(force=false) {
             if (!scrollAnchor) return;
@@ -4036,9 +4163,9 @@
             if (!container) { scrollAnchor.scrollIntoView({ behavior: 'smooth' }); return; }
             if (isStreaming) {
                 // Don't auto-scroll if the user has manually scrolled away during this stream
-                if (!force && userPausedAutoScroll) return;
+                if (!force && (userPausedAutoScroll || (Date.now() - lastUserScrollAt) < AUTO_SCROLL_RESUME_DELAY_MS)) return;
                 const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-                if (force || distFromBottom < 300) {
+                if (force || distFromBottom < 40) {
                     // Scroll container to absolute bottom — padding-bottom handles clearance
                     container.scrollTop = container.scrollHeight;
                 }
@@ -4083,7 +4210,8 @@
             }
         }
 
-        const AUTO_SCROLL_THRESHOLD_PX = 80; // pixels from bottom to detect manual scroll-up during streaming
+        const AUTO_SCROLL_THRESHOLD_PX = 48; // pixels from bottom to detect manual scroll-up during streaming
+        const AUTO_SCROLL_RESUME_DELAY_MS = 900; // ms after manual scroll-up before auto-scroll can resume
 
         // Listen to scroll events on chat container
         document.getElementById('chat-container').addEventListener('scroll', function() {
@@ -4093,6 +4221,7 @@
                 // If user scrolled beyond threshold, pause auto-scroll
                 if (distFromBottom > AUTO_SCROLL_THRESHOLD_PX) {
                     userPausedAutoScroll = true;
+                    lastUserScrollAt = Date.now(); // record time of manual scroll-up
                 } else {
                     // Near bottom again — resume auto-scroll
                     userPausedAutoScroll = false;
@@ -4100,6 +4229,97 @@
             }
             updateScrollJumpBtn();
         }, { passive: true });
+
+        // ── TEXT SELECTION QUICK ACTIONS TOOLBAR ─────────────────────
+        (function() {
+            const toolbar = document.getElementById('selection-toolbar');
+            if (!toolbar) return;
+            let _selText = '';
+
+            function positionAndShow(rect) {
+                const cx = rect.left + rect.width / 2 + window.scrollX;
+                const top = rect.top + window.scrollY - toolbar.offsetHeight - 10;
+                toolbar.style.left = Math.max(80, Math.min(cx, window.innerWidth - 80)) + 'px';
+                toolbar.style.top = Math.max(8, top) + 'px';
+                toolbar.classList.remove('hidden');
+            }
+
+            function hideToolbar() {
+                toolbar.classList.add('hidden');
+                _selText = '';
+            }
+
+            function handleSelectionChange() {
+                const sel = window.getSelection();
+                if (!sel || sel.isCollapsed || !sel.rangeCount) { hideToolbar(); return; }
+                const text = sel.toString().trim();
+                if (!text || text.length < 3) { hideToolbar(); return; }
+                // Only show toolbar if selection is inside an AI message
+                const node = sel.getRangeAt(0).commonAncestorContainer;
+                const msgWrapper = document.getElementById('messages-wrapper');
+                if (!msgWrapper) return;
+                let el = node.nodeType === 3 ? node.parentElement : node;
+                let inAI = false;
+                while (el && el !== document.body) {
+                    if (el.dataset && el.dataset.role === 'model') { inAI = true; break; }
+                    if (el.classList && el.classList.contains('ai-msg-bubble')) { inAI = true; break; }
+                    if (el === msgWrapper) break;
+                    el = el.parentElement;
+                }
+                if (!inAI) { hideToolbar(); return; }
+                _selText = text;
+                const range = sel.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                positionAndShow(rect);
+            }
+
+            document.addEventListener('mouseup', function(e) {
+                if (toolbar.contains(e.target)) return;
+                setTimeout(handleSelectionChange, 10);
+            });
+            document.addEventListener('touchend', function(e) {
+                if (toolbar.contains(e.target)) return;
+                setTimeout(handleSelectionChange, 80);
+            });
+            document.addEventListener('mousedown', function(e) {
+                if (!toolbar.contains(e.target)) hideToolbar();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') hideToolbar();
+            });
+
+            window.selectionToolbarCopy = function() {
+                if (!_selText) return;
+                navigator.clipboard.writeText(_selText).then(function() {
+                    showToast('Copied ✓');
+                }).catch(function() {
+                    const ta = document.createElement('textarea');
+                    ta.value = _selText; document.body.appendChild(ta);
+                    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                    showToast('Copied ✓');
+                });
+                hideToolbar();
+                window.getSelection().removeAllRanges();
+            };
+
+            window.selectionToolbarAsk = function() {
+                if (!_selText) return;
+                const snippet = _selText.length > 220 ? _selText.slice(0, 220) + '…' : _selText;
+                const inp = document.getElementById('chat-input');
+                if (inp) { inp.value = 'Explain this: "' + snippet + '"'; inp.focus(); inp.dispatchEvent(new Event('input')); }
+                hideToolbar();
+                window.getSelection().removeAllRanges();
+            };
+
+            window.selectionToolbarSimplify = function() {
+                if (!_selText) return;
+                const snippet = _selText.length > 220 ? _selText.slice(0, 220) + '…' : _selText;
+                const inp = document.getElementById('chat-input');
+                if (inp) { inp.value = 'Simplify this in plain language: "' + snippet + '"'; inp.focus(); inp.dispatchEvent(new Event('input')); }
+                hideToolbar();
+                window.getSelection().removeAllRanges();
+            };
+        })();
 
         // ── CHAT HISTORY ENGINE ─────────────────────────────────────────
         const MAIN_BRANCH_ID = 'main';
@@ -4114,6 +4334,7 @@
                 text: m?.text || '',
                 originalText: m?.originalText || m?.text || '',
                 thinking: m?.thinking || null,
+                thinkingMode: m?.thinkingMode || null,
                 sources: Array.isArray(m?.sources) ? m.sources : [],
                 agenticLogs: Array.isArray(m?.agenticLogs)
                     ? m.agenticLogs.slice(0, 8).map(l => ({ preface: (l.preface || '').slice(0, 500), url: l.url || '', status: l.status || 'read' }))
@@ -4652,6 +4873,7 @@
             updatePluginUI();
             // Load response sound
             updateResponseSoundUI();
+            updateAIDownloadableFilesUI();
             updateSendOnEnterUI();
             updateAutoFocusInputUI();
             updateOcrUI();
@@ -4733,6 +4955,8 @@
             localStorage.removeItem('snoah_multi_ai'); localStorage.removeItem('snoah_multi_ai_platforms');
             // Reset plugins and extra limits
             installedPlugins = [];
+            thinkingMode = 'auto';
+            aiFileDownloadsEnabled = true;
             webSearchResultLimit = 5;
             webSearchLanguage = 'auto';
             chatHistoryLimit = 30;
@@ -6563,6 +6787,28 @@ self.onmessage = async (event) => {
             }
         }
 
+        function toggleAIDownloadableFiles() {
+            aiFileDownloadsEnabled = !aiFileDownloadsEnabled;
+            localStorage.setItem('snoah_ai_file_downloads', aiFileDownloadsEnabled ? 'true' : 'false');
+            updateAIDownloadableFilesUI();
+            showToast(aiFileDownloadsEnabled ? 'AI downloadable files enabled' : 'AI downloadable files disabled');
+        }
+
+        function updateAIDownloadableFilesUI() {
+            const toggle = document.getElementById('ai-file-download-toggle');
+            if (!toggle) return;
+            const knob = toggle.querySelector('span');
+            if (aiFileDownloadsEnabled) {
+                toggle.classList.remove('bg-[#D9D6CE]');
+                toggle.classList.add('bg-[#D25D38]');
+                if (knob) knob.style.transform = 'translateX(20px)';
+            } else {
+                toggle.classList.remove('bg-[#D25D38]');
+                toggle.classList.add('bg-[#D9D6CE]');
+                if (knob) knob.style.transform = 'translateX(0)';
+            }
+        }
+
         function toggleSendOnEnter() {
             sendOnEnter = !sendOnEnter;
             localStorage.setItem('snoah_send_on_enter', sendOnEnter);
@@ -7013,7 +7259,7 @@ self.onmessage = async (event) => {
         }
 
         function backupChats() {
-            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_ai_response_format','snoah_ai_explain_level','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_param_by_platform','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_send_on_enter','snoah_autofocus_input','snoah_ocr_enabled','snoah_chat_branching_enabled','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_websearch_lang','snoah_agentic_ws','snoah_agent_browse_timeout','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
+            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_ai_response_format','snoah_ai_explain_level','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_param_by_platform','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_thinking_mode','snoah_ai_file_downloads','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_send_on_enter','snoah_autofocus_input','snoah_ocr_enabled','snoah_chat_branching_enabled','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_websearch_lang','snoah_agentic_ws','snoah_agent_browse_timeout','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
             const settings = {};
             settingsKeys.forEach(k => { const v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
             const data = { version: 2, app: 'SnoahAI', exported: new Date().toISOString(), chats: allChats, settings };
@@ -7309,23 +7555,41 @@ self.onmessage = async (event) => {
             }
         }
 
-        // ── RESPONSE LENGTH ────────────────────────────────────────────
-        function cycleLength() {
-            const idx = lengthCycle.indexOf(responseLength);
-            responseLength = lengthCycle[(idx + 1) % 3];
-            localStorage.setItem('snoah_length', responseLength);
-            updateLengthBtn();
+        // ── THINKING MODE ─────────────────────────────────────────────
+        function cycleThinkingMode() {
+            const idx = thinkingModeCycle.indexOf(thinkingMode);
+            thinkingMode = thinkingModeCycle[(idx + 1) % thinkingModeCycle.length];
+            localStorage.setItem('snoah_thinking_mode', thinkingMode);
+            localStorage.setItem('snoah_length', thinkingMode); // backward compatibility
+            updateThinkingModeBtn();
+            showToast('Thinking mode: ' + (thinkingModeLabels[thinkingMode] || 'Auto'));
         }
-        function updateLengthBtn() {
+        function updateThinkingModeBtn() {
             const btn = document.getElementById('btn-length');
-            const lbl = document.getElementById('length-label');
+            const lbl = document.getElementById('thinking-mode-label');
             if (!btn || !lbl) return;
-            lbl.textContent = lengthLabels[responseLength];
-            if (responseLength === 'normal') {
+            lbl.textContent = thinkingModeLabels[thinkingMode] || 'Auto';
+            if (thinkingMode === 'auto') {
                 btn.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]';
             } else {
                 btn.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 len-active border';
             }
+        }
+        function getThinkingModeInstruction(mode) {
+            if (mode === 'short') return 'THINKING MODE: Keep your hidden reasoning concise and focused.';
+            if (mode === 'normal') return 'THINKING MODE: Use balanced step-by-step hidden reasoning.';
+            if (mode === 'detailed') return 'THINKING MODE: Use deep, thorough hidden reasoning with edge cases before answering.';
+            return '';
+        }
+        function getEffectiveThinkingMode() {
+            return (smartMode || useThinking) ? (thinkingMode || 'auto') : 'off';
+        }
+        function getEffectiveFeatureFlags() {
+            return {
+                thinking: smartMode || useThinking,
+                web: smartMode || useAgent,
+                canvas: smartMode || canvasMode
+            };
         }
 
         // ── CHAT SEARCH ────────────────────────────────────────────────
@@ -8487,7 +8751,7 @@ self.onmessage = async (event) => {
                     } else {
                         inCode = false;
                         const codeText = codeLines.join('\n');
-                        html += canvasMode ? _buildArtifactCard(codeText, codeLang, false) : _buildInlineCodeBlock(codeText, codeLang, false);
+                        html += (smartMode || canvasMode) ? _buildArtifactCard(codeText, codeLang, false) : _buildInlineCodeBlock(codeText, codeLang, false);
                     }
                     continue;
                 }
@@ -8542,7 +8806,7 @@ self.onmessage = async (event) => {
             // Flush unclosed code block — happens during streaming when the closing ``` hasn't arrived yet
             if (inCode) {
                 const codeText = codeLines.join('\n');
-                html += canvasMode ? _buildArtifactCard(codeText, codeLang || 'text', true) : _buildInlineCodeBlock(codeText, codeLang || 'text', true);
+                html += (smartMode || canvasMode) ? _buildArtifactCard(codeText, codeLang || 'text', true) : _buildInlineCodeBlock(codeText, codeLang || 'text', true);
             }
             return html;
         }
@@ -8802,6 +9066,27 @@ self.onmessage = async (event) => {
             next = next.replace(/\[FILE:\s*[^\]\n]+\][\s\S]*?\[\/FILE\]/gi, '').trim();
             return { cleanedText: next, files };
         }
+
+        function normalizeThinkTagsForDisplay(raw) {
+            let out = String(raw || '')
+                .replace(/<reasoning>([\s\S]*?)<\/reasoning>/gi, '<think>$1</think>')
+                .replace(/<thinking>([\s\S]*?)<\/thinking>/gi, '<think>$1</think>')
+                .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>')
+                .replace(/<tool_call[^>]*>/gi, '<tool_call>')
+                .replace(/<\/tool_call>/gi, '</tool_call>');
+            out = out.replace(/<tool_call>([\s\S]*?)(?:<\/tool_call>|$)/gi, (_, content) => {
+                const trimmed = String(content || '').trim();
+                if (!trimmed) return '';
+                if (/<think>[\s\S]*?<\/think>/i.test(trimmed)) return trimmed;
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    if (parsed && typeof parsed === 'object') return '';
+                } catch (_) {}
+                return '<think>' + trimmed + '</think>';
+            }).replace(/<\/tool_call>/gi, '');
+            return out;
+        }
+
 
         function downloadGeneratedFile(encodedName, encodedData, encodedMime, isBase64) {
             const name = decodeURIComponent(encodedName || '');
@@ -9115,10 +9400,10 @@ self.onmessage = async (event) => {
 
             setIsLoading(true);
 
-            const lengthDirective = responseLength === 'short' ? 'Be brief and concise — 2-4 sentences max. ' : responseLength === 'detailed' ? 'Be thorough and detailed. ' : '';
+            const _multiThinkingDirective = (smartMode || useThinking) ? getThinkingModeInstruction(thinkingMode) + ' ' : '';
             const _convStyleExtra = (convStyle && convStyle !== 'standard' && CONV_STYLE_INSTRUCTIONS[convStyle]) ? '\n\nCONVERSATION STYLE: ' + CONV_STYLE_INSTRUCTIONS[convStyle] : '';
             const _pluginExtra = buildPluginPromptExtra();
-            const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + lengthDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '') + _convStyleExtra + (responseLang ? '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language.' : '') + (_pluginExtra ? '\n\n' + _pluginExtra : '');
+            const sysInstruction = (customPersona || 'You are SnoahAI, an advanced AI assistant.') + ' ' + _multiThinkingDirective + (customInstructions ? '\nUser custom instructions: ' + customInstructions : '') + _convStyleExtra + (responseLang ? '\n\nLANGUAGE DIRECTIVE: ALWAYS respond in ' + responseLang + ' language.' : '') + (_pluginExtra ? '\n\n' + _pluginExtra : '');
 
             try {
                 const results = await Promise.all(platforms.map(p => multiAIFetchSingle(p, textToSend, sysInstruction)));
@@ -9129,6 +9414,7 @@ self.onmessage = async (event) => {
                 const multiUID = 'multi_' + Date.now();
                 const multiWrapper = document.createElement('div');
                 multiWrapper.className = 'flex w-full justify-start animate-slide-up';
+                multiWrapper.dataset.role = 'model';
                 let dropdownOpts = results.map((r, i) => '<option value="' + i + '">' + MULTI_AI_LABELS[r.platform] + (r.error ? ' ⚠️' : '') + '</option>').join('');
                 multiWrapper.innerHTML =
                     '<div class="flex flex-col w-full max-w-[95%]">' +
@@ -9548,15 +9834,13 @@ self.onmessage = async (event) => {
             scrollToBottom();
 
             setIsLoading(true);
-
-            // Smart mode now leaves toggles untouched and lets the AI decide feature usage directly.
+            const _effectiveFlags = getEffectiveFeatureFlags();
+            const _effectiveUseThinking = _effectiveFlags.thinking;
+            const _effectiveUseAgent = _effectiveFlags.web;
+            const _effectiveCanvasMode = _effectiveFlags.canvas;
 
             try {
-                const lengthDirective = responseLength === 'short'
-                    ? 'RESPONSE LENGTH: Be brief and concise — 2-4 sentences max unless code is required. '
-                    : responseLength === 'detailed'
-                    ? 'RESPONSE LENGTH: Be thorough and detailed — explain deeply, cover edge cases, give examples. '
-                    : '';
+                const lengthDirective = _effectiveUseThinking ? (getThinkingModeInstruction(thinkingMode) + ' ') : '';
                 let systemInstruction = customPersona
                     ? customPersona + ' ' + lengthDirective
                     : `You are SnoahAI, an advanced AI assistant built into a mobile-first web app called SnoahAI. Here is everything you must know about the app you are running inside:
@@ -9584,8 +9868,8 @@ FEATURES:
 2. WEB SEARCH (🔍 Web button): When enabled, all AI platforms can perform real-time web search. Gemini uses native Google Search grounding. All other platforms receive search results pre-fetched from the configured Web Search Platform (Tavily, Brave, Serper, Wikipedia, DuckDuckGo, Custom, or Gemini) and injected as context — so EVERY platform supports live web search. The web search provider is independent of the AI platform. Web search works on ALL 21+ AI platforms. You should NEVER tell the user that a non-Gemini platform cannot do web search — all platforms support it when the Web button is ON.
 3. IMAGE UPLOAD (📎 Attach button / + button): Upload images for AI to analyze. Supported on ALL platforms that accept the OpenAI-compatible image_url format — including Gemini, OpenRouter, NVIDIA, Groq, Together AI, Mistral AI, Claude, Hugging Face, GitHub Models, Copilot, Google AI Studio, Cohere, DeepInfra, Ollama, Cerebras, SambaNova, Fireworks, xAI, Perplexity, and NanoGPT. Vision availability depends on whether the specific model selected supports image input; if not, the platform will return an error. Tap Attach button or the + button. Multi-image upload supported with preview strip.
 4. FILE ATTACHMENTS (📎 Attach button): Upload documents — PDFs, text files (.txt), CSVs, JSON, Markdown (.md), XML, .doc/.docx. Document content is extracted and sent as context to the AI. Combine with images in the same message.
-5. RESPONSE LENGTH (≡ Normal button): Cycles Normal → Short (2-4 sentences) → Detailed. Tap the button to cycle through lengths.
-6. TEMPLATES (🔖 Templates button): Pre-saved prompt starters. Built-in templates: Explain Simply, Clinical Summary, Compare & Contrast, Step by Step. Users can add custom templates with a name and text. Templates are saved to device storage.
+5. THINKING MODE PROFILE (🧠 Auto/Normal/Detailed/Short button): Controls hidden reasoning depth only. Auto lets model decide; Normal is balanced; Detailed is deeper; Short is concise.
+6. TEMPLATES (🔖 Templates button): Pre-saved prompt starters. Built-in templates: Explain Simply, Clinical Summary, Compare & Contrast, Step by Step, AI Workflow, Action Checklist. Users can add custom templates with a name and text. Templates are saved to device storage.
 7. TEMP CHAT (🕐 Temp Chat button): Start a temporary conversation that won't be saved to chat history. Perfect for quick questions or sensitive topics. A yellow banner shows when Temp Chat is active. Toggle on/off with the clock icon button in the top header bar (to the left of the Search and New Chat icons on the right side of the header).
 8. DARK MODE: Menu (☰) → Light/Dark Mode toggle. Full dark theme support across all UI elements.
 9. CHAT HISTORY: All chats auto-saved locally on device. Access via ☰ menu. Auto-titled after first exchange using AI.
@@ -9597,7 +9881,7 @@ FEATURES:
 15. AI PERSONA: Settings → AI Persona — override SnoahAI personality entirely with a custom persona description.
 16. THEMES: Settings → 4 color themes (Default/orange, Ocean/blue, Forest/green, Rose/pink). Changes accent colors throughout the app.
 17. FONT SIZE: Settings → Small / Medium / Large text size adjustment.
-18. SLASH COMMANDS: Type / in the input box for quick shortcuts: /explain, /summarize, /translate, /shorter, /longer, /bullets, /code, /compare. These insert prompt templates instantly.
+18. SLASH COMMANDS: Type / in the input box for quick shortcuts: /explain, /summarize, /translate, /shorter, /longer, /bullets, /code, /compare, /workflow, /checklist. These insert prompt templates instantly.
 19. CODE RUNNER: Code blocks in AI responses have a ▶ Run button (supports JavaScript and HTML). Output displays inline below the code block.
 20. TTS (Text-to-Speech): Every AI response has a 🔊 Read button to read the response aloud. If an ElevenLabs API key is configured in Settings → ElevenLabs TTS, it uses ElevenLabs high-quality AI voices (Rachel, Charlie, Aria, George, Liam, Charlotte, Alice, Brian). Falls back to device speech synthesis (preferring Google UK English Female) if ElevenLabs is not configured or fails. TTS automatically stops at the end — no repeat playback.
 21. VOICE INPUT: Mic 🎤 button next to the input for speech-to-text input. Speaks your message and converts to text.
@@ -9605,7 +9889,7 @@ FEATURES:
 23. STOP STREAMING: Send button turns into a ■ stop button during AI response generation. Tap to cancel the current response.
 24. PWA INSTALL: Orange install banner appears in browser — tap Install to add to home screen. Runs fullscreen with no browser bar for a native app feel.
 25. TOKEN USAGE TRACKING: Settings → Token Usage section. Tracks prompt tokens, completion tokens, total tokens, and request count per platform. View usage history and manage limits.
-26. CONTACT DEVELOPER: ☰ → Contact Us — reach the developer (Shahzaib Muzaffar) directly via Telegram (@Owner_Of_Crypton) or Instagram (@shahzaib_muzaffar_7).
+26. CONTACT + FEEDBACK: ☰ → Contact Us now includes direct feedback submission and feature request polls, plus developer contact links.
 27. UPDATES PANEL: ☰ → Updates — view the latest features, changes, and announcements about SnoahAI.
 28. HAPTIC FEEDBACK: The app provides subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.
 29. SMOOTH STREAMING: AI responses stream in real-time with a smooth animated cursor. A floating loading indicator appears above the input bar during generation.
@@ -9638,7 +9922,7 @@ FEATURES:
 56. INSTANT RESPONSE DISPLAY: Settings → API tab → Response Display toggle. When ON, AI responses appear all at once without the character-by-character streaming animation. Useful for users who prefer immediate full responses.
 57. RESPONSE LANGUAGE: Settings → AI tab → Response Language dropdown. Choose from: Auto (default), English, Spanish, French, German, Arabic, Chinese, Hindi, Japanese, Portuguese, Russian, Korean. When set, a language directive is injected into the system prompt to make the AI always respond in the chosen language, regardless of the user's input language.
 58. MESSAGE TIMESTAMPS: Settings → App tab → Show Timestamps toggle. When ON, every message (both user and AI) displays the time it was sent. Timestamps are stored on the message element and toggled via CSS class 'show-timestamps' on the root element.
-59. GLOBAL COMMUNITY CHAT: ☰ → Community — opens a full-screen live chat room shared by ALL SnoahAI users worldwide in real time. Powered by Firebase Firestore with onSnapshot for instant message delivery. Messages include sender name, time, and are stored in the 'community_chat' Firestore collection. The modal has two tabs: 💬 Live Chat (the global chat room) and 📬 Contact Dev (Telegram, Instagram, GitHub links to reach Shahzaib Muzaffar). Max 500 chars per message, 3-second cooldown to prevent spam. The user's saved name from Settings is shown as their display name.
+59. GLOBAL COMMUNITY CHAT: ☰ → Community — opens a full-screen live chat room shared by ALL SnoahAI users worldwide in real time. Powered by Firebase Firestore with onSnapshot for instant message delivery. Messages include sender name, time, and are stored in the 'community_chat' Firestore collection. The modal has two tabs: 💬 Live Chat (the global chat room) and 📬 Contact & Feedback (feedback form, feature poll, plus Telegram/Instagram/GitHub links). Max 500 chars per message, 3-second cooldown to prevent spam. The user's saved name from Settings is shown as their display name.
 60. CHEMISTRY RENDERING: KaTeX mhchem extension is loaded alongside KaTeX. Chemistry equations using \\ce{...} notation render beautifully in both inline ($...$) and display ($$...$$) math blocks. Examples: $\\ce{H2O}$ renders as water, $\\ce{2H2 + O2 -> 2H2O}$ renders a balanced equation with arrow. Use \\ce{} for any chemical formula or reaction equation.
 61. MATH & MARKDOWN RENDERING: All lines in the AI response go through processInlineRaw() which handles: display math ($$...$$), inline math ($...$), chemistry (\\ce{}), HTML escaping, bold/italic/code/link Markdown in the correct order. Previously, lines containing math could display with unformatted surrounding text — this is now fixed.
 62. TTS PLATFORM (MULTI-KEY): Settings → API tab → TTS Platform section. Choose from: Built-in Web Speech (free, no key), ElevenLabs (freemium, multi-key pool stored as elevenLabsApiKeys), OpenAI TTS (paid, multi-key pool stored as openaiTtsApiKeys, voices: alloy/echo/fable/onyx/nova/shimmer, models: tts-1/tts-1-hd), Groq TTS (free tier, multi-key pool stored as groqTtsApiKeys, voices: Arista-PlayAI/Atlas-PlayAI/Fritz-PlayAI), Gemini TTS (free, reuses Gemini key pool, voices: Aoede/Kore/Fenrir/Charon/Puck/Leda/Orus/Zephyr). Active platform stored as ttsPlatform in localStorage. Keys auto-rotate on 401 or 429 errors. Falls back to device Web Speech API on failure.
@@ -9688,18 +9972,19 @@ FEATURES:
 106. AI GENERATED DOWNLOAD FILES: The AI can output [FILE: ...] or [FILE_B64: ...] blocks and SnoahAI renders downloadable file cards with correct file extensions.
 107. CANVAS FULLSCREEN CONTROL: Artifact viewer includes a fullscreen button plus close (X) exit, enabling full-screen code/canvas viewing.
 108. PLATFORM-SPECIFIC PARAMETERS: Temperature, Top P, Top K, and Max Tokens are stored per selected AI platform and auto-load when switching platforms.
+109. TEXT SELECTION QUICK ACTIONS: When the user selects text inside any AI response, a floating dark toolbar appears above the selection with three buttons: Copy (copies the selected text), Ask AI (fills the chat input with "Explain this: [selected text]" ready to send), and Simplify (fills the chat input with "Simplify this in plain language: [selected text]" ready to send). The toolbar hides on click-outside, Escape, or after using an action. Only appears on AI message bubbles, not user messages.
 
 APP STRUCTURE & LAYOUT:
 - Complex multi-functional web app: main index.html with Tailwind CSS and inline JavaScript, plus backend Vercel serverless functions in /api/ folder for CORS-proxied platforms.
 - Top bar: App name "SnoahAI" (left), model badge (center), three icon buttons on the right: Temp Chat (clock 🕐), Search (🔍), New Chat (+). Hidden in Focus Mode.
 - Main area: Scrollable message thread with welcome screen shown when no chat is active. Generated images appear inline in chat as styled cards with download buttons. Agentic web search shows a collapsible "🔍 Search Process" block above the final response.
-- Bottom bar: Input toolbar with ⚡ Smart, Thinking (🧠), Web Search (🔍), Response Length, Templates, Canvas buttons, main text input (with Attach 📎 plus-icon on the left and Voice 🎤 on the right), Send/Stop button.
-- Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Multi-Key Storage toggle/Dark Mode/Focus Mode/About/Updates/Contact Us), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal). A branch strip appears in active chats with selector + New + Delete branch actions.
+- Bottom bar: Input toolbar with ⚡ Smart, Thinking (🧠), Web Search (🔍), Thinking Mode cycle (Auto/Normal/Detailed/Short), Templates, Canvas buttons, main text input (with Attach 📎 plus-icon on the left and Voice 🎤 on the right), Send/Stop button.
+- Sidebar (slides in from left): Clock icon (Temp Chat toggle) + New Chat + Search buttons at top, user profile at bottom, chat history list (shows 4 most recent; pinned chats appear at top with 📌 icon; tap "X more chats" to expand all) with tag filter, and 4 main action buttons — Settings (opens API/AI/App tabs modal), Preferences (opens a panel with 3 categories: Chat Tools with Export/Share/Summarize, Saved Items with Pinned Messages/Bookmarks, App & Info with Multi-Key Storage toggle/Dark Mode/Focus Mode/About/Updates/Contact Us + Feedback (developer links, feedback form, feature request poll), Community (global live chat with unique username + privacy policy on first entry, message deletion, 10s anti-spam), Updates (What's New modal). A branch strip appears in active chats with selector + New + Delete branch actions.
 - Settings → API tab sections: Platform & Model (21 AI platforms + Custom Endpoint), API Keys pool (multi-key, auto-rotate), Custom Endpoint section (URL + auth type, shown when Custom Endpoint selected), TTS Platform (WebSpeech/ElevenLabs/OpenAI/Groq/Gemini with multi-key pool), Image Generation (Pollinations AI/Gemini Imagen/NVIDIA NIM/Together AI/Hugging Face with multi-key pools), Web Search Platform (Gemini/Tavily/Brave/Serper/Custom with per-provider key pool + Web Search Language + Agentic Web Search toggle + Browse Depth + Browse Timeout sliders), Advanced Model Parameters, API Request Timeout (15–120s slider), Token Management, Notion Integration, Response Display.
 - Settings → AI tab sections: AI Persona (system prompt override), Custom Instructions, Multi-AI Response, Auto Memory, Response Language, AI Response Format, AI Explanation Level, Conversation Style (Standard/Friendly/Concise/Detailed/Academic/Casual), Follow-Up Suggestions toggle, Plugin / Extension System.
 - Settings → App tab sections: Font Size, Theme, Message Timestamps, Response Sound toggle, Send on Enter toggle, Auto-Focus Input toggle, OCR toggle (image text extraction), Chat Branching toggle, Full Backup & Restore (v2 JSON — chats + settings + keys), Storage Manager (usage breakdown + Clear Keys), Delete All Chats (Danger Zone).
-- Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact Dev tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
-- AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy Text, Download, Summarize, Follow-up, Bookmark) after response.
+- Modals: Settings (tabbed: API, AI, App), Updates, About Us, Global Community Chat (full-screen, with Live Chat + Contact & Feedback tabs), Notion Save confirmation, Pinned Messages, Bookmarks, image/file preview.
+- AI messages: White/light background, left-aligned. Show Copy, Retry, Read action buttons + ⋮ more menu (Pin, Notion, Translate, Share, Copy Text, Download, Summarize, Follow-up, Bookmark) after response. Selecting text inside an AI message shows a floating Text Selection toolbar with Copy, Ask AI, and Simplify actions.
 - User messages: Beige/tan background (#EFECE6), right-aligned, with small Edit button below.
 - New user onboarding: Welcome modal with name input, required Terms & Conditions checkbox, and optional Multi-Key Storage (cookies) checkbox.
 
@@ -9721,7 +10006,7 @@ DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mo
 Always answer questions about the app based on the above. If asked "what can you do" or "how do I use X feature", explain it clearly based on this documentation.
 
 FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $...$ display: $$...$$. For chemistry equations use KaTeX mhchem: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$, $$\\ce{CuSO4 + 2NaOH -> Cu(OH)2 + Na2SO4}$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. (6) DEVELOPER NOTE: Telegram username is @Owner_Of_Crypton and Instagram username is @shahzaib_muzaffar_7 — preserve underscores exactly as written. (7) IMAGE GENERATION: When the user asks you to include, generate, or show an image as part of your response, place an [IMG: detailed image description] marker exactly where the image should appear. The app will automatically generate the image and display it inline. You can mix text and images freely — e.g., explain something in text then place [IMG: ...] to show a visual. ` + lengthDirective;
-                if (useThinking) systemInstruction += "The user has enabled THINKING MODE. Wrap your detailed step-by-step internal reasoning inside <think> and </think> tags at the very beginning of your response, then give the final answer. ";
+                if (_effectiveUseThinking) systemInstruction += "The user has enabled THINKING MODE. Wrap your detailed step-by-step internal reasoning inside <think> and </think> tags at the very beginning of your response, then give the final answer. ";
                 // Inject active platform and model so the AI can answer platform/model questions accurately
                 const _platNames = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', nvidia: 'NVIDIA NIM', huggingface: 'Hugging Face', githubmodels: 'GitHub Models', claude: 'Claude (Anthropic)', copilot: 'Microsoft Copilot', gais: 'Google AI Studio', ollama: 'Ollama', cohere: 'Cohere', puter: 'Puter.js', deepinfra: 'DeepInfra', cerebras: 'Cerebras AI', sambanova: 'SambaNova', fireworks: 'Fireworks AI', xai: 'xAI (Grok)', perplexity: 'Perplexity', nanogpt: 'NanoGPT' };
                 const _activeModelNow = platform==='openrouter'?orModelId:platform==='groq'?groqModelId:platform==='together'?togetherModelId:platform==='mistral'?mistralModelId:platform==='nvidia'?nvidiaModelId:platform==='huggingface'?hfModelId:platform==='githubmodels'?ghModelId:platform==='claude'?claudeModelId:platform==='copilot'?copilotModelId:platform==='gais'?gaisModelId:platform==='ollama'?ollamaModelId:platform==='cohere'?cohereModelId:platform==='puter'?puterModelId:platform==='deepinfra'?deepinfraModelId:platform==='cerebras'?cerebrasModelId:platform==='sambanova'?sambanovaModelId:platform==='fireworks'?fireworksModelId:platform==='xai'?xaiModelId:platform==='perplexity'?perplexityModelId:platform==='nanogpt'?nanogptModelId:modelId;
@@ -9729,10 +10014,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Inject live feature state so AI always knows which toggles are on/off
                 const _wsProviders = { gemini: 'Gemini (Google Search)', wikipedia: 'Wikipedia Search', duckduckgo: 'DuckDuckGo Search', tavily: 'Tavily AI Search', brave: 'Brave Search', serper: 'Google via Serper.dev', custom: 'Custom Search API' };
                 const _featureState = [
-                    'Web Search: ' + (useAgent ? 'ON (provider: ' + (_wsProviders[webSearchPlatform] || webSearchPlatform) + ')' : 'OFF'),
-                    'Thinking Mode: ' + (useThinking ? 'ON' : 'OFF'),
+                    'Web Search: ' + (_effectiveUseAgent ? 'ON (provider: ' + (_wsProviders[webSearchPlatform] || webSearchPlatform) + ')' : 'OFF'),
+                    'Thinking Mode: ' + (_effectiveUseThinking ? 'ON (' + (thinkingModeLabels[thinkingMode] || 'Auto') + ')' : 'OFF'),
                     'Smart / Agentic Mode: ' + (smartMode ? 'ON (AI decides feature/tool usage directly)' : 'OFF'),
-                    'Canvas Mode: ' + (canvasMode ? 'ON (code opens in Artifact Viewer)' : 'OFF'),
+                    'Canvas Mode: ' + (_effectiveCanvasMode ? 'ON (code opens in Artifact Viewer)' : 'OFF'),
                     'Multi-AI Mode: ' + (multiAIEnabled ? 'ON (platforms: ' + (multiAIPlatforms.join(', ') || 'none selected') + ')' : 'OFF'),
                     'Instant Response Display: ' + (instantResponseMode ? 'ON (full response shown at once)' : 'OFF (animated character-by-character)'),
                     'Response Language: ' + (responseLang ? responseLang : 'auto (matches user language)'),
@@ -9751,9 +10036,13 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     'Auto-Focus Input: ' + (autoFocusInput ? 'ON' : 'OFF'),
                     'Focus Mode: ' + (focusModeActive ? 'ON (header hidden)' : 'OFF'),
                     'Model Parameters: Temperature=' + paramTemperature + ' | Top P=' + paramTopP + ' | Top K=' + paramTopK + ' | Max Tokens=' + paramMaxTokens,
-                    'Response Length: ' + responseLength,
+                    'Thinking Profile: ' + (_effectiveUseThinking ? (thinkingModeLabels[thinkingMode] || 'Auto') : 'Off'),
+                    'AI Download Files: ' + (aiFileDownloadsEnabled ? 'ON' : 'OFF'),
                 ].join(' | ');
-                systemInstruction += '\n\nACTIVE FEATURE STATE: ' + _featureState + '. When the user asks which features are on or off, what mode is active, or what parameters are set, answer accurately from this state.\n\nFEATURE CONTROL: You can toggle app features by including a control tag anywhere in your response: [SNOAH: feature=value] where feature can be: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). These tags are silently processed and removed from the displayed response. Example: if the user says "turn on canvas mode", include [SNOAH: canvas=on] somewhere in your response along with your text reply. In Smart mode, do not request keyword automation — decide and use features directly.\n\nFILE OUTPUT CONTROL: To generate downloadable files, include either [FILE: filename.ext]...content...[/FILE] for text files, or [FILE_B64: filename.ext]...base64...[/FILE_B64] for binary files like PDFs. These file blocks are converted into download cards in chat and removed from visible answer text.\n\nMEMORY CONTROL: If the user asks you to save something to memory or remember something, include [MEMORY: fact1. fact2. fact3] in your response — each fact separated by a period. These will be saved and removed from the displayed text.';
+                const fileOutputInstruction = aiFileDownloadsEnabled
+                    ? 'FILE OUTPUT CONTROL: To generate downloadable files, include either [FILE: filename.ext]...content...[/FILE] for text files, or [FILE_B64: filename.ext]...base64...[/FILE_B64] for binary files like PDFs. These file blocks are converted into download cards in chat and removed from visible answer text.'
+                    : 'FILE OUTPUT CONTROL: Downloadable file blocks are disabled right now. Do NOT use [FILE] or [FILE_B64] tags. Return normal text/code only.';
+                systemInstruction += '\n\nACTIVE FEATURE STATE: ' + _featureState + '. When the user asks which features are on or off, what mode is active, or what parameters are set, answer accurately from this state.\n\nFEATURE CONTROL: You can toggle app features by including a control tag anywhere in your response: [SNOAH: feature=value] where feature can be: canvas (on/off), thinking (on/off), web_search (on/off), smart (on/off). These tags are silently processed and removed from the displayed response. Example: if the user says "turn on canvas mode", include [SNOAH: canvas=on] somewhere in your response along with your text reply. In Smart mode, do not request keyword automation — decide and use features directly.\n\n' + fileOutputInstruction + '\n\nMEMORY CONTROL: If the user asks you to save something to memory or remember something, include [MEMORY: fact1. fact2. fact3] in your response — each fact separated by a period. These will be saved and removed from the displayed text.';
                 if (platform === 'mistral') {
                     systemInstruction += 'You are running on Mistral AI. ';
                 }
@@ -9763,7 +10052,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 if (platform === 'groq') {
                     systemInstruction += 'You are running on Groq. Do NOT output tool call syntax. ';
                 }
-                if (useAgent) {
+                if (_effectiveUseAgent) {
                     const now = new Date();
                     const _wsLangExtra = webSearchLanguage && webSearchLanguage !== 'auto' ? ' Preferred search language: ' + webSearchLanguage + '.' : '';
                     if (platform === 'gemini') {
@@ -9774,7 +10063,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 } else {
                     systemInstruction += "Web search is currently OFF. If the user asks about real-time info (today's date, current events, live data), answer from your training knowledge and suggest they tap the Web (🔍) button to enable real-time search. ";
                 }
-                if (useAgent && agenticWebSearch) {
+                if (_effectiveUseAgent && agenticWebSearch) {
                     systemInstruction += "\n\nAGENTIC WEB BROWSING IS ENABLED: You can visit any URL to read its full content. To browse a URL, output [BROWSE: https://example.com] on its own line. The system will fetch the full page content and return it to you as a [PAGE CONTENT] observation. After receiving page content, analyze it and answer the user's question thoroughly. You can use [BROWSE: url] when the user asks you to read a specific URL, or when search results show a promising link you need to read in full. IMPORTANT: Only use [BROWSE: url] when truly needed — once per response at most. Per-URL browse timeout is set to " + Math.round(agentBrowseTimeoutMs / 1000) + " seconds.";
                 }
                 if (followUpSuggestions) {
@@ -9820,7 +10109,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     if (msg.isError) continue;
                     const mappedRole = msg.role === 'user' ? 'user' : 'model';
                     let contentText = msg.originalText || msg.text || '';
-                    if (mappedRole === 'user' && msg === messages[messages.length - 1] && useAgent) {
+                    if (mappedRole === 'user' && msg === messages[messages.length - 1] && _effectiveUseAgent) {
                         contentText += "\n\n[SYSTEM DIRECTIVE: WEB SEARCH IS ENABLED. You MUST use the google_search tool to look up real-time information to answer this prompt before responding.]";
                     }
                     const parts = [];
@@ -9851,7 +10140,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // For non-Gemini platforms with web search on, fetch results and inject into systemInstruction
                 let _preFetchedSources = null, _preFetchedQueries = null;
                 let _wsPreFetchAttempted = false;
-                if (useAgent && platform !== 'gemini' && platform !== 'gais') {
+                if (_effectiveUseAgent && platform !== 'gemini' && platform !== 'gais') {
                     _wsPreFetchAttempted = true;
                     try {
                         const ws = await performWebSearch(messages);
@@ -9871,6 +10160,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // ── Build live response bubble immediately ──
                 const liveWrapper = document.createElement('div');
                 liveWrapper.className = 'flex w-full justify-start animate-slide-up';
+                liveWrapper.dataset.role = 'model';
                 const liveUID = 'live_' + Date.now();
                 liveWrapper.innerHTML =
                     '<div class="flex flex-col w-full max-w-[95%]">' +
@@ -9907,18 +10197,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
                 // Normalize alternative reasoning tags used by various models to <think>...</think>
                 function _normalizeThinkTags(raw) {
-                    return raw
-                        .replace(/<reasoning>([\s\S]*?)<\/reasoning>/gi, '<think>$1</think>')
-                        .replace(/<thinking>([\s\S]*?)<\/thinking>/gi, '<think>$1</think>')
-                        .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>')
-                        // GLM and some models use <tool_call> for internal reasoning output.
-                        // Use JSON.parse to reliably distinguish real JSON function calls
-                        // (which are stripped) from plain-text reasoning (routed to <think>).
-                        .replace(/<tool_call>([\s\S]*?)<\/tool_call>/gi, (_, content) => {
-                            const trimmed = content.trim();
-                            try { JSON.parse(trimmed); return ''; } catch(e) {}
-                            return '<think>' + trimmed + '</think>';
-                        });
+                    return normalizeThinkTagsForDisplay(raw);
                 }
 
                 function rafRender(ts) {
@@ -9976,7 +10255,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 liveTextEl.style.whiteSpace = '';
                             }
                             // Canvas mode: auto-open artifact viewer when first code block appears
-                            if (canvasMode && !_canvasAutoOpened) {
+                            if (_effectiveCanvasMode && !_canvasAutoOpened) {
                                 const artifactBtn = liveTextEl.querySelector('.artifact-card button[onclick^="openArtifact"]');
                                 if (artifactBtn) {
                                     _canvasAutoOpened = true;
@@ -9984,7 +10263,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 }
                             }
                             // Canvas mode: live-update the open artifact viewer with latest streamed code
-                            if (canvasMode && _canvasAutoOpened) {
+                            if (_effectiveCanvasMode && _canvasAutoOpened) {
                                 _updateCanvasViewer(displayMain);
                             }
                         } else {
@@ -10106,7 +10385,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 const chunk = part?.text ?? part?.delta?.content ?? '';
                                 if (chunk) { fullRaw += chunk; renderDirty = true; }
                             }
-                        } else if (platform === 'gais' && !useAgent) {
+                        } else if (platform === 'gais' && !_effectiveUseAgent) {
                             // Google AI Studio — same as Gemini API but with separate key
                             const gaisUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + gaisModelId + ':streamGenerateContent?alt=sse&key=' + gaisApiKey;
                             const gaPayload = { contents: formattedContents, systemInstruction: { parts: [{ text: systemInstruction }] }, generationConfig: { temperature: paramTemperature, topP: paramTopP, topK: paramTopK, maxOutputTokens: paramMaxTokens } };
@@ -10242,12 +10521,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             abortController = null;
                         } else {
                             const payload = { contents: formattedContents, systemInstruction: { parts: [{ text: systemInstruction }] }, generationConfig: { temperature: paramTemperature, topP: paramTopP, topK: paramTopK, maxOutputTokens: paramMaxTokens } };
-                            if (useAgent) payload.tools = [{ google_search: {} }];
+                            if (_effectiveUseAgent) payload.tools = [{ google_search: {} }];
                             abortController = new AbortController();
                             // Connection timeout: abort if no response within 60s
                             const connTimeout2 = setTimeout(() => { if (abortController) { abortController._timedOut = true; abortController.abort(); } }, 60000);
                             // google_search grounding does NOT work with SSE streaming — must use generateContent
-                            const geminiUrl = getApiUrl(useAgent ? false : true);
+                            const geminiUrl = getApiUrl(_effectiveUseAgent ? false : true);
                             const res = await fetch(geminiUrl, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -10261,7 +10540,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             }
                             if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
                             clearTimeout(connTimeout2);
-                            if (useAgent) {
+                            if (_effectiveUseAgent) {
                                 // Web search: fetch non-streaming (grounding requires it)
                                 // Show "Searching web..." indicator in the bubble immediately
                                 if (!liveAppended) {
@@ -10318,7 +10597,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
                         // ── AGENTIC WEB BROWSING: detect [BROWSE: url] commands in AI response ──
                         // Uses _browsesDone (not attempts) so key-rotation counter is not affected.
-                        if (agenticWebSearch && useAgent && _browsesDone < agentBrowseDepth) {
+                        if (agenticWebSearch && _effectiveUseAgent && _browsesDone < agentBrowseDepth) {
                             const _browseMatch = fullRaw.match(/\[BROWSE:\s*(https?:\/\/[^\]]+)\]/i);
                             if (_browseMatch) {
                                 const _browseUrl = _browseMatch[1].trim();
@@ -10486,9 +10765,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 mainText = mainText.replace(/\[MEMORY:[^\]]*\]/gi, '').trim();
                 // Strip any leftover [BROWSE: url] commands from the visible text
                 mainText = mainText.replace(/\[BROWSE:\s*https?:\/\/[^\]]*\]/gi, '').trim();
-                const _fileParse = parseAIGeneratedFiles(mainText);
-                mainText = _fileParse.cleanedText;
-                const _generatedFiles = Array.isArray(_fileParse.files) ? _fileParse.files : [];
+                let _generatedFiles = [];
+                if (aiFileDownloadsEnabled) {
+                    const _fileParse = parseAIGeneratedFiles(mainText);
+                    mainText = _fileParse.cleanedText;
+                    _generatedFiles = Array.isArray(_fileParse.files) ? _fileParse.files : [];
+                }
 
                 // Extract FOLLOW_UP suggestions line from AI response
                 let _followUpQuestions = [];
@@ -10600,7 +10882,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     if (thinkHeader) thinkHeader.innerHTML =
                         '<button onclick="toggleExpand(&quot;thbtn_' + liveUID + '&quot;,&quot;thbody_' + liveUID + '&quot;)" ' +
                         'class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-[#5B5951] hover:bg-[#EAE8E0] transition-colors">' +
-                        '<div class="flex items-center gap-2"><i data-lucide="brain" class="w-4 h-4 text-[#8C897D]"></i><span>Thought Process</span></div>' +
+                        '<div class="flex items-center gap-2"><i data-lucide="brain" class="w-4 h-4 text-[#8C897D]"></i><span>Thought Process' + (_effectiveUseThinking ? ' · ' + (thinkingModeLabels[thinkingMode] || 'Auto') : '') + '</span></div>' +
                         '<i id="thbtn_' + liveUID + '-icon" data-lucide="chevron-up" class="w-4 h-4 text-[#8C897D]"></i></button>';
                     thinkBody.id = 'thbody_' + liveUID;
                     thinkBody.className = 'px-4 pb-4 pt-2 text-[13px] text-[#737166] leading-relaxed italic border-t border-[#E5E3DB]';
@@ -10679,7 +10961,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Play response completion sound if enabled
                 playResponseChime();
 
-                const aiMsg = { id: generateMessageId(), role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, sources: uniqueSources, queries, agenticLogs: _agenticProcessLogs };
+                const aiMsg = { id: generateMessageId(), role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, thinkingMode: (thinkingText ? (thinkingModeLabels[thinkingMode] || 'Auto') : null), sources: uniqueSources, queries, agenticLogs: _agenticProcessLogs };
                 messages.push(aiMsg);
                 saveCurrentChat();
                 autoSaveToNotion(mainTextClean);
@@ -10794,7 +11076,9 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
         function setIsLoading(loading) {
             isLoading = loading;
-            const statusText = (useThinking && useAgent) ? 'Thinking & Searching...' : useThinking ? 'Thinking...' : useAgent ? (agenticWebSearch ? '🌐 Searching Web (Agent Mode)...' : 'Searching Web...') : 'SnoahAI is typing...';
+            const _flags = getEffectiveFeatureFlags();
+            const _modeLabel = thinkingModeLabels[thinkingMode] || 'Auto';
+            const statusText = (_flags.thinking && _flags.web) ? ('Thinking (' + _modeLabel + ') & Searching...') : _flags.thinking ? ('Thinking (' + _modeLabel + ')...') : _flags.web ? (agenticWebSearch ? '🌐 Searching Web (Agent Mode)...' : 'Searching Web...') : 'SnoahAI is typing...';
             if (loading) {
                 loadingIndicator.classList.remove('hidden');
                 loadingIndicator.classList.add('flex');
@@ -10824,6 +11108,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
         function renderAIResponse(msg, instant = false, msgIdxHint = null) {
             const wrapper = document.createElement('div');
             wrapper.className = "flex w-full justify-start animate-slide-up";
+            wrapper.dataset.role = 'model';
 
             let htmlContent = '<div class="flex flex-col w-full max-w-[95%]">';
             const uniqueId = Date.now();
@@ -10835,15 +11120,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
             let displayText = msg.text || '';
             if (!thinkingContent) {
                 // Normalize alternative reasoning tags before extraction
-                const _normDisplay = displayText
-                    .replace(/<reasoning>([\s\S]*?)<\/reasoning>/gi, '<think>$1</think>')
-                    .replace(/<thinking>([\s\S]*?)<\/thinking>/gi, '<think>$1</think>')
-                    .replace(/<reflection>([\s\S]*?)<\/reflection>/gi, '<think>$1</think>')
-                    .replace(/<tool_call>([\s\S]*?)<\/tool_call>/gi, (_, c) => {
-                        const t = c.trim();
-                        try { JSON.parse(t); return ''; } catch(e) {}
-                        return '<think>' + t + '</think>';
-                    });
+                const _normDisplay = normalizeThinkTagsForDisplay(displayText);
                 const legacyMatch = _normDisplay.match(THINK_RE);
                 if (legacyMatch) {
                     thinkingContent = legacyMatch[1].trim();
@@ -10854,7 +11131,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
             if (thinkingContent) {
                 htmlContent += '<div class="mb-4 rounded-xl border border-[#E5E3DB] bg-[#F2F0E9] overflow-hidden transition-all">' +
                     '<button id="btn-think-' + uniqueId + '" onclick="toggleExpand(\'btn-think-' + uniqueId + '\',\'content-think-' + uniqueId + '\')" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-[#5B5951] hover:bg-[#EAE8E0] transition-colors">' +
-                    '<div class="flex items-center gap-2"><i data-lucide="brain" class="w-4 h-4 text-[#8C897D]"></i><span>Thought Process</span></div>' +
+                    '<div class="flex items-center gap-2"><i data-lucide="brain" class="w-4 h-4 text-[#8C897D]"></i><span>Thought Process' + (msg.thinkingMode ? ' · ' + escapeHTML(msg.thinkingMode) : '') + '</span></div>' +
                     '<i id="btn-think-' + uniqueId + '-icon" data-lucide="chevron-down" class="w-4 h-4 text-[#8C897D] transition-transform duration-200"></i></button>' +
                     '<div id="content-think-' + uniqueId + '" class="hidden px-4 pb-4 pt-2 text-[13px] text-[#737166] leading-relaxed italic border-t border-[#E5E3DB]">' +
                     escapeHTML(thinkingContent).replace(/\n/g,'<br>') + '</div></div>';
@@ -10958,12 +11235,6 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 lucide.createIcons();
             }
         }
-
-        function scrollToBottom() {
-            const anchor = document.getElementById('scroll-anchor');
-            if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }
-
         // ── SLASH COMMANDS ─────────────────────────────────────────────
         function checkSlashCommand(val) {
             if (!val.startsWith('/')) { hideSlashMenu(); return; }
@@ -10993,6 +11264,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 '/bullets': 'Convert this to clear bullet points: ',
                 '/code': 'Write code for: ',
                 '/compare': 'Compare and contrast: ',
+                '/workflow': 'Design a practical workflow for: ',
+                '/checklist': 'Create a clear checklist for: ',
             };
             chatInput.value = (prompts[cmd] || cmd + ' ');
             chatInput.style.height = 'auto';
