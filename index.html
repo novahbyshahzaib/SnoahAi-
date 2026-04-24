@@ -3157,6 +3157,8 @@
         let webSearchPlatform = localStorage.getItem('snoah_websearch_platform') || 'gemini';
         let webSearchResultLimit = Math.min(10, Math.max(3, parseInt(localStorage.getItem('snoah_websearch_limit') || '5', 10) || 5));
         let webSearchLanguage = localStorage.getItem('snoah_websearch_lang') || 'auto';
+        const SEARCH_PROCESS_START_MARKER = '[SEARCH_PROCESS_START]';
+        const SEARCH_PROCESS_END_MARKER = '[SEARCH_PROCESS_END]';
         if (webSearchLanguage !== 'auto') {
             const _wsLangNorm = { english: 'English', spanish: 'Spanish', french: 'French', german: 'German', arabic: 'Arabic', chinese: 'Chinese', hindi: 'Hindi', japanese: 'Japanese', portuguese: 'Portuguese', russian: 'Russian', korean: 'Korean' };
             webSearchLanguage = _wsLangNorm[String(webSearchLanguage).toLowerCase()] || webSearchLanguage;
@@ -3834,7 +3836,7 @@
             activeCommunityPoll = null;
             try {
                 if (window._getActivePoll) activeCommunityPoll = await window._getActivePoll();
-            } catch (_) {}
+            } catch (e) { console.warn('Failed to fetch active poll:', e); }
             if (activeCommunityPoll && activeCommunityPoll.question) {
                 const q = document.getElementById('active-poll-question');
                 const d = document.getElementById('active-poll-details');
@@ -7820,11 +7822,14 @@ self.onmessage = async (event) => {
         function getLibraryScopeKey() {
             return String(currentChatId || 'default');
         }
+        const MAX_LIBRARY_ITEMS = 40;
+        const MAX_LIBRARY_ITEM_CONTENT = 8000;
+        const MAX_LIBRARY_CONTEXT_SNIPPET = 1200;
         function getLibraryItemsForScope() {
             return Array.isArray(personalLibrary[getLibraryScopeKey()]) ? personalLibrary[getLibraryScopeKey()] : [];
         }
         function persistPersonalLibrary() {
-            try { localStorage.setItem('snoah_personal_library', JSON.stringify(personalLibrary)); } catch(_) {}
+            try { localStorage.setItem('snoah_personal_library', JSON.stringify(personalLibrary)); } catch(e) { console.warn('Failed to persist library:', e); }
         }
         function openLibraryModal() {
             renderLibraryItems();
@@ -7866,7 +7871,7 @@ self.onmessage = async (event) => {
             const k = getLibraryScopeKey();
             const arr = getLibraryItemsForScope();
             arr.unshift({ id: 'lib_' + Date.now(), type: 'note', name: 'Quick Note', content: note.trim(), ts: Date.now() });
-            personalLibrary[k] = arr.slice(0, 40);
+            personalLibrary[k] = arr.slice(0, MAX_LIBRARY_ITEMS);
             persistPersonalLibrary();
             renderLibraryItems();
             showToast('Note saved to Library ✓');
@@ -7879,11 +7884,11 @@ self.onmessage = async (event) => {
             for (const f of files) {
                 if (f.size > MAX_FILE_SIZE) continue;
                 let txt = '';
-                try { txt = await f.text(); } catch(_) { txt = ''; }
+                try { txt = await f.text(); } catch(e) { console.warn('Failed to read file:', f.name, e); txt = ''; }
                 if (!txt.trim()) continue;
-                arr.unshift({ id: 'lib_' + Date.now() + '_' + Math.random().toString(36).slice(2,6), type: 'file', name: f.name, content: txt.slice(0, 8000), ts: Date.now() });
+                arr.unshift({ id: 'lib_' + Date.now() + '_' + Math.random().toString(36).slice(2,6), type: 'file', name: f.name, content: txt.slice(0, MAX_LIBRARY_ITEM_CONTENT), ts: Date.now() });
             }
-            personalLibrary[k] = arr.slice(0, 40);
+            personalLibrary[k] = arr.slice(0, MAX_LIBRARY_ITEMS);
             persistPersonalLibrary();
             renderLibraryItems();
             if (event?.target) event.target.value = '';
@@ -7902,7 +7907,7 @@ self.onmessage = async (event) => {
                 return { it, score };
             }).filter(x => x.score > 0).sort((a,b) => b.score - a.score).slice(0, 3);
             if (!scored.length) return '';
-            return scored.map(x => '[Library: ' + (x.it.name || 'note') + ']\n' + String(x.it.content || '').slice(0, 1200)).join('\n\n');
+            return scored.map(x => '[Library: ' + (x.it.name || 'note') + ']\n' + String(x.it.content || '').slice(0, MAX_LIBRARY_CONTEXT_SNIPPET)).join('\n\n');
         }
 
         // ── FONT SIZE ──────────────────────────────────────────────────
@@ -10860,7 +10865,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                                 '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto"><polyline points="6 9 12 15 18 9"/></svg>' +
                                             '</summary>' +
                                              '<div class="px-4 py-3 space-y-2">' +
-                                                '<div class="text-[10px] font-semibold text-[#A3A095] tracking-wide">[SEARCH_PROCESS_START]</div>' +
+                                                '<div class="text-[10px] font-semibold text-[#A3A095] tracking-wide">' + SEARCH_PROCESS_START_MARKER + '</div>' +
                                                 (_preBrowseRaw ? '<div class="text-[13px] text-[#5B5951] leading-relaxed mb-2 whitespace-pre-wrap">' + escapeHTML(_preBrowseRaw) + '</div>' : '') +
                                                 '<div id="' + _agentUID + '-visit" class="flex items-center gap-2 text-[13px] text-[#737166] italic">' +
                                                     '<span class="animate-pulse text-base">🌐</span>' +
@@ -10894,7 +10899,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                         if (_bData.content) {
                                             // Update visit indicator to show success and collapse block
                                             const _visitEl = document.getElementById(_agentUID + '-visit');
-                                            if (_visitEl) _visitEl.innerHTML = '<span class="text-base">✅</span><span>Read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a> <span class="ml-1 text-[10px] text-[#A3A095]">[SEARCH_PROCESS_END]</span></span>';
+                                            if (_visitEl) _visitEl.innerHTML = '<span class="text-base">✅</span><span>Read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a> <span class="ml-1 text-[10px] text-[#A3A095]">' + SEARCH_PROCESS_END_MARKER + '</span></span>';
                                             const _detailsEl = document.getElementById(_agentUID);
                                             if (_detailsEl) _detailsEl.removeAttribute('open');
                                             _logEntry.status = 'read';
@@ -10907,12 +10912,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                     }
                                     // Fetch failed or returned no content — show error and count as a browse attempt
                                     const _visitEl2 = document.getElementById(_agentUID + '-visit');
-                                    if (_visitEl2) _visitEl2.innerHTML = '<span class="text-base">❌</span><span>Failed to read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a> <span class="ml-1 text-[10px] text-[#A3A095]">[SEARCH_PROCESS_END]</span></span>';
+                                    if (_visitEl2) _visitEl2.innerHTML = '<span class="text-base">❌</span><span>Failed to read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a> <span class="ml-1 text-[10px] text-[#A3A095]">' + SEARCH_PROCESS_END_MARKER + '</span></span>';
                                     _logEntry.status = 'failed';
                                     _browsesDone++; // count failed attempts to prevent infinite loops
                                 } catch(_bErr) {
                                     const _visitEl3 = document.getElementById(_agentUID + '-visit');
-                                    if (_visitEl3) _visitEl3.innerHTML = '<span class="text-base">❌</span><span>Error visiting <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a> <span class="ml-1 text-[10px] text-[#A3A095]">[SEARCH_PROCESS_END]</span></span>';
+                                    if (_visitEl3) _visitEl3.innerHTML = '<span class="text-base">❌</span><span>Error visiting <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a> <span class="ml-1 text-[10px] text-[#A3A095]">' + SEARCH_PROCESS_END_MARKER + '</span></span>';
                                     _logEntry.status = 'error';
                                     _browsesDone++; // count failed attempts to prevent infinite loops
                                     console.warn('Browser agent error:', _bErr.message);

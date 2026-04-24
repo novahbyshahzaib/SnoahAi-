@@ -40,6 +40,7 @@ export default async function handler(req, res) {
       const data = await openAiRes.json();
       return res.status(openAiRes.status).json(data);
     }
+    const openAiErrorText = await openAiRes.text().catch(() => '');
 
     // Fallback: NVIDIA native genai endpoint for models that are not exposed via OpenAI-compatible path
     const nativeModelPath = String(model)
@@ -63,9 +64,9 @@ export default async function handler(req, res) {
         negative_prompt: body.negative_prompt || '',
       }),
     });
-    const fallbackData = await nativeRes.json().catch(() => ({}));
+    const fallbackData = await nativeRes.json().catch((e) => { console.warn('Failed to parse native response:', e); return {}; });
     if (!nativeRes.ok) {
-      const upstreamError = (fallbackData && (fallbackData.error || fallbackData.message)) || (await openAiRes.text().catch(() => 'NVIDIA upstream error'));
+      const upstreamError = (fallbackData && (fallbackData.error || fallbackData.message)) || openAiErrorText || 'NVIDIA upstream error';
       return res.status(nativeRes.status || openAiRes.status || 500).json({ error: upstreamError });
     }
     return res.status(nativeRes.status).json(fallbackData);
