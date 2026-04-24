@@ -466,11 +466,16 @@
             const snap = await getDoc(doc(_db, 'community_usernames', username));
             return snap.exists() && snap.data().banned === true;
         };
+        window._getActivePoll = async function() {
+            const snap = await getDoc(doc(_db, 'admin_stats', 'active_poll'));
+            if (!snap.exists()) return null;
+            return { id: snap.id, ...snap.data() };
+        };
         window._submitContactFeedback = async function(payload) {
             await _ensureAuth();
             const safe = payload && typeof payload === 'object' ? payload : {};
-            const type = safe.type === 'feature_poll' ? 'feature_poll' : 'feedback';
-            const category = String(safe.category || (type === 'feature_poll' ? 'feature' : 'general')).slice(0, 30);
+            const type = safe.type === 'feature_poll' || safe.type === 'poll_request' ? safe.type : 'feedback';
+            const category = String(safe.category || (type !== 'feedback' ? 'feature' : 'general')).slice(0, 30);
             const message = String(safe.message || '').trim().slice(0, 2000);
             if (!message) throw new Error('Message is required');
             const senderName = String(safe.senderName || localStorage.getItem('snoah_comm_username') || localStorage.getItem('snoah_user_name') || 'User').slice(0, 40);
@@ -484,7 +489,7 @@
                 priority,
                 workflowType,
                 uid: _currentUid || 'anon',
-                status: 'new',
+                status: type === 'poll_request' ? 'pending' : 'new',
                 ts: serverTimestamp()
             });
         };
@@ -1990,6 +1995,33 @@
         </div>
     </div>
 
+    <!-- ===== PERSONAL LIBRARY MODAL ===== -->
+    <div id="library-modal" class="absolute inset-0 z-50 flex items-end hidden">
+        <div class="absolute inset-0 bg-[#2C2B29]/30 backdrop-blur-sm" onclick="closeLibraryModal()"></div>
+        <div class="animate-modal relative z-10 w-full bg-[#FAF9F6] app-bg rounded-t-[28px] shadow-2xl border-t border-[#E5E3DB] max-h-[78%] flex flex-col">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h6l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+                    <h3 class="font-serif font-semibold text-[16px]">Library (Local RAG)</h3>
+                </div>
+                <button onclick="closeLibraryModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1 space-y-3">
+                <p class="text-[12px] text-[#A3A095]">Files/notes here stay local and are used only in this chat project.</p>
+                <div id="library-list" class="space-y-2"></div>
+            </div>
+            <div class="p-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
+                <input id="library-file-input" type="file" accept=".txt,.md,.json,.csv,.xml,.pdf" class="hidden" multiple onchange="handleLibraryUpload(event)">
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="document.getElementById('library-file-input').click()" class="py-2.5 rounded-xl border border-[#E5E3DB] text-[13px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">Upload File</button>
+                    <button onclick="addLibraryNote()" class="py-2.5 rounded-xl bg-[#D25D38] text-white text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors">Add Note</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
         <!-- ===== COOKIE CONSENT BANNER (returning users who skipped consent) ===== -->
         <div id="cookie-banner" class="absolute bottom-0 left-0 right-0 z-[60] hidden">
             <div class="bg-[#2C2B29] text-white rounded-t-[22px] shadow-2xl p-5 mx-0">
@@ -2349,6 +2381,15 @@
                                     <span class="text-[11px] text-[#A3A095] block">AI responses you've bookmarked</span>
                                 </div>
                             </button>
+                            <button onclick="closePreferencesModal();openLibraryModal();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F2F0E9] text-left transition-colors group">
+                                <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] group-hover:bg-[#EAE8E0] flex items-center justify-center shrink-0 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C897D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><path d="M3 7a2 2 0 0 1 2-2h6l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <span class="text-[14px] text-[#2C2B29] font-medium">Library</span>
+                                    <span class="text-[11px] text-[#A3A095] block">Project knowledge base (local RAG)</span>
+                                </div>
+                            </button>
                         </div>
                     </div>
 
@@ -2449,6 +2490,9 @@
                     <div>
                         <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.1</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Local Library (Project RAG) 📚</strong> — Added a new <strong>Library</strong> section in Preferences. Upload files/notes per chat project and SnoahAI now auto-injects relevant library context before answering.</li>
+                            <li><strong>Single Active Poll + Admin Approval 🗳️</strong> — Poll flow now supports one active poll at a time, poll request review in admin, active poll visibility for all users, and creator attribution.</li>
+                            <li><strong>Thinking Reliability + Auto Profile 🧠</strong> — Thinking now auto-selects Short/Normal/Detailed while on Auto, shows the concrete profile used, auto-enables toggle when think tags are returned, and warns on unsupported models.</li>
                             <li><strong>Text Selection Quick Actions 🎯</strong> — Select any text in an AI response and a floating toolbar instantly appears with Copy, Ask AI, and Simplify buttons. No need to copy-paste into the input — instantly send follow-up questions from selected text.</li>
                             <li><strong>Thinking Modes + Smart Access ⚡🧠</strong> — Thinking depth now supports Auto/Normal/Detailed/Short and Smart mode now grants background access to thinking, web search, and canvas automatically.</li>
                             <li><strong>Contact Feedback + Feature Polls 📝</strong> — Contact tab now supports structured feedback submissions and feature request polls, both visible in the admin panel.</li>
@@ -2739,6 +2783,18 @@
                     <p class="text-[12px] text-[#A3A095]">Share bugs, improvements, workflow requests, and feature votes directly with the SnoahAI team</p>
                 </div>
 
+                <div class="grid gap-2">
+                    <a href="https://t.me/Owner_Of_Crypton" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors">
+                        <span class="text-lg">📨</span><span class="text-[13px] font-semibold text-[#2C2B29]">Telegram</span><span class="text-[11px] text-[#A3A095]">@Owner_Of_Crypton</span>
+                    </a>
+                    <a href="https://instagram.com/shahzaib_muzaffar_7" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors">
+                        <span class="text-lg">📸</span><span class="text-[13px] font-semibold text-[#2C2B29]">Instagram</span><span class="text-[11px] text-[#A3A095]">@shahzaib_muzaffar_7</span>
+                    </a>
+                    <a href="https://github.com/novahbyshahzaib" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors">
+                        <span class="text-lg">🐙</span><span class="text-[13px] font-semibold text-[#2C2B29]">GitHub</span><span class="text-[11px] text-[#A3A095]">@novahbyshahzaib</span>
+                    </a>
+                </div>
+
                 <div class="bg-white border border-[#E5E3DB] rounded-2xl p-4 space-y-3">
                     <div class="flex items-center gap-2"><span class="text-lg">💬</span><h4 class="text-[14px] font-semibold text-[#2C2B29]">Send Feedback</h4></div>
                     <div class="grid grid-cols-2 gap-2">
@@ -2757,8 +2813,16 @@
                     </div>
                 </div>
 
-                <div class="bg-white border border-[#E5E3DB] rounded-2xl p-4 space-y-3">
-                    <div class="flex items-center gap-2"><span class="text-lg">🗳️</span><h4 class="text-[14px] font-semibold text-[#2C2B29]">Feature Request Poll</h4></div>
+                <div id="active-poll-card" class="hidden bg-[#FEF3EC] border border-[#F8E3DE] rounded-2xl p-4 space-y-2">
+                    <div class="flex items-center gap-2"><span class="text-lg">📌</span><h4 class="text-[14px] font-semibold text-[#2C2B29]">Active Community Poll</h4></div>
+                    <p id="active-poll-question" class="text-[13px] font-semibold text-[#2C2B29]"></p>
+                    <p id="active-poll-details" class="text-[12px] text-[#5B5951] whitespace-pre-wrap"></p>
+                    <p id="active-poll-meta" class="text-[11px] text-[#8C897D]"></p>
+                </div>
+
+                <div id="poll-request-form" class="bg-white border border-[#E5E3DB] rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center gap-2"><span class="text-lg">🗳️</span><h4 class="text-[14px] font-semibold text-[#2C2B29]">Request a Community Poll</h4></div>
+                    <p class="text-[11px] text-[#A3A095]">Only one poll can be active at a time. Send a request and wait for admin approval.</p>
                     <input id="contact-poll-feature" type="text" maxlength="120" placeholder="Suggested feature (e.g. better study planner workflow)" class="w-full bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38]">
                     <div class="grid grid-cols-2 gap-2">
                         <select id="contact-poll-priority" class="bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[12px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38]">
@@ -2776,15 +2840,9 @@
                     </div>
                     <textarea id="contact-poll-details" rows="3" maxlength="1200" placeholder="Optional details: why this feature matters..." class="w-full bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] focus:outline-none focus:border-[#D25D38] resize-none"></textarea>
                     <div class="flex items-center justify-between gap-2">
-                        <p class="text-[10px] text-[#A3A095]">Poll entries are tracked in admin feedback panel</p>
-                        <button onclick="submitFeaturePoll()" class="px-3 py-1.5 rounded-lg bg-[#D25D38] text-white text-[12px] font-semibold hover:bg-[#B84E2E] transition-colors">Submit Poll</button>
+                        <p class="text-[10px] text-[#A3A095]">Requests are reviewed in admin panel</p>
+                        <button onclick="submitFeaturePoll()" class="px-3 py-1.5 rounded-lg bg-[#D25D38] text-white text-[12px] font-semibold hover:bg-[#B84E2E] transition-colors">Request Poll</button>
                     </div>
-                </div>
-
-                <div class="grid gap-2">
-                    <a href="https://t.me/Owner_Of_Crypton" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors"><span class="text-[13px] font-semibold text-[#2C2B29]">Telegram</span><span class="text-[11px] text-[#A3A095]">@Owner_Of_Crypton</span></a>
-                    <a href="https://instagram.com/shahzaib_muzaffar_7" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors"><span class="text-[13px] font-semibold text-[#2C2B29]">Instagram</span><span class="text-[11px] text-[#A3A095]">@shahzaib_muzaffar_7</span></a>
-                    <a href="https://github.com/novahbyshahzaib" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] transition-colors"><span class="text-[13px] font-semibold text-[#2C2B29]">GitHub</span><span class="text-[11px] text-[#A3A095]">@novahbyshahzaib</span></a>
                 </div>
             </div>
             <!-- ── Username Setup Overlay ── -->
@@ -3099,6 +3157,8 @@
         let webSearchPlatform = localStorage.getItem('snoah_websearch_platform') || 'gemini';
         let webSearchResultLimit = Math.min(10, Math.max(3, parseInt(localStorage.getItem('snoah_websearch_limit') || '5', 10) || 5));
         let webSearchLanguage = localStorage.getItem('snoah_websearch_lang') || 'auto';
+        const SEARCH_PROCESS_START_MARKER = '[SEARCH_PROCESS_START]';
+        const SEARCH_PROCESS_END_MARKER = '[SEARCH_PROCESS_END]';
         if (webSearchLanguage !== 'auto') {
             const _wsLangNorm = { english: 'English', spanish: 'Spanish', french: 'French', german: 'German', arabic: 'Arabic', chinese: 'Chinese', hindi: 'Hindi', japanese: 'Japanese', portuguese: 'Portuguese', russian: 'Russian', korean: 'Korean' };
             webSearchLanguage = _wsLangNorm[String(webSearchLanguage).toLowerCase()] || webSearchLanguage;
@@ -3134,8 +3194,10 @@
         const thinkingModeCycle = ['auto','normal','detailed','short'];
         const thinkingModeLabels = {auto:'Auto', short:'Short', normal:'Normal', detailed:'Detailed'};
         if (!thinkingModeLabels[thinkingMode]) thinkingMode = 'auto';
+        let activeThinkingDisplayMode = 'Auto';
         let aiFileDownloadsEnabled = localStorage.getItem('snoah_ai_file_downloads') !== 'false';
         let promptTemplates = JSON.parse(localStorage.getItem('snoah_templates') || '[]');
+        let personalLibrary = (() => { try { const v = JSON.parse(localStorage.getItem('snoah_personal_library') || '{}'); return (v && typeof v === 'object') ? v : {}; } catch(_) { return {}; } })();
         let ttsUtterance = null;
         let ttsActive = false;
         let abortController = null;
@@ -3480,6 +3542,7 @@
             document.getElementById('contact-modal').classList.remove('hidden');
             switchCommTab('contact');
             checkCommEntry();
+            refreshActivePollCard();
         }
 
         function closeContactModal() {
@@ -3497,6 +3560,7 @@
                 btnChat.className = 'flex-1 py-1.5 rounded-xl text-[13px] font-semibold transition-colors ' + (isChat ? 'bg-[#D25D38] text-white' : 'text-[#8C897D] hover:bg-[#F2F0E9]');
                 btnContact.className = 'flex-1 py-1.5 rounded-xl text-[13px] font-semibold transition-colors ' + (!isChat ? 'bg-[#D25D38] text-white' : 'text-[#8C897D] hover:bg-[#F2F0E9]');
             }
+            if (!isChat) refreshActivePollCard();
         }
 
         let _commLastSendTime = 0;
@@ -3764,7 +3828,39 @@
             }
         }
 
+        let activeCommunityPoll = null;
+        async function refreshActivePollCard() {
+            const card = document.getElementById('active-poll-card');
+            const form = document.getElementById('poll-request-form');
+            if (!card || !form) return;
+            activeCommunityPoll = null;
+            try {
+                if (window._getActivePoll) activeCommunityPoll = await window._getActivePoll();
+            } catch (e) { console.warn('Failed to fetch active poll:', e); }
+            if (activeCommunityPoll && activeCommunityPoll.question) {
+                const q = document.getElementById('active-poll-question');
+                const d = document.getElementById('active-poll-details');
+                const m = document.getElementById('active-poll-meta');
+                if (q) q.textContent = activeCommunityPoll.question;
+                if (d) d.textContent = activeCommunityPoll.details || '';
+                if (m) {
+                    const by = activeCommunityPoll.creatorName || 'Unknown';
+                    const wf = activeCommunityPoll.workflowType ? (' · Workflow: ' + activeCommunityPoll.workflowType) : '';
+                    m.textContent = 'Created by @' + by + wf;
+                }
+                card.classList.remove('hidden');
+                form.classList.add('hidden');
+            } else {
+                card.classList.add('hidden');
+                form.classList.remove('hidden');
+            }
+        }
+
         async function submitFeaturePoll() {
+            if (activeCommunityPoll && activeCommunityPoll.question) {
+                showToast('A poll is already active. Wait until admin deletes it.');
+                return;
+            }
             const featureEl = document.getElementById('contact-poll-feature');
             const detailsEl = document.getElementById('contact-poll-details');
             if (!featureEl || !detailsEl) return;
@@ -3776,12 +3872,12 @@
             const senderName = localStorage.getItem('snoah_comm_username') || localStorage.getItem('snoah_user_name') || 'User';
             const message = details ? (feature + '\n\nDetails: ' + details) : feature;
             try {
-                await window._submitContactFeedback({ type: 'feature_poll', category: 'feature', message, priority, workflowType, senderName });
+                await window._submitContactFeedback({ type: 'poll_request', category: 'feature', message, priority, workflowType, senderName });
                 featureEl.value = '';
                 detailsEl.value = '';
-                showToast('Feature poll submitted ✓');
+                showToast('Poll request submitted ✓');
             } catch (e) {
-                showToast('Could not submit poll: ' + (e.message || 'error'));
+                showToast('Could not submit poll request: ' + (e.message || 'error'));
             }
         }
 
@@ -7259,7 +7355,7 @@ self.onmessage = async (event) => {
         }
 
         function backupChats() {
-            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_ai_response_format','snoah_ai_explain_level','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_param_by_platform','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_thinking_mode','snoah_ai_file_downloads','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_send_on_enter','snoah_autofocus_input','snoah_ocr_enabled','snoah_chat_branching_enabled','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_websearch_lang','snoah_agentic_ws','snoah_agent_browse_timeout','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
+            const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_ai_response_format','snoah_ai_explain_level','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_param_by_platform','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_thinking_mode','snoah_ai_file_downloads','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_send_on_enter','snoah_autofocus_input','snoah_ocr_enabled','snoah_chat_branching_enabled','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_personal_library','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_websearch_lang','snoah_agentic_ws','snoah_agent_browse_timeout','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
             const settings = {};
             settingsKeys.forEach(k => { const v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
             const data = { version: 2, app: 'SnoahAI', exported: new Date().toISOString(), chats: allChats, settings };
@@ -7304,7 +7400,7 @@ self.onmessage = async (event) => {
             const apiKeyNames = ['snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','pollinationsApiKeys','openaiTtsKeys','groqTtsKeys','nvidiaImageKeys','togetherImageKeys','hfImageKeys','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys'];
             let keysBytes = 0;
             apiKeyNames.forEach(k => { const v = localStorage.getItem(k); if (v) keysBytes += new TextEncoder().encode(v).length; });
-            const memNames = ['snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks'];
+            const memNames = ['snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_personal_library'];
             let memBytes = 0;
             memNames.forEach(k => { const v = localStorage.getItem(k); if (v) memBytes += new TextEncoder().encode(v).length; });
             let totalBytes = 0;
@@ -7568,7 +7664,9 @@ self.onmessage = async (event) => {
             const btn = document.getElementById('btn-length');
             const lbl = document.getElementById('thinking-mode-label');
             if (!btn || !lbl) return;
-            lbl.textContent = thinkingModeLabels[thinkingMode] || 'Auto';
+            lbl.textContent = thinkingMode === 'auto'
+                ? (activeThinkingDisplayMode && activeThinkingDisplayMode !== 'Auto' ? ('Auto→' + activeThinkingDisplayMode) : 'Auto')
+                : (thinkingModeLabels[thinkingMode] || 'Auto');
             if (thinkingMode === 'auto') {
                 btn.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]';
             } else {
@@ -7580,6 +7678,26 @@ self.onmessage = async (event) => {
             if (mode === 'normal') return 'THINKING MODE: Use balanced step-by-step hidden reasoning.';
             if (mode === 'detailed') return 'THINKING MODE: Use deep, thorough hidden reasoning with edge cases before answering.';
             return '';
+        }
+        function resolveAutoThinkingMode(text) {
+            const t = String(text || '').trim();
+            const len = t.length;
+            const lower = t.toLowerCase();
+            if (len > 320 || /\b(analyze|analysis|debug|design|research|compare|evaluate|workflow|plan|step-by-step|architecture)\b/.test(lower)) return 'detailed';
+            if (len < 70 && !/\b(why|how|explain|compare|solve)\b/.test(lower)) return 'short';
+            return 'normal';
+        }
+        function getResolvedThinkingMode(mode, text) {
+            if (mode === 'auto') return resolveAutoThinkingMode(text);
+            return mode || 'normal';
+        }
+        function getActiveModelIdForPlatform(p) {
+            return p==='openrouter'?orModelId:p==='groq'?groqModelId:p==='together'?togetherModelId:p==='mistral'?mistralModelId:p==='nvidia'?nvidiaModelId:p==='huggingface'?hfModelId:p==='githubmodels'?ghModelId:p==='claude'?claudeModelId:p==='copilot'?copilotModelId:p==='gais'?gaisModelId:p==='ollama'?ollamaModelId:p==='cohere'?cohereModelId:p==='puter'?puterModelId:p==='deepinfra'?deepinfraModelId:p==='cerebras'?cerebrasModelId:p==='sambanova'?sambanovaModelId:p==='fireworks'?fireworksModelId:p==='xai'?xaiModelId:p==='perplexity'?perplexityModelId:p==='nanogpt'?nanogptModelId:modelId;
+        }
+        function platformSupportsThinking(p, model) {
+            if (p === 'puter') return false;
+            if (String(model || '').toLowerCase().includes('vision') && (p === 'gemini' || p === 'gais')) return false;
+            return true;
         }
         function getEffectiveThinkingMode() {
             return (smartMode || useThinking) ? (thinkingMode || 'auto') : 'off';
@@ -7648,6 +7766,8 @@ self.onmessage = async (event) => {
                 { name: 'Clinical Summary', text: 'Provide a concise clinical summary including: presentation, diagnosis, management, and key points: ' },
                 { name: 'Compare & Contrast', text: 'Compare and contrast the following, highlighting key similarities and differences: ' },
                 { name: 'Step by Step', text: 'Walk me through this step by step, explaining the reasoning at each stage: ' },
+                { name: 'AI Workflow', text: 'Design a practical workflow for: ' },
+                { name: 'Action Checklist', text: 'Create a clear checklist for: ' },
             ];
             const custom = promptTemplates;
             const allTemplates = [...builtIn, ...custom];
@@ -7696,6 +7816,98 @@ self.onmessage = async (event) => {
             promptTemplates.splice(idx, 1);
             try { localStorage.setItem('snoah_templates', JSON.stringify(promptTemplates)); } catch(e) {}
             renderTemplates();
+        }
+
+        // ── PERSONAL LIBRARY (LOCAL RAG) ───────────────────────────────
+        function getLibraryScopeKey() {
+            return String(currentChatId || 'default');
+        }
+        const MAX_LIBRARY_ITEMS = 40;
+        const MAX_LIBRARY_ITEM_CONTENT = 8000;
+        const MAX_LIBRARY_CONTEXT_SNIPPET = 1200;
+        function getLibraryItemsForScope() {
+            return Array.isArray(personalLibrary[getLibraryScopeKey()]) ? personalLibrary[getLibraryScopeKey()] : [];
+        }
+        function persistPersonalLibrary() {
+            try { localStorage.setItem('snoah_personal_library', JSON.stringify(personalLibrary)); } catch(e) { console.warn('Failed to persist library:', e); }
+        }
+        function openLibraryModal() {
+            renderLibraryItems();
+            document.getElementById('library-modal').classList.remove('hidden');
+        }
+        function closeLibraryModal() {
+            document.getElementById('library-modal').classList.add('hidden');
+        }
+        function renderLibraryItems() {
+            const list = document.getElementById('library-list');
+            if (!list) return;
+            const items = getLibraryItemsForScope();
+            if (!items.length) {
+                list.innerHTML = '<p class="text-[13px] text-[#A3A095] text-center py-5">No library files/notes in this project yet.</p>';
+                return;
+            }
+            list.innerHTML = items.map((it, i) =>
+                '<div class="bg-white border border-[#E5E3DB] rounded-xl p-3">' +
+                    '<div class="flex items-start justify-between gap-2">' +
+                        '<div class="min-w-0"><p class="text-[13px] font-semibold text-[#2C2B29] truncate">' + escapeHTML(it.name || ('Item ' + (i + 1))) + '</p>' +
+                        '<p class="text-[11px] text-[#A3A095]">' + escapeHTML(it.type || 'note') + '</p></div>' +
+                        '<button onclick="removeLibraryItem(' + i + ')" class="text-[11px] px-2 py-1 rounded-lg border border-[#F8E3DE] text-[#D25D38] hover:bg-[#FDF4F2]">Delete</button>' +
+                    '</div>' +
+                    '<p class="text-[12px] text-[#5B5951] whitespace-pre-wrap mt-2">' + escapeHTML((it.content || '').slice(0, 360)) + (((it.content || '').length > 360) ? '…' : '') + '</p>' +
+                '</div>'
+            ).join('');
+        }
+        function removeLibraryItem(idx) {
+            const k = getLibraryScopeKey();
+            const arr = getLibraryItemsForScope();
+            arr.splice(idx, 1);
+            personalLibrary[k] = arr;
+            persistPersonalLibrary();
+            renderLibraryItems();
+        }
+        function addLibraryNote() {
+            const note = prompt('Add note to this project library:');
+            if (!note || !note.trim()) return;
+            const k = getLibraryScopeKey();
+            const arr = getLibraryItemsForScope();
+            arr.unshift({ id: 'lib_' + Date.now(), type: 'note', name: 'Quick Note', content: note.trim(), ts: Date.now() });
+            personalLibrary[k] = arr.slice(0, MAX_LIBRARY_ITEMS);
+            persistPersonalLibrary();
+            renderLibraryItems();
+            showToast('Note saved to Library ✓');
+        }
+        async function handleLibraryUpload(event) {
+            const files = Array.from(event?.target?.files || []);
+            if (!files.length) return;
+            const k = getLibraryScopeKey();
+            const arr = getLibraryItemsForScope();
+            for (const f of files) {
+                if (f.size > MAX_FILE_SIZE) continue;
+                let txt = '';
+                try { txt = await f.text(); } catch(e) { console.warn('Failed to read file:', f.name, e); txt = ''; }
+                if (!txt.trim()) continue;
+                arr.unshift({ id: 'lib_' + Date.now() + '_' + Math.random().toString(36).slice(2,6), type: 'file', name: f.name, content: txt.slice(0, MAX_LIBRARY_ITEM_CONTENT), ts: Date.now() });
+            }
+            personalLibrary[k] = arr.slice(0, MAX_LIBRARY_ITEMS);
+            persistPersonalLibrary();
+            renderLibraryItems();
+            if (event?.target) event.target.value = '';
+            showToast('Library updated ✓');
+        }
+        function getLibraryContextForPrompt(userText) {
+            const q = String(userText || '').toLowerCase();
+            const items = getLibraryItemsForScope();
+            if (!items.length) return '';
+            const scored = items.map(it => {
+                const c = String(it.content || '');
+                const l = c.toLowerCase();
+                let score = 0;
+                q.split(/\s+/).filter(Boolean).forEach(w => { if (w.length > 2 && l.includes(w)) score++; });
+                if (!score && q.length < 14) score = 1;
+                return { it, score };
+            }).filter(x => x.score > 0).sort((a,b) => b.score - a.score).slice(0, 3);
+            if (!scored.length) return '';
+            return scored.map(x => '[Library: ' + (x.it.name || 'note') + ']\n' + String(x.it.content || '').slice(0, MAX_LIBRARY_CONTEXT_SNIPPET)).join('\n\n');
         }
 
         // ── FONT SIZE ──────────────────────────────────────────────────
@@ -9838,9 +10050,15 @@ self.onmessage = async (event) => {
             const _effectiveUseThinking = _effectiveFlags.thinking;
             const _effectiveUseAgent = _effectiveFlags.web;
             const _effectiveCanvasMode = _effectiveFlags.canvas;
+            const _activeModelNow = getActiveModelIdForPlatform(platform);
+            const _resolvedThinkingMode = _effectiveUseThinking ? getResolvedThinkingMode(thinkingMode, textToSend) : 'off';
+            const _thinkingSupported = _effectiveUseThinking ? platformSupportsThinking(platform, _activeModelNow) : false;
+            activeThinkingDisplayMode = _effectiveUseThinking ? (thinkingModeLabels[_resolvedThinkingMode] || 'Normal') : 'Auto';
+            updateThinkingModeBtn();
+            if (_effectiveUseThinking && !_thinkingSupported) showToast('This AI/model does not support structured thinking output.');
 
             try {
-                const lengthDirective = _effectiveUseThinking ? (getThinkingModeInstruction(thinkingMode) + ' ') : '';
+                const lengthDirective = (_effectiveUseThinking && _thinkingSupported) ? (getThinkingModeInstruction(_resolvedThinkingMode) + ' ') : '';
                 let systemInstruction = customPersona
                     ? customPersona + ' ' + lengthDirective
                     : `You are SnoahAI, an advanced AI assistant built into a mobile-first web app called SnoahAI. Here is everything you must know about the app you are running inside:
@@ -9889,7 +10107,8 @@ FEATURES:
 23. STOP STREAMING: Send button turns into a ■ stop button during AI response generation. Tap to cancel the current response.
 24. PWA INSTALL: Orange install banner appears in browser — tap Install to add to home screen. Runs fullscreen with no browser bar for a native app feel.
 25. TOKEN USAGE TRACKING: Settings → Token Usage section. Tracks prompt tokens, completion tokens, total tokens, and request count per platform. View usage history and manage limits.
-26. CONTACT + FEEDBACK: ☰ → Contact Us now includes direct feedback submission and feature request polls, plus developer contact links.
+26. CONTACT + FEEDBACK: ☰ → Contact Us includes direct feedback submission, developer links, one active community poll card (visible to all users), and poll request submission for admin approval.
+26.1. PERSONAL LIBRARY (LOCAL RAG): Preferences → Saved Items → Library. Users can upload text-based files/notes into a per-chat-project local library. Relevant snippets from this library are injected into AI context automatically before responses.
 27. UPDATES PANEL: ☰ → Updates — view the latest features, changes, and announcements about SnoahAI.
 28. HAPTIC FEEDBACK: The app provides subtle vibration feedback on mobile devices when AI starts responding and when streaming completes.
 29. SMOOTH STREAMING: AI responses stream in real-time with a smooth animated cursor. A floating loading indicator appears above the input bar during generation.
@@ -10006,16 +10225,15 @@ DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mo
 Always answer questions about the app based on the above. If asked "what can you do" or "how do I use X feature", explain it clearly based on this documentation.
 
 FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $...$ display: $$...$$. For chemistry equations use KaTeX mhchem: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$, $$\\ce{CuSO4 + 2NaOH -> Cu(OH)2 + Na2SO4}$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. (6) DEVELOPER NOTE: Telegram username is @Owner_Of_Crypton and Instagram username is @shahzaib_muzaffar_7 — preserve underscores exactly as written. (7) IMAGE GENERATION: When the user asks you to include, generate, or show an image as part of your response, place an [IMG: detailed image description] marker exactly where the image should appear. The app will automatically generate the image and display it inline. You can mix text and images freely — e.g., explain something in text then place [IMG: ...] to show a visual. ` + lengthDirective;
-                if (_effectiveUseThinking) systemInstruction += "The user has enabled THINKING MODE. Wrap your detailed step-by-step internal reasoning inside <think> and </think> tags at the very beginning of your response, then give the final answer. ";
+                if (_effectiveUseThinking && _thinkingSupported) systemInstruction += "The user has enabled THINKING MODE. Always include your reasoning inside <think> and </think> tags at the very beginning, then provide the final answer.";
                 // Inject active platform and model so the AI can answer platform/model questions accurately
                 const _platNames = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', nvidia: 'NVIDIA NIM', huggingface: 'Hugging Face', githubmodels: 'GitHub Models', claude: 'Claude (Anthropic)', copilot: 'Microsoft Copilot', gais: 'Google AI Studio', ollama: 'Ollama', cohere: 'Cohere', puter: 'Puter.js', deepinfra: 'DeepInfra', cerebras: 'Cerebras AI', sambanova: 'SambaNova', fireworks: 'Fireworks AI', xai: 'xAI (Grok)', perplexity: 'Perplexity', nanogpt: 'NanoGPT' };
-                const _activeModelNow = platform==='openrouter'?orModelId:platform==='groq'?groqModelId:platform==='together'?togetherModelId:platform==='mistral'?mistralModelId:platform==='nvidia'?nvidiaModelId:platform==='huggingface'?hfModelId:platform==='githubmodels'?ghModelId:platform==='claude'?claudeModelId:platform==='copilot'?copilotModelId:platform==='gais'?gaisModelId:platform==='ollama'?ollamaModelId:platform==='cohere'?cohereModelId:platform==='puter'?puterModelId:platform==='deepinfra'?deepinfraModelId:platform==='cerebras'?cerebrasModelId:platform==='sambanova'?sambanovaModelId:platform==='fireworks'?fireworksModelId:platform==='xai'?xaiModelId:platform==='perplexity'?perplexityModelId:platform==='nanogpt'?nanogptModelId:modelId;
                 systemInstruction += '\n\nACTIVE PLATFORM & MODEL: You are currently running on the ' + (_platNames[platform] || platform) + ' platform. The active model is "' + _activeModelNow + '". When the user asks which AI, platform, or model is being used, state this information accurately. ';
                 // Inject live feature state so AI always knows which toggles are on/off
                 const _wsProviders = { gemini: 'Gemini (Google Search)', wikipedia: 'Wikipedia Search', duckduckgo: 'DuckDuckGo Search', tavily: 'Tavily AI Search', brave: 'Brave Search', serper: 'Google via Serper.dev', custom: 'Custom Search API' };
                 const _featureState = [
                     'Web Search: ' + (_effectiveUseAgent ? 'ON (provider: ' + (_wsProviders[webSearchPlatform] || webSearchPlatform) + ')' : 'OFF'),
-                    'Thinking Mode: ' + (_effectiveUseThinking ? 'ON (' + (thinkingModeLabels[thinkingMode] || 'Auto') + ')' : 'OFF'),
+                    'Thinking Mode: ' + (_effectiveUseThinking ? (_thinkingSupported ? 'ON (' + (thinkingModeLabels[_resolvedThinkingMode] || 'Normal') + ')' : 'ON but unsupported on this model') : 'OFF'),
                     'Smart / Agentic Mode: ' + (smartMode ? 'ON (AI decides feature/tool usage directly)' : 'OFF'),
                     'Canvas Mode: ' + (_effectiveCanvasMode ? 'ON (code opens in Artifact Viewer)' : 'OFF'),
                     'Multi-AI Mode: ' + (multiAIEnabled ? 'ON (platforms: ' + (multiAIPlatforms.join(', ') || 'none selected') + ')' : 'OFF'),
@@ -10036,7 +10254,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     'Auto-Focus Input: ' + (autoFocusInput ? 'ON' : 'OFF'),
                     'Focus Mode: ' + (focusModeActive ? 'ON (header hidden)' : 'OFF'),
                     'Model Parameters: Temperature=' + paramTemperature + ' | Top P=' + paramTopP + ' | Top K=' + paramTopK + ' | Max Tokens=' + paramMaxTokens,
-                    'Thinking Profile: ' + (_effectiveUseThinking ? (thinkingModeLabels[thinkingMode] || 'Auto') : 'Off'),
+                    'Thinking Profile: ' + (_effectiveUseThinking ? (_thinkingSupported ? (thinkingModeLabels[_resolvedThinkingMode] || 'Normal') : 'Unsupported') : 'Off'),
                     'AI Download Files: ' + (aiFileDownloadsEnabled ? 'ON' : 'OFF'),
                 ].join(' | ');
                 const fileOutputInstruction = aiFileDownloadsEnabled
@@ -10093,6 +10311,10 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Inject auto memory context if enabled and there is saved memory
                 if (autoMemoryEnabled && autoMemoryContent && autoMemoryContent.trim()) {
                     systemInstruction += '\n\nUSER MEMORY (important facts about this user, automatically saved from previous conversations — use as context):\n' + autoMemoryContent.trim();
+                }
+                const _libCtx = getLibraryContextForPrompt(textToSend);
+                if (_libCtx) {
+                    systemInstruction += '\n\nPROJECT LIBRARY CONTEXT (local personal knowledge base; use when relevant):\n' + _libCtx;
                 }
                 // Inject response language directive if set
                 if (responseLang) {
@@ -10503,6 +10725,11 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                             // Connection timeout: abort if no response within 60s
                             const connTimeout1 = setTimeout(() => { if (abortController) { abortController._timedOut = true; abortController.abort(); } }, 60000);
                             const chatBody = { model: chatModel, messages: chatMessages, stream: true, temperature: paramTemperature, top_p: paramTopP, max_tokens: paramMaxTokens };
+                            if (_effectiveUseThinking && _thinkingSupported && (platform === 'openrouter' || platform === 'groq' || platform === 'xai' || platform === 'perplexity' || platform === 'nanogpt' || platform === 'custom')) {
+                                const _effort = _resolvedThinkingMode === 'detailed' ? 'high' : _resolvedThinkingMode === 'short' ? 'low' : 'medium';
+                                chatBody.reasoning_effort = _effort;
+                                chatBody.include_reasoning = true;
+                            }
                             if (!isMistral && !isNvidia && !isHF && !isClaude && !isOllama && !isCerebras && !isSambaNova && !isFireworks && !isXAI && !isPPX && !isNGPT) chatBody.stream_options = { include_usage: true };
                             const res = await fetch(chatUrl, {
                                 method: 'POST',
@@ -10637,7 +10864,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                                 '<span class="text-[12px] font-semibold text-[#8C897D]">Search Process</span>' +
                                                 '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto"><polyline points="6 9 12 15 18 9"/></svg>' +
                                             '</summary>' +
-                                            '<div class="px-4 py-3 space-y-2">' +
+                                             '<div class="px-4 py-3 space-y-2">' +
+                                                '<div class="text-[10px] font-semibold text-[#A3A095] tracking-wide">' + SEARCH_PROCESS_START_MARKER + '</div>' +
                                                 (_preBrowseRaw ? '<div class="text-[13px] text-[#5B5951] leading-relaxed mb-2 whitespace-pre-wrap">' + escapeHTML(_preBrowseRaw) + '</div>' : '') +
                                                 '<div id="' + _agentUID + '-visit" class="flex items-center gap-2 text-[13px] text-[#737166] italic">' +
                                                     '<span class="animate-pulse text-base">🌐</span>' +
@@ -10658,7 +10886,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                     systemInstruction += '\n\n[SYSTEM OBSERVATION] You already visited ' + _browseUrl + ' in this same response cycle. Do not browse it again; use previous observations and provide the final answer now.';
                                     fullRaw = '';
                                     if (liveAppended) { liveWrapper.remove(); liveAppended = false; }
-                                    _browsesDone++;
+                                    _browsesDone = agentBrowseDepth;
                                     continue;
                                 }
                                 _visitedUrlsInCurrentResponse.add(_browseKey);
@@ -10671,7 +10899,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                         if (_bData.content) {
                                             // Update visit indicator to show success and collapse block
                                             const _visitEl = document.getElementById(_agentUID + '-visit');
-                                            if (_visitEl) _visitEl.innerHTML = '<span class="text-base">✅</span><span>Read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
+                                            if (_visitEl) _visitEl.innerHTML = '<span class="text-base">✅</span><span>Read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a> <span class="ml-1 text-[10px] text-[#A3A095]">' + SEARCH_PROCESS_END_MARKER + '</span></span>';
                                             const _detailsEl = document.getElementById(_agentUID);
                                             if (_detailsEl) _detailsEl.removeAttribute('open');
                                             _logEntry.status = 'read';
@@ -10684,12 +10912,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                     }
                                     // Fetch failed or returned no content — show error and count as a browse attempt
                                     const _visitEl2 = document.getElementById(_agentUID + '-visit');
-                                    if (_visitEl2) _visitEl2.innerHTML = '<span class="text-base">❌</span><span>Failed to read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
+                                    if (_visitEl2) _visitEl2.innerHTML = '<span class="text-base">❌</span><span>Failed to read <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a> <span class="ml-1 text-[10px] text-[#A3A095]">' + SEARCH_PROCESS_END_MARKER + '</span></span>';
                                     _logEntry.status = 'failed';
                                     _browsesDone++; // count failed attempts to prevent infinite loops
                                 } catch(_bErr) {
                                     const _visitEl3 = document.getElementById(_agentUID + '-visit');
-                                    if (_visitEl3) _visitEl3.innerHTML = '<span class="text-base">❌</span><span>Error visiting <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a></span>';
+                                    if (_visitEl3) _visitEl3.innerHTML = '<span class="text-base">❌</span><span>Error visiting <a href="' + escapeHTML(_browseUrl) + '" target="_blank" class="underline text-[#D25D38] break-all">' + escapeHTML(_browseUrl) + '</a> <span class="ml-1 text-[10px] text-[#A3A095]">' + SEARCH_PROCESS_END_MARKER + '</span></span>';
                                     _logEntry.status = 'error';
                                     _browsesDone++; // count failed attempts to prevent infinite loops
                                     console.warn('Browser agent error:', _bErr.message);
@@ -10735,6 +10963,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 if (thinkMatch) {
                     thinkingText = thinkMatch[1].trim();
                     mainText = _normFullRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
+                }
+                if (_effectiveUseThinking && !_thinkingSupported && !thinkingText) {
+                    thinkingText = 'Thinking is not supported by the active model (' + _activeModelNow + ').';
+                }
+                if (thinkingText && !useThinking && !smartMode) {
+                    useThinking = true;
+                    updateToggleButtons();
+                    showToast('Thinking auto-enabled (model returned thought tags).');
                 }
 
                 // Parse and execute [SNOAH: feature=value] control commands from AI response
@@ -10882,7 +11118,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     if (thinkHeader) thinkHeader.innerHTML =
                         '<button onclick="toggleExpand(&quot;thbtn_' + liveUID + '&quot;,&quot;thbody_' + liveUID + '&quot;)" ' +
                         'class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-[#5B5951] hover:bg-[#EAE8E0] transition-colors">' +
-                        '<div class="flex items-center gap-2"><i data-lucide="brain" class="w-4 h-4 text-[#8C897D]"></i><span>Thought Process' + (_effectiveUseThinking ? ' · ' + (thinkingModeLabels[thinkingMode] || 'Auto') : '') + '</span></div>' +
+                        '<div class="flex items-center gap-2"><i data-lucide="brain" class="w-4 h-4 text-[#8C897D]"></i><span>Thought Process' + (_effectiveUseThinking ? ' · ' + (thinkingModeLabels[_resolvedThinkingMode] || 'Normal') : '') + '</span></div>' +
                         '<i id="thbtn_' + liveUID + '-icon" data-lucide="chevron-up" class="w-4 h-4 text-[#8C897D]"></i></button>';
                     thinkBody.id = 'thbody_' + liveUID;
                     thinkBody.className = 'px-4 pb-4 pt-2 text-[13px] text-[#737166] leading-relaxed italic border-t border-[#E5E3DB]';
@@ -10961,7 +11197,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 // Play response completion sound if enabled
                 playResponseChime();
 
-                const aiMsg = { id: generateMessageId(), role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, thinkingMode: (thinkingText ? (thinkingModeLabels[thinkingMode] || 'Auto') : null), sources: uniqueSources, queries, agenticLogs: _agenticProcessLogs };
+                const aiMsg = { id: generateMessageId(), role: 'model', text: mainTextClean, originalText: fullRaw, thinking: thinkingText, thinkingMode: (thinkingText ? (thinkingModeLabels[_resolvedThinkingMode] || 'Normal') : null), sources: uniqueSources, queries, agenticLogs: _agenticProcessLogs };
                 messages.push(aiMsg);
                 saveCurrentChat();
                 autoSaveToNotion(mainTextClean);
@@ -11077,7 +11313,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
         function setIsLoading(loading) {
             isLoading = loading;
             const _flags = getEffectiveFeatureFlags();
-            const _modeLabel = thinkingModeLabels[thinkingMode] || 'Auto';
+            const _modeLabel = activeThinkingDisplayMode || (thinkingModeLabels[thinkingMode] || 'Auto');
             const statusText = (_flags.thinking && _flags.web) ? ('Thinking (' + _modeLabel + ') & Searching...') : _flags.thinking ? ('Thinking (' + _modeLabel + ')...') : _flags.web ? (agenticWebSearch ? '🌐 Searching Web (Agent Mode)...' : 'Searching Web...') : 'SnoahAI is typing...';
             if (loading) {
                 loadingIndicator.classList.remove('hidden');
