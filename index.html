@@ -7892,7 +7892,7 @@ self.onmessage = async (event) => {
             let skippedPdf = 0;
             for (const f of files) {
                 if (f.size > MAX_FILE_SIZE) continue;
-                // PDFs are binary — skip them with a clear message
+                // PDFs are binary - skip them with a clear message
                 const ext = f.name.split('.').pop().toLowerCase();
                 if (f.type === 'application/pdf' || ext === 'pdf') {
                     skippedPdf++;
@@ -7907,7 +7907,7 @@ self.onmessage = async (event) => {
             persistPersonalLibrary();
             renderLibraryItems();
             if (event?.target) event.target.value = '';
-            if (skippedPdf > 0) showToast('⚠️ PDFs cannot be saved to library — paste text as a note instead');
+            if (skippedPdf > 0) showToast('⚠️ PDFs cannot be saved to library - paste text as a note instead');
             else showToast('Library updated ✓');
         }
         function getLibraryContextForPrompt(userText) {
@@ -9008,7 +9008,10 @@ self.onmessage = async (event) => {
                 } else if (/^> /.test(line)) {
                     // Blockquote
                     flushList();
-                    if (!inBlockquote) { inBlockquote = true; html += '<blockquote class="border-l-4 border-[#D25D38] pl-4 my-2 italic text-[#5B5951]">'; }
+                    if (!inBlockquote) {
+                        inBlockquote = true;
+                        html += '<blockquote class="border-l-4 border-[#D25D38] pl-4 my-2 italic text-[#5B5951]">';
+                    }
                     html += '<p class="md-content text-[15px] leading-relaxed my-0.5">' + processInlineRaw(line.slice(2)) + '</p>';
                 } else if (/^[-*] \[([ xX])\] /.test(line)) {
                     // Interactive to-do checkbox item
