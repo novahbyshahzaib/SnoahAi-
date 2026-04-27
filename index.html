@@ -7895,11 +7895,13 @@ self.onmessage = async (event) => {
             if (!files.length) return;
             const k = getLibraryScopeKey();
             const arr = getLibraryItemsForScope();
+            const initialLen = arr.length;
             let skippedPdf = 0;
             for (const f of files) {
                 if (f.size > MAX_FILE_SIZE) continue;
                 // PDFs are binary - skip them with a clear message
-                const ext = f.name.split('.').pop().toLowerCase();
+                const dotIdx = f.name.lastIndexOf('.');
+                const ext = dotIdx !== -1 ? f.name.slice(dotIdx + 1).toLowerCase() : '';
                 if (f.type === 'application/pdf' || ext === 'pdf') {
                     skippedPdf++;
                     continue;
@@ -7909,12 +7911,16 @@ self.onmessage = async (event) => {
                 if (!txt.trim()) continue;
                 arr.unshift({ id: 'lib_' + Date.now() + '_' + Math.random().toString(36).slice(2,6), type: 'file', name: f.name, content: txt.slice(0, MAX_LIBRARY_ITEM_CONTENT), ts: Date.now() });
             }
-            personalLibrary[k] = arr.slice(0, MAX_LIBRARY_ITEMS);
-            persistPersonalLibrary();
-            renderLibraryItems();
+            const added = arr.length > initialLen;
+            if (added) {
+                personalLibrary[k] = arr.slice(0, MAX_LIBRARY_ITEMS);
+                persistPersonalLibrary();
+                renderLibraryItems();
+            }
             if (event?.target) event.target.value = '';
-            if (skippedPdf > 0) showToast('⚠️ PDFs cannot be saved to library - paste text as a note instead');
-            else showToast('Library updated ✓');
+            if (skippedPdf > 0 && !added) showToast('⚠️ PDFs cannot be saved to library - paste text as a note instead');
+            else if (skippedPdf > 0) showToast('⚠️ PDFs skipped - other files saved to library ✓');
+            else if (added) showToast('Library updated ✓');
         }
         function getLibraryContextForPrompt(userText) {
             const q = String(userText || '').toLowerCase();
@@ -9002,7 +9008,7 @@ self.onmessage = async (event) => {
                 }
                 if (inTable) flushTable();
                 // Horizontal rules: ---, ***, ___ (3+ chars, nothing else)
-                if (/^(\s*)(---+|\*\*\*+|___+)\s*$/.test(line)) {
+                if (/^\s*(---+|\*\*\*+|___+)\s*$/.test(line)) {
                     flushList(); flushBlockquote();
                     html += '<hr class="my-4 border-t border-[#E5E3DB]">';
                 } else if (/^\#{1,4} /.test(line)) {
@@ -10184,7 +10190,7 @@ FEATURES:
 58. MESSAGE TIMESTAMPS: Settings → App tab → Show Timestamps toggle. When ON, every message (both user and AI) displays the time it was sent. Timestamps are stored on the message element and toggled via CSS class 'show-timestamps' on the root element.
 59. GLOBAL COMMUNITY CHAT: ☰ → Community — opens a full-screen live chat room shared by ALL SnoahAI users worldwide in real time. Powered by Firebase Firestore with onSnapshot for instant message delivery. Messages include sender name, time, and are stored in the 'community_chat' Firestore collection. The modal has two tabs: 💬 Live Chat (the global chat room) and 📬 Contact & Feedback (feedback form, feature poll, plus Telegram/Instagram/GitHub links). Max 500 chars per message, 3-second cooldown to prevent spam. The user's saved name from Settings is shown as their display name.
 60. CHEMISTRY RENDERING: KaTeX mhchem extension is loaded alongside KaTeX. Chemistry equations using \\ce{...} notation render beautifully in both inline ($...$) and display ($$...$$) math blocks. Examples: $\\ce{H2O}$ renders as water, $\\ce{2H2 + O2 -> 2H2O}$ renders a balanced equation with arrow. Use \\ce{} for any chemical formula or reaction equation.
-61. MATH & MARKDOWN RENDERING: All lines in the AI response go through processInlineRaw() which handles: display math ($$...$$), inline math ($...$), chemistry (\\ce{}), HTML escaping, bold/italic/code/link Markdown in the correct order. The renderer also supports: blockquotes (> text renders with a styled left accent bar), horizontal rules (---, ***, ___ render as dividers), and ~~~ as an alternate code fence alongside backtick fences. All markdown state (blockquotes, lists, tables, code blocks) is properly flushed when switching context to prevent malformed output.
+61. MATH & MARKDOWN RENDERING: All lines in the AI response go through processInlineRaw() which handles: display math ($$...$$), inline math ($...$), chemistry (\\ce{}), HTML escaping, bold/italic/code/link Markdown in the correct order. The renderer also supports: blockquotes (> text renders with a styled left accent bar), horizontal rules (---, ***, or ___ render as dividers), and ~~~ as an alternate code fence alongside backtick fences. All markdown state (blockquotes, lists, tables, code blocks) is properly flushed when switching context to prevent malformed output.
 62. TTS PLATFORM (MULTI-KEY): Settings → API tab → TTS Platform section. Choose from: Built-in Web Speech (free, no key), ElevenLabs (freemium, multi-key pool stored as elevenLabsApiKeys), OpenAI TTS (paid, multi-key pool stored as openaiTtsApiKeys, voices: alloy/echo/fable/onyx/nova/shimmer, models: tts-1/tts-1-hd), Groq TTS (free tier, multi-key pool stored as groqTtsApiKeys, voices: Arista-PlayAI/Atlas-PlayAI/Fritz-PlayAI), Gemini TTS (free, reuses Gemini key pool, voices: Aoede/Kore/Fenrir/Charon/Puck/Leda/Orus/Zephyr). Active platform stored as ttsPlatform in localStorage. Keys auto-rotate on 401 or 429 errors. Falls back to device Web Speech API on failure.
 63. IMAGE GENERATION: Type /image <prompt> or include "generate image", "create image", or "draw" in your message to generate an image directly in chat. Supports 5 providers selectable in Settings → Image Generation: (1) Pollinations AI — multi-key pool, model options: Flux, Flux Realism, Flux Anime, Flux 3D, Flux Pro, Turbo, Any Dark, GPT Image. (2) Gemini Imagen — reuses Gemini key pool, models: Imagen 3 / Imagen 3 Fast (requires billing). (3) NVIDIA NIM (free) — multi-key pool, custom model text input (datalist suggestions: FLUX.1 Schnell/Dev, SDXL Turbo, SD 3 Medium) — proxied via /api/nvidia-img. (4) Together AI (free+paid tier) — multi-key pool, models: FLUX.1 Schnell (Free)/Dev, SDXL. (5) Hugging Face (free tier) — multi-key pool, models: FLUX.1 Schnell, SD 3.5, SDXL Turbo. All providers support multi-key auto-rotation on 401/429. Generated image shown as a card with download button and provider label.
 64. IMAGE & TTS USAGE TRACKING: Token Management dashboard (Settings → API → Token Management) now includes Image Generation section (images generated per platform: Pollinations, Gemini, NVIDIA, Together AI, Hugging Face) and TTS Usage section (characters used per provider: ElevenLabs, OpenAI TTS, Groq TTS, Gemini TTS). Counters stored in snoah_usage_counters localStorage key and reset together with token usage via confirmResetTokenUsage().
@@ -10265,7 +10271,7 @@ DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mo
 
 Always answer questions about the app based on the above. If asked "what can you do" or "how do I use X feature", explain it clearly based on this documentation.
 
-FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $...$ display: $$...$$. For chemistry equations use KaTeX mhchem: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$, $$\\ce{CuSO4 + 2NaOH -> Cu(OH)2 + Na2SO4}$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. (6) Use > text for blockquotes — they render with a styled left accent. Use --- or *** for horizontal dividers. Use triple-backtick or ~~~ fences for code blocks. (7) DEVELOPER NOTE: Telegram username is @Owner_Of_Crypton and Instagram username is @shahzaib_muzaffar_7 — preserve underscores exactly as written. (8) IMAGE GENERATION: When the user asks you to include, generate, or show an image as part of your response, place an [IMG: detailed image description] marker exactly where the image should appear. The app will automatically generate the image and display it inline. You can mix text and images freely — e.g., explain something in text then place [IMG: ...] to show a visual. ` + lengthDirective;
+FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $...$ display: $$...$$. For chemistry equations use KaTeX mhchem: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$, $$\\ce{CuSO4 + 2NaOH -> Cu(OH)2 + Na2SO4}$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. (6) Use > text for blockquotes — they render with a styled left accent. Use ---, ***, or ___ for horizontal dividers. Use triple-backtick or ~~~ fences for code blocks. (7) DEVELOPER NOTE: Telegram username is @Owner_Of_Crypton and Instagram username is @shahzaib_muzaffar_7 — preserve underscores exactly as written. (8) IMAGE GENERATION: When the user asks you to include, generate, or show an image as part of your response, place an [IMG: detailed image description] marker exactly where the image should appear. The app will automatically generate the image and display it inline. You can mix text and images freely — e.g., explain something in text then place [IMG: ...] to show a visual. ` + lengthDirective;
                 if (_effectiveUseThinking && _thinkingSupported) systemInstruction += "The user has enabled THINKING MODE. Always include your reasoning inside <think> and </think> tags at the very beginning, then provide the final answer.";
                 // Inject active platform and model so the AI can answer platform/model questions accurately
                 const _platNames = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', nvidia: 'NVIDIA NIM', huggingface: 'Hugging Face', githubmodels: 'GitHub Models', claude: 'Claude (Anthropic)', copilot: 'Microsoft Copilot', gais: 'Google AI Studio', ollama: 'Ollama', cohere: 'Cohere', puter: 'Puter.js', deepinfra: 'DeepInfra', cerebras: 'Cerebras AI', sambanova: 'SambaNova', fireworks: 'Fireworks AI', xai: 'xAI (Grok)', perplexity: 'Perplexity', nanogpt: 'NanoGPT' };
