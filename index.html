@@ -362,6 +362,36 @@
         .theme-ocean { --accent:#1A6EBD; --accent-light:#E8F0FE; --bg:#F4F7FB; --surface:#FFFFFF; --border:#D0DCF0; }
         .theme-forest { --accent:#2D7A4F; --accent-light:#E6F4EC; --bg:#F2F7F4; --surface:#FFFFFF; --border:#C5DFCE; }
         .theme-rose   { --accent:#C4396B; --accent-light:#FDE8F0; --bg:#FBF4F6; --surface:#FFFFFF; --border:#F0C8D8; }
+
+        /* ── DESKTOP LAYOUT (≥1024px) — ChatGPT / Gemini style ── */
+        @media (min-width: 1024px) {
+            /* Sidebar always visible and slightly wider */
+            #sidebar { width: 288px !important; }
+
+            /* Chat column: readable max-width, horizontally centered */
+            #messages-wrapper { max-width: 780px; margin-left: auto; margin-right: auto; }
+
+            /* Welcome screen centered column */
+            #welcome-screen { max-width: 680px; margin-left: auto; margin-right: auto; }
+            #welcome-screen p { max-width: 460px !important; }
+            /* Suggestion buttons in 2-column grid */
+            #welcome-suggestions { display: grid !important; grid-template-columns: 1fr 1fr !important; }
+
+            /* AI response fills full column width */
+            [data-role="model"] > div { max-width: 100% !important; }
+
+            /* User bubble capped at comfortable width */
+            .flex.w-full.justify-end > div { max-width: 72% !important; }
+
+            /* Input area centered to match message column */
+            #desktop-input-inner { max-width: 780px; margin-left: auto; margin-right: auto; }
+
+            /* Header slightly more spacious */
+            #main-content > header { padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 0.875rem; padding-bottom: 0.875rem; }
+
+            /* Loading indicator in chat area aligned to column */
+            #loading-indicator { max-width: 780px; margin-left: auto; margin-right: auto; }
+        }
     </style>
     <!-- Firebase SDK for visit tracking, admin features & community chat -->
     <script type="module">
@@ -516,7 +546,7 @@
 <body class="bg-[#EAE8E0] min-h-screen flex items-center justify-center font-sans sm:p-4 selection:bg-[#D25D38] selection:text-white relative overflow-hidden overscroll-x-none text-[#2C2B29]">
 
     <!-- App Container -->
-    <div class="w-full h-[100dvh] sm:h-[90vh] sm:max-w-[420px] lg:max-w-[1100px] lg:h-[92vh] sm:rounded-[40px] lg:rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.15)] bg-[#FAF9F6] app-bg flex flex-col lg:flex-row relative overflow-hidden overflow-x-hidden sm:border-[8px] sm:border-[#2C2B29] lg:border-0">
+    <div class="w-full h-[100dvh] sm:h-[90vh] sm:max-w-[420px] lg:max-w-none lg:h-screen sm:rounded-[40px] lg:rounded-none shadow-[0_0_50px_rgba(0,0,0,0.15)] lg:shadow-none bg-[#FAF9F6] app-bg flex flex-col lg:flex-row relative overflow-hidden overflow-x-hidden sm:border-[8px] sm:border-[#2C2B29] lg:border-0">
         
         <!-- Fake Notch (Desktop) -->
         <div class="h-7 w-full bg-[#FAF9F6] justify-center items-end hidden sm:flex lg:hidden pb-1.5 shrink-0 z-20 relative">
@@ -1758,18 +1788,18 @@
         </header>
 
         <!-- ===== CHAT AREA ===== -->
-        <div id="chat-container" class="flex-1 overflow-y-auto px-4 pt-6 pb-[240px] scroll-smooth flex flex-col">
+        <div id="chat-container" class="flex-1 overflow-y-auto px-4 lg:px-8 pt-6 pb-[240px] scroll-smooth flex flex-col">
             
             <!-- Welcome Screen -->
-            <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center animate-fade-in pb-10 mt-auto mb-auto">
-                <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB]">
-                    <i data-lucide="sparkles" class="w-8 h-8 text-[#D25D38]"></i>
+            <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center animate-fade-in pb-10 mt-auto mb-auto w-full">
+                <div class="w-16 h-16 lg:w-20 lg:h-20 bg-[#F2F0E9] rounded-[20px] lg:rounded-[24px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB]">
+                    <i data-lucide="sparkles" class="w-8 h-8 lg:w-10 lg:h-10 text-[#D25D38]"></i>
                 </div>
-                <h2 class="text-[26px] font-serif text-[#2C2B29] mb-3 tracking-tight">Good morning.</h2>
-                <p class="text-[#737166] text-[15px] mb-10 max-w-[260px] leading-relaxed">
+                <h2 id="welcome-greeting" class="text-[26px] lg:text-[32px] font-serif text-[#2C2B29] mb-3 tracking-tight">Good morning.</h2>
+                <p class="text-[#737166] text-[15px] lg:text-[16px] mb-10 max-w-[260px] lg:max-w-[460px] leading-relaxed">
                     I'm SnoahAI. Ready to explore biology or write some code today?
                 </p>
-                <div class="flex flex-col w-full gap-3 px-2">
+                <div id="welcome-suggestions" class="flex flex-col w-full gap-3 px-2 lg:px-0">
                     <button onclick="submitMessage('Explain cellular respiration simply')" class="w-full text-left px-5 py-3.5 bg-white border border-[#E5E3DB] rounded-[16px] text-[14px] text-[#5B5951] hover:bg-[#F2F0E9] transition-all flex justify-between items-center shadow-sm group">
                         <span class="font-medium">Explain cellular respiration simply</span>
                         <i data-lucide="arrow-right" class="w-4 h-4 text-[#A3A095] group-hover:text-[#2C2B29] transition-colors"></i>
@@ -1839,11 +1869,12 @@
 
         <!-- ===== BOTTOM INPUT AREA ===== -->
         <!-- Scroll jump button -->
-        <button id="scroll-jump-btn" onclick="scrollJump()" class="hidden absolute right-3 z-30 w-9 h-9 rounded-full bg-white border border-[#E5E3DB] shadow-md flex items-center justify-center text-[#5B5951] hover:bg-[#F2F0E9] transition-all" style="bottom: 230px;">
+        <button id="scroll-jump-btn" onclick="scrollJump()" class="hidden absolute right-3 lg:right-[max(0.75rem,calc(50%-390px-0.5rem))] z-30 w-9 h-9 rounded-full bg-white border border-[#E5E3DB] shadow-md flex items-center justify-center text-[#5B5951] hover:bg-[#F2F0E9] transition-all" style="bottom: 230px;">
             <svg id="scroll-jump-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
 
-        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent pt-12 pb-5 sm:pb-8 px-4 shrink-0 z-20">
+        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent pt-12 pb-5 sm:pb-8 px-4 lg:px-8 shrink-0 z-20">
+            <div id="desktop-input-inner" class="w-full">
             <!-- Floating loading indicator above input bar -->
             <div id="floating-loading" class="hidden justify-center mb-2 transition-all duration-300">
                 <div class="flex gap-1.5 items-center bg-[#F2F0E9] px-4 py-2 rounded-full border border-[#E5E3DB] shadow-sm">
@@ -1900,6 +1931,7 @@
                     </button>
                 </div>
             </div>
+            </div><!-- end #desktop-input-inner -->
         </div>
 
         </div><!-- end #main-content -->
@@ -3387,6 +3419,16 @@
         showWelcomeSetupIfNeeded();
         updateSidebarUserName();
 
+        // Dynamic time-of-day greeting on welcome screen
+        (function updateWelcomeGreeting() {
+            const h2 = document.getElementById('welcome-greeting');
+            if (!h2) return;
+            const hour = new Date().getHours();
+            const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+            const name = userName ? ', ' + userName.split(' ')[0] : '';
+            h2.textContent = timeGreet + name + '.';
+        })();
+
         // --- Cookie Consent & Terms ---
         // showCookieBannerIfNeeded: shown only to returning users who have a name but no consent decision yet
         function showCookieBannerIfNeeded() {
@@ -3496,6 +3538,13 @@
             localStorage.setItem('snoah_user_name', userName);
             document.getElementById('name-prompt-modal').classList.add('hidden');
             updateSidebarUserName();
+            // Refresh welcome greeting with new name
+            const _h2 = document.getElementById('welcome-greeting');
+            if (_h2) {
+                const _hr = new Date().getHours();
+                const _tg = _hr < 12 ? 'Good morning' : _hr < 17 ? 'Good afternoon' : 'Good evening';
+                _h2.textContent = _tg + ', ' + userName.split(' ')[0] + '.';
+            }
             showToast('Welcome, ' + userName + '! 👋');
         }
 
@@ -11531,7 +11580,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
             wrapper.className = "flex w-full justify-start animate-slide-up";
             wrapper.dataset.role = 'model';
 
-            let htmlContent = '<div class="flex flex-col w-full max-w-[95%]">';
+            let htmlContent = '<div class="flex flex-col w-full">';
             const uniqueId = Date.now();
             const msgIdx = Number.isInteger(msgIdxHint) ? msgIdxHint : messages.indexOf(msg);
 
