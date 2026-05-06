@@ -2546,12 +2546,21 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.1</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.2</span>
                     </div>
 
                     <div>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.1</h3>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.2</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
+                            <li><strong>Skip Thinking Button ⏭️</strong> — A <em>Skip ✕</em> button now appears inside the live "💭 Thinking…" block while the AI is reasoning. Tap it to instantly abort the thought process and re-send the same message without thinking enabled — the AI will reply directly and the partial thought is discarded. The button automatically hides once thinking completes and the main response begins streaming.</li>
+                            <li><strong>Thinking Enforcement &amp; Feedback 🧠</strong> — When Thinking Mode is ON and the AI responds without using <code>&lt;think&gt;</code> tags, the thought-process block now shows a clear message explaining that the model did not produce thinking output and suggesting a model that supports reasoning. A toast also appears to notify you. The thinking system instruction has been strengthened so supporting models are required to include their reasoning.</li>
+                            <li><strong>Test Connection Fixed ✅</strong> — The <em>Test Connection</em> button in Settings now correctly detects a successful response. Fixes: (1) added <code>stream: false</code> so the test always receives a clean JSON response instead of an SSE stream; (2) backend-proxied platforms (Claude, Cohere, NVIDIA, xAI, NanoGPT, HuggingFace, GitHub Models, Copilot, DeepInfra) now use the correct <code>x-api-key</code> header the proxy expects; (3) missing platforms (HuggingFace, GitHub Models, Copilot, DeepInfra, GAIS) added to the test; (4) Puter.js shows an informational message instead of an incorrect error.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">v4.1 — Previous Release</h3>
+                        <ul class="list-disc list-inside space-y-1.5 text-[13px]">
                             <li><strong>Enhanced Markdown Rendering 📝</strong> — AI responses now render blockquotes (<code>&gt; text</code> displays with a styled left accent bar), horizontal rules (<code>---</code>, <code>***</code>, <code>___</code> render as visual dividers), and <code>~~~</code> as an alternate code fence alongside the standard backtick fences. All state transitions are properly flushed to prevent malformed HTML.</li>
                             <li><strong>PDF Library Protection 📚</strong> — Library file upload now blocks PDF files with a clear toast message guiding users to paste text as a note instead. PDFs are binary and were previously corrupting library text entries silently.</li>
                             <li><strong>OCR Reliability Fix 👁️</strong> — The OCR (Tesseract.js) worker is now automatically reset after any failure. If processing an image fails, the worker is recreated on the next upload rather than staying permanently broken for the rest of the session.</li>
@@ -3283,6 +3292,8 @@
         let activeStreamFullText = '';
         let _streamPartialRaw = '';
         let _streamPartialWrapper = null;
+        let _skipThinkingOnce = false;   // set by skipThinking() to re-submit without thinking
+        let _noThinkingOverride = false; // consumed once at the start of submitMessage
         let uploadedImages = [];  // multi-image: array of {data,mimeType,previewUrl}
         let activeTagFilter = null; // tag filter for sidebar
         let pinnedMessages = JSON.parse(localStorage.getItem('snoah_pins') || '[]'); // [{id,chatId,text,ts}]
@@ -6604,13 +6615,38 @@
             const startTime = Date.now();
             const testPlatform = platform;
             const testModel = getActiveModelIdForPlatform(testPlatform);
-            const testKey = testPlatform === 'gemini' ? geminiApiKey : testPlatform === 'openrouter' ? orApiKey : testPlatform === 'groq' ? groqApiKey : testPlatform === 'together' ? togetherApiKey : testPlatform === 'mistral' ? mistralApiKey : testPlatform === 'claude' ? claudeApiKey : testPlatform === 'cohere' ? cohereApiKey : testPlatform === 'cerebras' ? cerebrasApiKey : testPlatform === 'sambanova' ? sambanovaApiKey : testPlatform === 'fireworks' ? fireworksApiKey : testPlatform === 'xai' ? xaiApiKey : testPlatform === 'perplexity' ? perplexityApiKey : testPlatform === 'nanogpt' ? nanogptApiKey : testPlatform === 'custom' ? customEndpointApiKey : null;
+            const testKey = testPlatform === 'gemini' ? geminiApiKey
+                : testPlatform === 'gais' ? gaisApiKey
+                : testPlatform === 'openrouter' ? orApiKey
+                : testPlatform === 'groq' ? groqApiKey
+                : testPlatform === 'together' ? togetherApiKey
+                : testPlatform === 'mistral' ? mistralApiKey
+                : testPlatform === 'claude' ? claudeApiKey
+                : testPlatform === 'cohere' ? cohereApiKey
+                : testPlatform === 'cerebras' ? cerebrasApiKey
+                : testPlatform === 'sambanova' ? sambanovaApiKey
+                : testPlatform === 'fireworks' ? fireworksApiKey
+                : testPlatform === 'xai' ? xaiApiKey
+                : testPlatform === 'perplexity' ? perplexityApiKey
+                : testPlatform === 'nanogpt' ? nanogptApiKey
+                : testPlatform === 'nvidia' ? nvidiaApiKey
+                : testPlatform === 'huggingface' ? hfApiKey
+                : testPlatform === 'githubmodels' ? ghApiKey
+                : testPlatform === 'copilot' ? copilotApiKey
+                : testPlatform === 'deepinfra' ? deepinfraApiKey
+                : testPlatform === 'custom' ? customEndpointApiKey
+                : null;
             const done = (ok, msg) => {
                 const ms = Date.now() - startTime;
                 if (btn) { btn.disabled = false; btn.textContent = 'Test Connection'; }
                 showToast(ok ? '✅ Connected (' + ms + 'ms): ' + msg : '❌ ' + msg);
             };
-            if (!testKey && testPlatform !== 'ollama' && testPlatform !== 'puter') {
+            if (testPlatform === 'puter') {
+                if (btn) { btn.disabled = false; btn.textContent = 'Test Connection'; }
+                showToast('ℹ️ Puter.js runs AI in the browser — no API key or connection test needed.');
+                return;
+            }
+            if (!testKey && testPlatform !== 'ollama') {
                 done(false, 'No API key set for this platform');
                 return;
             }
@@ -6620,11 +6656,41 @@
                     .then(r => r.json()).then(d => { const txt = d?.candidates?.[0]?.content?.parts?.[0]?.text || (d?.error?.message || 'Unknown error'); done(!d.error, d.error ? txt : 'Model: ' + testModel); })
                     .catch(e => done(false, e.message));
             } else {
-                const url = testPlatform === 'groq' ? 'https://api.groq.com/openai/v1/chat/completions' : testPlatform === 'together' ? 'https://api.together.xyz/v1/chat/completions' : testPlatform === 'mistral' ? 'https://api.mistral.ai/v1/chat/completions' : testPlatform === 'cerebras' ? 'https://api.cerebras.ai/v1/chat/completions' : testPlatform === 'sambanova' ? 'https://api.sambanova.ai/v1/chat/completions' : testPlatform === 'fireworks' ? 'https://api.fireworks.ai/inference/v1/chat/completions' : testPlatform === 'ollama' ? (ollamaHost + '/v1/chat/completions') : testPlatform === 'custom' ? customEndpointUrl : testPlatform === 'nvidia' ? '/api/nvidia' : testPlatform === 'claude' ? '/api/claude' : testPlatform === 'cohere' ? '/api/cohere' : testPlatform === 'xai' ? '/api/xai' : testPlatform === 'perplexity' ? '/api/perplexity' : testPlatform === 'nanogpt' ? '/api/nanogpt' : 'https://openrouter.ai/api/v1/chat/completions';
-                const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (testKey || '') };
-                const body = JSON.stringify({ model: testModel, messages: [{ role: 'user', content: 'Reply with just: OK' }], max_tokens: 10 });
+                // Platforms that go through backend proxies use x-api-key header
+                const _proxied = ['nvidia', 'claude', 'cohere', 'xai', 'nanogpt', 'huggingface', 'githubmodels', 'copilot', 'deepinfra', 'perplexity'];
+                const url = testPlatform === 'groq' ? 'https://api.groq.com/openai/v1/chat/completions'
+                    : testPlatform === 'together' ? 'https://api.together.xyz/v1/chat/completions'
+                    : testPlatform === 'mistral' ? 'https://api.mistral.ai/v1/chat/completions'
+                    : testPlatform === 'cerebras' ? 'https://api.cerebras.ai/v1/chat/completions'
+                    : testPlatform === 'sambanova' ? 'https://api.sambanova.ai/v1/chat/completions'
+                    : testPlatform === 'fireworks' ? 'https://api.fireworks.ai/inference/v1/chat/completions'
+                    : testPlatform === 'ollama' ? (ollamaHost + '/v1/chat/completions')
+                    : testPlatform === 'custom' ? customEndpointUrl
+                    : testPlatform === 'nvidia' ? '/api/nvidia'
+                    : testPlatform === 'claude' ? '/api/claude'
+                    : testPlatform === 'cohere' ? '/api/cohere'
+                    : testPlatform === 'xai' ? '/api/xai'
+                    : testPlatform === 'perplexity' ? '/api/perplexity'
+                    : testPlatform === 'nanogpt' ? '/api/nanogpt'
+                    : testPlatform === 'huggingface' ? '/api/huggingface'
+                    : testPlatform === 'githubmodels' || testPlatform === 'copilot' ? '/api/github'
+                    : testPlatform === 'deepinfra' ? '/api/deepinfra'
+                    : 'https://openrouter.ai/api/v1/chat/completions';
+                const headers = _proxied.includes(testPlatform)
+                    ? { 'Content-Type': 'application/json', 'x-api-key': testKey || '' }
+                    : testPlatform === 'ollama'
+                    ? { 'Content-Type': 'application/json' }
+                    : testPlatform === 'custom' && !customEndpointApiKey
+                    ? { 'Content-Type': 'application/json' }
+                    : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (testKey || ''), 'HTTP-Referer': 'https://snoah.ai', 'X-Title': 'SnoahAI' };
+                const body = JSON.stringify({ model: testModel, messages: [{ role: 'user', content: 'Reply with just: OK' }], max_tokens: 10, stream: false });
                 fetch(url, { method: 'POST', headers, body })
-                    .then(r => r.json()).then(d => { const txt = d?.choices?.[0]?.message?.content || (d?.error?.message || JSON.stringify(d).slice(0, 80)); done(!d.error, d.error ? txt : 'Model: ' + testModel); })
+                    .then(r => r.json())
+                    .then(d => {
+                        const hasResult = !d.error && (Array.isArray(d.choices) ? d.choices.length > 0 : !!d.id);
+                        const txt = d?.choices?.[0]?.message?.content || d?.id || (d?.error?.message || JSON.stringify(d).slice(0, 80));
+                        done(hasResult, hasResult ? 'Model: ' + testModel : txt);
+                    })
                     .catch(e => done(false, e.message));
             }
         }
@@ -7750,6 +7816,14 @@ self.onmessage = async (event) => {
             floatingLoading.classList.add('hidden');
             floatingLoading.classList.remove('flex');
             streamingBarIndicator.classList.add('hidden');
+        }
+
+        // ── SKIP THINKING ─────────────────────────────────────────────
+        // Aborts the current thinking stream and re-submits the message without thinking.
+        function skipThinking() {
+            if (!isLoading && !isStreaming) return;
+            _skipThinkingOnce = true;
+            stopGeneration();
         }
 
         // ── PINNED MESSAGES ────────────────────────────────────────
@@ -10278,7 +10352,8 @@ self.onmessage = async (event) => {
 
             setIsLoading(true);
             const _effectiveFlags = getEffectiveFeatureFlags();
-            const _effectiveUseThinking = _effectiveFlags.thinking;
+            const _skipThinkingNow = _noThinkingOverride; _noThinkingOverride = false; // consume once
+            const _effectiveUseThinking = _skipThinkingNow ? false : _effectiveFlags.thinking;
             const _effectiveUseAgent = _effectiveFlags.web;
             const _effectiveCanvasMode = _effectiveFlags.canvas;
             const _activeModelNow = getActiveModelIdForPlatform(platform);
@@ -10313,7 +10388,7 @@ PLATFORMS & MODELS (all configurable in Settings):
 MULTI-KEY POOL: Add multiple API keys per platform. On rate limit (429), app silently rotates to next key and retries. Manage keys in Settings.
 
 FEATURES:
-1. THINKING MODE (🧠 Thinking button): AI reasons step-by-step. A live collapsible "💭 Thinking…" block streams in real-time. Best for complex problems, math, logic. Available on all platforms.
+1. THINKING MODE (🧠 Thinking button): AI reasons step-by-step. A live collapsible "💭 Thinking…" block streams in real-time. Best for complex problems, math, logic. Available on all platforms. While the AI is thinking, a "Skip ✕" button appears in the thinking block header — tapping it immediately stops the thinking stream and re-sends the message without thinking so the AI replies directly. The partial thought is discarded. If the AI responds without using <think> tags despite thinking being enabled, the thought-process block shows a message indicating the model does not support structured thinking.
 2. WEB SEARCH (🔍 Web button): When enabled, all AI platforms can perform real-time web search. Gemini uses native Google Search grounding. All other platforms receive search results pre-fetched from the configured Web Search Platform (Tavily, Brave, Serper, Wikipedia, DuckDuckGo, Custom, or Gemini) and injected as context — so EVERY platform supports live web search. The web search provider is independent of the AI platform. Web search works on ALL 21+ AI platforms. You should NEVER tell the user that a non-Gemini platform cannot do web search — all platforms support it when the Web button is ON.
 3. IMAGE UPLOAD (📎 Attach button / + button): Upload images for AI to analyze. Supported on ALL platforms that accept the OpenAI-compatible image_url format — including Gemini, OpenRouter, NVIDIA, Groq, Together AI, Mistral AI, Claude, Hugging Face, GitHub Models, Copilot, Google AI Studio, Cohere, DeepInfra, Ollama, Cerebras, SambaNova, Fireworks, xAI, Perplexity, and NanoGPT. Vision availability depends on whether the specific model selected supports image input; if not, the platform will return an error. Tap Attach button or the + button. Multi-image upload supported with preview strip.
 4. FILE ATTACHMENTS (📎 Attach button): Upload documents — PDFs, text files (.txt), CSVs, JSON, Markdown (.md), XML, .doc/.docx. Document content is extracted and sent as context to the AI. Combine with images in the same message.
@@ -10456,7 +10531,7 @@ DEVELOPER: Built by Shahzaib Muzaffar — a developer focused on AI tools and mo
 Always answer questions about the app based on the above. If asked "what can you do" or "how do I use X feature", explain it clearly based on this documentation.
 
 FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $...$ display: $$...$$. For chemistry equations use KaTeX mhchem: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$, $$\\ce{CuSO4 + 2NaOH -> Cu(OH)2 + Na2SO4}$$. (2) Use ## ### headers. (3) Bullet points with - or numbered lists. (4) Tables for tabular data. (5) IMPORTANT: When the user asks for a to-do list, checklist, or task list, ALWAYS format each item as a markdown task checkbox using "- [ ] task" for unchecked and "- [x] task" for already-done items. This renders as interactive checkboxes in the UI. (6) Use > text for blockquotes — they render with a styled left accent. Use ---, ***, or ___ for horizontal dividers. Use triple-backtick or ~~~ fences for code blocks. (7) DEVELOPER NOTE: Telegram username is @Owner_Of_Crypton and Instagram username is @shahzaib_muzaffar_7 — preserve underscores exactly as written. (8) IMAGE GENERATION: When the user asks you to include, generate, or show an image as part of your response, place an [IMG: detailed image description] marker exactly where the image should appear. The app will automatically generate the image and display it inline. You can mix text and images freely — e.g., explain something in text then place [IMG: ...] to show a visual. ` + lengthDirective;
-                if (_effectiveUseThinking && _thinkingSupported) systemInstruction += "The user has enabled THINKING MODE. Always include your reasoning inside <think> and </think> tags at the very beginning, then provide the final answer.";
+                if (_effectiveUseThinking && _thinkingSupported) systemInstruction += " THINKING MODE IS ENABLED. You MUST output your full internal reasoning inside <think> and </think> tags at the very start of your reply, BEFORE the final answer. This is required — do not skip or omit the <think> block.";
                 // Inject active platform and model so the AI can answer platform/model questions accurately
                 const _platNames = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', nvidia: 'NVIDIA NIM', huggingface: 'Hugging Face', githubmodels: 'GitHub Models', claude: 'Claude (Anthropic)', copilot: 'Microsoft Copilot', gais: 'Google AI Studio', ollama: 'Ollama', cohere: 'Cohere', puter: 'Puter.js', deepinfra: 'DeepInfra', cerebras: 'Cerebras AI', sambanova: 'SambaNova', fireworks: 'Fireworks AI', xai: 'xAI (Grok)', perplexity: 'Perplexity', nanogpt: 'NanoGPT' };
                 systemInstruction += '\n\nACTIVE PLATFORM & MODEL: You are currently running on the ' + (_platNames[platform] || platform) + ' platform. The active model is "' + _activeModelNow + '". When the user asks which AI, platform, or model is being used, state this information accurately. ';
@@ -10620,9 +10695,12 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 liveWrapper.innerHTML =
                     '<div class="flex flex-col w-full max-w-[95%]">' +
                         '<div id="think-block-' + liveUID + '" class="hidden mb-4 rounded-xl border border-[#E5E3DB] bg-[#F2F0E9] overflow-hidden">' +
-                            '<div class="flex items-center gap-2 px-4 py-2.5 border-b border-[#E5E3DB]">' +
-                                '<span class="text-[12px] font-semibold text-[#8C897D]">💭 Thinking…</span>' +
-                                '<span id="think-dots-' + liveUID + '" class="thinking-dots"></span>' +
+                            '<div class="flex items-center justify-between px-4 py-2.5 border-b border-[#E5E3DB]">' +
+                                '<div class="flex items-center gap-2">' +
+                                    '<span class="text-[12px] font-semibold text-[#8C897D]">💭 Thinking…</span>' +
+                                    '<span id="think-dots-' + liveUID + '" class="thinking-dots"></span>' +
+                                '</div>' +
+                                '<button id="skip-think-btn-' + liveUID + '" onclick="skipThinking()" class="text-[11px] font-semibold text-[#A3A095] hover:text-[#D25D38] px-2 py-0.5 rounded-lg hover:bg-[#FDF4F2] transition-colors active:scale-95">Skip ✕</button>' +
                             '</div>' +
                             '<div id="think-body-' + liveUID + '" class="px-4 py-3 text-[13px] text-[#737166] leading-relaxed italic max-h-52 overflow-y-auto whitespace-pre-wrap"></div>' +
                         '</div>' +
@@ -10672,6 +10750,8 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                                 displayMain  = _normRaw.slice(thinkClose + 8).trimStart();
                                 const dots = liveWrapper.querySelector('#think-dots-' + liveUID);
                                 if (dots) dots.style.display = 'none';
+                                const skipBtn = liveWrapper.querySelector('#skip-think-btn-' + liveUID);
+                                if (skipBtn) skipBtn.style.display = 'none';
                             } else {
                                 displayThink = fullRaw.slice(thinkOpen + 7);
                                 displayMain  = '';
@@ -11198,8 +11278,14 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     thinkingText = thinkMatch[1].trim();
                     mainText = _normFullRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
                 }
-                if (_effectiveUseThinking && !_thinkingSupported && !thinkingText) {
-                    thinkingText = 'Thinking is not supported by the active model (' + _activeModelNow + ').';
+                if (_effectiveUseThinking && !thinkingText) {
+                    if (!_thinkingSupported) {
+                        thinkingText = 'Thinking is not supported by the active model (' + _activeModelNow + ').';
+                    } else {
+                        // Model is listed as supported but did not produce <think> tags — notify user
+                        thinkingText = 'This model did not produce thinking output. Structured thinking may not be supported for ' + _activeModelNow + '. Try a model known to support reasoning (e.g. DeepSeek R1, Qwen3, or a reasoning-enabled OpenRouter model).';
+                        showToast('⚠️ Thinking enabled but this model did not use it. It may not be supported.');
+                    }
                 }
                 if (thinkingText && !useThinking && !smartMode) {
                     useThinking = true;
@@ -11443,6 +11529,21 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
             } catch (error) {
                 // User-initiated abort (stop button) — save partial content and show Continue button
                 if (error.name === 'AbortError' && !abortController?._timedOut) {
+                    // Skip-thinking: clean up and re-submit without thinking
+                    if (_skipThinkingOnce) {
+                        _skipThinkingOnce = false;
+                        if (liveAppended && liveWrapper.isConnected) liveWrapper.remove();
+                        const _skipUserIdx = messages.map(m => m.role).lastIndexOf('user');
+                        if (_skipUserIdx !== -1) {
+                            const _skipUserText = messages[_skipUserIdx].text;
+                            messages.splice(_skipUserIdx, 1);
+                            const _userBubbles = messagesWrapper.querySelectorAll('[data-role="user"]');
+                            if (_userBubbles.length) _userBubbles[_userBubbles.length - 1].remove();
+                            _noThinkingOverride = true;
+                            setTimeout(() => submitMessage(_skipUserText), 80);
+                        }
+                        return;
+                    }
                     if (_streamPartialRaw && _streamPartialRaw.trim() && _streamPartialWrapper && _streamPartialWrapper.isConnected) {
                         const _normPartial = _normalizeThinkTags(_streamPartialRaw);
                         let mainText = _normPartial;
