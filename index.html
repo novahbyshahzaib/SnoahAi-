@@ -363,8 +363,8 @@
         .theme-forest { --accent:#2D7A4F; --accent-light:#E6F4EC; --bg:#F2F7F4; --surface:#FFFFFF; --border:#C5DFCE; }
         .theme-rose   { --accent:#C4396B; --accent-light:#FDE8F0; --bg:#FBF4F6; --surface:#FFFFFF; --border:#F0C8D8; }
 
-        /* ── DESKTOP LAYOUT (≥768px) — ChatGPT / Gemini style ── */
-        @media (min-width: 768px) {
+        /* ── DESKTOP LAYOUT (≥1024px) — ChatGPT / Gemini style ── */
+        @media (min-width: 1024px) {
             /* Sidebar always visible and slightly wider */
             #sidebar { width: 288px !important; }
 
@@ -530,7 +530,9 @@
         };
     </script>
 </head>
-<div id="pwa-banner" class="hidden fixed top-0 left-0 right-0 z-[9999] bg-[#D25D38] text-white px-4 py-2.5 flex items-center justify-between shadow-lg">
+<body class="bg-[#EAE8E0] min-h-screen flex items-center justify-center font-sans sm:p-4 lg:p-0 lg:bg-[#FAF9F6] selection:bg-[#D25D38] selection:text-white relative overflow-hidden overscroll-x-none text-[#2C2B29]">
+
+    <div id="pwa-banner" class="hidden fixed top-0 left-0 right-0 z-[9999] bg-[#D25D38] text-white px-4 py-2.5 flex items-center justify-between shadow-lg">
         <div class="flex items-center gap-2.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="white" opacity="0.2"/><path d="M256 120 C156 120 76 188 76 272 C76 316 100 356 138 382 L124 432 L182 404 C206 412 230 416 256 416 C356 416 436 348 436 264 C436 180 356 120 256 120Z" fill="white" opacity="0.95"/></svg>
             <div>
@@ -543,13 +545,12 @@
             <button onclick="dismissPWA()" class="text-white opacity-70 text-[20px] leading-none px-1">&times;</button>
         </div>
     </div>
-<body class="bg-[#EAE8E0] min-h-screen flex items-center justify-center font-sans sm:p-4 md:p-0 md:bg-[#FAF9F6] selection:bg-[#D25D38] selection:text-white relative overflow-hidden overscroll-x-none text-[#2C2B29]">
 
     <!-- App Container -->
-    <div class="w-full h-[100dvh] sm:h-[90vh] sm:max-w-[420px] md:max-w-none md:h-screen sm:rounded-[40px] md:rounded-none shadow-[0_0_50px_rgba(0,0,0,0.15)] md:shadow-none bg-[#FAF9F6] app-bg flex flex-col md:flex-row relative overflow-hidden overflow-x-hidden sm:border-[8px] sm:border-[#2C2B29] md:border-0">
+    <div id="app-shell" class="w-full h-[100dvh] sm:h-[90vh] sm:max-w-[420px] lg:max-w-none lg:h-screen sm:rounded-[40px] lg:rounded-none shadow-[0_0_50px_rgba(0,0,0,0.15)] lg:shadow-none bg-[#FAF9F6] app-bg flex flex-col lg:flex-row relative overflow-hidden overflow-x-hidden sm:border-[8px] sm:border-[#2C2B29] lg:border-0">
         
         <!-- Fake Notch (Desktop) -->
-        <div class="h-7 w-full bg-[#FAF9F6] justify-center items-end hidden sm:flex md:hidden pb-1.5 shrink-0 z-20 relative">
+        <div class="h-7 w-full bg-[#FAF9F6] justify-center items-end hidden sm:flex lg:hidden pb-1.5 shrink-0 z-20 relative">
             <div class="w-[120px] h-[6px] bg-[#EAE8E0] rounded-full"></div>
         </div>
 
@@ -560,7 +561,7 @@
         </div>
 
         <!-- Sidebar Overlay -->
-        <div id="sidebar-overlay" class="absolute inset-0 bg-[#2C2B29]/30 backdrop-blur-sm z-30 transition-opacity hidden opacity-0 md:!hidden" onclick="toggleSidebar()"></div>
+        <div id="sidebar-overlay" class="absolute inset-0 bg-[#2C2B29]/30 backdrop-blur-sm z-30 transition-opacity hidden opacity-0 lg:!hidden" onclick="toggleSidebar()"></div>
 
         <!-- ===== SETTINGS MODAL ===== -->
         <div id="settings-modal" class="absolute inset-0 z-50 flex items-center justify-center p-5 hidden">
@@ -1769,10 +1770,10 @@
         </div>
 
         <!-- ===== SLIDE-OUT SIDEBAR ===== -->
-        <div id="sidebar" class="absolute top-0 left-0 bottom-0 w-[280px] max-w-[86vw] bg-[#FAF9F6] z-40 transform -translate-x-full transition-transform duration-300 ease-in-out border-r border-[#EAE8E0] shadow-2xl flex flex-col overflow-x-hidden md:relative md:translate-x-0 md:z-auto md:shadow-none md:max-w-none md:shrink-0">
+        <div id="sidebar" class="absolute top-0 left-0 bottom-0 w-[280px] max-w-[86vw] bg-[#FAF9F6] z-40 transform -translate-x-full transition-transform duration-300 ease-in-out border-r border-[#EAE8E0] shadow-2xl flex flex-col overflow-x-hidden lg:relative lg:translate-x-0 lg:z-auto lg:shadow-none lg:max-w-none lg:shrink-0">
             <div class="flex items-center justify-between p-5 border-b border-[#EAE8E0]">
                 <h2 class="font-serif font-semibold text-[18px]">Menu</h2>
-                <button onclick="toggleSidebar()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors md:hidden">
+                <button onclick="toggleSidebar()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors lg:hidden">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -1847,7 +1848,7 @@
         <!-- ===== HEADER ===== -->
         <header class="flex items-center px-4 py-3 bg-[#FAF9F6]/90 backdrop-blur-md z-10 shrink-0 border-b border-[#EAE8E0]/50 header-bg">
             <div class="flex-1 flex items-center">
-                <button onclick="toggleSidebar()" class="p-2 -ml-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors md:hidden">
+                <button onclick="toggleSidebar()" class="p-2 -ml-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors lg:hidden">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -1870,7 +1871,7 @@
         </header>
 
         <!-- ===== CHAT AREA ===== -->
-        <div id="chat-container" class="flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-[240px] scroll-smooth flex flex-col">
+        <div id="chat-container" class="flex-1 overflow-y-auto px-4 lg:px-8 pt-6 pb-[240px] scroll-smooth flex flex-col">
             
             
             <!-- Onboarding Overlay -->
@@ -2020,11 +2021,11 @@
 
         <!-- ===== BOTTOM INPUT AREA ===== -->
         <!-- Scroll jump button -->
-        <button id="scroll-jump-btn" onclick="scrollJump()" class="hidden absolute right-3 md:right-[max(0.75rem,calc(50%-390px-0.5rem))] z-30 w-9 h-9 rounded-full bg-white border border-[#E5E3DB] shadow-md flex items-center justify-center text-[#5B5951] hover:bg-[#F2F0E9] transition-all" style="bottom: 230px;">
+        <button id="scroll-jump-btn" onclick="scrollJump()" class="hidden absolute right-3 lg:right-[max(0.75rem,calc(50%-390px-0.5rem))] z-30 w-9 h-9 rounded-full bg-white border border-[#E5E3DB] shadow-md flex items-center justify-center text-[#5B5951] hover:bg-[#F2F0E9] transition-all" style="bottom: 230px;">
             <svg id="scroll-jump-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
 
-        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent pt-12 pb-5 sm:pb-8 px-4 md:px-8 shrink-0 z-20">
+        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent pt-12 pb-5 sm:pb-8 px-4 lg:px-8 shrink-0 z-20">
             <div id="desktop-input-inner" class="w-full">
             <!-- Floating loading indicator above input bar -->
             <div id="floating-loading" class="hidden justify-center mb-2 transition-all duration-300">
@@ -4397,7 +4398,7 @@
         }, true);
 
         // Drag & drop on app container
-        const appContainer = document.querySelector('[class*="w-full h-\[100dvh\]"]') || document.body;
+        const appContainer = document.getElementById('app-shell') || document.body;
         appContainer.addEventListener('dragover', e => { e.preventDefault(); document.getElementById('drag-overlay').classList.add('active'); });
         appContainer.addEventListener('dragleave', e => { if (!appContainer.contains(e.relatedTarget)) document.getElementById('drag-overlay').classList.remove('active'); });
         appContainer.addEventListener('drop', e => {
@@ -8942,7 +8943,7 @@ self.onmessage = async (event) => {
             toast.id = 'snoah-toast';
             toast.style.cssText = 'position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:#2C2B29;color:white;font-size:13px;padding:8px 18px;border-radius:99px;z-index:999;pointer-events:none;white-space:nowrap;font-family:sans-serif;';
             toast.textContent = message;
-            document.querySelector('[class*="w-full h-\\[100dvh\\]"]')?.appendChild(toast) || document.body.appendChild(toast);
+            document.getElementById('app-shell')?.appendChild(toast) || document.body.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'toastOut 0.2s ease forwards'; setTimeout(() => toast.remove(), 200); }, 2000);
         }
 
