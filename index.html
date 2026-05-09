@@ -594,76 +594,7 @@
                 </div>
 
                 <!-- API Config Tab -->
-                
-                <!-- API Config Tab (Master-Detail View) -->
-                <div id="stab-api-content" class="flex flex-col flex-1 overflow-hidden relative">
-                    <!-- Master List -->
-                    <div id="api-master-list" class="p-4 space-y-2.5 overflow-y-auto flex-1">
-                        <button onclick="openApiSubpage('api-sub-models')" class="w-full p-4 bg-white border border-[#E5E3DB] rounded-2xl flex items-center justify-between hover:bg-[#F2F0E9] transition-all shadow-sm group">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 bg-[#FDF4F2] rounded-xl flex items-center justify-center text-[#D25D38] group-hover:scale-105 transition-transform"><i data-lucide="cpu" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <div class="text-[14px] font-bold text-[#2C2B29] mb-0.5">Platform & Models</div>
-                                    <div class="text-[12px] text-[#737166]">Select AI provider, search model directory</div>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-[#A3A095]"></i>
-                        </button>
-
-                        <button onclick="openApiSubpage('api-sub-keys')" class="w-full p-4 bg-white border border-[#E5E3DB] rounded-2xl flex items-center justify-between hover:bg-[#F2F0E9] transition-all shadow-sm group">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 bg-[#FDF4F2] rounded-xl flex items-center justify-center text-[#D25D38] group-hover:scale-105 transition-transform"><i data-lucide="key" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <div class="text-[14px] font-bold text-[#2C2B29] mb-0.5">API Keys & Connection</div>
-                                    <div class="text-[12px] text-[#737166]">Manage keys, custom endpoints, test connection</div>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-[#A3A095]"></i>
-                        </button>
-
-                        <button onclick="openApiSubpage('api-sub-tts')" class="w-full p-4 bg-white border border-[#E5E3DB] rounded-2xl flex items-center justify-between hover:bg-[#F2F0E9] transition-all shadow-sm group">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 bg-[#FDF4F2] rounded-xl flex items-center justify-center text-[#D25D38] group-hover:scale-105 transition-transform"><i data-lucide="mic" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <div class="text-[14px] font-bold text-[#2C2B29] mb-0.5">TTS & Speech</div>
-                                    <div class="text-[12px] text-[#737166]">Text-to-speech providers and voice settings</div>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-[#A3A095]"></i>
-                        </button>
-
-                        <button onclick="openApiSubpage('api-sub-image')" class="w-full p-4 bg-white border border-[#E5E3DB] rounded-2xl flex items-center justify-between hover:bg-[#F2F0E9] transition-all shadow-sm group">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 bg-[#FDF4F2] rounded-xl flex items-center justify-center text-[#D25D38] group-hover:scale-105 transition-transform"><i data-lucide="image" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <div class="text-[14px] font-bold text-[#2C2B29] mb-0.5">Image Generation</div>
-                                    <div class="text-[12px] text-[#737166]">Configure image generation platforms</div>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-[#A3A095]"></i>
-                        </button>
-                    </div>
-
-                    <!-- Subpages Container -->
-                    <div id="api-subpages-container" class="absolute inset-0 bg-[#FAF9F6] transform translate-x-full transition-transform duration-300 z-10 flex flex-col hidden">
-                        <!-- Subpage Header -->
-                        <div class="flex items-center gap-3 px-4 py-3 border-b border-[#EAE8E0] bg-white shrink-0">
-                            <button onclick="closeApiSubpage()" class="p-1.5 hover:bg-[#F2F0E9] rounded-full transition-colors text-[#5B5951]">
-                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
-                            </button>
-                            <h3 id="api-subpage-title" class="font-bold text-[15px] text-[#2C2B29]">Title</h3>
-                        </div>
-
-                        <!-- Subpage Content Area -->
-                        <div class="flex-1 overflow-y-auto p-5 space-y-6" id="api-subpage-content">
-                            <!-- Dynamically moved content will appear here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Hidden Original Sections (to be moved by JS) -->
-                <div id="hidden-original-sections" class="hidden">
-
+                <div id="stab-api-content" class="p-5 space-y-5 overflow-y-auto flex-1">
 
                     <!-- Platform Switcher -->
                     <div>
@@ -701,8 +632,7 @@
                     <!-- AI Model -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">AI Model</label>
-                        
-                        <div class="relative mb-2">
+<div class="relative mb-2">
                             <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-[#A3A095]"></i>
                             <input type="text" id="model-search-input" onkeyup="filterModelCards()" placeholder="Search models (e.g. flash, pro, claude)..." 
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl pl-9 pr-3 py-2.5 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
@@ -719,7 +649,6 @@
                         </div>
                         <input type="hidden" id="settings-model" value="gemini-2.5-flash">
                         <p id="model-hint" class="text-[11px] text-[#A3A095] mt-1.5">Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> · <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span></p>
-
                     </div>
 
                     <!-- Test API Connection -->
@@ -1284,10 +1213,6 @@
                 </div>
 
                 <!-- AI Config Tab -->
-                
-                </div>
-                <!-- End API Config Tab -->
-
                 <div id="stab-ai-content" class="p-5 space-y-5 overflow-y-auto flex-1 hidden">
 
                     <!-- System Prompt / Persona -->
@@ -1888,75 +1813,6 @@
         <!-- ===== CHAT AREA ===== -->
         <div id="chat-container" class="flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-[240px] scroll-smooth flex flex-col">
             
-            
-            <!-- Onboarding Overlay -->
-            <div id="onboarding-overlay" class="absolute inset-0 z-[100] bg-[#FAF9F6] flex flex-col items-center justify-center transition-opacity duration-500 hidden">
-                <div class="relative w-[90%] max-w-[400px] h-[450px] bg-white rounded-3xl shadow-xl border border-[#E5E3DB] overflow-hidden flex flex-col">
-                    <button onclick="skipOnboarding()" class="absolute top-4 right-4 text-[#8C897D] text-[13px] font-bold uppercase tracking-wider hover:text-[#2C2B29] z-10 transition-colors">Skip</button>
-                    
-                    <div id="onboarding-steps" class="flex-1 relative w-full h-full">
-                        <!-- Step 1 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-0 opacity-100" id="ob-step-1">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="sparkles" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">Welcome to SnoahAi</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">Let's get you set up in 60 seconds. We will show you the key features so you can start chatting immediately.</p>
-                        </div>
-                        
-                        <!-- Step 2 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-full opacity-0 pointer-events-none" id="ob-step-2">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="key" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">Add Your API Key</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">SnoahAi connects to AI platforms using your own keys. Open <strong class="text-[#2C2B29]">Settings</strong> &rarr; <strong class="text-[#2C2B29]">API</strong> to add one.</p>
-                        </div>
-                        
-                        <!-- Step 3 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-full opacity-0 pointer-events-none" id="ob-step-3">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="search" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">Searchable Model Cards</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">Find models easily! Use our new directory with tags like <span class="bg-[#E6F4EC] text-[#2D7A4F] px-1 rounded text-[10px] font-bold">FREE</span> and <span class="bg-[#E8F0FE] text-[#1A6EBD] px-1 rounded text-[10px] font-bold">FAST</span>.</p>
-                        </div>
-                        
-                        <!-- Step 4 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-full opacity-0 pointer-events-none" id="ob-step-4">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="layers" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">Clean Sub-Pages</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">We've organized settings into clean, fully tappable sub-pages. No more endless scrolling to find what you need.</p>
-                        </div>
-                        
-                        <!-- Step 5 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-full opacity-0 pointer-events-none" id="ob-step-5">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="check" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">You're All Set!</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">You're ready to start exploring everything SnoahAi has to offer. Enjoy!</p>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 shrink-0 flex flex-col items-center w-full bg-[#FAF9F6] border-t border-[#EAE8E0]">
-                        <div class="flex gap-2.5 mb-5" id="ob-dots">
-                            <div class="w-2 h-2 rounded-full bg-[#D25D38] transition-colors duration-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-[#D9D7CE] transition-colors duration-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-[#D9D7CE] transition-colors duration-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-[#D9D7CE] transition-colors duration-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-[#D9D7CE] transition-colors duration-300"></div>
-                        </div>
-                        <button onclick="nextOnboardingStep()" id="ob-next-btn" class="w-full py-3 bg-[#D25D38] text-white rounded-xl text-[14px] font-bold shadow-md hover:bg-[#B84E2E] active:scale-95 transition-all flex justify-center items-center gap-2">
-                            <span>Continue</span>
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Welcome Screen -->
             <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center animate-fade-in pb-10 mt-auto mb-auto w-full">
                 <div class="w-16 h-16 md:w-20 md:h-20 bg-[#F2F0E9] rounded-[20px] md:rounded-[24px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB]">
@@ -2713,7 +2569,7 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.4</span>
+<span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.4</span>
                     </div>
 
                     <div>
@@ -9215,21 +9071,16 @@ self.onmessage = async (event) => {
             // Build iframe src
             let iframeSrc = '';
             if (langLower === 'html') { iframeSrc = code; }
-            else if (langLower === 'svg') { iframeSrc = '<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}</style></head><body>' + code + '
-</body></html>'; }
+            else if (langLower === 'svg') { iframeSrc = '<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}</style></head><body>' + code + '</body></html>'; }
             else if (['jsx', 'tsx', 'react'].includes(langLower)) {
                 const reactCode = code.replace(/<\/script>/gi,'<\\/script>');
-                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}#root{min-height:50px}</style></head><body><div id="root"></div><script src="https://unpkg.com/react@18/umd/react.development.js"><\/script><script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script><script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script><script type="text/babel" data-presets="react">' + reactCode + ';(function(){try{const el=document.getElementById("root");if(typeof App!=="undefined"){ReactDOM.createRoot(el).render(React.createElement(App));}else{const comps=Object.keys(window).filter(k=>typeof window[k]==="function"&&/^[A-Z]/.test(k)&&k!=="React"&&k!=="ReactDOM"&&k!=="Babel");if(comps.length)ReactDOM.createRoot(el).render(React.createElement(window[comps[0]]));}}catch(e){document.getElementById("root").innerHTML=\'<pre style="color:red;font-size:12px;white-space:pre-wrap">\'+e.message+\'<\/pre>\';}})();<\/script>
-</body></html>';
+                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}#root{min-height:50px}</style></head><body><div id="root"></div><script src="https://unpkg.com/react@18/umd/react.development.js"><\/script><script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script><script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script><script type="text/babel" data-presets="react">' + reactCode + ';(function(){try{const el=document.getElementById("root");if(typeof App!=="undefined"){ReactDOM.createRoot(el).render(React.createElement(App));}else{const comps=Object.keys(window).filter(k=>typeof window[k]==="function"&&/^[A-Z]/.test(k)&&k!=="React"&&k!=="ReactDOM"&&k!=="Babel");if(comps.length)ReactDOM.createRoot(el).render(React.createElement(window[comps[0]]));}}catch(e){document.getElementById("root").innerHTML=\'<pre style="color:red;font-size:12px;white-space:pre-wrap">\'+e.message+\'<\/pre>\';}})();<\/script></body></html>';
             }
-            else if (['javascript','js','typescript','ts'].includes(langLower)) { iframeSrc = '<!DOCTYPE html><html><head><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}</style></head><body><script>' + code.replace(/<\/script>/gi,'<\\/script>') + '<\/script>
-</body></html>'; }
-            else if (langLower === 'css') { iframeSrc = '<!DOCTYPE html><html><head><style>' + code + '</style></head><body><p style="font-family:system-ui;padding:1rem;color:#888">CSS Preview — styles are applied above.</p>
-</body></html>'; }
+            else if (['javascript','js','typescript','ts'].includes(langLower)) { iframeSrc = '<!DOCTYPE html><html><head><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}</style></head><body><script>' + code.replace(/<\/script>/gi,'<\\/script>') + '<\/script></body></html>'; }
+            else if (langLower === 'css') { iframeSrc = '<!DOCTYPE html><html><head><style>' + code + '</style></head><body><p style="font-family:system-ui;padding:1rem;color:#888">CSS Preview — styles are applied above.</p></body></html>'; }
             else if (langLower === 'python' || langLower === 'py') {
                 const pyCode = JSON.stringify(code);
-                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff;margin:0}#output{white-space:pre-wrap;font-family:monospace;font-size:13px;line-height:1.5;color:#2C2B29}#status{font-size:12px;color:#A3A095;margin-bottom:8px}</style></head><body><div id="status">⏳ Loading Python runtime (Pyodide)…</div><div id="output"></div><script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"><\/script><script>async function main(){const status=document.getElementById("status");const output=document.getElementById("output");try{const pyodide=await loadPyodide({stdout:(t)=>{output.textContent+=t+"\\n";},stderr:(t)=>{output.innerHTML+=\'<span style="color:#D25D38">\'+t+\'<\/span>\\n\';}});status.textContent="✅ Python ready";await pyodide.runPythonAsync(' + pyCode + ');}catch(e){document.getElementById("status").textContent="❌ Error";output.innerHTML=\'<span style="color:#D25D38">\'+e.message+\'<\/span>\';}}main();<\/script>
-</body></html>';
+                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff;margin:0}#output{white-space:pre-wrap;font-family:monospace;font-size:13px;line-height:1.5;color:#2C2B29}#status{font-size:12px;color:#A3A095;margin-bottom:8px}</style></head><body><div id="status">⏳ Loading Python runtime (Pyodide)…</div><div id="output"></div><script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"><\/script><script>async function main(){const status=document.getElementById("status");const output=document.getElementById("output");try{const pyodide=await loadPyodide({stdout:(t)=>{output.textContent+=t+"\\n";},stderr:(t)=>{output.innerHTML+=\'<span style="color:#D25D38">\'+t+\'<\/span>\\n\';}});status.textContent="✅ Python ready";await pyodide.runPythonAsync(' + pyCode + ');}catch(e){document.getElementById("status").textContent="❌ Error";output.innerHTML=\'<span style="color:#D25D38">\'+e.message+\'<\/span>\';}}main();<\/script></body></html>';
             }
             overlay.innerHTML =
                 // Header bar
@@ -11443,6 +11294,21 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     }
                 }
 
+                if (_skipThinkingOnce) {
+                    _skipThinkingOnce = false;
+                    if (liveAppended && liveWrapper.isConnected) liveWrapper.remove();
+                    const _skipUserIdx = messages.map(m => m.role).lastIndexOf('user');
+                    if (_skipUserIdx !== -1) {
+                        const _skipUserText = messages[_skipUserIdx].text;
+                        messages.splice(_skipUserIdx, 1);
+                        const _userBubbles = messagesWrapper.querySelectorAll('[data-role="user"]');
+                        if (_userBubbles.length) _userBubbles[_userBubbles.length - 1].remove();
+                        _noThinkingOverride = true;
+                        setTimeout(() => submitMessage(_skipUserText), 80);
+                    }
+                    return;
+                }
+
                 // ── FINALISE ──
                 // Record token usage from stream
                 if (lastStreamUsage) {
@@ -12045,6 +11911,27 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
     </script>
 
     <script>
+    // PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', e => {
+    if (e.request.url.startsWith('chrome-extension')) return;
+    e.respondWith(
+        caches.open('snoah-v1').then(cache =>
+            cache.match(e.request).then(cached => {
+                const net = fetch(e.request).then(res => {
+                    if (e.request.url.startsWith(location.origin) && res.ok) cache.put(e.request, res.clone());
+                    return res;
+                }).catch(() => cached);
+                return cached || net;
+            })
+        )
+    );
+});`;
+        const blob = new Blob([swCode], {type: 'application/javascript'});
+        navigator.serviceWorker.register(URL.createObjectURL(blob));
     }
 
     // PWA Install banner
@@ -12071,6 +11958,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
         if (banner) banner.classList.add('hidden');
     }
     </script>
+<<<<<<< HEAD
 
     <script>
 // --- Onboarding Logic ---
@@ -12638,5 +12526,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
 
 
 </script>
+=======
+>>>>>>> aeff4607c95c4bbd486158b6817ad520e4534484
 </body>
 </html>
