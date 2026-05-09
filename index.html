@@ -82,6 +82,15 @@
             'sliders': '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
             'layout-panel-right': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/>',
             'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+            'arrow-left': '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+            'chevron-right': '<path d="m9 18 6-6-6-6"/>',
+            'cpu': '<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>',
+            'key': '<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.3 9.3"/><path d="M17 6l4 4"/><path d="m14 9 2 2"/>',
+            'layers': '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+            'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+            'shield': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+            'message-circle': '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+            'monitor': '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
         },
         createIcons() {
             document.querySelectorAll('i[data-lucide]').forEach(el => {
@@ -697,6 +706,13 @@
                             <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-[#A3A095]"></i>
                             <input type="text" id="model-search-input" onkeyup="filterModelCards()" placeholder="Search models (e.g. flash, pro, claude)..." 
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl pl-9 pr-3 py-2.5 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
+                        </div>
+                        <div class="flex gap-1.5 mb-2.5 flex-wrap">
+                            <button onclick="setModelBadgeFilter('All')" data-badge="All" class="model-badge-pill px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors bg-[#D25D38] text-white border-[#D25D38]">All</button>
+                            <button onclick="setModelBadgeFilter('Free')" data-badge="Free" class="model-badge-pill px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors bg-white text-[#5B5951] border-[#E5E3DB]">🟢 Free</button>
+                            <button onclick="setModelBadgeFilter('Fast')" data-badge="Fast" class="model-badge-pill px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors bg-white text-[#5B5951] border-[#E5E3DB]">⚡ Fast</button>
+                            <button onclick="setModelBadgeFilter('Recommended')" data-badge="Recommended" class="model-badge-pill px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors bg-white text-[#5B5951] border-[#E5E3DB]">⭐ Recommended</button>
+                            <button onclick="setModelBadgeFilter('Paid')" data-badge="Paid" class="model-badge-pill px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors bg-white text-[#5B5951] border-[#E5E3DB]">💳 Paid</button>
                         </div>
                         <div id="model-cards-container" class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
                             <!-- Cards populated by JS -->
@@ -2697,12 +2713,17 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.3</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.4</span>
                     </div>
 
                     <div>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.3</h3>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.4</h3>
                         <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px] mb-4">
+                            <li><strong>Searchable Model Cards with Badge Filters 🔍</strong> — The model directory now features 24+ models with visual cards showing <span class="bg-[#E6F4EC] text-[#2D7A4F] px-1 rounded text-[10px] font-bold">FREE</span>, <span class="bg-[#E8F0FE] text-[#1A6EBD] px-1 rounded text-[10px] font-bold">FAST</span>, <span class="bg-[#FEF3C7] text-[#92400E] px-1 rounded text-[10px] font-bold">RECOMMENDED</span>, and <span class="bg-[#F2F0E9] text-[#737166] px-1 rounded text-[10px] font-bold">PAID</span> badges. Tap filter pills to instantly show only Free, Fast, or Recommended models. Search by model name, platform, or badge type.</li>
+                            <li><strong>Clean Sub-Pages for AI & App Settings ⚙️</strong> — Both the AI and App settings tabs are now organized into clean, tappable sub-page categories instead of one long scroll. The AI tab groups into Persona & Instructions, AI Behavior, Multi-AI & Memory, and Plugins. The App tab groups into Appearance, Chat Experience, Data Management, and Danger Zone — all with smooth slide-in animations.</li>
+                        </ul>
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">v4.3 — Previous Release</h3>
+                        <ul class="list-disc list-inside space-y-1.5 text-[13px] mb-4">
                             <li><strong>New Onboarding Guide 🚀</strong> — A fresh 5-step interactive onboarding experience for new users, featuring a skip button, progress dots, and animated calls to action.</li>
                             <li><strong>Searchable Model Directory 🔍</strong> — Replacing the plain text input, you can now search through models with visual cards showing badges (Free, Fast, Recommended, Paid) and concise descriptions.</li>
                             <li><strong>Clean Settings Layout ⚙️</strong> — The settings panel has been completely reorganized into clean, fully tappable sub-pages instead of one long scrolling list, making it much easier to navigate.</li>
@@ -5270,8 +5291,21 @@
                     btn.classList.remove('bg-[#D25D38]', 'text-white');
                     btn.classList.add('text-[#5B5951]', 'hover:bg-[#F2F0E9]');
                     content.classList.add('hidden');
+                    // Close any open sub-pages when switching away
+                    const subcontainer = document.getElementById('stab-' + t + '-content-subcontainer');
+                    if (subcontainer && !subcontainer.classList.contains('hidden')) {
+                        if (typeof closeSettingsSubPage === 'function') closeSettingsSubPage('stab-' + t + '-content');
+                    }
                 }
             });
+            // Also close API subpage when switching away from API tab
+            if (tab !== 'api') {
+                const apiSub = document.getElementById('api-subpages-container');
+                if (apiSub && !apiSub.classList.contains('hidden')) {
+                    if (typeof closeApiSubpage === 'function') closeApiSubpage();
+                }
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function confirmResetSettings() {
@@ -12262,20 +12296,47 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
     });
 
 
-    // --- Searchable Model Cards Logic ---
+    // --- Searchable Model Cards Logic with Badge Filters ---
+    let activeModelBadgeFilter = 'All';
     const modelDirectory = [
-        { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", desc: "Fast & lightweight for quick reasoning.", badges: [{text:"Fast", color:"blue"}, {text:"Free", color:"green"}, {text:"Recommended", color:"orange"}] },
-        { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", desc: "Highly capable model for complex tasks.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}] },
-        { id: "gemini-2.0-flash-exp", name: "Gemini 2.0 Flash Exp", desc: "Experimental fastest tier.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}] },
-        { id: "gemini-2.0-pro-exp-02-05", name: "Gemini 2.0 Pro Exp", desc: "Latest experimental pro capabilities.", badges: [{text:"Paid", color:"gray"}] },
-        { id: "llama-3.1-8b-instant", name: "Llama 3.1 8B", desc: "Ultra-fast open source model via Groq.", badges: [{text:"Fast", color:"blue"}, {text:"Free", color:"green"}] },
-        { id: "llama-3.1-70b-versatile", name: "Llama 3.1 70B", desc: "Powerful versatile open source model.", badges: [{text:"Free", color:"green"}] },
-        { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet", desc: "Smartest and fastest Claude model.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}] },
-        { id: "gpt-4o-mini", name: "GPT-4o Mini", desc: "Cost-efficient small model from OpenAI.", badges: [{text:"Paid", color:"gray"}, {text:"Fast", color:"blue"}] },
-        { id: "gpt-4o", name: "GPT-4o", desc: "Flagship multimodel AI from OpenAI.", badges: [{text:"Paid", color:"gray"}] },
-        { id: "deepseek-coder", name: "DeepSeek Coder", desc: "Excellent coding companion.", badges: [{text:"Free", color:"green"}] },
-        { id: "deepseek-reasoner", name: "DeepSeek Reasoner (R1)", desc: "Advanced reasoning and problem solving.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}] },
-        { id: "qwen-2.5-coder-32b", name: "Qwen 2.5 Coder 32B", desc: "Top tier coding model.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}] }
+        // Gemini models
+        { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", desc: "Fast & lightweight for quick reasoning. Best balance of speed and quality.", badges: [{text:"Fast", color:"blue"}, {text:"Free", color:"green"}, {text:"Recommended", color:"orange"}], platform: "gemini" },
+        { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", desc: "Highly capable model for complex multi-step tasks and deep analysis.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}], platform: "gemini" },
+        { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash", desc: "Previous-gen fast model, still very capable.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}], platform: "gemini" },
+        { id: "gemini-2.0-flash-exp", name: "Gemini 2.0 Flash Exp", desc: "Experimental fastest tier with cutting-edge features.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}], platform: "gemini" },
+        { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro", desc: "1M token context window for massive document analysis.", badges: [{text:"Paid", color:"gray"}], platform: "gemini" },
+        // Groq models
+        { id: "llama-3.3-70b-versatile", name: "Llama 3.3 70B", desc: "Powerful open-source model with ultra-fast Groq inference.", badges: [{text:"Fast", color:"blue"}, {text:"Free", color:"green"}, {text:"Recommended", color:"orange"}], platform: "groq" },
+        { id: "llama-3.1-8b-instant", name: "Llama 3.1 8B Instant", desc: "Ultra-fast lightweight model, great for quick queries.", badges: [{text:"Fast", color:"blue"}, {text:"Free", color:"green"}], platform: "groq" },
+        { id: "gemma2-9b-it", name: "Gemma 2 9B", desc: "Google's efficient open model via Groq.", badges: [{text:"Fast", color:"blue"}, {text:"Free", color:"green"}], platform: "groq" },
+        // Claude models
+        { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet", desc: "Anthropic's smartest model — excellent for code and analysis.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}], platform: "claude" },
+        { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku", desc: "Fast and affordable Claude model for everyday tasks.", badges: [{text:"Paid", color:"gray"}, {text:"Fast", color:"blue"}], platform: "claude" },
+        // OpenRouter / GPT models
+        { id: "gpt-4o-mini", name: "GPT-4o Mini", desc: "Cost-efficient small model from OpenAI via OpenRouter.", badges: [{text:"Paid", color:"gray"}, {text:"Fast", color:"blue"}], platform: "openrouter" },
+        { id: "gpt-4o", name: "GPT-4o", desc: "OpenAI's flagship multimodal AI model.", badges: [{text:"Paid", color:"gray"}], platform: "openrouter" },
+        // Together AI models
+        { id: "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free", name: "Llama 3.3 70B Turbo", desc: "Free tier access to powerful Llama model on Together AI.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}], platform: "together" },
+        // Cerebras (Free)
+        { id: "llama-3.3-70b", name: "Llama 3.3 70B (Cerebras)", desc: "World's fastest inference — instant responses.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}, {text:"Recommended", color:"orange"}], platform: "cerebras" },
+        // SambaNova (Free)
+        { id: "Meta-Llama-3.1-70B-Instruct", name: "Llama 3.1 70B (SambaNova)", desc: "Free access to powerful Llama model with fast inference.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}], platform: "sambanova" },
+        // Mistral
+        { id: "mistral-small-latest", name: "Mistral Small", desc: "Efficient and fast — great for routine tasks.", badges: [{text:"Fast", color:"blue"}, {text:"Paid", color:"gray"}], platform: "mistral" },
+        { id: "mistral-large-latest", name: "Mistral Large", desc: "Top-tier Mistral model for complex reasoning.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}], platform: "mistral" },
+        // xAI
+        { id: "grok-3-mini", name: "Grok 3 Mini", desc: "xAI's fast and witty model with reasoning capabilities.", badges: [{text:"Paid", color:"gray"}, {text:"Fast", color:"blue"}], platform: "xai" },
+        // Puter (Free, no key)
+        { id: "gpt-4o-mini", name: "GPT-4o Mini (Puter)", desc: "Free access via Puter.js — no API key needed at all.", badges: [{text:"Free", color:"green"}, {text:"Recommended", color:"orange"}], platform: "puter" },
+        // DeepSeek
+        { id: "deepseek-coder", name: "DeepSeek Coder", desc: "Excellent coding companion with deep code understanding.", badges: [{text:"Free", color:"green"}], platform: "deepinfra" },
+        { id: "deepseek-reasoner", name: "DeepSeek Reasoner (R1)", desc: "Advanced chain-of-thought reasoning and problem solving.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}], platform: "deepinfra" },
+        // Qwen
+        { id: "qwen-2.5-coder-32b", name: "Qwen 2.5 Coder 32B", desc: "Top-tier open-source coding model with fast inference.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}], platform: "cerebras" },
+        // Fireworks
+        { id: "accounts/fireworks/models/llama-v3p1-70b-instruct", name: "Llama 3.1 70B (Fireworks)", desc: "Fast and free access on Fireworks AI platform.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}], platform: "fireworks" },
+        // Cohere
+        { id: "command-r-plus-08-2024", name: "Command R+", desc: "Cohere's powerful enterprise-grade model with RAG.", badges: [{text:"Paid", color:"gray"}], platform: "cohere" }
     ];
 
     function renderModelCards(filterText = '') {
@@ -12288,15 +12349,26 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
         const currentSelected = document.getElementById('settings-model').value || 'gemini-2.5-flash';
         
         let hasMatches = false;
+        const badgeFilterLower = activeModelBadgeFilter.toLowerCase();
+        const badgeNames = ['free','fast','recommended','paid'];
+        const isSearchingBadge = badgeNames.some(bn => lowerFilter === bn);
 
         modelDirectory.forEach(model => {
-            if (lowerFilter && !model.name.toLowerCase().includes(lowerFilter) && !model.id.toLowerCase().includes(lowerFilter)) {
-                return;
+            // Badge filter
+            if (badgeFilterLower !== 'all' && !model.badges.some(b => b.text.toLowerCase() === badgeFilterLower)) return;
+            // Text search (also matches badge names)
+            if (lowerFilter && !isSearchingBadge) {
+                if (!model.name.toLowerCase().includes(lowerFilter) && !model.id.toLowerCase().includes(lowerFilter) && !model.desc.toLowerCase().includes(lowerFilter) && !(model.platform || '').toLowerCase().includes(lowerFilter)) {
+                    return;
+                }
+            }
+            if (lowerFilter && isSearchingBadge) {
+                if (!model.badges.some(b => b.text.toLowerCase() === lowerFilter)) return;
             }
             hasMatches = true;
             
             const isSelected = currentSelected === model.id;
-            const borderClass = isSelected ? 'border-[#D25D38] bg-[#FDF4F2]' : 'border-[#E5E3DB] bg-white hover:bg-[#F2F0E9]';
+            const borderClass = isSelected ? 'border-[#D25D38] bg-[#FDF4F2] shadow-sm' : 'border-[#E5E3DB] bg-white hover:bg-[#F2F0E9] hover:border-[#D9D6CE]';
             
             const badgesHtml = model.badges.map(b => {
                 let colorClasses = "bg-[#EAE8E0] text-[#5B5951]";
@@ -12307,29 +12379,33 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 return `<span class="${colorClasses} px-1.5 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-wide">${b.text}</span>`;
             }).join('');
 
+            const selectedIcon = isSelected ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' : '';
+
             const card = document.createElement('div');
-            card.className = `p-3 rounded-xl border ${borderClass} cursor-pointer transition-colors`;
+            card.className = `p-3 rounded-xl border ${borderClass} cursor-pointer transition-all duration-150 active:scale-[0.98]`;
             card.onclick = () => selectModelCard(model.id);
             card.innerHTML = `
                 <div class="flex justify-between items-start mb-1">
-                    <div class="font-bold text-[13px] text-[#2C2B29]">${model.name}</div>
-                    <div class="flex gap-1">${badgesHtml}</div>
+                    <div class="flex items-center gap-1.5">
+                        ${selectedIcon}
+                        <div class="font-bold text-[13px] text-[#2C2B29]">${model.name}</div>
+                    </div>
+                    <div class="flex gap-1 flex-shrink-0">${badgesHtml}</div>
                 </div>
-                <div class="text-[11px] text-[#737166] mb-1.5">${model.desc}</div>
-                <code class="text-[10px] text-[#A3A095] bg-[#FAF9F6] px-1 py-0.5 rounded">${model.id}</code>
+                <div class="text-[11px] text-[#737166] mb-1.5 leading-relaxed">${model.desc}</div>
+                <code class="text-[10px] text-[#A3A095] bg-[#FAF9F6] px-1.5 py-0.5 rounded font-mono">${model.id}</code>
             `;
             container.appendChild(card);
         });
 
         if (!hasMatches && filterText) {
-            // Show custom input option if no matches
             const card = document.createElement('div');
-            card.className = `p-3 rounded-xl border border-[#D25D38] bg-[#FDF4F2] cursor-pointer transition-colors`;
+            card.className = `p-3 rounded-xl border border-[#D25D38] bg-[#FDF4F2] cursor-pointer transition-all active:scale-[0.98]`;
             card.onclick = () => selectModelCard(filterText);
             card.innerHTML = `
                 <div class="font-bold text-[13px] text-[#D25D38] mb-1">Use Custom Model</div>
-                <div class="text-[11px] text-[#737166] mb-1.5">Use exact ID:</div>
-                <code class="text-[10px] text-[#D25D38] bg-white px-1 py-0.5 rounded">${filterText}</code>
+                <div class="text-[11px] text-[#737166] mb-1.5">Type any model ID and select to use it:</div>
+                <code class="text-[10px] text-[#D25D38] bg-white px-1.5 py-0.5 rounded font-mono">${filterText}</code>
             `;
             container.appendChild(card);
         }
@@ -12342,13 +12418,223 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
         renderModelCards(text);
     };
 
+    window.setModelBadgeFilter = function(badge) {
+        activeModelBadgeFilter = badge;
+        // Update pill styles
+        document.querySelectorAll('.model-badge-pill').forEach(el => {
+            if (el.dataset.badge === badge) {
+                el.classList.remove('bg-white', 'text-[#5B5951]', 'border-[#E5E3DB]');
+                el.classList.add('bg-[#D25D38]', 'text-white', 'border-[#D25D38]');
+            } else {
+                el.classList.remove('bg-[#D25D38]', 'text-white', 'border-[#D25D38]');
+                el.classList.add('bg-white', 'text-[#5B5951]', 'border-[#E5E3DB]');
+            }
+        });
+        renderModelCards(document.getElementById('model-search-input')?.value || '');
+    };
+
     window.selectModelCard = function(modelId) {
         document.getElementById('settings-model').value = modelId;
-        // Optionally save directly if you want instant save, but currently it's saved on 'Done' or onChange maybe?
-        // Trigger any original logic if needed:
         if(typeof updateModelSelection === 'function') updateModelSelection();
-        renderModelCards(document.getElementById('model-search-input').value);
+        renderModelCards(document.getElementById('model-search-input')?.value || '');
     };
+
+
+    // --- Clean Sub-Pages for AI & App Settings Tabs ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Helper: create master-detail subpages for a settings tab
+        function createSettingsSubPages(tabContentId, categories) {
+            const tabEl = document.getElementById(tabContentId);
+            if (!tabEl) return;
+            
+            const originalChildren = Array.from(tabEl.children);
+            
+            // Group children into categories based on config
+            const groups = [];
+            let currentGroupIdx = 0;
+            let childIdx = 0;
+            
+            categories.forEach((cat, catIdx) => {
+                const group = [];
+                for (let i = 0; i < cat.childCount && childIdx < originalChildren.length; i++) {
+                    group.push(originalChildren[childIdx]);
+                    childIdx++;
+                }
+                groups.push(group);
+            });
+            
+            // Clear the tab
+            tabEl.innerHTML = '';
+            tabEl.className = 'flex flex-col flex-1 overflow-hidden relative hidden';
+            
+            // Create master list
+            const masterList = document.createElement('div');
+            masterList.className = 'p-4 space-y-2.5 overflow-y-auto flex-1';
+            masterList.id = tabContentId + '-master';
+            
+            categories.forEach((cat, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full p-4 bg-white border border-[#E5E3DB] rounded-2xl flex items-center justify-between hover:bg-[#F2F0E9] transition-all shadow-sm group';
+                btn.onclick = () => openSettingsSubPage(tabContentId, idx, cat.title);
+                btn.innerHTML = `
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 bg-[#FDF4F2] rounded-xl flex items-center justify-center text-[#D25D38] group-hover:scale-105 transition-transform">
+                            <i data-lucide="${cat.icon}" class="w-5 h-5"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="text-[14px] font-bold text-[#2C2B29] mb-0.5">${cat.title}</div>
+                            <div class="text-[12px] text-[#737166]">${cat.desc}</div>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-[#A3A095]"></i>
+                `;
+                masterList.appendChild(btn);
+            });
+            
+            tabEl.appendChild(masterList);
+            
+            // Create subpages container
+            const subContainer = document.createElement('div');
+            subContainer.className = 'absolute inset-0 bg-[#FAF9F6] transform translate-x-full transition-transform duration-300 z-10 flex flex-col hidden';
+            subContainer.id = tabContentId + '-subcontainer';
+            
+            // Subpage header
+            const subHeader = document.createElement('div');
+            subHeader.className = 'flex items-center gap-3 px-4 py-3 border-b border-[#EAE8E0] bg-white shrink-0';
+            subHeader.innerHTML = `
+                <button onclick="closeSettingsSubPage('${tabContentId}')" class="p-1.5 hover:bg-[#F2F0E9] rounded-full transition-colors text-[#5B5951]">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+                <h3 id="${tabContentId}-subtitle" class="font-bold text-[15px] text-[#2C2B29]">Title</h3>
+            `;
+            subContainer.appendChild(subHeader);
+            
+            // Subpage content area
+            const subContent = document.createElement('div');
+            subContent.className = 'flex-1 overflow-y-auto p-5 space-y-5';
+            subContent.id = tabContentId + '-subcontent';
+            subContainer.appendChild(subContent);
+            
+            tabEl.appendChild(subContainer);
+            
+            // Store groups on the tab element
+            tabEl._groups = groups;
+            tabEl._hiddenStore = document.createElement('div');
+            tabEl._hiddenStore.style.display = 'none';
+            groups.forEach(group => {
+                group.forEach(el => tabEl._hiddenStore.appendChild(el));
+            });
+            tabEl.appendChild(tabEl._hiddenStore);
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        
+        window.openSettingsSubPage = function(tabContentId, idx, title) {
+            const tabEl = document.getElementById(tabContentId);
+            const container = document.getElementById(tabContentId + '-subcontainer');
+            const content = document.getElementById(tabContentId + '-subcontent');
+            const titleEl = document.getElementById(tabContentId + '-subtitle');
+            
+            content.innerHTML = '';
+            titleEl.innerText = title;
+            
+            const group = tabEl._groups[idx];
+            if (group) {
+                group.forEach(el => content.appendChild(el));
+            }
+            
+            container.dataset.activeIndex = idx;
+            container.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.remove('translate-x-full');
+                container.classList.add('translate-x-0');
+            }, 10);
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+        
+        window.closeSettingsSubPage = function(tabContentId) {
+            const tabEl = document.getElementById(tabContentId);
+            const container = document.getElementById(tabContentId + '-subcontainer');
+            const content = document.getElementById(tabContentId + '-subcontent');
+            
+            container.classList.remove('translate-x-0');
+            container.classList.add('translate-x-full');
+            setTimeout(() => {
+                container.classList.add('hidden');
+                const idx = parseInt(container.dataset.activeIndex);
+                const group = tabEl._groups[idx];
+                if (group) {
+                    while (content.children.length > 0) {
+                        tabEl._hiddenStore.appendChild(content.children[0]);
+                    }
+                }
+            }, 300);
+        };
+        
+        // AI Settings Tab Sub-Pages
+        // Children order in stab-ai-content:
+        // 0: System Prompt / Persona
+        // 1: Divider
+        // 2: Custom Instructions
+        // 3: Divider
+        // 4: Multi-AI Response
+        // 5: Divider
+        // 6: Auto Memory
+        // 7: Divider
+        // 8: Response Language
+        // 9: Divider
+        // 10: AI Response Format
+        // 11: Divider
+        // 12: AI Explanation Level
+        // 13: Divider
+        // 14: Conversation Style
+        // 15: Divider
+        // 16: Max Context Messages
+        // 17: Divider
+        // 18: Follow-Up Suggestions
+        // 19: Divider
+        // 20: Plugin / Extension System
+        createSettingsSubPages('stab-ai-content', [
+            { title: 'Persona & Instructions', desc: 'System prompt, custom instructions', icon: 'user', childCount: 4 },     // Persona + divider + Custom Instructions + divider
+            { title: 'AI Behavior', desc: 'Language, format, style, explanation level', icon: 'brain', childCount: 10 },  // Response Language, Format, Explanation, Style, Context, Follow-up + dividers
+            { title: 'Multi-AI & Memory', desc: 'Multi-AI responses, auto memory', icon: 'layers', childCount: 4 },       // Multi-AI + divider + Auto Memory + divider
+            { title: 'Plugins & Extensions', desc: 'Install and manage custom plugins', icon: 'code-2', childCount: 3 }    // Follow-up + divider + Plugin system
+        ]);
+        
+        // App Settings Tab Sub-Pages
+        // Children order in stab-app-content:
+        // 0: Font Size
+        // 1: Theme
+        // 2: Divider
+        // 3: Show Timestamps
+        // 4: Divider
+        // 5: Response Sound
+        // 6: Divider
+        // 7: AI File Output
+        // 8: Divider
+        // 9: Send on Enter
+        // 10: Divider
+        // 11: Auto Focus Input
+        // 12: Divider
+        // 13: OCR on Image Upload
+        // 14: Divider
+        // 15: Chat Branching Toggle
+        // 16: Divider
+        // 17: Chat History Limit
+        // 18: Divider
+        // 19: Full Backup & Restore
+        // 20: Divider
+        // 21: Storage Manager
+        // 22: Divider
+        // 23: Delete All Chats
+        createSettingsSubPages('stab-app-content', [
+            { title: 'Appearance', desc: 'Font size, theme, timestamps', icon: 'palette', childCount: 5 },             // Font + Theme + divider + Timestamps + divider
+            { title: 'Chat Experience', desc: 'Sound, files, input, vision, branching', icon: 'message-circle', childCount: 12 }, // Sound + divider + AI File + divider + Send + divider + Focus + divider + OCR + divider + Branching + divider
+            { title: 'Data Management', desc: 'History, backup, restore, storage', icon: 'shield', childCount: 5 },    // History Limit + divider + Backup + divider + Storage
+            { title: 'Danger Zone', desc: 'Delete all chats', icon: 'trash-2', childCount: 1 }                          // Delete All Chats
+        ]);
+    });
 
 
 </script>
