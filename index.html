@@ -11247,6 +11247,21 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     }
                 }
 
+                if (_skipThinkingOnce) {
+                    _skipThinkingOnce = false;
+                    if (liveAppended && liveWrapper.isConnected) liveWrapper.remove();
+                    const _skipUserIdx = messages.map(m => m.role).lastIndexOf('user');
+                    if (_skipUserIdx !== -1) {
+                        const _skipUserText = messages[_skipUserIdx].text;
+                        messages.splice(_skipUserIdx, 1);
+                        const _userBubbles = messagesWrapper.querySelectorAll('[data-role="user"]');
+                        if (_userBubbles.length) _userBubbles[_userBubbles.length - 1].remove();
+                        _noThinkingOverride = true;
+                        setTimeout(() => submitMessage(_skipUserText), 80);
+                    }
+                    return;
+                }
+
                 // ── FINALISE ──
                 // Record token usage from stream
                 if (lastStreamUsage) {
