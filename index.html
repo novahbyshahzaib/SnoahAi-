@@ -363,8 +363,8 @@
         .theme-forest { --accent:#2D7A4F; --accent-light:#E6F4EC; --bg:#F2F7F4; --surface:#FFFFFF; --border:#C5DFCE; }
         .theme-rose   { --accent:#C4396B; --accent-light:#FDE8F0; --bg:#FBF4F6; --surface:#FFFFFF; --border:#F0C8D8; }
 
-        /* ── DESKTOP LAYOUT (≥1024px) — ChatGPT / Gemini style ── */
-        @media (min-width: 1024px) {
+        /* ── DESKTOP LAYOUT (≥768px) — ChatGPT / Gemini style ── */
+        @media (min-width: 768px) {
             /* Sidebar always visible and slightly wider */
             #sidebar { width: 288px !important; }
 
@@ -530,9 +530,7 @@
         };
     </script>
 </head>
-<body class="bg-[#EAE8E0] min-h-screen flex items-center justify-center font-sans sm:p-4 lg:p-0 lg:bg-[#FAF9F6] selection:bg-[#D25D38] selection:text-white relative overflow-hidden overscroll-x-none text-[#2C2B29]">
-
-    <div id="pwa-banner" class="hidden fixed top-0 left-0 right-0 z-[9999] bg-[#D25D38] text-white px-4 py-2.5 flex items-center justify-between shadow-lg">
+<div id="pwa-banner" class="hidden fixed top-0 left-0 right-0 z-[9999] bg-[#D25D38] text-white px-4 py-2.5 flex items-center justify-between shadow-lg">
         <div class="flex items-center gap-2.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="white" opacity="0.2"/><path d="M256 120 C156 120 76 188 76 272 C76 316 100 356 138 382 L124 432 L182 404 C206 412 230 416 256 416 C356 416 436 348 436 264 C436 180 356 120 256 120Z" fill="white" opacity="0.95"/></svg>
             <div>
@@ -545,12 +543,13 @@
             <button onclick="dismissPWA()" class="text-white opacity-70 text-[20px] leading-none px-1">&times;</button>
         </div>
     </div>
+<body class="bg-[#EAE8E0] min-h-screen flex items-center justify-center font-sans sm:p-4 md:p-0 md:bg-[#FAF9F6] selection:bg-[#D25D38] selection:text-white relative overflow-hidden overscroll-x-none text-[#2C2B29]">
 
     <!-- App Container -->
-    <div id="app-shell" class="w-full h-[100dvh] sm:h-[90vh] sm:max-w-[420px] lg:max-w-none lg:h-screen sm:rounded-[40px] lg:rounded-none shadow-[0_0_50px_rgba(0,0,0,0.15)] lg:shadow-none bg-[#FAF9F6] app-bg flex flex-col lg:flex-row relative overflow-hidden overflow-x-hidden sm:border-[8px] sm:border-[#2C2B29] lg:border-0">
+    <div class="w-full h-[100dvh] sm:h-[90vh] sm:max-w-[420px] md:max-w-none md:h-screen sm:rounded-[40px] md:rounded-none shadow-[0_0_50px_rgba(0,0,0,0.15)] md:shadow-none bg-[#FAF9F6] app-bg flex flex-col md:flex-row relative overflow-hidden overflow-x-hidden sm:border-[8px] sm:border-[#2C2B29] md:border-0">
         
         <!-- Fake Notch (Desktop) -->
-        <div class="h-7 w-full bg-[#FAF9F6] justify-center items-end hidden sm:flex lg:hidden pb-1.5 shrink-0 z-20 relative">
+        <div class="h-7 w-full bg-[#FAF9F6] justify-center items-end hidden sm:flex md:hidden pb-1.5 shrink-0 z-20 relative">
             <div class="w-[120px] h-[6px] bg-[#EAE8E0] rounded-full"></div>
         </div>
 
@@ -561,7 +560,7 @@
         </div>
 
         <!-- Sidebar Overlay -->
-        <div id="sidebar-overlay" class="absolute inset-0 bg-[#2C2B29]/30 backdrop-blur-sm z-30 transition-opacity hidden opacity-0 lg:!hidden" onclick="toggleSidebar()"></div>
+        <div id="sidebar-overlay" class="absolute inset-0 bg-[#2C2B29]/30 backdrop-blur-sm z-30 transition-opacity hidden opacity-0 md:!hidden" onclick="toggleSidebar()"></div>
 
         <!-- ===== SETTINGS MODAL ===== -->
         <div id="settings-modal" class="absolute inset-0 z-50 flex items-center justify-center p-5 hidden">
@@ -586,76 +585,7 @@
                 </div>
 
                 <!-- API Config Tab -->
-                
-                <!-- API Config Tab (Master-Detail View) -->
-                <div id="stab-api-content" class="flex flex-col flex-1 overflow-hidden relative">
-                    <!-- Master List -->
-                    <div id="api-master-list" class="p-4 space-y-2.5 overflow-y-auto flex-1">
-                        <button onclick="openApiSubpage('api-sub-models')" class="w-full p-4 bg-white border border-[#E5E3DB] rounded-2xl flex items-center justify-between hover:bg-[#F2F0E9] transition-all shadow-sm group">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 bg-[#FDF4F2] rounded-xl flex items-center justify-center text-[#D25D38] group-hover:scale-105 transition-transform"><i data-lucide="cpu" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <div class="text-[14px] font-bold text-[#2C2B29] mb-0.5">Platform & Models</div>
-                                    <div class="text-[12px] text-[#737166]">Select AI provider, search model directory</div>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-[#A3A095]"></i>
-                        </button>
-
-                        <button onclick="openApiSubpage('api-sub-keys')" class="w-full p-4 bg-white border border-[#E5E3DB] rounded-2xl flex items-center justify-between hover:bg-[#F2F0E9] transition-all shadow-sm group">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 bg-[#FDF4F2] rounded-xl flex items-center justify-center text-[#D25D38] group-hover:scale-105 transition-transform"><i data-lucide="key" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <div class="text-[14px] font-bold text-[#2C2B29] mb-0.5">API Keys & Connection</div>
-                                    <div class="text-[12px] text-[#737166]">Manage keys, custom endpoints, test connection</div>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-[#A3A095]"></i>
-                        </button>
-
-                        <button onclick="openApiSubpage('api-sub-tts')" class="w-full p-4 bg-white border border-[#E5E3DB] rounded-2xl flex items-center justify-between hover:bg-[#F2F0E9] transition-all shadow-sm group">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 bg-[#FDF4F2] rounded-xl flex items-center justify-center text-[#D25D38] group-hover:scale-105 transition-transform"><i data-lucide="mic" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <div class="text-[14px] font-bold text-[#2C2B29] mb-0.5">TTS & Speech</div>
-                                    <div class="text-[12px] text-[#737166]">Text-to-speech providers and voice settings</div>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-[#A3A095]"></i>
-                        </button>
-
-                        <button onclick="openApiSubpage('api-sub-image')" class="w-full p-4 bg-white border border-[#E5E3DB] rounded-2xl flex items-center justify-between hover:bg-[#F2F0E9] transition-all shadow-sm group">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 bg-[#FDF4F2] rounded-xl flex items-center justify-center text-[#D25D38] group-hover:scale-105 transition-transform"><i data-lucide="image" class="w-5 h-5"></i></div>
-                                <div class="text-left">
-                                    <div class="text-[14px] font-bold text-[#2C2B29] mb-0.5">Image Generation</div>
-                                    <div class="text-[12px] text-[#737166]">Configure image generation platforms</div>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-[#A3A095]"></i>
-                        </button>
-                    </div>
-
-                    <!-- Subpages Container -->
-                    <div id="api-subpages-container" class="absolute inset-0 bg-[#FAF9F6] transform translate-x-full transition-transform duration-300 z-10 flex flex-col hidden">
-                        <!-- Subpage Header -->
-                        <div class="flex items-center gap-3 px-4 py-3 border-b border-[#EAE8E0] bg-white shrink-0">
-                            <button onclick="closeApiSubpage()" class="p-1.5 hover:bg-[#F2F0E9] rounded-full transition-colors text-[#5B5951]">
-                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
-                            </button>
-                            <h3 id="api-subpage-title" class="font-bold text-[15px] text-[#2C2B29]">Title</h3>
-                        </div>
-
-                        <!-- Subpage Content Area -->
-                        <div class="flex-1 overflow-y-auto p-5 space-y-6" id="api-subpage-content">
-                            <!-- Dynamically moved content will appear here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Hidden Original Sections (to be moved by JS) -->
-                <div id="hidden-original-sections" class="hidden">
-
+                <div id="stab-api-content" class="p-5 space-y-5 overflow-y-auto flex-1">
 
                     <!-- Platform Switcher -->
                     <div>
@@ -693,18 +623,9 @@
                     <!-- AI Model -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">AI Model</label>
-                        
-                        <div class="relative mb-2">
-                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-[#A3A095]"></i>
-                            <input type="text" id="model-search-input" onkeyup="filterModelCards()" placeholder="Search models (e.g. flash, pro, claude)..." 
-                                class="w-full bg-white border border-[#E5E3DB] rounded-xl pl-9 pr-3 py-2.5 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                        </div>
-                        <div id="model-cards-container" class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                            <!-- Cards populated by JS -->
-                        </div>
-                        <input type="hidden" id="settings-model" value="gemini-2.5-flash">
+                        <input type="text" id="settings-model" placeholder="e.g. gemini-2.5-flash"
+                            class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2.5 text-[14px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 font-mono">
                         <p id="model-hint" class="text-[11px] text-[#A3A095] mt-1.5">Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> · <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span></p>
-
                     </div>
 
                     <!-- Test API Connection -->
@@ -1269,10 +1190,6 @@
                 </div>
 
                 <!-- AI Config Tab -->
-                
-                </div>
-                <!-- End API Config Tab -->
-
                 <div id="stab-ai-content" class="p-5 space-y-5 overflow-y-auto flex-1 hidden">
 
                     <!-- System Prompt / Persona -->
@@ -1770,10 +1687,10 @@
         </div>
 
         <!-- ===== SLIDE-OUT SIDEBAR ===== -->
-        <div id="sidebar" class="absolute top-0 left-0 bottom-0 w-[280px] max-w-[86vw] bg-[#FAF9F6] z-40 transform -translate-x-full transition-transform duration-300 ease-in-out border-r border-[#EAE8E0] shadow-2xl flex flex-col overflow-x-hidden lg:relative lg:translate-x-0 lg:z-auto lg:shadow-none lg:max-w-none lg:shrink-0">
+        <div id="sidebar" class="absolute top-0 left-0 bottom-0 w-[280px] max-w-[86vw] bg-[#FAF9F6] z-40 transform -translate-x-full transition-transform duration-300 ease-in-out border-r border-[#EAE8E0] shadow-2xl flex flex-col overflow-x-hidden md:relative md:translate-x-0 md:z-auto md:shadow-none md:max-w-none md:shrink-0">
             <div class="flex items-center justify-between p-5 border-b border-[#EAE8E0]">
                 <h2 class="font-serif font-semibold text-[18px]">Menu</h2>
-                <button onclick="toggleSidebar()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors lg:hidden">
+                <button onclick="toggleSidebar()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors md:hidden">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -1848,7 +1765,7 @@
         <!-- ===== HEADER ===== -->
         <header class="flex items-center px-4 py-3 bg-[#FAF9F6]/90 backdrop-blur-md z-10 shrink-0 border-b border-[#EAE8E0]/50 header-bg">
             <div class="flex-1 flex items-center">
-                <button onclick="toggleSidebar()" class="p-2 -ml-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors lg:hidden">
+                <button onclick="toggleSidebar()" class="p-2 -ml-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors md:hidden">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -1871,77 +1788,8 @@
         </header>
 
         <!-- ===== CHAT AREA ===== -->
-        <div id="chat-container" class="flex-1 overflow-y-auto px-4 lg:px-8 pt-6 pb-[240px] scroll-smooth flex flex-col">
+        <div id="chat-container" class="flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-[240px] scroll-smooth flex flex-col">
             
-            
-            <!-- Onboarding Overlay -->
-            <div id="onboarding-overlay" class="absolute inset-0 z-[100] bg-[#FAF9F6] flex flex-col items-center justify-center transition-opacity duration-500 hidden">
-                <div class="relative w-[90%] max-w-[400px] h-[450px] bg-white rounded-3xl shadow-xl border border-[#E5E3DB] overflow-hidden flex flex-col">
-                    <button onclick="skipOnboarding()" class="absolute top-4 right-4 text-[#8C897D] text-[13px] font-bold uppercase tracking-wider hover:text-[#2C2B29] z-10 transition-colors">Skip</button>
-                    
-                    <div id="onboarding-steps" class="flex-1 relative w-full h-full">
-                        <!-- Step 1 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-0 opacity-100" id="ob-step-1">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="sparkles" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">Welcome to SnoahAi</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">Let's get you set up in 60 seconds. We will show you the key features so you can start chatting immediately.</p>
-                        </div>
-                        
-                        <!-- Step 2 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-full opacity-0 pointer-events-none" id="ob-step-2">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="key" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">Add Your API Key</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">SnoahAi connects to AI platforms using your own keys. Open <strong class="text-[#2C2B29]">Settings</strong> &rarr; <strong class="text-[#2C2B29]">API</strong> to add one.</p>
-                        </div>
-                        
-                        <!-- Step 3 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-full opacity-0 pointer-events-none" id="ob-step-3">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="search" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">Searchable Model Cards</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">Find models easily! Use our new directory with tags like <span class="bg-[#E6F4EC] text-[#2D7A4F] px-1 rounded text-[10px] font-bold">FREE</span> and <span class="bg-[#E8F0FE] text-[#1A6EBD] px-1 rounded text-[10px] font-bold">FAST</span>.</p>
-                        </div>
-                        
-                        <!-- Step 4 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-full opacity-0 pointer-events-none" id="ob-step-4">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="layers" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">Clean Sub-Pages</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">We've organized settings into clean, fully tappable sub-pages. No more endless scrolling to find what you need.</p>
-                        </div>
-                        
-                        <!-- Step 5 -->
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center transition-all duration-500 transform translate-x-full opacity-0 pointer-events-none" id="ob-step-5">
-                            <div class="w-16 h-16 bg-[#F2F0E9] rounded-[20px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB] mx-auto">
-                                <i data-lucide="check" class="w-8 h-8 text-[#D25D38]"></i>
-                            </div>
-                            <h2 class="text-[24px] font-serif font-bold text-[#2C2B29] mb-3 leading-tight">You're All Set!</h2>
-                            <p class="text-[#737166] text-[14px] leading-relaxed">You're ready to start exploring everything SnoahAi has to offer. Enjoy!</p>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 shrink-0 flex flex-col items-center w-full bg-[#FAF9F6] border-t border-[#EAE8E0]">
-                        <div class="flex gap-2.5 mb-5" id="ob-dots">
-                            <div class="w-2 h-2 rounded-full bg-[#D25D38] transition-colors duration-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-[#D9D7CE] transition-colors duration-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-[#D9D7CE] transition-colors duration-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-[#D9D7CE] transition-colors duration-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-[#D9D7CE] transition-colors duration-300"></div>
-                        </div>
-                        <button onclick="nextOnboardingStep()" id="ob-next-btn" class="w-full py-3 bg-[#D25D38] text-white rounded-xl text-[14px] font-bold shadow-md hover:bg-[#B84E2E] active:scale-95 transition-all flex justify-center items-center gap-2">
-                            <span>Continue</span>
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Welcome Screen -->
             <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center animate-fade-in pb-10 mt-auto mb-auto w-full">
                 <div class="w-16 h-16 md:w-20 md:h-20 bg-[#F2F0E9] rounded-[20px] md:rounded-[24px] flex items-center justify-center mb-6 shadow-sm border border-[#E5E3DB]">
@@ -2021,11 +1869,11 @@
 
         <!-- ===== BOTTOM INPUT AREA ===== -->
         <!-- Scroll jump button -->
-        <button id="scroll-jump-btn" onclick="scrollJump()" class="hidden absolute right-3 lg:right-[max(0.75rem,calc(50%-390px-0.5rem))] z-30 w-9 h-9 rounded-full bg-white border border-[#E5E3DB] shadow-md flex items-center justify-center text-[#5B5951] hover:bg-[#F2F0E9] transition-all" style="bottom: 230px;">
+        <button id="scroll-jump-btn" onclick="scrollJump()" class="hidden absolute right-3 md:right-[max(0.75rem,calc(50%-390px-0.5rem))] z-30 w-9 h-9 rounded-full bg-white border border-[#E5E3DB] shadow-md flex items-center justify-center text-[#5B5951] hover:bg-[#F2F0E9] transition-all" style="bottom: 230px;">
             <svg id="scroll-jump-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
 
-        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent pt-12 pb-5 sm:pb-8 px-4 lg:px-8 shrink-0 z-20">
+        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent pt-12 pb-5 sm:pb-8 px-4 md:px-8 shrink-0 z-20">
             <div id="desktop-input-inner" class="w-full">
             <!-- Floating loading indicator above input bar -->
             <div id="floating-loading" class="hidden justify-center mb-2 transition-all duration-300">
@@ -2698,18 +2546,12 @@
                     <div class="text-center space-y-2">
                         <div class="text-3xl">🚀</div>
                         <h3 class="font-serif font-semibold text-[18px] text-[#2C2B29]">SnoahAI — Latest Updates</h3>
-                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.3</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-[11px] font-bold uppercase tracking-wider border border-[#FDE68A]">v4.2</span>
                     </div>
 
                     <div>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.3</h3>
-                        <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px] mb-4">
-                            <li><strong>New Onboarding Guide 🚀</strong> — A fresh 5-step interactive onboarding experience for new users, featuring a skip button, progress dots, and animated calls to action.</li>
-                            <li><strong>Searchable Model Directory 🔍</strong> — Replacing the plain text input, you can now search through models with visual cards showing badges (Free, Fast, Recommended, Paid) and concise descriptions.</li>
-                            <li><strong>Clean Settings Layout ⚙️</strong> — The settings panel has been completely reorganized into clean, fully tappable sub-pages instead of one long scrolling list, making it much easier to navigate.</li>
-                        </ul>
-                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">v4.2 — Previous Release</h3>
-                        <ul class="list-disc list-inside space-y-1.5 text-[13px]">
+                        <h3 class="font-semibold text-[14px] text-[#2C2B29] mb-1">🆕 What's New in v4.2</h3>
+                        <ul id="admin-whats-new" class="list-disc list-inside space-y-1.5 text-[13px]">
                             <li><strong>Skip Thinking Button ⏭️</strong> — A <em>Skip ✕</em> button now appears inside the live "💭 Thinking…" block while the AI is reasoning. Tap it to instantly abort the thought process and re-send the same message without thinking enabled — the AI will reply directly and the partial thought is discarded. The button automatically hides once thinking completes and the main response begins streaming.</li>
                             <li><strong>Thinking Enforcement &amp; Feedback 🧠</strong> — When Thinking Mode is ON and the AI responds without using <code>&lt;think&gt;</code> tags, the thought-process block now shows a clear message explaining that the model did not produce thinking output and suggesting a model that supports reasoning. A toast also appears to notify you. The thinking system instruction has been strengthened so supporting models are required to include their reasoning.</li>
                             <li><strong>Test Connection Fixed ✅</strong> — The <em>Test Connection</em> button in Settings now correctly detects a successful response. Fixes: (1) added <code>stream: false</code> so the test always receives a clean JSON response instead of an SSE stream; (2) backend-proxied platforms (Claude, Cohere, NVIDIA, xAI, NanoGPT, HuggingFace, GitHub Models, Copilot, DeepInfra) now use the correct <code>x-api-key</code> header the proxy expects; (3) missing platforms (HuggingFace, GitHub Models, Copilot, DeepInfra, GAIS) added to the test; (4) Puter.js shows an informational message instead of an incorrect error.</li>
@@ -4398,7 +4240,7 @@
         }, true);
 
         // Drag & drop on app container
-        const appContainer = document.getElementById('app-shell') || document.body;
+        const appContainer = document.querySelector('[class*="w-full h-\[100dvh\]"]') || document.body;
         appContainer.addEventListener('dragover', e => { e.preventDefault(); document.getElementById('drag-overlay').classList.add('active'); });
         appContainer.addEventListener('dragleave', e => { if (!appContainer.contains(e.relatedTarget)) document.getElementById('drag-overlay').classList.remove('active'); });
         appContainer.addEventListener('drop', e => {
@@ -8943,7 +8785,7 @@ self.onmessage = async (event) => {
             toast.id = 'snoah-toast';
             toast.style.cssText = 'position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:#2C2B29;color:white;font-size:13px;padding:8px 18px;border-radius:99px;z-index:999;pointer-events:none;white-space:nowrap;font-family:sans-serif;';
             toast.textContent = message;
-            document.getElementById('app-shell')?.appendChild(toast) || document.body.appendChild(toast);
+            document.querySelector('[class*="w-full h-\\[100dvh\\]"]')?.appendChild(toast) || document.body.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'toastOut 0.2s ease forwards'; setTimeout(() => toast.remove(), 200); }, 2000);
         }
 
@@ -9182,21 +9024,16 @@ self.onmessage = async (event) => {
             // Build iframe src
             let iframeSrc = '';
             if (langLower === 'html') { iframeSrc = code; }
-            else if (langLower === 'svg') { iframeSrc = '<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}</style></head><body>' + code + '
-</body></html>'; }
+            else if (langLower === 'svg') { iframeSrc = '<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}</style></head><body>' + code + '</body></html>'; }
             else if (['jsx', 'tsx', 'react'].includes(langLower)) {
                 const reactCode = code.replace(/<\/script>/gi,'<\\/script>');
-                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}#root{min-height:50px}</style></head><body><div id="root"></div><script src="https://unpkg.com/react@18/umd/react.development.js"><\/script><script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script><script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script><script type="text/babel" data-presets="react">' + reactCode + ';(function(){try{const el=document.getElementById("root");if(typeof App!=="undefined"){ReactDOM.createRoot(el).render(React.createElement(App));}else{const comps=Object.keys(window).filter(k=>typeof window[k]==="function"&&/^[A-Z]/.test(k)&&k!=="React"&&k!=="ReactDOM"&&k!=="Babel");if(comps.length)ReactDOM.createRoot(el).render(React.createElement(window[comps[0]]));}}catch(e){document.getElementById("root").innerHTML=\'<pre style="color:red;font-size:12px;white-space:pre-wrap">\'+e.message+\'<\/pre>\';}})();<\/script>
-</body></html>';
+                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}#root{min-height:50px}</style></head><body><div id="root"></div><script src="https://unpkg.com/react@18/umd/react.development.js"><\/script><script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script><script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script><script type="text/babel" data-presets="react">' + reactCode + ';(function(){try{const el=document.getElementById("root");if(typeof App!=="undefined"){ReactDOM.createRoot(el).render(React.createElement(App));}else{const comps=Object.keys(window).filter(k=>typeof window[k]==="function"&&/^[A-Z]/.test(k)&&k!=="React"&&k!=="ReactDOM"&&k!=="Babel");if(comps.length)ReactDOM.createRoot(el).render(React.createElement(window[comps[0]]));}}catch(e){document.getElementById("root").innerHTML=\'<pre style="color:red;font-size:12px;white-space:pre-wrap">\'+e.message+\'<\/pre>\';}})();<\/script></body></html>';
             }
-            else if (['javascript','js','typescript','ts'].includes(langLower)) { iframeSrc = '<!DOCTYPE html><html><head><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}</style></head><body><script>' + code.replace(/<\/script>/gi,'<\\/script>') + '<\/script>
-</body></html>'; }
-            else if (langLower === 'css') { iframeSrc = '<!DOCTYPE html><html><head><style>' + code + '</style></head><body><p style="font-family:system-ui;padding:1rem;color:#888">CSS Preview — styles are applied above.</p>
-</body></html>'; }
+            else if (['javascript','js','typescript','ts'].includes(langLower)) { iframeSrc = '<!DOCTYPE html><html><head><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff}</style></head><body><script>' + code.replace(/<\/script>/gi,'<\\/script>') + '<\/script></body></html>'; }
+            else if (langLower === 'css') { iframeSrc = '<!DOCTYPE html><html><head><style>' + code + '</style></head><body><p style="font-family:system-ui;padding:1rem;color:#888">CSS Preview — styles are applied above.</p></body></html>'; }
             else if (langLower === 'python' || langLower === 'py') {
                 const pyCode = JSON.stringify(code);
-                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff;margin:0}#output{white-space:pre-wrap;font-family:monospace;font-size:13px;line-height:1.5;color:#2C2B29}#status{font-size:12px;color:#A3A095;margin-bottom:8px}</style></head><body><div id="status">⏳ Loading Python runtime (Pyodide)…</div><div id="output"></div><script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"><\/script><script>async function main(){const status=document.getElementById("status");const output=document.getElementById("output");try{const pyodide=await loadPyodide({stdout:(t)=>{output.textContent+=t+"\\n";},stderr:(t)=>{output.innerHTML+=\'<span style="color:#D25D38">\'+t+\'<\/span>\\n\';}});status.textContent="✅ Python ready";await pyodide.runPythonAsync(' + pyCode + ');}catch(e){document.getElementById("status").textContent="❌ Error";output.innerHTML=\'<span style="color:#D25D38">\'+e.message+\'<\/span>\';}}main();<\/script>
-</body></html>';
+                iframeSrc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;padding:1rem;background:#fff;margin:0}#output{white-space:pre-wrap;font-family:monospace;font-size:13px;line-height:1.5;color:#2C2B29}#status{font-size:12px;color:#A3A095;margin-bottom:8px}</style></head><body><div id="status">⏳ Loading Python runtime (Pyodide)…</div><div id="output"></div><script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"><\/script><script>async function main(){const status=document.getElementById("status");const output=document.getElementById("output");try{const pyodide=await loadPyodide({stdout:(t)=>{output.textContent+=t+"\\n";},stderr:(t)=>{output.innerHTML+=\'<span style="color:#D25D38">\'+t+\'<\/span>\\n\';}});status.textContent="✅ Python ready";await pyodide.runPythonAsync(' + pyCode + ');}catch(e){document.getElementById("status").textContent="❌ Error";output.innerHTML=\'<span style="color:#D25D38">\'+e.message+\'<\/span>\';}}main();<\/script></body></html>';
             }
             overlay.innerHTML =
                 // Header bar
@@ -12012,6 +11849,27 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
     </script>
 
     <script>
+    // PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', e => {
+    if (e.request.url.startsWith('chrome-extension')) return;
+    e.respondWith(
+        caches.open('snoah-v1').then(cache =>
+            cache.match(e.request).then(cached => {
+                const net = fetch(e.request).then(res => {
+                    if (e.request.url.startsWith(location.origin) && res.ok) cache.put(e.request, res.clone());
+                    return res;
+                }).catch(() => cached);
+                return cached || net;
+            })
+        )
+    );
+});`;
+        const blob = new Blob([swCode], {type: 'application/javascript'});
+        navigator.serviceWorker.register(URL.createObjectURL(blob));
     }
 
     // PWA Install banner
@@ -12038,320 +11896,5 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
         if (banner) banner.classList.add('hidden');
     }
     </script>
-
-    <script>
-// --- Onboarding Logic ---
-    let currentObStep = 1;
-    const totalObSteps = 5;
-
-    function initOnboarding() {
-        if (!localStorage.getItem('snoah_onboarded_v43')) {
-            const overlay = document.getElementById('onboarding-overlay');
-            if(overlay) {
-                overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.add('opacity-100'), 50);
-            }
-        }
-    }
-
-    window.skipOnboarding = function() {
-        const overlay = document.getElementById('onboarding-overlay');
-        overlay.classList.remove('opacity-100');
-        overlay.classList.add('opacity-0');
-        setTimeout(() => overlay.classList.add('hidden'), 500);
-        localStorage.setItem('snoah_onboarded_v43', 'true');
-    };
-
-    window.nextOnboardingStep = function() {
-        if (currentObStep >= totalObSteps) {
-            skipOnboarding();
-            return;
-        }
-        
-        const currentEl = document.getElementById('ob-step-' + currentObStep);
-        currentEl.classList.remove('translate-x-0', 'opacity-100');
-        currentEl.classList.add('-translate-x-full', 'opacity-0', 'pointer-events-none');
-        
-        currentObStep++;
-        
-        const nextEl = document.getElementById('ob-step-' + currentObStep);
-        nextEl.classList.remove('translate-x-full', 'opacity-0', 'pointer-events-none');
-        nextEl.classList.add('translate-x-0', 'opacity-100');
-        
-        // Update dots
-        const dots = document.getElementById('ob-dots').children;
-        for (let i = 0; i < dots.length; i++) {
-            if (i < currentObStep) {
-                dots[i].className = 'w-2 h-2 rounded-full bg-[#D25D38] transition-colors duration-300';
-            } else {
-                dots[i].className = 'w-2 h-2 rounded-full bg-[#D9D7CE] transition-colors duration-300';
-            }
-        }
-        
-        // Update button text on last step
-        if (currentObStep === totalObSteps) {
-            document.getElementById('ob-next-btn').querySelector('span').innerText = "Get Started";
-        }
-    };
-
-    // Initialize onboarding on load
-    document.addEventListener('DOMContentLoaded', initOnboarding);
-
-
-    // --- Sub-Pages Logic ---
-    window.openApiSubpage = function(subpageId) {
-        const container = document.getElementById('api-subpages-container');
-        const content = document.getElementById('api-subpage-content');
-        const titleEl = document.getElementById('api-subpage-title');
-        
-        // Clear content
-        content.innerHTML = '';
-        
-        // Move content based on subpageId
-        let title = "";
-        let selectors = [];
-        
-        if (subpageId === 'api-sub-models') {
-            title = "Platform & Models";
-            selectors = ['#platform-select', '#settings-model', '#model-search-input', '#model-cards-container', '#model-hint'];
-        } else if (subpageId === 'api-sub-keys') {
-            title = "API Keys & Connection";
-            selectors = ['#test-connection-btn', '#keys-list', '#settings-apikey', '#apikey-hint', '#custom-endpoint-section'];
-        } else if (subpageId === 'api-sub-tts') {
-            title = "TTS & Speech";
-            selectors = ['#settings-tts-platform', '#tts-section-webspeech', '#tts-section-elevenlabs', '#tts-section-openai_tts', '#tts-section-groq_tts', '#tts-section-gemini_tts'];
-        } else if (subpageId === 'api-sub-image') {
-            title = "Image Generation";
-            selectors = ['#settings-img-platform'];
-        }
-
-        titleEl.innerText = title;
-        
-        // Because the original HTML has labels mixed with inputs, we fetch the parent divs
-        const hiddenDiv = document.getElementById('hidden-original-sections');
-        
-        if(subpageId === 'api-sub-models') {
-            content.appendChild(hiddenDiv.children[0]); // Platform Div
-            content.appendChild(hiddenDiv.children[0]); // Model Div
-            renderModelCards();
-        } else if (subpageId === 'api-sub-keys') {
-            content.appendChild(hiddenDiv.children[0]); // Test Connection
-            content.appendChild(hiddenDiv.children[0]); // API Keys Pool
-            content.appendChild(hiddenDiv.children[0]); // Custom Endpoint
-        } else if (subpageId === 'api-sub-tts') {
-            content.appendChild(hiddenDiv.children[0]); // TTS Div
-            content.appendChild(hiddenDiv.children[0]); // TTS specific divs... Wait, the DOM structure is flattened.
-            // A better way is to move everything in advance into wrapper divs.
-        }
-
-        container.classList.remove('hidden');
-        // small delay to allow display:block before transform
-        setTimeout(() => {
-            container.classList.remove('translate-x-full');
-            container.classList.add('translate-x-0');
-        }, 10);
-    };
-
-    window.closeApiSubpage = function() {
-        const container = document.getElementById('api-subpages-container');
-        container.classList.remove('translate-x-0');
-        container.classList.add('translate-x-full');
-        setTimeout(() => {
-            container.classList.add('hidden');
-            // Move content back to hidden
-            const hiddenDiv = document.getElementById('hidden-original-sections');
-            const content = document.getElementById('api-subpage-content');
-            while(content.children.length > 0) {
-                hiddenDiv.appendChild(content.children[0]);
-            }
-        }, 300);
-    };
-
-    // Re-structure DOM on load for subpages to work correctly
-    document.addEventListener('DOMContentLoaded', () => {
-        const hiddenDiv = document.getElementById('hidden-original-sections');
-        // The original sections are directly inside hidden-original-sections now.
-        // We will manually group them.
-        
-        const children = Array.from(hiddenDiv.children);
-        
-        const modelsDiv = document.createElement('div');
-        const keysDiv = document.createElement('div');
-        const ttsDiv = document.createElement('div');
-        const imgDiv = document.createElement('div');
-        
-        // Divs order originally:
-        // 0: Platform Switcher
-        // 1: AI Model
-        // 2: Test API Connection
-        // 3: API Keys Pool
-        // 4: Custom Endpoint
-        // 5: Divider
-        // 6: TTS Platform
-        // 7: Divider
-        // 8: Image Generation
-        
-        if(children.length >= 9) {
-            modelsDiv.appendChild(children[0]);
-            modelsDiv.appendChild(children[0]); // AI Model is now index 0
-            
-            keysDiv.appendChild(children[0]); // Test API
-            keysDiv.appendChild(children[0]); // API Keys
-            keysDiv.appendChild(children[0]); // Custom
-            
-            if (children[0] && children[0].parentNode) children[0].parentNode.removeChild(children[0]); // Divider
-            
-            if (children[0]) ttsDiv.appendChild(children[0]); // TTS container
-            
-            if (children[0] && children[0].parentNode) children[0].parentNode.removeChild(children[0]); // Divider
-            
-            if (children[0]) imgDiv.appendChild(children[0]); // Image Gen
-        }
-        
-        hiddenDiv.innerHTML = '';
-        hiddenDiv.appendChild(modelsDiv);
-        hiddenDiv.appendChild(keysDiv);
-        hiddenDiv.appendChild(ttsDiv);
-        hiddenDiv.appendChild(imgDiv);
-
-        // Override the open subpage logic to just use these grouped divs
-        window.openApiSubpage = function(subpageId) {
-            const container = document.getElementById('api-subpages-container');
-            const content = document.getElementById('api-subpage-content');
-            const titleEl = document.getElementById('api-subpage-title');
-            
-            content.innerHTML = '';
-            
-            let title = "";
-            let idx = 0;
-            
-            if (subpageId === 'api-sub-models') { title = "Platform & Models"; idx = 0; }
-            else if (subpageId === 'api-sub-keys') { title = "API Keys & Connection"; idx = 1; }
-            else if (subpageId === 'api-sub-tts') { title = "TTS & Speech"; idx = 2; }
-            else if (subpageId === 'api-sub-image') { title = "Image Generation"; idx = 3; }
-
-            titleEl.innerText = title;
-            content.appendChild(hiddenDiv.children[idx]);
-            
-            if (subpageId === 'api-sub-models') renderModelCards();
-
-            container.classList.remove('hidden');
-            setTimeout(() => {
-                container.classList.remove('translate-x-full');
-                container.classList.add('translate-x-0');
-            }, 10);
-            
-            // Store active index so we can put it back
-            container.dataset.activeIndex = idx;
-        };
-
-        window.closeApiSubpage = function() {
-            const container = document.getElementById('api-subpages-container');
-            container.classList.remove('translate-x-0');
-            container.classList.add('translate-x-full');
-            setTimeout(() => {
-                container.classList.add('hidden');
-                const idx = parseInt(container.dataset.activeIndex);
-                const hiddenDiv = document.getElementById('hidden-original-sections');
-                const content = document.getElementById('api-subpage-content');
-                if(content.children.length > 0) {
-                    // insert at correct index
-                    hiddenDiv.insertBefore(content.children[0], hiddenDiv.children[idx] || null);
-                }
-            }, 300);
-        };
-    });
-
-
-    // --- Searchable Model Cards Logic ---
-    const modelDirectory = [
-        { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", desc: "Fast & lightweight for quick reasoning.", badges: [{text:"Fast", color:"blue"}, {text:"Free", color:"green"}, {text:"Recommended", color:"orange"}] },
-        { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", desc: "Highly capable model for complex tasks.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}] },
-        { id: "gemini-2.0-flash-exp", name: "Gemini 2.0 Flash Exp", desc: "Experimental fastest tier.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}] },
-        { id: "gemini-2.0-pro-exp-02-05", name: "Gemini 2.0 Pro Exp", desc: "Latest experimental pro capabilities.", badges: [{text:"Paid", color:"gray"}] },
-        { id: "llama-3.1-8b-instant", name: "Llama 3.1 8B", desc: "Ultra-fast open source model via Groq.", badges: [{text:"Fast", color:"blue"}, {text:"Free", color:"green"}] },
-        { id: "llama-3.1-70b-versatile", name: "Llama 3.1 70B", desc: "Powerful versatile open source model.", badges: [{text:"Free", color:"green"}] },
-        { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet", desc: "Smartest and fastest Claude model.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}] },
-        { id: "gpt-4o-mini", name: "GPT-4o Mini", desc: "Cost-efficient small model from OpenAI.", badges: [{text:"Paid", color:"gray"}, {text:"Fast", color:"blue"}] },
-        { id: "gpt-4o", name: "GPT-4o", desc: "Flagship multimodel AI from OpenAI.", badges: [{text:"Paid", color:"gray"}] },
-        { id: "deepseek-coder", name: "DeepSeek Coder", desc: "Excellent coding companion.", badges: [{text:"Free", color:"green"}] },
-        { id: "deepseek-reasoner", name: "DeepSeek Reasoner (R1)", desc: "Advanced reasoning and problem solving.", badges: [{text:"Paid", color:"gray"}, {text:"Recommended", color:"orange"}] },
-        { id: "qwen-2.5-coder-32b", name: "Qwen 2.5 Coder 32B", desc: "Top tier coding model.", badges: [{text:"Free", color:"green"}, {text:"Fast", color:"blue"}] }
-    ];
-
-    function renderModelCards(filterText = '') {
-        const container = document.getElementById('model-cards-container');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        const lowerFilter = filterText.toLowerCase();
-        
-        const currentSelected = document.getElementById('settings-model').value || 'gemini-2.5-flash';
-        
-        let hasMatches = false;
-
-        modelDirectory.forEach(model => {
-            if (lowerFilter && !model.name.toLowerCase().includes(lowerFilter) && !model.id.toLowerCase().includes(lowerFilter)) {
-                return;
-            }
-            hasMatches = true;
-            
-            const isSelected = currentSelected === model.id;
-            const borderClass = isSelected ? 'border-[#D25D38] bg-[#FDF4F2]' : 'border-[#E5E3DB] bg-white hover:bg-[#F2F0E9]';
-            
-            const badgesHtml = model.badges.map(b => {
-                let colorClasses = "bg-[#EAE8E0] text-[#5B5951]";
-                if(b.color === "blue") colorClasses = "bg-[#E8F0FE] text-[#1A6EBD]";
-                if(b.color === "green") colorClasses = "bg-[#E6F4EC] text-[#2D7A4F]";
-                if(b.color === "orange") colorClasses = "bg-[#FEF3C7] text-[#92400E]";
-                if(b.color === "gray") colorClasses = "bg-[#F2F0E9] text-[#737166]";
-                return `<span class="${colorClasses} px-1.5 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-wide">${b.text}</span>`;
-            }).join('');
-
-            const card = document.createElement('div');
-            card.className = `p-3 rounded-xl border ${borderClass} cursor-pointer transition-colors`;
-            card.onclick = () => selectModelCard(model.id);
-            card.innerHTML = `
-                <div class="flex justify-between items-start mb-1">
-                    <div class="font-bold text-[13px] text-[#2C2B29]">${model.name}</div>
-                    <div class="flex gap-1">${badgesHtml}</div>
-                </div>
-                <div class="text-[11px] text-[#737166] mb-1.5">${model.desc}</div>
-                <code class="text-[10px] text-[#A3A095] bg-[#FAF9F6] px-1 py-0.5 rounded">${model.id}</code>
-            `;
-            container.appendChild(card);
-        });
-
-        if (!hasMatches && filterText) {
-            // Show custom input option if no matches
-            const card = document.createElement('div');
-            card.className = `p-3 rounded-xl border border-[#D25D38] bg-[#FDF4F2] cursor-pointer transition-colors`;
-            card.onclick = () => selectModelCard(filterText);
-            card.innerHTML = `
-                <div class="font-bold text-[13px] text-[#D25D38] mb-1">Use Custom Model</div>
-                <div class="text-[11px] text-[#737166] mb-1.5">Use exact ID:</div>
-                <code class="text-[10px] text-[#D25D38] bg-white px-1 py-0.5 rounded">${filterText}</code>
-            `;
-            container.appendChild(card);
-        }
-        
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-
-    window.filterModelCards = function() {
-        const text = document.getElementById('model-search-input').value;
-        renderModelCards(text);
-    };
-
-    window.selectModelCard = function(modelId) {
-        document.getElementById('settings-model').value = modelId;
-        // Optionally save directly if you want instant save, but currently it's saved on 'Done' or onChange maybe?
-        // Trigger any original logic if needed:
-        if(typeof updateModelSelection === 'function') updateModelSelection();
-        renderModelCards(document.getElementById('model-search-input').value);
-    };
-
-
-</script>
 </body>
 </html>
