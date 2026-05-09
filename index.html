@@ -644,7 +644,15 @@
                             <button onclick="setModelBadgeFilter('Recommended')" data-badge="Recommended" class="model-badge-pill px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors bg-white text-[#5B5951] border-[#E5E3DB]">⭐ Recommended</button>
                             <button onclick="setModelBadgeFilter('Paid')" data-badge="Paid" class="model-badge-pill px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors bg-white text-[#5B5951] border-[#E5E3DB]">💳 Paid</button>
                         </div>
-                        <div id="model-cards-container" class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                        <div class="relative mb-3">
+                            <select id="model-select-dropdown" onchange="handleModelDropdownChange(this.value)" class="w-full px-3 py-2.5 pr-9 rounded-xl border border-[#E5E3DB] bg-white text-[13px] font-semibold text-[#2C2B29] focus:outline-none focus:border-[#D25D38] appearance-none cursor-pointer">
+                                <!-- Options populated by JS -->
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3A095" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+                            </div>
+                        </div>
+                        <div id="model-cards-container" class="space-y-2 max-h-[250px] overflow-y-auto pr-1">
                             <!-- Cards populated by JS -->
                         </div>
                         <input type="hidden" id="settings-model" value="gemini-2.5-flash">
@@ -11958,9 +11966,7 @@ self.addEventListener('fetch', e => {
         if (banner) banner.classList.add('hidden');
     }
     </script>
-<<<<<<< HEAD
-
-    <script>
+<script>
 // --- Onboarding Logic ---
     let currentObStep = 1;
     const totalObSteps = 5;
@@ -12325,7 +12331,76 @@ self.addEventListener('fetch', e => {
         document.getElementById('settings-model').value = modelId;
         if(typeof updateModelSelection === 'function') updateModelSelection();
         renderModelCards(document.getElementById('model-search-input')?.value || '');
+        updateModelDropdownSelection(modelId);
     };
+
+    // Populate model dropdown
+    function populateModelDropdown() {
+        const select = document.getElementById('model-select-dropdown');
+        if (!select) return;
+        
+        const currentSelected = document.getElementById('settings-model').value || 'gemini-2.5-flash';
+        
+        // Group models by platform
+        const platformGroups = {};
+        modelDirectory.forEach(model => {
+            const platform = model.platform || 'other';
+            if (!platformGroups[platform]) platformGroups[platform] = [];
+            platformGroups[platform].push(model);
+        });
+        
+        // Build options with optgroups
+        let html = '<option value="">-- Select Model --</option>';
+        const platformNames = {
+            'gemini': 'Google Gemini',
+            'groq': 'Groq',
+            'claude': 'Anthropic Claude',
+            'openrouter': 'OpenRouter (GPT)',
+            'together': 'Together AI',
+            'cerebras': 'Cerebras',
+            'sambanova': 'SambaNova',
+            'mistral': 'Mistral AI',
+            'xai': 'xAI (Grok)',
+            'puter': 'Puter.js (Free)',
+            'deepinfra': 'DeepInfra',
+            'fireworks': 'Fireworks AI',
+            'cohere': 'Cohere'
+        };
+        
+        Object.keys(platformGroups).forEach(platform => {
+            const models = platformGroups[platform];
+            const platformLabel = platformNames[platform] || platform;
+            html += `<optgroup label="${platformLabel}">`;
+            models.forEach(model => {
+                const selected = model.id === currentSelected ? 'selected' : '';
+                html += `<option value="${model.id}" ${selected}>${model.name}</option>`;
+            });
+            html += `</optgroup>`;
+        });
+        
+        select.innerHTML = html;
+    }
+    
+    // Handle dropdown change
+    window.handleModelDropdownChange = function(modelId) {
+        if (!modelId) return;
+        document.getElementById('settings-model').value = modelId;
+        if(typeof updateModelSelection === 'function') updateModelSelection();
+        renderModelCards(document.getElementById('model-search-input')?.value || '');
+    };
+    
+    // Update dropdown selection when card is clicked
+    function updateModelDropdownSelection(modelId) {
+        const select = document.getElementById('model-select-dropdown');
+        if (select) select.value = modelId;
+    }
+    
+    // Initialize dropdown on load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', populateModelDropdown);
+    } else {
+        populateModelDropdown();
+    }
 
 
     // --- Clean Sub-Pages for AI & App Settings Tabs ---
@@ -12526,7 +12601,5 @@ self.addEventListener('fetch', e => {
 
 
 </script>
-=======
->>>>>>> aeff4607c95c4bbd486158b6817ad520e4534484
 </body>
 </html>
