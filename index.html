@@ -12037,34 +12037,6 @@ const thinkOpen  = _normRaw.indexOf('<think>');
 
     </script>
 
-    <script>
-    // PWA Service Worker
-    if ('serviceWorker' in navigator) {
-        try {
-            const swCode = `
-self.addEventListener('install', e => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-self.addEventListener('fetch', e => {
-    if (e.request.url.startsWith('chrome-extension')) return;
-    e.respondWith(
-        caches.open('snoah-v1').then(cache =>
-            cache.match(e.request).then(cached => {
-                const net = fetch(e.request).then(res => {
-                    if (e.request.url.startsWith(location.origin) && res.ok) cache.put(e.request, res.clone());
-                    return res;
-                }).catch(() => cached);
-                return cached || net;
-            })
-        )
-    );
-});`;
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(blob));
-        } catch(e) {
-            console.log('ServiceWorker registration skipped:', e.message);
-        }
-    }
-
     // PWA Install banner
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', e => {
@@ -12089,6 +12061,7 @@ self.addEventListener('fetch', e => {
         if (banner) banner.classList.add('hidden');
     }
     </script>
+    <!-- PWA Service Worker registration removed (blob URLs not supported) -->
 <script>
 // --- Onboarding Logic ---
     let currentObStep = 1;
