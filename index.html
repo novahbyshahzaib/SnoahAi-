@@ -10863,7 +10863,7 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         let displayThink = '';
                         let displayMain  = _normRaw;
 const thinkOpen  = _normRaw.indexOf('<think>');
-                        const thinkClose = _normRaw.indexOf('');
+                        const thinkClose = _normRaw.indexOf('</think>');
                         // Handle skip thinking - hide thinking block, show main content
                         const isSkipThink = _skipThinkFlag;
                         if (thinkOpen !== -1) {
