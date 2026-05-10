@@ -10884,7 +10884,6 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                                 }
                             }
                         }
-                        }
                         // Append bubble on first real content
                         if (!liveAppended && (displayThink || displayMain)) {
                             messagesWrapper.appendChild(liveWrapper);
@@ -12500,43 +12499,6 @@ let currentObStep = 1;
         select.innerHTML = html;
     }
     
-    // Render model cards - filtered by platform
-    function renderModelCards(filterText, platformFilter) {
-        const container = document.getElementById('model-cards-container');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        const lowerFilter = filterText.toLowerCase();
-        
-        const currentSelected = document.getElementById('settings-model').value || 'gemini-2.5-flash';
-        const currentPlatform = platformFilter || document.getElementById('platform-select')?.value || 'gemini';
-        
-        // Filter models by platform
-        let modelsToRender = modelDirectory.filter(m => m.platform === currentPlatform);
-        
-        // If no platform-specific models, show all
-        if (modelsToRender.length === 0) {
-            modelsToRender = modelDirectory;
-        }
-        
-        let hasMatches = false;
-        const badgeFilterLower = activeModelBadgeFilter.toLowerCase();
-        const badgeNames = ['free','fast','recommended','paid'];
-        const isSearchingBadge = badgeNames.some(bn => lowerFilter === bn);
-
-        modelsToRender.forEach(model => {
-            // Badge filter
-            if (badgeFilterLower !== 'all' && !model.badges.some(b => b.text.toLowerCase() === badgeFilterLower)) return;
-            // Text search (also matches badge names)
-            if (lowerFilter && !isSearchingBadge) {
-                if (!model.name.toLowerCase().includes(lowerFilter) && !model.id.toLowerCase().includes(lowerFilter) && !model.desc.toLowerCase().includes(lowerFilter) && !(model.platform || '').toLowerCase().includes(lowerFilter)) {
-                    return;
-                }
-            }
-            if (lowerFilter && isSearchingBadge) {
-                if (!model.badges.some(b => b.text.toLowerCase() === lowerFilter)) return;
-            }
-            hasMatches = true;
     
     // Handle dropdown change
     window.handleModelDropdownChange = function(modelId) {
