@@ -12036,35 +12036,31 @@ const thinkOpen  = _normRaw.indexOf('<think>');
         }
 
     </script>
-
-    // PWA Install banner
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', e => {
-        e.preventDefault();
-        deferredPrompt = e;
-        const banner = document.getElementById('pwa-banner');
-        if (banner) banner.classList.remove('hidden');
-    });
-    window.addEventListener('appinstalled', () => {
-        const banner = document.getElementById('pwa-banner');
-        if (banner) banner.classList.add('hidden');
-        deferredPrompt = null;
-    });
-    function installPWA() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-        }
-    }
-    function dismissPWA() {
-        const banner = document.getElementById('pwa-banner');
-        if (banner) banner.classList.add('hidden');
-    }
-    </script>
     <!-- PWA Service Worker registration removed (blob URLs not supported) -->
 <script>
+// --- PWA Functions ---
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const banner = document.getElementById('pwa-banner');
+    if (banner) banner.classList.remove('hidden');
+});
+window.addEventListener('appinstalled', () => {
+    const banner = document.getElementById('pwa-banner');
+    if (banner) banner.classList.add('hidden');
+    deferredPrompt = null;
+});
+function installPWA() {
+    if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); }
+}
+function dismissPWA() {
+    const banner = document.getElementById('pwa-banner');
+    if (banner) banner.classList.add('hidden');
+}
+
 // --- Onboarding Logic ---
-    let currentObStep = 1;
+let currentObStep = 1;
     const totalObSteps = 5;
 
     function initOnboarding() {
