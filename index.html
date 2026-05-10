@@ -633,7 +633,8 @@
                     <!-- AI Model -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">AI Model</label>
-<div class="relative mb-2">
+                        <div id="standard-model-ui">
+                        <div class="relative mb-2">
                             <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-[#A3A095]"></i>
                             <input type="text" id="model-search-input" onkeyup="filterModelCards()" placeholder="Search models (e.g. flash, pro, claude)..." 
                                 class="w-full bg-white border border-[#E5E3DB] rounded-xl pl-9 pr-3 py-2.5 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20">
@@ -656,7 +657,8 @@
                         <div id="model-cards-container" class="space-y-2 max-h-[250px] overflow-y-auto pr-1">
                             <!-- Cards populated by JS -->
                         </div>
-                        <input type="hidden" id="settings-model" value="gemini-2.5-flash">
+                        </div>
+                        <input type="hidden" id="settings-model" value="gemini-2.5-flash" class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2.5 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 mt-1 placeholder-[#A3A095]" placeholder="Enter custom model ID (e.g. nvidia/llama3)">
                         <p id="model-hint" class="text-[11px] text-[#A3A095] mt-1.5">Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> · <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span></p>
                     </div>
 
@@ -12337,9 +12339,26 @@ let currentObStep = 1;
         // Filter models by platform first
         let modelsToRender = modelDirectory.filter(m => m.platform === currentPlatform);
         
-        // If no models for this platform, show all models (for custom/other platforms)
+        const standardUi = document.getElementById('standard-model-ui');
+        const settingsModelInput = document.getElementById('settings-model');
+        const hintEl = document.getElementById('model-hint');
+        
+        // If no models for this platform, hide standard UI and show text bar
         if (modelsToRender.length === 0) {
-            modelsToRender = modelDirectory;
+            if (standardUi) standardUi.style.display = 'none';
+            if (settingsModelInput) {
+                settingsModelInput.type = 'text';
+                settingsModelInput.oninput = () => { if(typeof updateModelSelection === 'function') updateModelSelection(); };
+            }
+            if (hintEl) hintEl.innerHTML = 'Enter a custom model ID for this platform.';
+            return;
+        } else {
+            if (standardUi) standardUi.style.display = 'block';
+            if (settingsModelInput) {
+                settingsModelInput.type = 'hidden';
+                settingsModelInput.oninput = null;
+            }
+            if (hintEl) hintEl.innerHTML = 'Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> &middot; <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span>';
         }
         
         let hasMatches = false;
@@ -12457,8 +12476,10 @@ let currentObStep = 1;
         // Get models for the current platform
         const platformModels = modelDirectory.filter(m => m.platform === currentPlatform);
         
-        // If no models for platform, show all (for custom/free platforms)
-        const modelsToShow = platformModels.length > 0 ? platformModels : modelDirectory;
+        if (platformModels.length === 0) {
+            // No predefined models for this platform, the dropdown will be hidden by renderModelCards
+            return;
+        }
         
         // Build options
         let html = '<option value="">-- Select Model --</option>';
