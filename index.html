@@ -1695,18 +1695,29 @@
                     <!-- Divider -->
                     <div class="border-t border-[#EAE8E0]"></div>
 
-                    <!-- Delete All Chats -->
+                    <!-- Danger Zone -->
                     <div>
                         <label class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest block mb-2">Danger Zone</label>
-                        <button onclick="closeSettings();confirmDeleteHistory();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#FDF4F2] border border-[#F8E3DE] text-left transition-colors group">
-                            <div class="w-8 h-8 rounded-lg bg-[#FDF4F2] group-hover:bg-[#FDEAE5] flex items-center justify-center shrink-0 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C5A09A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                            </div>
-                            <div>
-                                <span class="text-[14px] text-[#D25D38] font-medium block">Delete All Chats</span>
-                                <span class="text-[11px] text-[#A3A095]">Permanently remove all conversations</span>
-                            </div>
-                        </button>
+                        <div class="space-y-2">
+                            <button onclick="closeSettings();confirmDeleteHistory();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#FDF4F2] border border-[#F8E3DE] text-left transition-colors group">
+                                <div class="w-8 h-8 rounded-lg bg-[#FDF4F2] group-hover:bg-[#FDEAE5] flex items-center justify-center shrink-0 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C5A09A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </div>
+                                <div>
+                                    <span class="text-[14px] text-[#D25D38] font-medium block">Delete All Chats</span>
+                                    <span class="text-[11px] text-[#A3A095]">Permanently remove all conversations</span>
+                                </div>
+                            </button>
+                            <button onclick="closeSettings();confirmDeleteEverything();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#FDF4F2] border border-[#F8E3DE] text-left transition-colors group">
+                                <div class="w-8 h-8 rounded-lg bg-[#FDF4F2] group-hover:bg-[#FDEAE5] flex items-center justify-center shrink-0 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C5A09A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                </div>
+                                <div>
+                                    <span class="text-[14px] text-[#D25D38] font-medium block">Delete Everything</span>
+                                    <span class="text-[11px] text-[#A3A095]">Remove all chats, settings, and API keys</span>
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="px-5 py-4 border-t border-[#EAE8E0] flex gap-3 shrink-0 bg-[#FAF9F6]">
@@ -2038,6 +2049,23 @@
             <div class="flex gap-3">
                 <button onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-xl border border-[#E5E3DB] text-[14px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">Cancel</button>
                 <button onclick="deleteHistory()" class="flex-1 py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== DELETE EVERYTHING MODAL ===== -->
+    <div id="delete-everything-modal" class="absolute inset-0 z-50 flex items-center justify-center p-6 hidden">
+        <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeDeleteEverythingModal()"></div>
+        <div class="animate-modal relative bg-[#FAF9F6] app-bg rounded-[22px] w-full shadow-2xl border border-[#F8E3DE] z-10 p-6 text-center">
+            <div class="w-12 h-12 bg-[#FDF4F2] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#F8E3DE]">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-[#D25D38]"></i>
+            </div>
+            <h3 class="font-serif font-semibold text-[17px] text-[#D25D38] mb-1.5">Delete everything?</h3>
+            <p class="text-[13px] text-[#737166] mb-3 leading-relaxed">This will permanently remove <strong>all chats, settings, and API keys</strong> from your browser storage.</p>
+            <p class="text-[12px] text-[#A3A095] mb-5 leading-relaxed">This action cannot be undone. Use "Backup" in Settings to save your data first.</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteEverythingModal()" class="flex-1 py-2.5 rounded-xl border border-[#E5E3DB] text-[14px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">Cancel</button>
+                <button onclick="deleteEverything()" class="flex-1 py-2.5 rounded-xl bg-[#D25D38] text-white text-[14px] font-semibold hover:bg-[#B84E2E] transition-colors shadow-sm active:scale-95">Delete Everything</button>
             </div>
         </div>
     </div>
@@ -5572,6 +5600,9 @@
             document.getElementById('settings-apikey').value = '';
             applyPlatformParams(p);
             renderKeysList();
+            // Refresh model dropdown and cards for the selected platform
+            populateModelDropdown(p);
+            renderModelCards('', p);
         }
 
         function updatePlatformUI() {
@@ -7660,6 +7691,29 @@ self.onmessage = async (event) => {
             showToast('All chat history deleted');
         }
 
+        // --- Delete Everything ---
+        function confirmDeleteEverything() {
+            document.getElementById('delete-everything-modal').classList.remove('hidden');
+            lucide.createIcons();
+            if (isSidebarOpen) toggleSidebar();
+        }
+        function closeDeleteEverythingModal() {
+            document.getElementById('delete-everything-modal').classList.add('hidden');
+        }
+        function deleteEverything() {
+            localStorage.clear();
+            allChats = [];
+            currentChatId = generateChatId();
+            currentBranchId = MAIN_BRANCH_ID;
+            messages = [];
+            messagesWrapper.innerHTML = '';
+            welcomeScreen.classList.remove('hidden');
+            renderChatHistoryList();
+            closeDeleteEverythingModal();
+            showToast('All data deleted — reloading...');
+            setTimeout(() => location.reload(), 1000);
+        }
+
         function backupChats() {
             const settingsKeys = ['snoah_platform','snoah_model','snoah_or_model','snoah_groq_model','snoah_together_model','snoah_mistral_model','snoah_nvidia_model','snoah_hf_model','snoah_gh_model','snoah_claude_model','snoah_copilot_model','snoah_gais_model','snoah_ollama_model','snoah_ollama_host','snoah_cohere_model','snoah_puter_model','snoah_deepinfra_model','snoah_cerebras_model','snoah_sambanova_model','snoah_fireworks_model','snoah_xai_model','snoah_perplexity_model','snoah_nanogpt_model','snoah_custom_model','snoah_custom_url','snoah_instructions','snoah_persona','snoah_ai_response_format','snoah_ai_explain_level','snoah_param_temp','snoah_param_topp','snoah_param_topk','snoah_param_maxtokens','snoah_param_by_platform','snoah_multi_ai','snoah_multi_ai_platforms','snoah_dark','snoah_fontsize','snoah_theme','snoah_length','snoah_thinking_mode','snoah_ai_file_downloads','snoah_instant_response','snoah_response_lang','snoah_show_timestamps','snoah_send_on_enter','snoah_autofocus_input','snoah_ocr_enabled','snoah_chat_branching_enabled','snoah_canvas_mode','snoah_stream_timeout','snoah_conv_style','ttsPlatform','elevenLabsVoiceId','openaiTtsVoice','openaiTtsModel','groqTtsVoice','geminiTtsVoice','snoah_img_platform','pollinationsModel','imagenModel','nvidiaImageModel','togetherImageModel','hfImageModel','snoah_notion_key','snoah_notion_parent','snoah_notion_autosave','snoah_auto_memory_enabled','snoah_auto_memory','snoah_templates','snoah_pins','snoah_bookmarks','snoah_personal_library','snoah_gemini_keys','snoah_or_keys','snoah_groq_keys','snoah_together_keys','snoah_mistral_keys','snoah_nvidia_keys','snoah_hf_keys','snoah_gh_keys','snoah_claude_keys','snoah_copilot_keys','snoah_gais_keys','snoah_cohere_keys','snoah_deepinfra_keys','snoah_cerebras_keys','snoah_sambanova_keys','snoah_fireworks_keys','snoah_xai_keys','snoah_perplexity_keys','snoah_nanogpt_keys','snoah_custom_keys','elevenLabsApiKeys','elevenLabsKeyIndex','pollinationsApiKeys','openaiTtsKeys','openaiTtsKeyIndex','groqTtsKeys','groqTtsKeyIndex','nvidiaImageKeys','nvidiaImageKeyIndex','togetherImageKeys','togetherImageKeyIndex','hfImageKeys','hfImageKeyIndex','snoah_websearch_platform','snoah_websearch_lang','snoah_agentic_ws','snoah_agent_browse_timeout','snoah_tavily_keys','snoah_brave_keys','snoah_serper_keys','snoah_custom_search_keys','snoah_custom_search_url'];
             const settings = {};
@@ -7874,11 +7928,20 @@ self.onmessage = async (event) => {
         }
 
         // ── SKIP THINKING ─────────────────────────────────────────────
-        // Aborts the current thinking stream and re-submits the message without thinking.
+        // Skips the thinking block and continues streaming the main response
+        // without re-fetching. If thinking is already complete, stops the response.
+        let _skipThinkFlag = false;
         function skipThinking() {
             if (!isLoading && !isStreaming) return;
-            _skipThinkingOnce = true;
-            stopGeneration();
+            _skipThinkFlag = true;
+            // Hide the thinking block from the live wrapper
+            const thinkBlocks = document.querySelectorAll('[id^="think-block-"]');
+            thinkBlocks.forEach(el => el.classList.add('hidden'));
+            // If no thinking content yet (still in thought process), set flag to skip
+            // Otherwise if thinking already finished, stop generation
+            if (isStreaming && !_skipThinkingOnce) {
+                _skipThinkingOnce = true;
+            }
         }
 
         // ── PINNED MESSAGES ────────────────────────────────────────
@@ -10796,21 +10859,30 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                         const _normRaw = _normalizeThinkTags(fullRaw);
                         let displayThink = '';
                         let displayMain  = _normRaw;
-                        const thinkOpen  = _normRaw.indexOf('<think>');
-                        const thinkClose = _normRaw.indexOf('</think>');
+const thinkOpen  = _normRaw.indexOf('<think>');
+                        const thinkClose = _normRaw.indexOf('');
+                        // Handle skip thinking - hide thinking block, show main content
+                        const isSkipThink = _skipThinkFlag;
                         if (thinkOpen !== -1) {
-                            thinkBlock.classList.remove('hidden');
-                            if (thinkClose !== -1) {
-                                displayThink = _normRaw.slice(thinkOpen + 7, thinkClose);
-                                displayMain  = _normRaw.slice(thinkClose + 8).trimStart();
-                                const dots = liveWrapper.querySelector('#think-dots-' + liveUID);
-                                if (dots) dots.style.display = 'none';
-                                const skipBtn = liveWrapper.querySelector('#skip-think-btn-' + liveUID);
-                                if (skipBtn) skipBtn.style.display = 'none';
+                            if (isSkipThink && thinkClose === -1) {
+                                // User wants to skip, hide thinking block, show only main content
+                                thinkBlock.classList.add('hidden');
+                                displayMain = _normRaw.replace(/<think>[\s\S]*$/, '');
                             } else {
-                                displayThink = fullRaw.slice(thinkOpen + 7);
-                                displayMain  = '';
+                                thinkBlock.classList.remove('hidden');
+                                if (thinkClose !== -1) {
+                                    displayThink = _normRaw.slice(thinkOpen + 7, thinkClose);
+                                    displayMain  = _normRaw.slice(thinkClose + 8).trimStart();
+                                    const dots = liveWrapper.querySelector('#think-dots-' + liveUID);
+                                    if (dots) dots.style.display = 'none';
+                                    const skipBtn = liveWrapper.querySelector('#skip-think-btn-' + liveUID);
+                                    if (skipBtn) skipBtn.style.display = 'none';
+                                } else {
+                                    displayThink = fullRaw.slice(thinkOpen + 7);
+                                    displayMain  = '';
+                                }
                             }
+                        }
                         }
                         // Append bubble on first real content
                         if (!liveAppended && (displayThink || displayMain)) {
@@ -11302,9 +11374,20 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                     }
                 }
 
-                if (_skipThinkingOnce) {
+                if (_skipThinkingOnce && _skipThinkFlag) {
+                    // Skip thinking mode: hide thinking block, continue streaming main response
                     _skipThinkingOnce = false;
-                    if (liveAppended && liveWrapper.isConnected) liveWrapper.remove();
+                    _skipThinkFlag = false;
+                    // Hide thinking block from live wrapper if visible
+                    if (liveWrapper && liveWrapper.isConnected) {
+                        const thinkBlock = liveWrapper.querySelector('[id^="think-block-"]');
+                        if (thinkBlock) thinkBlock.classList.add('hidden');
+                    }
+                    // Continue streaming without stopping
+                } else if (_skipThinkingOnce) {
+                    // User clicked skip after thinking was done - stop and continue with partial response
+                    _skipThinkingOnce = false;
+                    if (liveWrapper && liveWrapper.isConnected) liveWrapper.remove();
                     const _skipUserIdx = messages.map(m => m.role).lastIndexOf('user');
                     if (_skipUserIdx !== -1) {
                         const _skipUserText = messages[_skipUserIdx].text;
@@ -11340,13 +11423,17 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 const tOF = _normFullRaw.indexOf('<think>'), tCF = _normFullRaw.indexOf('</think>');
                 if (tOF !== -1 && tCF !== -1) { displayThinkFinal = _normFullRaw.slice(tOF+7,tCF); displayMainFinal = _normFullRaw.slice(tCF+8).trimStart(); }
                 else if (tOF !== -1) { displayThinkFinal = _normFullRaw.slice(tOF+7); displayMainFinal = ''; }
-                // Extract think vs main text
+// Extract think vs main text
                 let mainText = _normFullRaw;
                 let thinkingText = null;
                 const thinkMatch = _normFullRaw.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
                 if (thinkMatch) {
                     thinkingText = thinkMatch[1].trim();
                     mainText = _normFullRaw.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
+                }
+                // If user skipped thinking, hide the thinking text
+                if (_skipThinkFlag && thinkingText) {
+                    thinkingText = null;
                 }
                 if (_effectiveUseThinking && !thinkingText) {
                     if (!_thinkingSupported) {
@@ -11599,7 +11686,38 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
             } catch (error) {
                 // User-initiated abort (stop button) — save partial content and show Continue button
                 if (error.name === 'AbortError' && !abortController?._timedOut) {
-                    // Skip-thinking: clean up and re-submit without thinking
+                    // Skip-thinking: if user wants to skip thinking while streaming, hide thinking block
+                    if (_skipThinkFlag && _streamPartialRaw) {
+                        // Hide thinking, save partial response with main content only
+                        _skipThinkFlag = false;
+                        if (_streamPartialWrapper && _streamPartialWrapper.isConnected) {
+                            const thinkBlock = _streamPartialWrapper.querySelector('[id^="think-block-"]');
+                            if (thinkBlock) thinkBlock.classList.add('hidden');
+                            const innerCol = _streamPartialWrapper.querySelector('.flex.flex-col');
+                            if (innerCol) {
+                                // Save partial response without thinking
+                                const _normPartial = _normalizeThinkTags(_streamPartialRaw);
+                                let mainText = _normPartial.replace(/<think>[\s\S]*?(?:<\/think>|$)/i, '').trim();
+                                const mainTextClean = mainText.replace(/\[IMG:[^\]]*\]/gi, '').trim();
+                                if (mainTextClean) {
+                                    messages.push({ id: generateMessageId(), role: 'model', text: mainTextClean, originalText: _streamPartialRaw, isPartial: true });
+                                    saveCurrentChat();
+                                    const tempActionsDiv = document.createElement('div');
+                                    tempActionsDiv.innerHTML = buildActionsDivHTML('', false, messages.length, { platform: platform, model: _activeModelNow });
+                                    const actionsDiv = tempActionsDiv.firstElementChild;
+                                    wireActionsDiv(actionsDiv, mainTextClean, messages.length);
+                                    innerCol.appendChild(actionsDiv);
+                                    const contDiv = document.createElement('div');
+                                    contDiv.className = 'mt-2 flex items-center gap-2';
+                                    contDiv.innerHTML = '<button onclick="continueLastResponse()" class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-white bg-[#D25D38] border border-[#C04E2C] rounded-full hover:bg-[#B84E2E] active:scale-95 transition-all"><i data-lucide="play" class="w-3 h-3"></i> Continue</button><span class="text-[11px] text-[#A3A095]">— Response was stopped</span>';
+                                    innerCol.appendChild(contDiv);
+                                    lucide.createIcons({ nodes: [actionsDiv, contDiv] });
+                                }
+                            }
+                        }
+                        return;
+                    }
+                    // User clicked skip after thinking was done - re-submit without thinking
                     if (_skipThinkingOnce) {
                         _skipThinkingOnce = false;
                         if (liveAppended && liveWrapper.isConnected) liveWrapper.remove();
@@ -12233,7 +12351,7 @@ self.addEventListener('fetch', e => {
         { id: "command-r-plus-08-2024", name: "Command R+", desc: "Cohere's powerful enterprise-grade model with RAG.", badges: [{text:"Paid", color:"gray"}], platform: "cohere" }
     ];
 
-    function renderModelCards(filterText = '') {
+    function renderModelCards(filterText = '', platformFilter) {
         const container = document.getElementById('model-cards-container');
         if (!container) return;
         
@@ -12241,13 +12359,22 @@ self.addEventListener('fetch', e => {
         const lowerFilter = filterText.toLowerCase();
         
         const currentSelected = document.getElementById('settings-model').value || 'gemini-2.5-flash';
+        const currentPlatform = platformFilter || document.getElementById('platform-select')?.value || 'gemini';
+        
+        // Filter models by platform first
+        let modelsToRender = modelDirectory.filter(m => m.platform === currentPlatform);
+        
+        // If no models for this platform, show all models (for custom/other platforms)
+        if (modelsToRender.length === 0) {
+            modelsToRender = modelDirectory;
+        }
         
         let hasMatches = false;
         const badgeFilterLower = activeModelBadgeFilter.toLowerCase();
         const badgeNames = ['free','fast','recommended','paid'];
         const isSearchingBadge = badgeNames.some(bn => lowerFilter === bn);
 
-        modelDirectory.forEach(model => {
+        modelsToRender.forEach(model => {
             // Badge filter
             if (badgeFilterLower !== 'all' && !model.badges.some(b => b.text.toLowerCase() === badgeFilterLower)) return;
             // Text search (also matches badge names)
@@ -12309,7 +12436,8 @@ self.addEventListener('fetch', e => {
 
     window.filterModelCards = function() {
         const text = document.getElementById('model-search-input').value;
-        renderModelCards(text);
+        const platform = document.getElementById('platform-select')?.value || 'gemini';
+        renderModelCards(text, platform);
     };
 
     window.setModelBadgeFilter = function(badge) {
@@ -12324,69 +12452,141 @@ self.addEventListener('fetch', e => {
                 el.classList.add('bg-white', 'text-[#5B5951]', 'border-[#E5E3DB]');
             }
         });
-        renderModelCards(document.getElementById('model-search-input')?.value || '');
+        const platform = document.getElementById('platform-select')?.value || 'gemini';
+        renderModelCards(document.getElementById('model-search-input')?.value || '', platform);
     };
 
     window.selectModelCard = function(modelId) {
+        // Handle custom model selection
+        if (modelId === '__custom__') {
+            const customModel = prompt('Enter custom model ID (e.g., gemini-2.5-flash, llama-3.3-70b):');
+            if (customModel && customModel.trim()) {
+                modelId = customModel.trim();
+            } else {
+                return;
+            }
+        }
         document.getElementById('settings-model').value = modelId;
         if(typeof updateModelSelection === 'function') updateModelSelection();
-        renderModelCards(document.getElementById('model-search-input')?.value || '');
+        const platform = document.getElementById('platform-select')?.value || 'gemini';
+        renderModelCards(document.getElementById('model-search-input')?.value || '', platform);
         updateModelDropdownSelection(modelId);
     };
 
-    // Populate model dropdown
-    function populateModelDropdown() {
+    // Populate model dropdown - filtered by platform
+    function populateModelDropdown(platformFilter) {
         const select = document.getElementById('model-select-dropdown');
         if (!select) return;
         
         const currentSelected = document.getElementById('settings-model').value || 'gemini-2.5-flash';
+        const currentPlatform = platformFilter || document.getElementById('platform-select')?.value || 'gemini';
         
-        // Group models by platform
-        const platformGroups = {};
-        modelDirectory.forEach(model => {
-            const platform = model.platform || 'other';
-            if (!platformGroups[platform]) platformGroups[platform] = [];
-            platformGroups[platform].push(model);
-        });
+        // Get models for the current platform
+        const platformModels = modelDirectory.filter(m => m.platform === currentPlatform);
         
-        // Build options with optgroups
+        // If no models for platform, show all (for custom/free platforms)
+        const modelsToShow = platformModels.length > 0 ? platformModels : modelDirectory;
+        
+        // Build options
         let html = '<option value="">-- Select Model --</option>';
-        const platformNames = {
-            'gemini': 'Google Gemini',
-            'groq': 'Groq',
-            'claude': 'Anthropic Claude',
-            'openrouter': 'OpenRouter (GPT)',
-            'together': 'Together AI',
-            'cerebras': 'Cerebras',
-            'sambanova': 'SambaNova',
-            'mistral': 'Mistral AI',
-            'xai': 'xAI (Grok)',
-            'puter': 'Puter.js (Free)',
-            'deepinfra': 'DeepInfra',
-            'fireworks': 'Fireworks AI',
-            'cohere': 'Cohere'
-        };
         
-        Object.keys(platformGroups).forEach(platform => {
-            const models = platformGroups[platform];
-            const platformLabel = platformNames[platform] || platform;
-            html += `<optgroup label="${platformLabel}">`;
-            models.forEach(model => {
+        if (platformModels.length > 0) {
+            // Show platform-specific models
+            platformModels.forEach(model => {
                 const selected = model.id === currentSelected ? 'selected' : '';
                 html += `<option value="${model.id}" ${selected}>${model.name}</option>`;
             });
-            html += `</optgroup>`;
-        });
+            // Add custom option at the end
+            html += `<option value="__custom__">+ Use Custom Model</option>`;
+        } else {
+            // No specific models - show all with optgroups
+            const platformGroups = {};
+            modelDirectory.forEach(model => {
+                const platform = model.platform || 'other';
+                if (!platformGroups[platform]) platformGroups[platform] = [];
+                platformGroups[platform].push(model);
+            });
+            const platformNames = {
+                'gemini': 'Google Gemini', 'groq': 'Groq', 'claude': 'Anthropic Claude', 'openrouter': 'OpenRouter (GPT)',
+                'together': 'Together AI', 'cerebras': 'Cerebras', 'sambanova': 'SambaNova', 'mistral': 'Mistral AI',
+                'xai': 'xAI (Grok)', 'puter': 'Puter.js (Free)', 'deepinfra': 'DeepInfra', 'fireworks': 'Fireworks AI', 'cohere': 'Cohere'
+            };
+            Object.keys(platformGroups).forEach(platform => {
+                const models = platformGroups[platform];
+                const platformLabel = platformNames[platform] || platform;
+                html += `<optgroup label="${platformLabel}">`;
+                models.forEach(model => {
+                    const selected = model.id === currentSelected ? 'selected' : '';
+                    html += `<option value="${model.id}" ${selected}>${model.name}</option>`;
+                });
+                html += `</optgroup>`;
+            });
+        }
         
         select.innerHTML = html;
     }
     
+    // Render model cards - filtered by platform
+    function renderModelCards(filterText, platformFilter) {
+        const container = document.getElementById('model-cards-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        const lowerFilter = filterText.toLowerCase();
+        
+        const currentSelected = document.getElementById('settings-model').value || 'gemini-2.5-flash';
+        const currentPlatform = platformFilter || document.getElementById('platform-select')?.value || 'gemini';
+        
+        // Filter models by platform
+        let modelsToRender = modelDirectory.filter(m => m.platform === currentPlatform);
+        
+        // If no platform-specific models, show all
+        if (modelsToRender.length === 0) {
+            modelsToRender = modelDirectory;
+        }
+        
+        let hasMatches = false;
+        const badgeFilterLower = activeModelBadgeFilter.toLowerCase();
+        const badgeNames = ['free','fast','recommended','paid'];
+        const isSearchingBadge = badgeNames.some(bn => lowerFilter === bn);
+
+        modelsToRender.forEach(model => {
+            // Badge filter
+            if (badgeFilterLower !== 'all' && !model.badges.some(b => b.text.toLowerCase() === badgeFilterLower)) return;
+            // Text search (also matches badge names)
+            if (lowerFilter && !isSearchingBadge) {
+                if (!model.name.toLowerCase().includes(lowerFilter) && !model.id.toLowerCase().includes(lowerFilter) && !model.desc.toLowerCase().includes(lowerFilter) && !(model.platform || '').toLowerCase().includes(lowerFilter)) {
+                    return;
+                }
+            }
+            if (lowerFilter && isSearchingBadge) {
+                if (!model.badges.some(b => b.text.toLowerCase() === lowerFilter)) return;
+            }
+            hasMatches = true;
+    
     // Handle dropdown change
     window.handleModelDropdownChange = function(modelId) {
         if (!modelId) return;
+        
+        // Handle custom model selection
+        if (modelId === '__custom__') {
+            const customModel = prompt('Enter custom model ID (e.g., gemini-2.5-flash, llama-3.3-70b):');
+            if (customModel && customModel.trim()) {
+                modelId = customModel.trim();
+            } else {
+                // Reset to previous selection
+                const prevModel = document.getElementById('settings-model').value;
+                if (prevModel) {
+                    document.getElementById('model-select-dropdown').value = prevModel;
+                }
+                return;
+            }
+        }
+        
         document.getElementById('settings-model').value = modelId;
         if(typeof updateModelSelection === 'function') updateModelSelection();
-        renderModelCards(document.getElementById('model-search-input')?.value || '');
+        const platform = document.getElementById('platform-select')?.value || 'gemini';
+        renderModelCards(document.getElementById('model-search-input')?.value || '', platform);
     };
     
     // Update dropdown selection when card is clicked
@@ -12397,9 +12597,15 @@ self.addEventListener('fetch', e => {
     
     // Initialize dropdown on load
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', populateModelDropdown);
+        document.addEventListener('DOMContentLoaded', () => {
+            const platform = document.getElementById('platform-select')?.value || 'gemini';
+            populateModelDropdown(platform);
+            renderModelCards('', platform);
+        });
     } else {
-        populateModelDropdown();
+        const platform = document.getElementById('platform-select')?.value || 'gemini';
+        populateModelDropdown(platform);
+        renderModelCards('', platform);
     }
 
 
@@ -12595,7 +12801,7 @@ self.addEventListener('fetch', e => {
             { title: 'Appearance', desc: 'Font size, theme, timestamps', icon: 'palette', childCount: 5 },             // Font + Theme + divider + Timestamps + divider
             { title: 'Chat Experience', desc: 'Sound, files, input, vision, branching', icon: 'message-circle', childCount: 12 }, // Sound + divider + AI File + divider + Send + divider + Focus + divider + OCR + divider + Branching + divider
             { title: 'Data Management', desc: 'History, backup, restore, storage', icon: 'shield', childCount: 5 },    // History Limit + divider + Backup + divider + Storage
-            { title: 'Danger Zone', desc: 'Delete all chats', icon: 'trash-2', childCount: 1 }                          // Delete All Chats
+            { title: 'Danger Zone', desc: 'Delete chats or reset all data', icon: 'trash-2', childCount: 1 }                          // Delete All Chats + Delete Everything
         ]);
     });
 
