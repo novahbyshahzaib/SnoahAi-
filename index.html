@@ -446,7 +446,15 @@
                     // Override "What's New" content if admin set it
                     if (data.whatsNew) {
                         const el = document.getElementById('admin-whats-new');
-                        if (el) el.innerHTML = data.whatsNew;
+                        if (el) {
+                            // Basic sanitization to prevent XSS script injection
+                            const sanitized = data.whatsNew
+                                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+                                .replace(/ on\w+="[^"]*"/g, "")
+                                .replace(/ on\w+='[^']*'/g, "")
+                                .replace(/ on\w+=\S+/g, "");
+                            el.innerHTML = sanitized;
+                        }
                     }
                     // Announcement banner
                     if (data.announcement) {
