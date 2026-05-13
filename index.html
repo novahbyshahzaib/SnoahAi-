@@ -1921,20 +1921,20 @@
 
         <!-- ===== HEADER ===== -->
         <header class="flex items-center px-4 py-3 bg-[#FAF9F6]/90 backdrop-blur-md z-10 shrink-0 border-b border-[#EAE8E0]/50 header-bg">
-            <div class="flex-1 flex items-center">
+            <div class="flex-1 flex items-center gap-0.5">
                 <button onclick="toggleSidebar()" class="p-2 -ml-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors md:hidden">
                     <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <button id="btn-voice-mode" onclick="toggleVoiceConversationMode()" title="Voice Conversation Mode" class="p-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
+                    <i data-lucide="mic" class="w-5 h-5"></i>
                 </button>
             </div>
             <div class="flex flex-col items-center">
                 <h1 class="text-[18px] font-serif font-semibold text-[#2C2B29] tracking-tight snoah-app-name">SnoahAI</h1>
                 <span id="header-model-badge" class="text-[10px] font-bold text-[#A3A095] tracking-widest uppercase mt-0.5">NOVAH GEM</span>
             </div>
-            <!-- Right-side header buttons: Voice Mode, Temp Chat, Search, New Chat — equal icon buttons -->
+            <!-- Right-side header buttons: Temp Chat, Search, New Chat — equal icon buttons -->
             <div class="flex-1 flex items-center justify-end gap-0.5 -mr-1">
-                <button id="btn-voice-mode" onclick="toggleVoiceConversationMode()" title="Voice Conversation Mode" class="p-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
-                    <i data-lucide="mic" class="w-5 h-5"></i>
-                </button>
                 <button id="btn-temp-chat" onclick="toggleTempChat()" title="Temp Chat" class="p-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
                     <i data-lucide="clock" class="w-5 h-5"></i>
                 </button>
@@ -6953,15 +6953,15 @@
                     : testPlatform === 'fireworks' ? 'https://api.fireworks.ai/inference/v1/chat/completions'
                     : testPlatform === 'ollama' ? (ollamaHost + '/v1/chat/completions')
                     : testPlatform === 'custom' ? customEndpointUrl
-                    : testPlatform === 'nvidia' ? '/api/nvidia'
+                    : testPlatform === 'nvidia' ? '/api/unified?provider=nvidia'
                     : testPlatform === 'claude' ? '/api/claude'
-                    : testPlatform === 'cohere' ? '/api/cohere'
-                    : testPlatform === 'xai' ? '/api/xai'
+                    : testPlatform === 'cohere' ? '/api/unified?provider=cohere'
+                    : testPlatform === 'xai' ? '/api/unified?provider=xai'
                     : testPlatform === 'perplexity' ? '/api/perplexity'
-                    : testPlatform === 'nanogpt' ? '/api/nanogpt'
-                    : testPlatform === 'huggingface' ? '/api/huggingface'
+                    : testPlatform === 'nanogpt' ? '/api/unified?provider=nanogpt'
+                    : testPlatform === 'huggingface' ? '/api/unified?provider=huggingface'
                     : testPlatform === 'githubmodels' || testPlatform === 'copilot' ? '/api/github'
-                    : testPlatform === 'deepinfra' ? '/api/deepinfra'
+                    : testPlatform === 'deepinfra' ? '/api/unified?provider=deepinfra'
                     : 'https://openrouter.ai/api/v1/chat/completions';
                 const headers = _proxied.includes(testPlatform)
                     ? { 'Content-Type': 'application/json', 'x-api-key': testKey || '' }
@@ -7655,7 +7655,7 @@ self.onmessage = async (event) => {
             if (!_openAICompatPlatforms.includes(platform)) return;
             const _memChatKey = platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : platform === 'mistral' ? mistralApiKey : platform === 'nvidia' ? nvidiaApiKey : platform === 'huggingface' ? hfApiKey : platform === 'githubmodels' ? ghApiKey : platform === 'claude' ? claudeApiKey : platform === 'copilot' ? copilotApiKey : platform === 'cohere' ? cohereApiKey : platform === 'deepinfra' ? deepinfraApiKey : platform === 'cerebras' ? cerebrasApiKey : platform === 'sambanova' ? sambanovaApiKey : platform === 'fireworks' ? fireworksApiKey : platform === 'xai' ? xaiApiKey : platform === 'perplexity' ? perplexityApiKey : platform === 'nanogpt' ? nanogptApiKey: platform === 'custom' ? customEndpointApiKey : orApiKey;
             if (!_memChatKey && platform !== 'ollama') return;
-            const _memChatUrl = platform === 'groq' ? 'https://api.groq.com/openai/v1/chat/completions' : platform === 'together' ? 'https://api.together.xyz/v1/chat/completions' : platform === 'mistral' ? 'https://api.mistral.ai/v1/chat/completions' : platform === 'nvidia' ? '/api/nvidia' : platform === 'huggingface' ? '/api/huggingface' : platform === 'githubmodels' ? '/api/github' : platform === 'claude' ? '/api/claude' : platform === 'copilot' ? '/api/github' : platform === 'cohere' ? '/api/cohere' : platform === 'deepinfra' ? '/api/deepinfra' : platform === 'ollama' ? (ollamaHost + '/v1/chat/completions') : platform === 'cerebras' ? 'https://api.cerebras.ai/v1/chat/completions' : platform === 'sambanova' ? 'https://api.sambanova.ai/v1/chat/completions' : platform === 'fireworks' ? 'https://api.fireworks.ai/inference/v1/chat/completions' : platform === 'xai' ? '/api/xai' : platform === 'perplexity' ? '/api/perplexity' : platform === 'nanogpt' ? '/api/nanogpt': platform === 'custom' ? customEndpointUrl : 'https://openrouter.ai/api/v1/chat/completions';
+            const _memChatUrl = platform === 'groq' ? 'https://api.groq.com/openai/v1/chat/completions' : platform === 'together' ? 'https://api.together.xyz/v1/chat/completions' : platform === 'mistral' ? 'https://api.mistral.ai/v1/chat/completions' : platform === 'nvidia' ? '/api/unified?provider=nvidia' : platform === 'huggingface' ? '/api/unified?provider=huggingface' : platform === 'githubmodels' ? '/api/github' : platform === 'claude' ? '/api/claude' : platform === 'copilot' ? '/api/github' : platform === 'cohere' ? '/api/unified?provider=cohere' : platform === 'deepinfra' ? '/api/unified?provider=deepinfra' : platform === 'ollama' ? (ollamaHost + '/v1/chat/completions') : platform === 'cerebras' ? 'https://api.cerebras.ai/v1/chat/completions' : platform === 'sambanova' ? 'https://api.sambanova.ai/v1/chat/completions' : platform === 'fireworks' ? 'https://api.fireworks.ai/inference/v1/chat/completions' : platform === 'xai' ? '/api/unified?provider=xai' : platform === 'perplexity' ? '/api/perplexity' : platform === 'nanogpt' ? '/api/unified?provider=nanogpt': platform === 'custom' ? customEndpointUrl : 'https://openrouter.ai/api/v1/chat/completions';
             const _isProxiedMem = ['nvidia','huggingface','githubmodels','claude','copilot','cohere','deepinfra','xai','perplexity','nanogpt'].includes(platform);
             const _memChatModel = platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'cohere' ? cohereModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'ollama' ? ollamaModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : platform === 'xai' ? xaiModelId : platform === 'perplexity' ? perplexityModelId : platform === 'nanogpt' ? nanogptModelId: platform === 'custom' ? customModelId : orModelId;
             const _memHeaders = _isProxiedMem ? { 'Content-Type': 'application/json', 'x-api-key': _memChatKey } : platform === 'ollama' ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _memChatKey };
@@ -11049,7 +11049,7 @@ self.onmessage = async (event) => {
 
         // ── MULTI-AI RESPONSE ──────────────────────────────────────────
         const MULTI_AI_LABELS = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', together: 'Together AI', mistral: 'Mistral AI', nvidia: 'NVIDIA', huggingface: 'Hugging Face', githubmodels: 'GitHub Models', claude: 'Claude', copilot: 'Copilot', gais: 'Google AI Studio', ollama: 'Ollama', cohere: 'Cohere', puter: 'Puter.js', deepinfra: 'DeepInfra', cerebras: 'Cerebras AI', sambanova: 'SambaNova', fireworks: 'Fireworks AI', xai: 'xAI (Grok)', perplexity: 'Perplexity', nanogpt: 'NanoGPT' };
-        const MULTI_AI_URLS = { openrouter: 'https://openrouter.ai/api/v1/chat/completions', groq: 'https://api.groq.com/openai/v1/chat/completions', together: 'https://api.together.xyz/v1/chat/completions', mistral: 'https://api.mistral.ai/v1/chat/completions', nvidia: '/api/nvidia', huggingface: '/api/huggingface', githubmodels: '/api/github', claude: '/api/claude', copilot: '/api/github', gais: null, ollama: null, cohere: '/api/cohere', deepinfra: '/api/deepinfra', cerebras: 'https://api.cerebras.ai/v1/chat/completions', sambanova: 'https://api.sambanova.ai/v1/chat/completions', fireworks: 'https://api.fireworks.ai/inference/v1/chat/completions', xai: '/api/xai', perplexity: '/api/perplexity', nanogpt: '/api/nanogpt' };
+        const MULTI_AI_URLS = { openrouter: 'https://openrouter.ai/api/v1/chat/completions', groq: 'https://api.groq.com/openai/v1/chat/completions', together: 'https://api.together.xyz/v1/chat/completions', mistral: 'https://api.mistral.ai/v1/chat/completions', nvidia: '/api/unified?provider=nvidia', huggingface: '/api/unified?provider=huggingface', githubmodels: '/api/github', claude: '/api/claude', copilot: '/api/github', gais: null, ollama: null, cohere: '/api/unified?provider=cohere', deepinfra: '/api/unified?provider=deepinfra', cerebras: 'https://api.cerebras.ai/v1/chat/completions', sambanova: 'https://api.sambanova.ai/v1/chat/completions', fireworks: 'https://api.fireworks.ai/inference/v1/chat/completions', xai: '/api/unified?provider=xai', perplexity: '/api/perplexity', nanogpt: '/api/unified?provider=nanogpt' };
         function getMultiAIKey(p) { if (p === 'puter' || p === 'ollama') return '__nokey__'; return p === 'gemini' ? (geminiKeys[0] || apiKey) : p === 'openrouter' ? (orKeys[0] || orApiKey) : p === 'groq' ? (groqKeys[0] || groqApiKey) : p === 'together' ? (togetherKeys[0] || togetherApiKey) : p === 'nvidia' ? (nvidiaKeys[0] || nvidiaApiKey) : p === 'huggingface' ? (hfKeys[0] || hfApiKey) : p === 'githubmodels' ? (ghKeys[0] || ghApiKey) : p === 'claude' ? (claudeKeys[0] || claudeApiKey) : p === 'copilot' ? (copilotKeys[0] || copilotApiKey) : p === 'gais' ? (gaisKeys[0] || gaisApiKey) : p === 'cohere' ? (cohereKeys[0] || cohereApiKey) : p === 'deepinfra' ? (deepinfraKeys[0] || deepinfraApiKey) : p === 'cerebras' ? (cerebrasKeys[0] || cerebrasApiKey) : p === 'sambanova' ? (sambanovaKeys[0] || sambanovaApiKey) : p === 'fireworks' ? (fireworksKeys[0] || fireworksApiKey) : p === 'xai' ? (xaiKeys[0] || xaiApiKey) : p === 'perplexity' ? (perplexityKeys[0] || perplexityApiKey) : p === 'nanogpt' ? (nanogptKeys[0] || nanogptApiKey): (mistralKeys[0] || mistralApiKey); }
         function getMultiAIModel(p) { return p === 'gemini' ? modelId : p === 'openrouter' ? orModelId : p === 'groq' ? groqModelId : p === 'together' ? togetherModelId : p === 'nvidia' ? nvidiaModelId : p === 'huggingface' ? hfModelId : p === 'githubmodels' ? ghModelId : p === 'claude' ? claudeModelId : p === 'copilot' ? copilotModelId : p === 'gais' ? gaisModelId : p === 'ollama' ? ollamaModelId : p === 'cohere' ? cohereModelId : p === 'puter' ? puterModelId : p === 'deepinfra' ? deepinfraModelId : p === 'cerebras' ? cerebrasModelId : p === 'sambanova' ? sambanovaModelId : p === 'fireworks' ? fireworksModelId : p === 'xai' ? xaiModelId : p === 'perplexity' ? perplexityModelId : p === 'nanogpt' ? nanogptModelId: mistralModelId; }
 
@@ -11362,7 +11362,7 @@ self.onmessage = async (event) => {
                 const mdl = nvidiaImageModel || 'black-forest-labs/flux-schnell';
                 for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
                     try {
-                        const res = await fetch('/api/nvidia-img', {
+                        const res = await fetch('/api/unified?provider=nvidia&type=image', {
                             method: 'POST',
                             headers: { 'x-api-key': keysToTry[ki], 'Content-Type': 'application/json' },
                             body: JSON.stringify({ model: mdl, prompt: prompt, cfg_scale: 5, aspect_ratio: '1/1', seed: 0, steps: 4, negative_prompt: '' })
@@ -12211,9 +12211,9 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                                 : isMistral
                                 ? 'https://api.mistral.ai/v1/chat/completions'
                                 : isNvidia
-                                ? '/api/nvidia'
+                                ? '/api/unified?provider=nvidia'
                                 : isHF
-                                ? '/api/huggingface'
+                                ? '/api/unified?provider=huggingface'
                                 : isGH
                                 ? '/api/github'
                                 : isClaude
@@ -12221,9 +12221,9 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                                 : isCopilot
                                 ? '/api/github'
                                 : isCohere
-                                ? '/api/cohere'
+                                ? '/api/unified?provider=cohere'
                                 : isDeepInfra
-                                ? '/api/deepinfra'
+                                ? '/api/unified?provider=deepinfra'
                                 : isOllama
                                 ? (ollamaHost + '/v1/chat/completions')
                                 : isCerebras
@@ -12233,11 +12233,11 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                                 : isFireworks
                                 ? 'https://api.fireworks.ai/inference/v1/chat/completions'
                                 : isXAI
-                                ? '/api/xai'
+                                ? '/api/unified?provider=xai'
                                 : isPPX
                                 ? '/api/perplexity'
                                 : isNGPT
-                                ? '/api/nanogpt'
+                                ? '/api/unified?provider=nanogpt'
                                
                                
                                 : (platform === 'custom')
