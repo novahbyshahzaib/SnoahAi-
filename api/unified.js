@@ -72,10 +72,32 @@ export default async function handler(req, res) {
 
       // Fallback: NVIDIA native genai endpoint for models that are not exposed via OpenAI-compatible path
       const nativeModelPath = String(model)
-        .replace(/flux\.1-schnell/ig, 'flux-schnell')
-        .replace(/flux\.1-dev/ig, 'flux-dev')
-        .replace(/flux-1-schnell/ig, 'flux-schnell')
-        .replace(/flux-1-dev/ig, 'flux-dev');
+        .replace(/flux-schnell/ig, 'flux.1-schnell')
+        .replace(/flux-dev/ig, 'flux.1-dev')
+        .replace(/flux\.1\.1-schnell/ig, 'flux.1-schnell')
+        .replace(/flux\.1\.1-dev/ig, 'flux.1-dev');
+
+      const isFlux = nativeModelPath.includes('flux');
+      let fallbackBody;
+      if (isFlux) {
+          fallbackBody = {
+              prompt,
+              seed: body.seed != null ? body.seed : 0,
+              steps: body.steps != null ? body.steps : 4,
+              width: sizeMap[body.aspect_ratio] ? parseInt(sizeMap[body.aspect_ratio].split('x')[0]) : 1024,
+              height: sizeMap[body.aspect_ratio] ? parseInt(sizeMap[body.aspect_ratio].split('x')[1]) : 1024,
+          };
+      } else {
+          fallbackBody = {
+              prompt,
+              cfg_scale: body.cfg_scale != null ? body.cfg_scale : 5,
+              aspect_ratio: body.aspect_ratio || '1/1',
+              seed: body.seed != null ? body.seed : 0,
+              steps: body.steps != null ? body.steps : 4,
+              negative_prompt: body.negative_prompt || '',
+          };
+      }
+
       const nativeRes = await fetch(`https://ai.api.nvidia.com/v1/genai/${nativeModelPath}`, {
         method: 'POST',
         headers: {
@@ -83,18 +105,20 @@ export default async function handler(req, res) {
           'Accept': 'application/json',
           'Authorization': 'Bearer ' + apiKey,
         },
-        body: JSON.stringify({
-          prompt,
-          cfg_scale: body.cfg_scale != null ? body.cfg_scale : 5,
-          aspect_ratio: body.aspect_ratio || '1/1',
-          seed: body.seed != null ? body.seed : 0,
-          steps: body.steps != null ? body.steps : 4,
-          negative_prompt: body.negative_prompt || '',
-        }),
+        body: JSON.stringify(fallbackBody),
       });
+
       const fallbackData = await nativeRes.json().catch((e) => { console.warn('Failed to parse native response:', e); return {}; });
+      
+      // Ensure frontend finds the base64 string
+      if (fallbackData && fallbackData.artifacts && fallbackData.artifacts.length > 0) {
+        if (fallbackData.artifacts[0].base64 && !fallbackData.artifacts[0].b64_json) {
+           fallbackData.artifacts[0].b64_json = fallbackData.artifacts[0].base64;
+        }
+      }
+
       if (!nativeRes.ok) {
-        const upstreamError = (fallbackData && (fallbackData.error || fallbackData.message)) || openAiErrorText || 'NVIDIA upstream error';
+        const upstreamError = (fallbackData && (fallbackData.error || fallbackData.message || fallbackData.detail || fallbackData.title)) || openAiErrorText || 'NVIDIA upstream error';
         return res.status(nativeRes.status || openAiRes.status || 500).json({ error: upstreamError });
       }
       return res.status(nativeRes.status).json(fallbackData);
