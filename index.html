@@ -204,48 +204,6 @@
         .md-content hr { border: none; border-top: 1px solid #E5E3DB; margin: 12px 0; }
         .md-content p { margin: 4px 0; line-height: 1.7; }
 
-        /* Voice Conversation Mode Styles */
-        .voice-active { background-color: #D25D38 !important; color: white !important; }
-        .voice-listening { animation: voice-pulse 1.5s ease-in-out infinite; }
-        .voice-speaking { animation: voice-wave 1s ease-in-out infinite; }
-        
-        @keyframes voice-pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        
-        @keyframes voice-wave {
-            0%, 100% { transform: scale(1); }
-            25% { transform: scale(1.05); }
-            75% { transform: scale(0.95); }
-        }
-        
-        .voice-transcript-item {
-            padding: 8px 12px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-        
-        .voice-transcript-user {
-            background-color: #EFECE6;
-            color: #2C2B29;
-            margin-left: 20px;
-        }
-        
-        .voice-transcript-ai {
-            background-color: #F2F0E9;
-            color: #2C2B29;
-            margin-right: 20px;
-        }
-        
-        .voice-transcript-timestamp {
-            font-size: 10px;
-            color: #A3A095;
-            margin-top: 4px;
-        }
-
         /* Dark Mode */
         .dark { color-scheme: dark; }
 
@@ -1925,9 +1883,6 @@
                 <button onclick="toggleSidebar()" class="p-2 -ml-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors md:hidden">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
-                <button id="btn-voice-mode" onclick="toggleVoiceConversationMode()" title="Voice Conversation Mode" class="p-2 text-[#5B5951] hover:bg-[#F2F0E9] rounded-full transition-colors">
-                    <i data-lucide="mic" class="w-5 h-5"></i>
-                </button>
             </div>
             <div class="flex flex-col items-center">
                 <h1 class="text-[18px] font-serif font-semibold text-[#2C2B29] tracking-tight snoah-app-name">SnoahAI</h1>
@@ -2005,52 +1960,6 @@
             
             <div id="scroll-anchor" class="h-2 shrink-0"></div>
 
-            <!-- ===== VOICE CONVERSATION MODE UI ===== -->
-            <div id="voice-conversation-mode" class="hidden flex-col items-center justify-center h-full text-center pb-10 mt-auto mb-auto w-full">
-                <div class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-[#D25D38] to-[#B84E2E] rounded-full flex items-center justify-center mb-6 shadow-lg animate-pulse">
-                    <i data-lucide="mic" class="w-10 h-10 md:w-12 md:h-12 text-white"></i>
-                </div>
-                <h2 id="voice-status-title" class="text-[24px] md:text-[28px] font-serif text-[#2C2B29] mb-3 tracking-tight">Voice Conversation Mode</h2>
-                <p id="voice-status-subtitle" class="text-[#737166] text-[15px] md:text-[16px] mb-8 max-w-[300px] md:max-w-[400px] leading-relaxed">
-                    Tap the microphone to start speaking. I'll listen and respond naturally.
-                </p>
-                
-                <!-- Voice Controls -->
-                <div class="flex flex-col items-center gap-6">
-                    <!-- Main Voice Button -->
-                    <button id="voice-main-btn" onclick="toggleVoiceConversation()" class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-[#D25D38] text-white flex items-center justify-center shadow-lg hover:bg-[#B84E2E] transition-all duration-300 hover:scale-105 active:scale-95">
-                        <i data-lucide="mic" class="w-10 h-10 md:w-12 md:h-12"></i>
-                    </button>
-                    
-                    <!-- Voice Status Indicator -->
-                    <div id="voice-status-indicator" class="flex items-center gap-2 px-4 py-2 bg-[#F2F0E9] rounded-full border border-[#E5E3DB]">
-                        <div id="voice-status-dot" class="w-2 h-2 rounded-full bg-[#A3A095]"></div>
-                        <span id="voice-status-text" class="text-[12px] font-semibold text-[#5B5951]">Ready to speak</span>
-                    </div>
-                    
-                    <!-- Voice Options -->
-                    <div class="flex items-center gap-3">
-                        <button onclick="toggleVoiceAutoResponse()" id="voice-auto-response-btn" class="flex items-center gap-2 px-4 py-2 rounded-full bg-[#F2F0E9] text-[#12px] font-semibold text-[#5B5951] border border-[#E5E3DB] hover:bg-[#EAE8E0] transition-colors">
-                            <i data-lucide="zap" class="w-4 h-4"></i>
-                            <span>Auto Response</span>
-                        </button>
-                        <button onclick="toggleVoiceTranscript()" id="voice-transcript-btn" class="flex items-center gap-2 px-4 py-2 rounded-full bg-[#F2F0E9] text-[#12px] font-semibold text-[#5B5951] border border-[#E5E3DB] hover:bg-[#EAE8E0] transition-colors">
-                            <i data-lucide="message-square" class="w-4 h-4"></i>
-                            <span>Show Transcript</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Voice Transcript (hidden by default) -->
-                <div id="voice-transcript" class="hidden mt-6 w-full max-w-[500px] px-4">
-                    <div class="bg-white rounded-2xl border border-[#E5E3DB] p-4 shadow-sm max-h-[300px] overflow-y-auto">
-                        <div id="voice-transcript-content" class="space-y-3 text-left">
-                            <!-- Transcript items will be added here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- ===== BOTTOM INPUT AREA ===== -->
             <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#FAF9F6] via-[#FAF9F6] to-transparent pt-12 pb-5 sm:pb-8 px-4 md:px-8 shrink-0 z-20">
                 <div id="desktop-input-inner" class="w-full">
@@ -2085,9 +1994,6 @@
                             <button id="btn-canvas" onclick="toggleCanvasMode()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
                                 <i data-lucide="layout-panel-right" class="w-3.5 h-3.5"></i> Canvas
                             </button>
-                            <button id="btn-workflow" onclick="openWorkflowModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 bg-[#F2F0E9] text-[#737166] border border-transparent hover:bg-[#EAE8E0]">
-                                <i data-lucide="zap" class="w-3.5 h-3.5"></i> Workflow
-                            </button>
                         </div>
 
                         <!-- Multi-Image Preview Strip -->
@@ -2121,11 +2027,6 @@
                 <!-- populated by JS -->
             </div>
 
-            <!-- ===== SLASH COMMAND MENU ===== -->
-            <div id="slash-menu" class="hidden">
-                <!-- populated by JS -->
-            </div>
-
             <!-- ===== CHAT SEARCH MODAL ===== -->
     <div id="search-modal" class="absolute inset-0 z-50 flex flex-col hidden">
         <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeSearchModal()"></div>
@@ -2144,74 +2045,7 @@
         </div>
     </div>
 
-    <!-- ===== WORKFLOW MODAL ===== -->
-    <div id="workflow-modal" class="absolute inset-0 z-50 flex items-end hidden">
-        <div class="absolute inset-0 bg-[#2C2B29]/30 backdrop-blur-sm" onclick="closeWorkflowModal()"></div>
-        <div class="animate-modal relative z-10 w-full bg-[#FAF9F6] app-bg rounded-t-[28px] shadow-2xl border-t border-[#E5E3DB] max-h-[85%] flex flex-col">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="zap" class="w-5 h-5 text-[#D25D38]"></i>
-                    <h3 class="font-serif font-semibold text-[16px]">Workflow Automation</h3>
-                </div>
-                <button onclick="closeWorkflowModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            
-            <div class="p-4 overflow-y-auto flex-1">
-                <!-- Workflow Templates -->
-                <div class="mb-4">
-                    <p class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest mb-2">Workflow Templates</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="runWorkflow('code-review')" class="flex flex-col items-center gap-2 p-3 bg-white border border-[#E5E3DB] rounded-xl hover:bg-[#F2F0E9] transition-colors">
-                            <i data-lucide="code-2" class="w-6 h-6 text-[#D25D38]"></i>
-                            <span class="text-[12px] font-semibold text-[#2C2B29]">Code Review</span>
-                        </button>
-                        <button onclick="runWorkflow('code-execution')" class="flex flex-col items-center gap-2 p-3 bg-white border border-[#E5E3DB] rounded-xl hover:bg-[#F2F0E9] transition-colors">
-                            <i data-lucide="play" class="w-6 h-6 text-[#D25D38]"></i>
-                            <span class="text-[12px] font-semibold text-[#2C2B29]">Code Execution</span>
-                        </button>
-                        <button onclick="runWorkflow('debug-analysis')" class="flex flex-col items-center gap-2 p-3 bg-white border border-[#E5E3DB] rounded-xl hover:bg-[#F2F0E9] transition-colors">
-                            <i data-lucide="bug" class="w-6 h-6 text-[#D25D38]"></i>
-                            <span class="text-[12px] font-semibold text-[#2C2B29]">Debug Analysis</span>
-                        </button>
-                        <button onclick="runWorkflow('documentation')" class="flex flex-col items-center gap-2 p-3 bg-white border border-[#E5E3DB] rounded-xl hover:bg-[#F2F0E9] transition-colors">
-                            <i data-lucide="file-text" class="w-6 h-6 text-[#D25D38]"></i>
-                            <span class="text-[12px] font-semibold text-[#2C2B29]">Documentation</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Custom Workflow Builder -->
-                <div class="border-t border-[#EAE8E0] pt-4">
-                    <p class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest mb-2">Custom Workflow</p>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-[12px] font-semibold text-[#5B5951] block mb-1">Workflow Name</label>
-                            <input id="workflow-name" type="text" placeholder="e.g., My Code Review Process" 
-                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] outline-none focus:ring-2 focus:ring-[#D25D38]/20">
-                        </div>
-                        <div>
-                            <label class="text-[12px] font-semibold text-[#5B5951] block mb-1">Steps (one per line)</label>
-                            <textarea id="workflow-steps" rows="4" placeholder="1. Analyze the code structure&#10;2. Check for bugs and issues&#10;3. Suggest improvements&#10;4. Generate documentation"
-                                class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2 text-[13px] text-[#2C2B29] outline-none focus:ring-2 focus:ring-[#D25D38]/20 resize-none"></textarea>
-                        </div>
-                        <button onclick="saveCustomWorkflow()" class="w-full py-2.5 bg-[#D25D38] text-white rounded-xl text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors active:scale-95">
-                            Save & Run Workflow
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Saved Workflows -->
-                <div id="saved-workflows-section" class="border-t border-[#EAE8E0] pt-4 mt-4 hidden">
-                    <p class="text-[11px] font-bold text-[#A3A095] uppercase tracking-widest mb-2">Saved Workflows</p>
-                    <div id="saved-workflows-list" class="space-y-2">
-                        <!-- Saved workflows will be listed here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- ===== PROMPT TEMPLATES MODAL ===== -->
     <div id="templates-modal" class="absolute inset-0 z-50 flex items-end hidden">
@@ -2240,34 +2074,7 @@
         </div>
     </div>
 
-    <!-- ===== PERSONAL LIBRARY MODAL ===== -->
-    <div id="library-modal" class="absolute inset-0 z-50 flex items-end hidden">
-        <div class="absolute inset-0 bg-[#2C2B29]/30 backdrop-blur-sm" onclick="closeLibraryModal()"></div>
-        <div class="animate-modal relative z-10 w-full bg-[#FAF9F6] app-bg rounded-t-[28px] shadow-2xl border-t border-[#E5E3DB] max-h-[78%] flex flex-col">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
-                <div class="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D25D38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h6l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
-                    <h3 class="font-serif font-semibold text-[16px]">Library (Local RAG)</h3>
-                </div>
-                <button onclick="closeLibraryModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            <div class="p-4 overflow-y-auto flex-1 space-y-3">
-                <p class="text-[12px] text-[#A3A095]">Files/notes here stay local and are used only in this chat project.</p>
-                <div id="library-list" class="space-y-2"></div>
-            </div>
-            <div class="p-4 border-t border-[#EAE8E0] shrink-0 bg-[#FAF9F6]">
-                <input id="library-file-input" type="file" accept=".txt,.md,.json,.csv,.xml" class="hidden" multiple onchange="handleLibraryUpload(event)">
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="document.getElementById('library-file-input').click()" class="py-2.5 rounded-xl border border-[#E5E3DB] text-[13px] text-[#5B5951] hover:bg-[#F2F0E9] transition-colors font-medium">Upload File</button>
-                    <button onclick="addLibraryNote()" class="py-2.5 rounded-xl bg-[#D25D38] text-white text-[13px] font-semibold hover:bg-[#B84E2E] transition-colors">Add Note</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-        <!-- ===== COOKIE CONSENT BANNER (returning users who skipped consent) ===== -->
+    <!-- ===== COOKIE CONSENT BANNER (returning users who skipped consent) ===== -->
         <div id="cookie-banner" class="absolute bottom-0 left-0 right-0 z-[60] hidden">
             <div class="bg-[#2C2B29] text-white rounded-t-[22px] shadow-2xl p-5 mx-0">
                 <div class="flex items-start gap-3 mb-3">
@@ -2626,15 +2433,7 @@
                                     <span class="text-[11px] text-[#A3A095] block">AI responses you've bookmarked</span>
                                 </div>
                             </button>
-                            <button onclick="closePreferencesModal();openLibraryModal();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F2F0E9] text-left transition-colors group">
-                                <div class="w-8 h-8 rounded-lg bg-[#F2F0E9] group-hover:bg-[#EAE8E0] flex items-center justify-center shrink-0 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C897D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-[#D25D38]"><path d="M3 7a2 2 0 0 1 2-2h6l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
-                                </div>
-                                <div class="flex-1">
-                                    <span class="text-[14px] text-[#2C2B29] font-medium">Library</span>
-                                    <span class="text-[11px] text-[#A3A095] block">Project knowledge base (local RAG)</span>
-                                </div>
-                            </button>
+                            
                         </div>
                     </div>
 
@@ -3484,7 +3283,6 @@
         let activeThinkingDisplayMode = 'Auto';
         let aiFileDownloadsEnabled = localStorage.getItem('snoah_ai_file_downloads') !== 'false';
         let promptTemplates = JSON.parse(localStorage.getItem('snoah_templates') || '[]');
-        let personalLibrary = (() => { try { const v = JSON.parse(localStorage.getItem('snoah_personal_library') || '{}'); return (v && typeof v === 'object') ? v : {}; } catch(_) { return {}; } })();
         let ttsUtterance = null;
         let ttsActive = false;
         let abortController = null;
@@ -3522,7 +3320,7 @@
             { cmd: '/bullets',   label: 'Convert to bullet points', desc: 'List format' },
             { cmd: '/code',      label: 'Write code for this',  desc: 'Programming help' },
             { cmd: '/compare',   label: 'Compare these',        desc: 'Side-by-side comparison' },
-            { cmd: '/workflow',  label: 'Build AI workflow',    desc: 'Step-by-step workflow plan' },
+            
             { cmd: '/checklist', label: 'Create checklist',     desc: 'Actionable task checklist' },
         ];
         let isListening = false;
@@ -3601,65 +3399,6 @@
 
         // --- Variable Declarations ---
         
-        // Voice Conversation Mode
-        let voiceConversationMode = false;
-        let voiceConversationActive = false;
-        let voiceAutoResponse = true;
-        let voiceShowTranscript = false;
-        let voiceConversationState = 'idle';
-        let voiceConversationTranscript = [];
-        let voiceConversationRecognition = null;
-        let voiceConversationAudio = null;
-
-        // Workflow Automation
-        let workflows = {};
-        let activeWorkflow = null;
-        let workflowExecutionHistory = [];
-
-        // Workflow Templates
-        const workflowTemplates = {
-            'code-review': {
-                name: 'Code Review',
-                steps: [
-                    'Analyze the code structure and architecture',
-                    'Identify potential bugs and security issues',
-                    'Check code quality and best practices',
-                    'Suggest performance optimizations',
-                    'Provide improvement recommendations'
-                ]
-            },
-            'code-execution': {
-                name: 'Code Execution',
-                steps: [
-                    'Parse and understand the code',
-                    'Identify the execution environment needed',
-                    'Check for dependencies and requirements',
-                    'Execute the code safely',
-                    'Capture and analyze the output'
-                ]
-            },
-            'debug-analysis': {
-                name: 'Debug Analysis',
-                steps: [
-                    'Analyze the error or issue description',
-                    'Examine the relevant code sections',
-                    'Identify potential root causes',
-                    'Propose debugging strategies',
-                    'Suggest fixes and preventive measures'
-                ]
-            },
-            'documentation': {
-                name: 'Documentation',
-                steps: [
-                    'Analyze the code structure and functionality',
-                    'Identify key components and their purposes',
-                    'Generate comprehensive documentation',
-                    'Include usage examples and best practices',
-                    'Create API documentation if applicable'
-                ]
-            }
-        };
-
         // GitHub & Slack Integrations
         let githubToken = null;
         let slackToken = null;
@@ -8165,7 +7904,7 @@ self.onmessage = async (event) => {
             }
 
             try {
-                const response = await fetch(`/api/github?path/repos/${githubRepo}/issues`, {
+                const response = await fetch(`/api/github?path=repos/${githubRepo}/issues`, {
                     method: 'POST',
                     headers: {
                         'x-github-key': githubToken,
@@ -8199,7 +7938,7 @@ self.onmessage = async (event) => {
             }
 
             try {
-                const response = await fetch(`/api/github?path/repos/${githubRepo}/issues?state=${state}`, {
+                const response = await fetch(`/api/github?path=repos/${githubRepo}/issues?state=${state}`, {
                     method: 'GET',
                     headers: {
                         'x-github-key': githubToken
@@ -8376,615 +8115,6 @@ self.onmessage = async (event) => {
             if (savedSlackChannel) {
                 slackChannel = savedSlackChannel;
                 document.getElementById('settings-slackchannel').value = savedSlackChannel;
-            }
-        }
-
-        function openWorkflowModal() {
-            document.getElementById('workflow-modal').classList.remove('hidden');
-            loadSavedWorkflows();
-        }
-
-        function closeWorkflowModal() {
-            document.getElementById('workflow-modal').classList.add('hidden');
-        }
-
-        function runWorkflow(templateId) {
-            const template = workflowTemplates[templateId];
-            if (!template) {
-                showToast('Workflow template not found');
-                return;
-            }
-
-            executeWorkflow(template.name, template.steps);
-        }
-
-        function saveCustomWorkflow() {
-            const name = document.getElementById('workflow-name').value.trim();
-            const stepsText = document.getElementById('workflow-steps').value.trim();
-            
-            if (!name || !stepsText) {
-                showToast('Please provide workflow name and steps');
-                return;
-            }
-
-            const steps = stepsText.split('\n').filter(step => step.trim());
-            if (steps.length === 0) {
-                showToast('Please add at least one step');
-                return;
-            }
-
-            // Save workflow
-            const workflowId = 'custom_' + Date.now();
-            workflows[workflowId] = {
-                name,
-                steps,
-                createdAt: new Date().toISOString()
-            };
-
-            // Save to localStorage
-            localStorage.setItem('snoah_workflows', JSON.stringify(workflows));
-
-            // Execute the workflow
-            executeWorkflow(name, steps);
-
-            // Clear form
-            document.getElementById('workflow-name').value = '';
-            document.getElementById('workflow-steps').value = '';
-
-            showToast('Workflow saved and started');
-        }
-
-        function executeWorkflow(name, steps) {
-            activeWorkflow = {
-                name,
-                steps,
-                currentStep: 0,
-                startTime: new Date()
-            };
-
-            // Show workflow status
-            showWorkflowStatus();
-
-            // Start executing steps
-            executeNextStep();
-        }
-
-        function executeNextStep() {
-            if (!activeWorkflow) return;
-
-            if (activeWorkflow.currentStep >= activeWorkflow.steps.length) {
-                // Workflow completed
-                completeWorkflow();
-                return;
-            }
-
-            const step = activeWorkflow.steps[activeWorkflow.currentStep];
-            
-            // Update status
-            updateWorkflowStatus(step);
-
-            // Execute the step by sending it as a message to the AI
-            const prompt = `Workflow Step ${activeWorkflow.currentStep + 1}/${activeWorkflow.steps.length}: ${step}`;
-            
-            // Add context about the workflow
-            const contextPrompt = `I'm running a workflow called "${activeWorkflow.name}". ` +
-                `This is step ${activeWorkflow.currentStep + 1} of ${activeWorkflow.steps.length}. ` +
-                `The step is: "${step}". ` +
-                `Please help me complete this step. ` +
-                `If you need code or context from previous steps, let me know.`;
-
-            // Submit the message
-            chatInput.value = contextPrompt;
-            submitMessage();
-
-            // Move to next step after response
-            activeWorkflow.currentStep++;
-        }
-
-        function showWorkflowStatus() {
-            // Create a workflow status indicator
-            const statusDiv = document.createElement('div');
-            statusDiv.id = 'workflow-status';
-            statusDiv.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-[#D25D38] text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2';
-            statusDiv.innerHTML = `
-                <i data-lucide="zap" class="w-4 h-4 animate-pulse"></i>
-                <span class="text-[12px] font-semibold">Running: ${activeWorkflow.name}</span>
-                <span class="text-[10px] opacity-80">Step ${activeWorkflow.currentStep + 1}/${activeWorkflow.steps.length}</span>
-            `;
-            document.body.appendChild(statusDiv);
-            lucide.createIcons();
-        }
-
-        function updateWorkflowStatus(currentStep) {
-            const statusDiv = document.getElementById('workflow-status');
-            if (statusDiv) {
-                statusDiv.innerHTML = `
-                    <i data-lucide="zap" class="w-4 h-4 animate-pulse"></i>
-                    <span class="text-[12px] font-semibold">Running: ${activeWorkflow.name}</span>
-                    <span class="text-[10px] opacity-80">Step ${activeWorkflow.currentStep + 1}/${activeWorkflow.steps.length}</span>
-                `;
-                lucide.createIcons();
-            }
-        }
-
-        function completeWorkflow() {
-            const statusDiv = document.getElementById('workflow-status');
-            if (statusDiv) {
-                statusDiv.innerHTML = `
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                    <span class="text-[12px] font-semibold">Workflow Complete: ${activeWorkflow.name}</span>
-                `;
-                setTimeout(() => {
-                    statusDiv.remove();
-                }, 3000);
-            }
-
-            // Save to history
-            workflowExecutionHistory.push({
-                name: activeWorkflow.name,
-                steps: activeWorkflow.steps,
-                completedAt: new Date(),
-                duration: new Date() - activeWorkflow.startTime
-            });
-
-            localStorage.setItem('snoah_workflow_history', JSON.stringify(workflowExecutionHistory));
-
-            activeWorkflow = null;
-            showToast('Workflow completed successfully');
-        }
-
-        function loadSavedWorkflows() {
-            // Load from localStorage
-            const saved = localStorage.getItem('snoah_workflows');
-            if (saved) {
-                workflows = JSON.parse(saved);
-            }
-
-            // Load templates
-            Object.keys(workflowTemplates).forEach(id => {
-                workflows[id] = workflowTemplates[id];
-            });
-
-            // Update UI
-            const savedSection = document.getElementById('saved-workflows-section');
-            const savedList = document.getElementById('saved-workflows-list');
-
-            if (Object.keys(workflows).length === 0) {
-                savedSection.classList.add('hidden');
-                return;
-            }
-
-            savedSection.classList.remove('hidden');
-            savedList.innerHTML = '';
-
-            Object.entries(workflows).forEach(([id, workflow]) => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center justify-between p-3 bg-white border border-[#E5E3DB] rounded-xl';
-                item.innerHTML = `
-                    <div class="flex-1">
-                        <p class="text-[13px] font-semibold text-[#2C2B29]">${workflow.name}</p>
-                        <p class="text-[11px] text-[#A3A095]">${workflow.steps.length} steps</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="runWorkflowById('${id}')" class="p-2 text-[#D25D38] hover:bg-[#FDF4F2] rounded-full transition-colors">
-                            <i data-lucide="play" class="w-4 h-4"></i>
-                        </button>
-                        <button onclick="deleteWorkflow('${id}')" class="p-2 text-[#8C897D] hover:bg-[#F2F0E9] rounded-full transition-colors">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                `;
-                savedList.appendChild(item);
-            });
-
-            lucide.createIcons();
-        }
-
-        function runWorkflowById(id) {
-            const workflow = workflows[id];
-            if (workflow) {
-                executeWorkflow(workflow.name, workflow.steps);
-                closeWorkflowModal();
-            }
-        }
-
-        function deleteWorkflow(id) {
-            if (confirm('Delete this workflow?')) {
-                delete workflows[id];
-                localStorage.setItem('snoah_workflows', JSON.stringify(workflows));
-                loadSavedWorkflows();
-                showToast('Workflow deleted');
-            }
-        }
-
-        // ── VOICE CONVERSATION MODE FUNCTIONS ───────────────────────────────────────────
-
-        function toggleVoiceConversationMode() {
-            voiceConversationMode = !voiceConversationMode;
-            const btn = document.getElementById('btn-voice-mode');
-            const voiceModeUI = document.getElementById('voice-conversation-mode');
-            const chatContainer = document.getElementById('chat-container');
-            const inputArea = document.querySelector('.absolute.bottom-0');
-
-            if (voiceConversationMode) {
-                // Activate voice conversation mode
-                btn.classList.add('voice-active');
-                voiceModeUI.classList.remove('hidden');
-                voiceModeUI.classList.add('flex');
-                chatContainer.classList.add('hidden');
-                inputArea.classList.add('hidden');
-                showToast('🎤 Voice Conversation Mode activated');
-            } else {
-                // Deactivate voice conversation mode
-                btn.classList.remove('voice-active');
-                voiceModeUI.classList.add('hidden');
-                voiceModeUI.classList.remove('flex');
-                chatContainer.classList.remove('hidden');
-                inputArea.classList.remove('hidden');
-                
-                // Stop any active voice conversation
-                if (voiceConversationActive) {
-                    stopVoiceConversation();
-                }
-            }
-        }
-
-        function toggleVoiceConversation() {
-            if (voiceConversationActive) {
-                stopVoiceConversation();
-            } else {
-                startVoiceConversation();
-            }
-        }
-
-        function startVoiceConversation() {
-            // Check API support
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                showToast('Voice not supported — use Chrome or Safari');
-                return;
-            }
-
-            voiceConversationActive = true;
-            updateVoiceConversationUI();
-            startVoiceListening();
-        }
-
-        function stopVoiceConversation() {
-            voiceConversationActive = false;
-            
-            // Stop speech recognition
-            if (voiceConversationRecognition) {
-                try { voiceConversationRecognition.stop(); } catch(e) {}
-                voiceConversationRecognition = null;
-            }
-            
-            // Stop any playing audio
-            if (voiceConversationAudio) {
-                try { voiceConversationAudio.pause(); voiceConversationAudio = null; } catch(e) {}
-            }
-            
-            // Stop TTS
-            if (typeof window.speechSynthesis !== 'undefined') {
-                window.speechSynthesis.cancel();
-            }
-            
-            voiceConversationState = 'idle';
-            updateVoiceConversationUI();
-        }
-
-        function startVoiceListening() {
-            voiceConversationState = 'listening';
-            updateVoiceConversationUI();
-
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            voiceConversationRecognition = new SR();
-            
-            voiceConversationRecognition.continuous = false;
-            voiceConversationRecognition.interimResults = true;
-            voiceConversationRecognition.lang = 'en-US';
-
-            let accumulated = '';
-
-            voiceConversationRecognition.onstart = () => {
-                voiceConversationState = 'listening';
-                updateVoiceConversationUI();
-            };
-
-            voiceConversationRecognition.onresult = (e) => {
-                let finalChunk = '', interimChunk = '';
-                for (let i = e.resultIndex; i < e.results.length; i++) {
-                    const t = e.results[i][0].transcript;
-                    if (e.results[i].isFinal) finalChunk += t;
-                    else interimChunk += t;
-                }
-                if (finalChunk) accumulated += finalChunk;
-                
-                // Update status with current speech
-                if (accumulated || interimChunk) {
-                    const statusText = document.getElementById('voice-status-text');
-                    if (statusText) {
-                        statusText.textContent = (accumulated + interimChunk).substring(0, 50) + ((accumulated + interimChunk).length > 50 ? '...' : '');
-                    }
-                }
-            };
-
-            voiceConversationRecognition.onend = () => {
-                if (accumulated.trim()) {
-                    // User spoke something
-                    addVoiceTranscriptItem('user', accumulated.trim());
-                    processVoiceInput(accumulated.trim());
-                } else if (voiceConversationActive) {
-                    // Restart listening if still active
-                    setTimeout(() => {
-                        if (voiceConversationActive && voiceConversationState === 'listening') {
-                            startVoiceListening();
-                        }
-                    }, 500);
-                }
-            };
-
-            voiceConversationRecognition.onerror = (e) => {
-                console.error('Voice recognition error:', e.error);
-                if (voiceConversationActive) {
-                    showToast('Voice error: ' + e.error);
-                    setTimeout(() => {
-                        if (voiceConversationActive) {
-                            startVoiceListening();
-                        }
-                    }, 1000);
-                }
-            };
-
-            try {
-                voiceConversationRecognition.start();
-            } catch(e) {
-                console.error('Could not start voice recognition:', e);
-                if (voiceConversationActive) {
-                    setTimeout(() => {
-                        if (voiceConversationActive) {
-                            startVoiceListening();
-                        }
-                    }, 1000);
-                }
-            }
-        }
-
-        async function processVoiceInput(text) {
-            voiceConversationState = 'processing';
-            updateVoiceConversationUI();
-
-            try {
-                // Get AI response
-                const response = await getAIResponseForVoice(text);
-                
-                if (response) {
-                    addVoiceTranscriptItem('ai', response);
-                    
-                    if (voiceAutoResponse) {
-                        // Speak the response
-                        await speakVoiceResponse(response);
-                    }
-                    
-                    // Go back to listening if still active
-                    if (voiceConversationActive) {
-                        setTimeout(() => {
-                            if (voiceConversationActive) {
-                                startVoiceListening();
-                            }
-                        }, 500);
-                    }
-                }
-            } catch (error) {
-                console.error('Error processing voice input:', error);
-                showToast('Error processing voice input');
-                
-                if (voiceConversationActive) {
-                    setTimeout(() => {
-                        if (voiceConversationActive) {
-                            startVoiceListening();
-                        }
-                    }, 1000);
-                }
-            }
-        }
-
-        async function getAIResponseForVoice(text) {
-            // This is a simplified version - in production, you'd integrate with your existing AI logic
-            // For now, we'll use the existing submitMessage function but capture the response
-            
-            return new Promise((resolve, reject) => {
-                // Store the original messages to avoid duplication
-                const originalMessages = [...messages];
-                
-                // Create a temporary callback to capture the response
-                const originalOnStreamComplete = window.onStreamComplete;
-                
-                window.onStreamComplete = (response) => {
-                    // Restore original callback
-                    window.onStreamComplete = originalOnStreamComplete;
-                    resolve(response);
-                };
-                
-                // Submit the message
-                chatInput.value = text;
-                submitMessage();
-                
-                // Set a timeout in case the callback doesn't fire
-                setTimeout(() => {
-                    if (window.onStreamComplete === originalOnStreamComplete) {
-                        window.onStreamComplete = originalOnStreamComplete;
-                        reject(new Error('Timeout waiting for AI response'));
-                    }
-                }, 30000);
-            });
-        }
-
-        async function speakVoiceResponse(text) {
-            voiceConversationState = 'speaking';
-            updateVoiceConversationUI();
-
-            // Clean the text for speech
-            const cleanText = text
-                .replace(/```[\s\S]*?```/g, 'Code block omitted.')
-                .replace(/`[^`]+`/g, '')
-                .replace(/\*\*([^*]+)\*\*/g, '$1')
-                .replace(/\*([^*]+)\*/g, '$1')
-                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-                .replace(/\n+/g, ' ')
-                .trim();
-
-            // Use the existing TTS functionality
-            const platform = ttsPlatform || 'webspeech';
-            
-            return new Promise((resolve) => {
-                if (platform === 'webspeech') {
-                    speakWithWebSpeech(cleanText, () => {
-                        voiceConversationState = 'idle';
-                        updateVoiceConversationUI();
-                        resolve();
-                    });
-                } else {
-                    // For other platforms, we'd need to modify the existing TTS functions
-                    // For now, fall back to web speech
-                    speakWithWebSpeech(cleanText, () => {
-                        voiceConversationState = 'idle';
-                        updateVoiceConversationUI();
-                        resolve();
-                    });
-                }
-            });
-        }
-
-        function speakWithWebSpeech(text, callback) {
-            if (!window.speechSynthesis) {
-                if (callback) callback();
-                return;
-            }
-
-            window.speechSynthesis.cancel();
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
-
-            // Try to get a good voice
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length > 0) {
-                const preferredVoice = voices.find(v => 
-                    v.name.includes('Google') && v.name.includes('English')
-                ) || voices.find(v => v.lang.startsWith('en'));
-                if (preferredVoice) {
-                    utterance.voice = preferredVoice;
-                }
-            }
-
-            utterance.onend = () => {
-                if (callback) callback();
-            };
-
-            utterance.onerror = () => {
-                if (callback) callback();
-            };
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function updateVoiceConversationUI() {
-            const mainBtn = document.getElementById('voice-main-btn');
-            const statusDot = document.getElementById('voice-status-dot');
-            const statusText = document.getElementById('voice-status-text');
-            const statusTitle = document.getElementById('voice-status-title');
-            const statusSubtitle = document.getElementById('voice-status-subtitle');
-
-            if (!mainBtn || !statusDot || !statusText) return;
-
-            // Reset all states
-            mainBtn.classList.remove('voice-listening', 'voice-speaking');
-            statusDot.className = 'w-2 h-2 rounded-full';
-
-            switch (voiceConversationState) {
-                case 'listening':
-                    mainBtn.classList.add('voice-listening');
-                    statusDot.classList.add('bg-[#D25D38]', 'animate-pulse');
-                    statusText.textContent = 'Listening...';
-                    if (statusTitle) statusTitle.textContent = 'Listening';
-                    if (statusSubtitle) statusSubtitle.textContent = 'Speak naturally. I\'m ready to hear you.';
-                    break;
-                case 'processing':
-                    statusDot.classList.add('bg-[#F59E0B]', 'animate-pulse');
-                    statusText.textContent = 'Processing...';
-                    if (statusTitle) statusTitle.textContent = 'Thinking';
-                    if (statusSubtitle) statusSubtitle.textContent = 'Let me think about that...';
-                    break;
-                case 'speaking':
-                    mainBtn.classList.add('voice-speaking');
-                    statusDot.classList.add('bg-[#10B981]', 'animate-pulse');
-                    statusText.textContent = 'Speaking...';
-                    if (statusTitle) statusTitle.textContent = 'Speaking';
-                    if (statusSubtitle) statusSubtitle.textContent = 'Tap the button to interrupt.';
-                    break;
-                default:
-                    statusDot.classList.add('bg-[#A3A095]');
-                    statusText.textContent = 'Ready to speak';
-                    if (statusTitle) statusTitle.textContent = 'Voice Conversation Mode';
-                    if (statusSubtitle) statusSubtitle.textContent = 'Tap the microphone to start speaking. I\'ll listen and respond naturally.';
-            }
-        }
-
-        function toggleVoiceAutoResponse() {
-            voiceAutoResponse = !voiceAutoResponse;
-            const btn = document.getElementById('voice-auto-response-btn');
-            
-            if (voiceAutoResponse) {
-                btn.classList.add('bg-[#D25D38]', 'text-white', 'border-[#D25D38]');
-                btn.classList.remove('bg-[#F2F0E9]', 'text-[#5B5951]', 'border-[#E5E3DB]');
-                showToast('Auto Response enabled');
-            } else {
-                btn.classList.remove('bg-[#D25D38]', 'text-white', 'border-[#D25D38]');
-                btn.classList.add('bg-[#F2F0E9]', 'text-[#5B5951]', 'border-[#E5E3DB]');
-                showToast('Auto Response disabled');
-            }
-        }
-
-        function toggleVoiceTranscript() {
-            voiceShowTranscript = !voiceShowTranscript;
-            const transcriptDiv = document.getElementById('voice-transcript');
-            const btn = document.getElementById('voice-transcript-btn');
-            
-            if (voiceShowTranscript) {
-                transcriptDiv.classList.remove('hidden');
-                btn.classList.add('bg-[#D25D38]', 'text-white', 'border-[#D25D38]');
-                btn.classList.remove('bg-[#F2F0E9]', 'text-[#5B5951]', 'border-[#E5E3DB]');
-            } else {
-                transcriptDiv.classList.add('hidden');
-                btn.classList.remove('bg-[#D25D38]', 'text-white', 'border-[#D25D38]');
-                btn.classList.add('bg-[#F2F0E9]', 'text-[#5B5951]', 'border-[#E5E3DB]');
-            }
-        }
-
-        function addVoiceTranscriptItem(speaker, text) {
-            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            voiceConversationTranscript.push({
-                speaker,
-                text,
-                timestamp
-            });
-
-            if (voiceShowTranscript) {
-                const transcriptContent = document.getElementById('voice-transcript-content');
-                if (transcriptContent) {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = `voice-transcript-item voice-transcript-${speaker}`;
-                    itemDiv.innerHTML = `
-                        <div class="font-semibold text-xs mb-1">${speaker === 'user' ? 'You' : 'SnoahAI'}</div>
-                        <div>${text}</div>
-                        <div class="voice-transcript-timestamp">${timestamp}</div>
-                    `;
-                    transcriptContent.appendChild(itemDiv);
-                    transcriptContent.scrollTop = transcriptContent.scrollHeight;
-                }
             }
         }
 
@@ -9282,112 +8412,6 @@ self.onmessage = async (event) => {
             promptTemplates.splice(idx, 1);
             try { localStorage.setItem('snoah_templates', JSON.stringify(promptTemplates)); } catch(e) {}
             renderTemplates();
-        }
-
-        // ── PERSONAL LIBRARY (LOCAL RAG) ───────────────────────────────
-        function getLibraryScopeKey() {
-            return String(currentChatId || 'default');
-        }
-        const MAX_LIBRARY_ITEMS = 40;
-        const MAX_LIBRARY_ITEM_CONTENT = 8000;
-        const MAX_LIBRARY_CONTEXT_SNIPPET = 1200;
-        function getLibraryItemsForScope() {
-            return Array.isArray(personalLibrary[getLibraryScopeKey()]) ? personalLibrary[getLibraryScopeKey()] : [];
-        }
-        function persistPersonalLibrary() {
-            try { localStorage.setItem('snoah_personal_library', JSON.stringify(personalLibrary)); } catch(e) { console.warn('Failed to persist library:', e); }
-        }
-        function openLibraryModal() {
-            renderLibraryItems();
-            document.getElementById('library-modal').classList.remove('hidden');
-        }
-        function closeLibraryModal() {
-            document.getElementById('library-modal').classList.add('hidden');
-        }
-        function renderLibraryItems() {
-            const list = document.getElementById('library-list');
-            if (!list) return;
-            const items = getLibraryItemsForScope();
-            if (!items.length) {
-                list.innerHTML = '<p class="text-[13px] text-[#A3A095] text-center py-5">No library files/notes in this project yet.</p>';
-                return;
-            }
-            list.innerHTML = items.map((it, i) =>
-                '<div class="bg-white border border-[#E5E3DB] rounded-xl p-3">' +
-                    '<div class="flex items-start justify-between gap-2">' +
-                        '<div class="min-w-0"><p class="text-[13px] font-semibold text-[#2C2B29] truncate">' + escapeHTML(it.name || ('Item ' + (i + 1))) + '</p>' +
-                        '<p class="text-[11px] text-[#A3A095]">' + escapeHTML(it.type || 'note') + '</p></div>' +
-                        '<button onclick="removeLibraryItem(' + i + ')" class="text-[11px] px-2 py-1 rounded-lg border border-[#F8E3DE] text-[#D25D38] hover:bg-[#FDF4F2]">Delete</button>' +
-                    '</div>' +
-                    '<p class="text-[12px] text-[#5B5951] whitespace-pre-wrap mt-2">' + escapeHTML((it.content || '').slice(0, 360)) + (((it.content || '').length > 360) ? '…' : '') + '</p>' +
-                '</div>'
-            ).join('');
-        }
-        function removeLibraryItem(idx) {
-            const k = getLibraryScopeKey();
-            const arr = getLibraryItemsForScope();
-            arr.splice(idx, 1);
-            personalLibrary[k] = arr;
-            persistPersonalLibrary();
-            renderLibraryItems();
-        }
-        function addLibraryNote() {
-            const note = prompt('Add note to this project library:');
-            if (!note || !note.trim()) return;
-            const k = getLibraryScopeKey();
-            const arr = getLibraryItemsForScope();
-            arr.unshift({ id: 'lib_' + Date.now(), type: 'note', name: 'Quick Note', content: note.trim(), ts: Date.now() });
-            personalLibrary[k] = arr.slice(0, MAX_LIBRARY_ITEMS);
-            persistPersonalLibrary();
-            renderLibraryItems();
-            showToast('Note saved to Library ✓');
-        }
-        async function handleLibraryUpload(event) {
-            const files = Array.from(event?.target?.files || []);
-            if (!files.length) return;
-            const k = getLibraryScopeKey();
-            const arr = getLibraryItemsForScope();
-            const initialLen = arr.length;
-            let skippedPdf = 0;
-            for (const f of files) {
-                if (f.size > MAX_FILE_SIZE) continue;
-                // PDFs are binary - skip them with a clear message
-                const dotIdx = f.name.lastIndexOf('.');
-                const ext = dotIdx !== -1 ? f.name.slice(dotIdx + 1).toLowerCase() : '';
-                if (f.type === 'application/pdf' || ext === 'pdf') {
-                    skippedPdf++;
-                    continue;
-                }
-                let txt = '';
-                try { txt = await f.text(); } catch(e) { console.warn('Failed to read file:', f.name, e); txt = ''; }
-                if (!txt.trim()) continue;
-                arr.unshift({ id: 'lib_' + Date.now() + '_' + Math.random().toString(36).slice(2,6), type: 'file', name: f.name, content: txt.slice(0, MAX_LIBRARY_ITEM_CONTENT), ts: Date.now() });
-            }
-            const added = arr.length > initialLen;
-            if (added) {
-                personalLibrary[k] = arr.slice(0, MAX_LIBRARY_ITEMS);
-                persistPersonalLibrary();
-                renderLibraryItems();
-            }
-            if (event?.target) event.target.value = '';
-            if (skippedPdf > 0 && !added) showToast('⚠️ PDFs cannot be saved to library - paste text as a note instead');
-            else if (skippedPdf > 0) showToast('⚠️ PDFs skipped - other files saved to library ✓');
-            else if (added) showToast('Library updated ✓');
-        }
-        function getLibraryContextForPrompt(userText) {
-            const q = String(userText || '').toLowerCase();
-            const items = getLibraryItemsForScope();
-            if (!items.length) return '';
-            const scored = items.map(it => {
-                const c = String(it.content || '');
-                const l = c.toLowerCase();
-                let score = 0;
-                q.split(/\s+/).filter(Boolean).forEach(w => { if (w.length > 2 && l.includes(w)) score++; });
-                if (!score && q.length < 14) score = 1;
-                return { it, score };
-            }).filter(x => x.score > 0).sort((a,b) => b.score - a.score).slice(0, 3);
-            if (!scored.length) return '';
-            return scored.map(x => '[Library: ' + (x.it.name || 'note') + ']\n' + String(x.it.content || '').slice(0, MAX_LIBRARY_CONTEXT_SNIPPET)).join('\n\n');
         }
 
         // ── FONT SIZE ──────────────────────────────────────────────────
@@ -11356,16 +10380,20 @@ self.onmessage = async (event) => {
                 }
                 if (imgSrc) { usageCounters.geminiImagesCount++; saveUsageCounters(); }
             } else if (usePlatform === 'nvidia_img') {
-                const keysToTry = nvidiaImageKeys.length > 0
-                    ? [...nvidiaImageKeys.slice(nvidiaImageKeyIdx), ...nvidiaImageKeys.slice(0, nvidiaImageKeyIdx)]
-                    : [];
-                const mdl = nvidiaImageModel || 'black-forest-labs/flux-schnell';
-                for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
+                 const keysToTry = nvidiaImageKeys.length > 0
+                     ? [...nvidiaImageKeys.slice(nvidiaImageKeyIdx), ...nvidiaImageKeys.slice(0, nvidiaImageKeyIdx)]
+                     : [];
+                 const mdl = nvidiaImageModel || 'black-forest-labs/flux-schnell';
+                 if (!mdl.includes('/')) {
+                     showToast('Please select a valid NVIDIA image model in Settings');
+                     return;
+                 }
+                 for (let ki = 0; ki < keysToTry.length && !imgSrc; ki++) {
                     try {
                         const res = await fetch('/api/unified?provider=nvidia&type=image', {
                             method: 'POST',
                             headers: { 'x-api-key': keysToTry[ki], 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ model: mdl, prompt: prompt, cfg_scale: 5, aspect_ratio: '1/1', seed: 0, steps: 4, negative_prompt: '' })
+                            body: JSON.stringify({ model: mdl, prompt: prompt, aspect_ratio: '1/1', seed: 0 })
                         });
                         if (res.status === 401 || res.status === 429) {
                             showToast('NVIDIA key rotated');
@@ -11373,7 +10401,10 @@ self.onmessage = async (event) => {
                             localStorage.setItem('nvidiaImageKeyIndex', String(nvidiaImageKeyIdx));
                             continue;
                         }
-                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        if (!res.ok) {
+                            const errText = await res.text();
+                            throw new Error('HTTP ' + res.status + ': ' + errText);
+                        }
                         const data = await res.json();
                         // NVIDIA NIM returns b64_json in artifacts[] (native format) or data[] (OpenAI-compat)
                         const b64 = (data.artifacts && data.artifacts[0] && data.artifacts[0].b64_json)
@@ -11387,9 +10418,16 @@ self.onmessage = async (event) => {
                             else throw new Error('no_image_data');
                         }
                         provider = 'NVIDIA NIM';
-                    } catch(e) { console.error('[SnoahAI] NVIDIA image error:', e); }
+                    } catch(e) { 
+                        console.error('[SnoahAI] NVIDIA image error:', e);
+                        showToast('NVIDIA image error: ' + (e.message || 'Unknown error'));
+                    }
                 }
-                if (!imgSrc && keysToTry.length > 0) showToast('All NVIDIA keys failed');
+                if (keysToTry.length === 0) {
+                    showToast('No NVIDIA API keys. Add one in Settings → Image Generation.');
+                } else if (!imgSrc) {
+                    showToast('All NVIDIA keys failed. Check your API key.');
+                }
                 if (imgSrc) { usageCounters.nvidiaImagesCount++; saveUsageCounters(); }
             } else if (usePlatform === 'together_img') {
                 const keysToTry = togetherImageKeys.length > 0
@@ -11454,6 +10492,24 @@ self.onmessage = async (event) => {
                 cardDiv.innerHTML = buildImageErrorCard(usePlatform);
             }
             scrollToBottom();
+        }
+
+        function getLibraryContextForPrompt(prompt) {
+            try {
+                const library = JSON.parse(localStorage.getItem('snoah_personal_library') || '[]');
+                if (!library.length) return '';
+                const keywords = (prompt || '').toLowerCase().split(/\s+/).filter(w => w.length > 3);
+                if (!keywords.length) return '';
+                const relevant = library.filter(item => {
+                    const text = ((item.title || '') + ' ' + (item.content || '')).toLowerCase();
+                    return keywords.some(k => text.includes(k));
+                });
+                if (!relevant.length) return '';
+                return relevant.slice(0, 5).map(item => `[Title: ${item.title}]\n${item.content}`).join('\n\n---\n\n');
+            } catch (e) {
+                console.warn('Library retrieval error:', e);
+                return '';
+            }
         }
 
         async function submitMessage(textToSubmit) {
@@ -13131,11 +12187,17 @@ const thinkOpen  = _normRaw.indexOf('<think>');
 <script>
 // --- PWA Functions ---
 let deferredPrompt = null;
+let pwaBannerShown = false;
 window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
-    const banner = document.getElementById('pwa-banner');
-    if (banner) banner.classList.remove('hidden');
+    if (!pwaBannerShown) {
+        pwaBannerShown = true;
+        setTimeout(() => {
+            const banner = document.getElementById('pwa-banner');
+            if (banner && deferredPrompt) banner.classList.remove('hidden');
+        }, 5000);
+    }
 });
 window.addEventListener('appinstalled', () => {
     const banner = document.getElementById('pwa-banner');
