@@ -37,8 +37,7 @@ export default async function handler(req, res) {
   };
 
   if (type === 'image') {
-    const config = imageConfigs[provider];
-    if (!config) {
+    if (provider !== 'nvidia') {
       return res.status(400).json({ error: `Image generation not supported for ${provider}. Only nvidia supports image generation.` });
     }
     try {
@@ -53,15 +52,54 @@ export default async function handler(req, res) {
         size: sizeMap[body.aspect_ratio] || '1024x1024',
         seed: body.seed != null ? body.seed : 0,
       };
-      const response = await fetch(config.url, {
+
+      const openAiRes = await fetch('https://integrate.api.nvidia.com/v1/images/generations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + apiKey,
+        },
         body: JSON.stringify(openAiBody),
       });
-      const data = await response.json();
-      return res.status(response.status).json(data);
+      
+      let data;
+      if (openAiRes.ok) {
+        data = await openAiRes.json();
+        return res.status(openAiRes.status).json(data);
+      }
+      const openAiErrorText = await openAiRes.text().catch(() => '');
+
+      // Fallback: NVIDIA native genai endpoint for models that are not exposed via OpenAI-compatible path
+      const nativeModelPath = String(model)
+        .replace(/flux\.1-schnell/ig, 'flux-schnell')
+        .replace(/flux\.1-dev/ig, 'flux-dev')
+        .replace(/flux-1-schnell/ig, 'flux-schnell')
+        .replace(/flux-1-dev/ig, 'flux-dev');
+      const nativeRes = await fetch(`https://ai.api.nvidia.com/v1/genai/${nativeModelPath}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + apiKey,
+        },
+        body: JSON.stringify({
+          prompt,
+          cfg_scale: body.cfg_scale != null ? body.cfg_scale : 5,
+          aspect_ratio: body.aspect_ratio || '1/1',
+          seed: body.seed != null ? body.seed : 0,
+          steps: body.steps != null ? body.steps : 4,
+          negative_prompt: body.negative_prompt || '',
+        }),
+      });
+      const fallbackData = await nativeRes.json().catch((e) => { console.warn('Failed to parse native response:', e); return {}; });
+      if (!nativeRes.ok) {
+        const upstreamError = (fallbackData && (fallbackData.error || fallbackData.message)) || openAiErrorText || 'NVIDIA upstream error';
+        return res.status(nativeRes.status || openAiRes.status || 500).json({ error: upstreamError });
+      }
+      return res.status(nativeRes.status).json(fallbackData);
     } catch (error) {
-      console.error(`${config.name} image proxy error:`, error);
+      console.error(`NVIDIA image proxy error:`, error);
       return res.status(500).json({ error: `Image proxy error: ${error.message}` });
     }
   }
