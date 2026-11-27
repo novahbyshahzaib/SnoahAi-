@@ -46,8 +46,12 @@
 const DAILY_LIMIT = 20;
 const PER_MINUTE_LIMIT = 10;
 const MAX_MESSAGES = 50;
-const MAX_MESSAGE_CHARS = 20000;
-const MAX_TOTAL_CHARS = 100000;
+// The app's own system prompt is ~45k chars (full feature/persona text) and
+// grows with memory, library context and web-search results, so a 20k cap
+// rejected EVERY main-chat send. 100k/message and 200k total still fit the
+// free models' contexts (Gemini 1M, Nemotron 256k, GPT-OSS 128k tokens).
+const MAX_MESSAGE_CHARS = 100000;
+const MAX_TOTAL_CHARS = 200000;
 
 const PLATFORMS = {
   openrouter: {
@@ -157,7 +161,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Message roles must be user, assistant or system.' });
     }
     if (typeof m.content !== 'string' || m.content.length === 0 || m.content.length > MAX_MESSAGE_CHARS) {
-      return res.status(400).json({ error: 'Each message must be text under 20,000 characters.' });
+      return res.status(400).json({ error: 'Each message must be text under 100,000 characters.' });
     }
     totalChars += m.content.length;
     if (totalChars > MAX_TOTAL_CHARS) {
