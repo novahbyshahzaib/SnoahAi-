@@ -1,9 +1,9 @@
 // SnoahAI — Selective Free Credits proxy
 // POST /api/free-credits  { platform, model, messages, temperature?, top_p?, max_tokens?, stream? }
-// Lets visitors chat with a small curated set of FREE models on four platforms —
-// OpenRouter, Groq, Gemini, Mistral AI — using the OWNER's keys. Users never
+// Lets visitors chat with a small curated set of FREE models on three platforms —
+// OpenRouter, Groq, Gemini — using the OWNER's keys. Users never
 // supply a key and never see one: the keys live only in Vercel server env vars
-// (OPENROUTER_API_KEY, GROQ_API_KEY, GEMINI_API_KEY, MISTRAL_API_KEY) and are
+// (OPENROUTER_API_KEY, GROQ_API_KEY, GEMINI_API_KEY) and are
 // read from process.env here, on the server, only.
 //
 // Security rules (do not weaken them):
@@ -15,7 +15,7 @@
 // - NEVER log keys. Logs carry platform/model/status only.
 // - Platform and model are validated against the allow-lists below. Anything
 //   else is rejected. The client dropdown is UI only; this list is the law.
-// - All four providers are called through their OpenAI-compatible
+// - All three providers are called through their OpenAI-compatible
 //   /chat/completions endpoints, so one code path serves them all.
 //
 // Daily limit (20 free messages per user):
@@ -30,19 +30,18 @@
 // stops working upstream, remove it from the allow-list below):
 // - OpenRouter: only ":free" suffixed models are free. The live catalogue
 //   currently lists 10; the old llama-3.3-70b-instruct:free / gemma-3-27b-it:free
-//   are GONE. Default is google/gemma-4-31b-it:free. Free tier caps at
+//   are GONE. Default is nvidia/nemotron-3-ultra-550b-a55b:free (changed
+//   2026-11-27 — the old default google/gemma-4-31b-it:free returned 429
+//   rate-limited from OpenRouter on a live test that day). Free tier caps at
 //   50 req/day unless $10 of credits was ever purchased.
 // - Groq: the Llama chat models (llama-3.3-70b-versatile, llama-3.1-8b-instant)
 //   were removed from the free tier on 2026-08-16. Free chat models now are
 //   openai/gpt-oss-20b, openai/gpt-oss-120b and qwen/qwen3.8-27b.
 // - Gemini: gemini-2.5-flash is on the free tier; called via Google's
 //   OpenAI-compatible endpoint.
-// - Mistral: free API access is disputed — Mistral's docs said from early
-//   Nov 2026 that the Free plan no longer includes API access, and on a
-//   tested free key mistral-small-latest returns 429 with a zero rate limit.
-//   open-mistral-nemo and codestral-latest DID answer on a free key, so they
-//   are the free defaults here. mistral-small-latest is listed only because
-//   it works with a billed key; if the owner's key has no billing, it fails.
+// - Mistral was REMOVED 2026-11-27 (owner's decision): both of his keys
+//   authenticate, but the account has no API subscription, so chat returns
+//   402 "You need a subscription". Do not re-add it without a billed key.
 
 const DAILY_LIMIT = 20;
 const PER_MINUTE_LIMIT = 10;
@@ -73,12 +72,6 @@ const PLATFORMS = {
     env: 'GEMINI_API_KEY',
     url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
     models: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'],
-    headers: {},
-  },
-  mistral: {
-    env: 'MISTRAL_API_KEY',
-    url: 'https://api.mistral.ai/v1/chat/completions',
-    models: ['open-mistral-nemo', 'codestral-latest', 'mistral-small-latest'],
     headers: {},
   },
 };
@@ -149,7 +142,7 @@ export default async function handler(req, res) {
 
   const config = PLATFORMS[platform];
   if (!config) {
-    return res.status(400).json({ error: 'Unknown platform. Valid platforms: openrouter, groq, gemini, mistral.' });
+    return res.status(400).json({ error: 'Unknown platform. Valid platforms: openrouter, groq, gemini.' });
   }
   if (typeof model !== 'string' || !config.models.includes(model)) {
     return res.status(400).json({ error: 'That model is not available in Free Credits for this platform.' });
