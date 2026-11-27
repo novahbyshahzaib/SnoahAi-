@@ -87,12 +87,13 @@ SnoahAi-/
 | /api/browser | Web search + URL reading |
 | /api/notion | Notion integration |
 | /api/plugin | Plugin system |
-| /api/free-credits | Selective Free Credits — free models on OpenRouter, Groq, Gemini, Mistral AI using the owner's server-side keys (env vars). No user key input; 20 free messages/day/user (client localStorage counter + best-effort per-IP server cap). See "Selective Free Credits" below. |
+| /api/free-credits | Selective Free Credits — free models on OpenRouter, Groq, Gemini using the owner's server-side keys (env vars). No user key input; 20 free messages/day/user (client localStorage counter + best-effort per-IP server cap). See "Selective Free Credits" below. |
 
-### Selective Free Credits (added 2026-11-27)
-- Sidebar menu item + modal (`free-credits-modal` in index.html). Four platforms, each defaulting to a free model, user can switch model within the platform from a curated dropdown. No API key input anywhere in the section.
-- Server: `api/free-credits.js` — validates platform/model against a server-side allow-list, proxies via each provider's OpenAI-compatible `/chat/completions` endpoint with keys from server env vars only (`OPENROUTER_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY`, `MISTRAL_API_KEY`). Keys are never read from the request, never logged, never returned.
-- Defaults (checked 2026-11-27; free catalogues churn): OpenRouter `google/gemma-4-31b-it:free`, Groq `openai/gpt-oss-20b`, Gemini `gemini-2.5-flash`, Mistral `open-mistral-nemo`. Note: Groq Llama models left the free tier Aug 2026; Mistral free API access is disputed since Nov 2026 (mistral-small-latest needs a billed key).
+### Selective Free Credits (added 2026-11-27; Mistral removed 2026-11-27, OpenRouter default changed 2026-11-27)
+- Sidebar menu item + modal (`free-credits-modal` in index.html). Three platforms, each defaulting to a free model, user can switch model within the platform from a curated dropdown. No API key input anywhere in the section.
+- Server: `api/free-credits.js` — validates platform/model against a server-side allow-list, proxies via each provider's OpenAI-compatible `/chat/completions` endpoint with keys from server env vars only (`OPENROUTER_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY`). Keys are never read from the request, never logged, never returned.
+- Defaults (checked 2026-11-27; free catalogues churn): OpenRouter `nvidia/nemotron-3-ultra-550b-a55b:free`, Groq `openai/gpt-oss-20b`, Gemini `gemini-2.5-flash`. Note: Groq Llama models left the free tier Aug 2026; the old OpenRouter default `google/gemma-4-31b-it:free` returned 429 rate-limited on a live test 2026-11-27, so the default was switched to Nemotron 3 Ultra.
+- Mistral removed 2026-11-27 (owner's decision): both owner keys authenticate, but the account has no API subscription, so chat returns 402 "You need a subscription". The platform was removed from the server allow-list and the modal — do not re-add without a billed key.
 - Daily limit: 20/day per user. Client counter in localStorage (`snoah_free_credits_v1`); server enforces a best-effort per-IP cap in memory (stateless functions, so not a hard guarantee — provider spend caps are the backstop).
 
 ## Important Code Patterns

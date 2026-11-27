@@ -2518,7 +2518,7 @@
 
         <!-- ===== UPDATES MODAL ===== -->
         <!-- ===== SELECTIVE FREE CREDITS MODAL ===== -->
-        <!-- Free models on 4 platforms, paid for by the owner. Users only pick a
+        <!-- Free models on 3 platforms, paid for by the owner. Users only pick a
              platform and a model — there is NO api-key input here. Requests go to
              /api/free-credits, which uses the owner's server-side keys. -->
         <div id="free-credits-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
@@ -2536,7 +2536,7 @@
                     </button>
                 </div>
                 <div class="p-5 overflow-y-auto flex-1 text-[13px] text-[#5B5951] leading-relaxed space-y-4">
-                    <p>Chat with free models on four platforms — on us, no API key needed. Pick a platform, pick a model, and ask away.</p>
+                    <p>Chat with free models on three platforms — on us, no API key needed. Pick a platform, pick a model, and ask away.</p>
                     <div class="flex items-center justify-between bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3.5 py-2.5">
                         <span class="font-semibold text-[13px] text-[#2C2B29]">Free messages today</span>
                         <span id="fc-remaining" class="text-[13px] font-bold text-[#D25D38]">20 / 20 left</span>
@@ -2547,7 +2547,6 @@
                             <button type="button" data-fc-platform="openrouter" onclick="selectFreeCreditsPlatform('openrouter')" class="fc-platform-btn px-3 py-2.5 rounded-xl border text-[13px] font-semibold text-left transition-colors">OpenRouter</button>
                             <button type="button" data-fc-platform="groq" onclick="selectFreeCreditsPlatform('groq')" class="fc-platform-btn px-3 py-2.5 rounded-xl border text-[13px] font-semibold text-left transition-colors">Groq</button>
                             <button type="button" data-fc-platform="gemini" onclick="selectFreeCreditsPlatform('gemini')" class="fc-platform-btn px-3 py-2.5 rounded-xl border text-[13px] font-semibold text-left transition-colors">Gemini</button>
-                            <button type="button" data-fc-platform="mistral" onclick="selectFreeCreditsPlatform('mistral')" class="fc-platform-btn px-3 py-2.5 rounded-xl border text-[13px] font-semibold text-left transition-colors">Mistral AI</button>
                         </div>
                     </div>
                     <div>
@@ -3733,7 +3732,7 @@
                 { id: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free', name: 'Nemotron 3 Nano Reasoning (free)' },
                 { id: 'nvidia/nemotron-3.5-lightning:free', name: 'Nemotron 3.5 Lightning (free)' },
                 { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'Nemotron 3 Ultra (free)' }
-            ], def: 'google/gemma-4-31b-it:free' },
+            ], def: 'nvidia/nemotron-3-ultra-550b-a55b:free' },
             groq: { label: 'Groq', note: 'Groq free tier — Llama models left the free tier in Aug 2026, so GPT-OSS and Qwen are the free choices now.', models: [
                 { id: 'openai/gpt-oss-20b', name: 'GPT-OSS 20B (free)' },
                 { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B (free)' },
@@ -3743,12 +3742,7 @@
                 { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (free)' },
                 { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite (free)' },
                 { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (free)' }
-            ], def: 'gemini-2.5-flash' },
-            mistral: { label: 'Mistral AI', note: 'Free keys can use Open Mistral Nemo and Codestral. Mistral Small needs a billed key — if it fails, switch to Nemo.', models: [
-                { id: 'open-mistral-nemo', name: 'Open Mistral Nemo (free)' },
-                { id: 'codestral-latest', name: 'Codestral (free)' },
-                { id: 'mistral-small-latest', name: 'Mistral Small (needs billed key)' }
-            ], def: 'open-mistral-nemo' }
+            ], def: 'gemini-2.5-flash' }
         };
         let fcPlatform = localStorage.getItem('snoah_fc_platform') || 'openrouter';
         if (!FREE_CREDITS_MODELS[fcPlatform]) fcPlatform = 'openrouter';
