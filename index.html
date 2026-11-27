@@ -1894,6 +1894,8 @@
             <div class="flex flex-col items-center">
                 <h1 class="text-[18px] font-serif font-semibold text-[#2C2B29] tracking-tight snoah-app-name">SnoahAI</h1>
                 <span id="header-model-badge" class="text-[10px] font-bold text-[#A3A095] tracking-widest uppercase mt-0.5">NOVAH GEM</span>
+                <!-- Free-credits main-chat mode indicator (hidden unless free mode is on) -->
+                <button id="fc-main-chip" onclick="openFreeCreditsModal()" class="hidden mt-1 px-2.5 py-0.5 rounded-full bg-[#D25D38] text-white text-[10px] font-bold tracking-wide" title="Free credits in main chat — tap to manage">Free credits ON · <span id="fc-main-chip-count">20 / 20 left</span></button>
             </div>
             <!-- Right-side header buttons: Temp Chat, Search, New Chat — equal icon buttons -->
             <div class="flex-1 flex items-center justify-end gap-0.5 -mr-1">
@@ -2541,6 +2543,13 @@
                         <span class="font-semibold text-[13px] text-[#2C2B29]">Free messages today</span>
                         <span id="fc-remaining" class="text-[13px] font-bold text-[#D25D38]">20 / 20 left</span>
                     </div>
+                    <label class="flex items-start justify-between gap-3 bg-white border border-[#E5E3DB] rounded-xl px-3.5 py-2.5 cursor-pointer">
+                        <span>
+                            <span class="font-semibold text-[13px] text-[#2C2B29] block">Use free credits in main chat</span>
+                            <span class="text-[11px] text-[#A3A095] block mt-0.5">When on, the main chat offers only OpenRouter, Groq and Gemini — no API key needed. Turn it off and the main chat works like before, with all platforms and your own keys. Multi-AI stays off while this is on.</span>
+                        </span>
+                        <input id="fc-main-toggle" type="checkbox" onchange="onFreeCreditsMainToggle(this.checked)" class="w-5 h-5 mt-0.5 shrink-0 accent-[#D25D38] cursor-pointer">
+                    </label>
                     <div>
                         <p class="text-[11px] text-[#A3A095] uppercase font-bold tracking-widest mb-2">Platform</p>
                         <div class="grid grid-cols-2 gap-2" id="fc-platforms">
@@ -3744,10 +3753,107 @@
                 { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (free)' }
             ], def: 'gemini-2.5-flash' }
         };
+        // Set once the free-models list above has been evaluated. updateModelLabels()
+        // runs during page init (before this point), so it must check this flag
+        // before calling fcSelectedModel() — reading the const earlier would throw.
+        var _fcModelsReady = true;
         let fcPlatform = localStorage.getItem('snoah_fc_platform') || 'openrouter';
         if (!FREE_CREDITS_MODELS[fcPlatform]) fcPlatform = 'openrouter';
         let fcHistory = [];
         let fcSending = false;
+
+        // ── FREE CREDITS IN MAIN CHAT ──────────────────────────────────
+        // Toggle (in the Free Credits modal): when ON, the main chat offers
+        // ONLY the 3 free platforms and sends through /api/free-credits with
+        // no user API key. When OFF, the main chat works exactly as before.
+        // State lives in localStorage; default is OFF.
+        const FC_MAIN_KEY = 'snoah_fc_main_enabled';
+        const FC_PREV_PLATFORM_KEY = 'snoah_fc_prev_platform';
+        const FC_MAIN_PLATFORMS = ['openrouter', 'groq', 'gemini'];
+        // Full platform list for #platform-select (must match the HTML options).
+        const FC_ALL_PLATFORMS = [
+            ['gemini', 'Gemini'], ['openrouter', 'OpenRouter'], ['groq', 'Groq'],
+            ['together', 'Together AI'], ['mistral', 'Mistral AI'], ['nvidia', 'NVIDIA'],
+            ['huggingface', 'Hugging Face'], ['githubmodels', 'GitHub Models'],
+            ['claude', 'Claude (Anthropic)'], ['copilot', 'Microsoft Copilot'],
+            ['gais', 'Google AI Studio'], ['ollama', 'Ollama (Local)'], ['cohere', 'Cohere'],
+            ['puter', 'Puter.js (Free)'], ['deepinfra', 'DeepInfra'],
+            ['cerebras', 'Cerebras AI (Free)'], ['sambanova', 'SambaNova (Free)'],
+            ['fireworks', 'Fireworks AI (Free)'], ['xai', 'xAI (Grok)'],
+            ['nanogpt', 'NanoGPT'], ['custom', 'Custom Endpoint']
+        ];
+        const FC_ALL_PLATFORM_VALUES = FC_ALL_PLATFORMS.map(function (p) { return p[0]; });
+        // Reads localStorage only, so it is safe to call from anywhere (incl. page init).
+        function fcMainEnabled() {
+            try { return localStorage.getItem(FC_MAIN_KEY) === 'true'; } catch (e) { return false; }
+        }
+        function onFreeCreditsMainToggle(on) {
+            try { localStorage.setItem(FC_MAIN_KEY, on ? 'true' : 'false'); } catch (e) {}
+            fcApplyMainMode();
+        }
+        // Rebuilds #platform-select: only the 3 free platforms while free mode is on.
+        function fcRestrictPlatformSelect() {
+            const sel = document.getElementById('platform-select');
+            if (!sel) return;
+            const on = fcMainEnabled();
+            const list = on ? FC_ALL_PLATFORMS.filter(function (p) { return FC_MAIN_PLATFORMS.indexOf(p[0]) !== -1; }) : FC_ALL_PLATFORMS;
+            const cur = sel.value || platform;
+            sel.innerHTML = list.map(function (p) { return '<option value="' + p[0] + '">' + p[1] + '</option>'; }).join('');
+            sel.value = list.some(function (p) { return p[0] === cur; }) ? cur : (on ? 'openrouter' : cur);
+        }
+        // Shows/hides the "Free credits ON · X / 20 left" chip in the header.
+        function fcUpdateMainChip() {
+            const chip = document.getElementById('fc-main-chip');
+            if (!chip) return;
+            const on = fcMainEnabled();
+            chip.classList.toggle('hidden', !on);
+            if (on) {
+                const count = document.getElementById('fc-main-chip-count');
+                if (count) count.textContent = fcRemaining() + ' / ' + FREE_CREDITS_DAILY_LIMIT + ' left';
+            }
+        }
+        // Applies free mode to the main chat (or restores normal mode). Called from
+        // the modal toggle and once on page load (via DOMContentLoaded below).
+        function fcApplyMainMode() {
+            const on = fcMainEnabled();
+            fcRestrictPlatformSelect();
+            if (on) {
+                if (FC_MAIN_PLATFORMS.indexOf(platform) === -1) {
+                    // Remember the platform to restore when free mode is turned off.
+                    try { localStorage.setItem(FC_PREV_PLATFORM_KEY, platform); } catch (e) {}
+                    // Prefer the free platform last picked in the Free Credits popup.
+                    const target = FC_MAIN_PLATFORMS.indexOf(fcPlatform) !== -1 ? fcPlatform : 'openrouter';
+                    selectPlatform(target);
+                } else {
+                    updatePlatformUI();
+                    updateModelLabels();
+                    const sm = document.getElementById('settings-model');
+                    if (sm) sm.value = fcSelectedModel();
+                }
+            } else {
+                let prev = null;
+                try { prev = localStorage.getItem(FC_PREV_PLATFORM_KEY); } catch (e) {}
+                if (prev && FC_ALL_PLATFORM_VALUES.indexOf(prev) !== -1) {
+                    try { localStorage.removeItem(FC_PREV_PLATFORM_KEY); } catch (e) {}
+                    if (prev !== platform) selectPlatform(prev);
+                    else { updatePlatformUI(); updateModelLabels(); selectPlatform(platform); }
+                } else {
+                    // No remembered platform — keep the current one, restore normal UI.
+                    updatePlatformUI();
+                    updateModelLabels();
+                    selectPlatform(platform);
+                }
+            }
+            if (typeof populateModelDropdown === 'function') populateModelDropdown(platform);
+            if (typeof renderModelCards === 'function') renderModelCards('', platform);
+            fcUpdateMainChip();
+            fcUpdateRemaining();
+        }
+        // Apply a persisted free-mode choice once the page (and all script blocks) is ready.
+        document.addEventListener('DOMContentLoaded', function () {
+            if (fcMainEnabled()) fcApplyMainMode();
+            fcUpdateMainChip();
+        });
 
         function fcTodayKey() { return new Date().toISOString().slice(0, 10); }
         function fcUsage() {
@@ -3773,6 +3879,7 @@
             const btn = document.getElementById('fc-send-btn');
             if (input) input.disabled = left <= 0;
             if (btn) btn.disabled = left <= 0 || fcSending;
+            fcUpdateMainChip();
         }
         function fcSelectedModel() {
             const saved = localStorage.getItem('snoah_fc_model_' + fcPlatform);
@@ -3835,6 +3942,8 @@
             fcPopulateModels();
             fcUpdateRemaining();
             fcRenderMessages();
+            const fcMainTgl = document.getElementById('fc-main-toggle');
+            if (fcMainTgl) fcMainTgl.checked = fcMainEnabled();
             lucide.createIcons();
             const input = document.getElementById('fc-input');
             if (input) {
@@ -5177,7 +5286,7 @@
             const badge = document.getElementById('header-model-badge');
             const sidebarLabel = document.getElementById('sidebar-model-label');
             const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : platform === 'together' ? 'Together AI' : platform === 'mistral' ? 'Mistral AI' : platform === 'nvidia' ? 'NVIDIA' : platform === 'huggingface' ? 'Hugging Face' : platform === 'githubmodels' ? 'GitHub Models' : platform === 'claude' ? 'Claude' : platform === 'copilot' ? 'Copilot' : platform === 'gais' ? 'Google AI Studio' : platform === 'ollama' ? 'Ollama' : platform === 'cohere' ? 'Cohere' : platform === 'puter' ? 'Puter.js' : platform === 'deepinfra' ? 'DeepInfra' : platform === 'cerebras' ? 'Cerebras AI' : platform === 'sambanova' ? 'SambaNova' : platform === 'fireworks' ? 'Fireworks AI' : platform === 'xai' ? 'xAI (Grok)' : platform === 'perplexity' ? 'Perplexity' : platform === 'nanogpt' ? 'NanoGPT' : platform === 'custom' ? 'Custom Endpoint' : 'Gemini';
-            const activeModel = platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'gais' ? gaisModelId : platform === 'ollama' ? ollamaModelId : platform === 'cohere' ? cohereModelId : platform === 'puter' ? puterModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : platform === 'xai' ? xaiModelId : platform === 'perplexity' ? perplexityModelId : platform === 'nanogpt' ? nanogptModelId: platform === 'custom' ? customModelId : modelId;
+            const activeModel = (fcMainEnabled() && typeof _fcModelsReady !== 'undefined' && _fcModelsReady) ? fcSelectedModel() : platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'gais' ? gaisModelId : platform === 'ollama' ? ollamaModelId : platform === 'cohere' ? cohereModelId : platform === 'puter' ? puterModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : platform === 'xai' ? xaiModelId : platform === 'perplexity' ? perplexityModelId : platform === 'nanogpt' ? nanogptModelId: platform === 'custom' ? customModelId : modelId;
             if (badge) badge.textContent = 'NOVAH GEM';
             if (sidebarLabel) sidebarLabel.textContent = platLabel + ' · ' + activeModel;
         }
@@ -5186,6 +5295,7 @@
 
         function openSettings() {
             const pSel = document.getElementById('platform-select');
+            fcRestrictPlatformSelect();
             if (pSel) pSel.value = platform;
             if (platform === 'openrouter') {
                 document.getElementById('settings-model').value = orModelId;
@@ -5232,6 +5342,8 @@
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
+            // Free-credits main-chat mode: show the free model, not the user's own model.
+            if (fcMainEnabled()) { document.getElementById('settings-model').value = fcSelectedModel(); }
             document.getElementById('settings-apikey').value = '';
             document.getElementById('settings-instructions').value = customInstructions;
             document.getElementById('settings-persona').value = customPersona;
@@ -5464,7 +5576,16 @@
         }
 
         function saveSettings() {
-            const newModel = document.getElementById('settings-model').value.trim();
+            let newModel = document.getElementById('settings-model').value.trim();
+            // Free-credits main-chat mode: the model shown here is a free model.
+            // Remember the choice in the free-credits list and do NOT overwrite
+            // the user's own model, so turning free mode off restores it untouched.
+            if (fcMainEnabled() && FREE_CREDITS_MODELS[platform]) {
+                if (newModel && FREE_CREDITS_MODELS[platform].models.some(function (m) { return m.id === newModel; })) {
+                    try { localStorage.setItem('snoah_fc_model_' + platform, newModel); } catch (e) {}
+                }
+                newModel = '';
+            }
             const newInstructions = document.getElementById('settings-instructions').value.trim();
             const newPersona = document.getElementById('settings-persona').value.trim();
 
@@ -5737,6 +5858,14 @@
         }
 
         function selectPlatform(p) {
+            // Free-credits main-chat mode: only the 3 free platforms are available.
+            // Any other path that tries to switch platforms is stopped here too.
+            if (fcMainEnabled() && FC_MAIN_PLATFORMS.indexOf(p) === -1) {
+                showToast('🎁 Free credits is on — only OpenRouter, Groq and Gemini are available here. Turn it off in the Free Credits popup to use all platforms.');
+                const _ps = document.getElementById('platform-select');
+                if (_ps) _ps.value = platform;
+                return;
+            }
             saveCurrentPlatformParams();
             platform = p;
             localStorage.setItem('snoah_platform', p);
@@ -5787,6 +5916,8 @@
             } else {
                 document.getElementById('settings-model').value = modelId;
             }
+            // Free-credits main-chat mode: show the free model, not the user's own model.
+            if (fcMainEnabled()) { document.getElementById('settings-model').value = fcSelectedModel(); }
             document.getElementById('settings-apikey').value = '';
             applyPlatformParams(p);
             renderKeysList();
@@ -5834,8 +5965,10 @@
                     btnAgent.style.pointerEvents = '';
                 }
             }
-            if (lbl) lbl.textContent = isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : isTG ? 'Together AI API Key' : isMT ? 'Mistral AI API Key' : isNV ? 'NVIDIA API Key' : isHF ? 'Hugging Face Token' : isGH ? 'GitHub Token' : isCL ? 'Anthropic API Key' : isCO ? 'GitHub/Azure Token' : isGA ? 'Google AI Studio Key' : isOL ? 'Ollama (no key needed)' : isCR ? 'Cohere API Key' : isPT ? 'Puter.js (no key needed)' : isDI ? 'DeepInfra API Key' : isCB ? 'Cerebras API Key' : isSN ? 'SambaNova API Key' : isFW ? 'Fireworks API Key' : isXAI ? 'xAI API Key' : isPPX ? 'Perplexity API Key' : isNGPT ? 'NanoGPT API Key' : isCUSTOM ? 'Custom Endpoint API Key (optional)' : 'Gemini API Key';
-            if (hint) hint.innerHTML = isOR
+            if (lbl) lbl.textContent = fcMainEnabled() ? 'Free credits — no API key needed' : isOR ? 'OpenRouter API Key' : isGQ ? 'Groq API Key' : isTG ? 'Together AI API Key' : isMT ? 'Mistral AI API Key' : isNV ? 'NVIDIA API Key' : isHF ? 'Hugging Face Token' : isGH ? 'GitHub Token' : isCL ? 'Anthropic API Key' : isCO ? 'GitHub/Azure Token' : isGA ? 'Google AI Studio Key' : isOL ? 'Ollama (no key needed)' : isCR ? 'Cohere API Key' : isPT ? 'Puter.js (no key needed)' : isDI ? 'DeepInfra API Key' : isCB ? 'Cerebras API Key' : isSN ? 'SambaNova API Key' : isFW ? 'Fireworks API Key' : isXAI ? 'xAI API Key' : isPPX ? 'Perplexity API Key' : isNGPT ? 'NanoGPT API Key' : isCUSTOM ? 'Custom Endpoint API Key (optional)' : 'Gemini API Key';
+            if (hint) hint.innerHTML = fcMainEnabled()
+                ? 'Chatting with free credits on the owner\'s keys — no API key needed. Pick the model in the Free Credits popup.'
+                : isOR
                 ? 'Get your key at <a href="https://openrouter.ai/keys" target="_blank" class="underline">openrouter.ai/keys</a>'
                 : isGQ
                 ? 'Get your key at <a href="https://console.groq.com" target="_blank" class="underline">console.groq.com</a>'
@@ -5924,6 +6057,10 @@
                 : isCUSTOM
                 ? 'Enter the model name your endpoint expects (e.g. <span class="font-mono text-[#5B5951]">gpt-4o</span>, <span class="font-mono text-[#5B5951]">llama-3.3-70b</span>)'
                 : 'Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> · <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span>';
+            // Free-credits main-chat mode: the model is chosen in the Free Credits
+            // popup, so the Settings model field is read-only while it is on.
+            const _smInput = document.getElementById('settings-model');
+            if (_smInput) _smInput.readOnly = fcMainEnabled();
         }
 
         function renderElevenLabsKeysList() {
@@ -6527,6 +6664,9 @@
         }
 
         function rotateKey() {
+            // Free-credits main-chat mode: there is no user key to rotate — the
+            // owner's server keys are used, so a 429/503 must surface, not retry.
+            if (typeof fcMainEnabled === 'function' && fcMainEnabled()) return false;
             if (platform === 'openrouter') {
                 if (orKeys.length <= 1) return false;
                 orKeyIdx = (orKeyIdx + 1) % orKeys.length; orApiKey = orKeys[orKeyIdx]; return true;
@@ -8717,6 +8857,22 @@ self.onmessage = async (event) => {
 
         // ── HELPER FETCH (used by autoTitle + summarize) ──────────────
         async function helperFetch(prompt) {
+            // Free-credits main-chat mode: route helper calls (e.g. Summarize) through
+            // the server endpoint. This is a real AI call, so it uses one free message.
+            if (fcMainEnabled()) {
+                try {
+                    const r = await fetch('/api/free-credits', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ platform, model: fcSelectedModel(), messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 256 })
+                    });
+                    const d = await r.json().catch(() => ({}));
+                    if (!r.ok) return '';
+                    const text = d.choices?.[0]?.message?.content?.trim() || '';
+                    if (text) fcBumpUsage();
+                    return text;
+                } catch (e) { return ''; }
+            }
             if (platform === 'openrouter') {
                 const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
@@ -8835,6 +8991,8 @@ self.onmessage = async (event) => {
 
         // ── AUTO-TITLE ─────────────────────────────────────────────────
         async function autoTitleChat() {
+            // Free-credits mode: don't spend a free message on a background title.
+            if (fcMainEnabled()) return;
             if (messages.length < 2) return;
             try {
                 const firstUser = messages.find(m => m.role === 'user');
@@ -10758,8 +10916,9 @@ self.onmessage = async (event) => {
                 pluginOutputs = Array.isArray(pluginResult.outputs) ? pluginResult.outputs : [];
             }
 
-            // Delegate to multi-AI if enabled
-            if (multiAIEnabled && multiAIPlatforms.length > 0) {
+            // Delegate to multi-AI if enabled (never in free-credits mode: one
+            // message must go to one free platform only, or the daily limit burns fast)
+            if (!fcMainEnabled() && multiAIEnabled && multiAIPlatforms.length > 0) {
                 return submitMultiAI(processedText, pluginOutputs);
             }
 
@@ -10806,8 +10965,8 @@ self.onmessage = async (event) => {
                 }
             }
 
-            // Check token limit
-            if (!checkTokenLimit(platform)) {
+            // Check token limit (free-credits mode has its own 20/day limit instead)
+            if (!fcMainEnabled() && !checkTokenLimit(platform)) {
                 showToast('⚠️ Token limit reached for ' + TOKEN_PLATFORM_LABELS[platform] + '. Increase or remove limit in Settings → Token Management.');
                 return;
             }
@@ -10818,11 +10977,20 @@ self.onmessage = async (event) => {
                 return;
             }
             // Pre-flight API key validation (skip for keyless platforms)
-            const isKeylessPlatform = platform === 'puter' || platform === 'ollama' || (platform === 'custom' && !customEndpointApiKey);
+            // Free-credits main-chat mode: no user key is needed — the owner's server keys are used
+            const fcMain = fcMainEnabled();
+            const isKeylessPlatform = fcMain || platform === 'puter' || platform === 'ollama' || (platform === 'custom' && !customEndpointApiKey);
             const activeKey = isKeylessPlatform ? '__nokey__' : platform === 'gemini' ? apiKey : platform === 'openrouter' ? orApiKey : platform === 'groq' ? groqApiKey : platform === 'together' ? togetherApiKey : platform === 'nvidia' ? nvidiaApiKey : platform === 'huggingface' ? hfApiKey : platform === 'githubmodels' ? ghApiKey : platform === 'claude' ? claudeApiKey : platform === 'copilot' ? copilotApiKey : platform === 'gais' ? gaisApiKey : platform === 'cohere' ? cohereApiKey : platform === 'deepinfra' ? deepinfraApiKey : platform === 'cerebras' ? cerebrasApiKey : platform === 'sambanova' ? sambanovaApiKey : platform === 'fireworks' ? fireworksApiKey : platform === 'xai' ? xaiApiKey : platform === 'perplexity' ? perplexityApiKey : platform === 'nanogpt' ? nanogptApiKey: platform === 'custom' ? customEndpointApiKey : mistralApiKey;
             if (!activeKey) {
                 const platformLabel = platform === 'gemini' ? 'Gemini (aistudio.google.com)' : platform === 'openrouter' ? 'OpenRouter (openrouter.ai/keys)' : platform === 'groq' ? 'Groq (console.groq.com)' : platform === 'together' ? 'Together AI (api.together.ai)' : platform === 'nvidia' ? 'NVIDIA (build.nvidia.com)' : platform === 'huggingface' ? 'Hugging Face (huggingface.co/settings/tokens)' : platform === 'githubmodels' ? 'GitHub Models (github.com/settings/tokens)' : platform === 'claude' ? 'Claude (console.anthropic.com)' : platform === 'copilot' ? 'Microsoft Copilot (github.com/settings/tokens)' : platform === 'gais' ? 'Google AI Studio (aistudio.google.com/apikey)' : platform === 'cohere' ? 'Cohere (dashboard.cohere.com/api-keys)' : platform === 'deepinfra' ? 'DeepInfra (deepinfra.com/dash/api_keys)' : platform === 'cerebras' ? 'Cerebras AI (cloud.cerebras.ai)' : platform === 'sambanova' ? 'SambaNova (cloud.sambanova.ai)' : platform === 'fireworks' ? 'Fireworks AI (fireworks.ai/api-keys)' : platform === 'xai' ? 'xAI (console.x.ai)' : platform === 'perplexity' ? 'Perplexity (perplexity.ai/settings/api)' : platform === 'nanogpt' ? 'NanoGPT (nano-gpt.com/api)' : platform === 'custom' ? 'Custom Endpoint' : 'Mistral AI (console.mistral.ai)';
                 showToast('🔑 Please add an API key for ' + platformLabel + ' in Settings first.');
+                return;
+            }
+
+            // Free-credits main-chat mode: the shared 20/day counter (same as the
+            // popup). Checked here, before the message is added to the chat.
+            if (fcMain && fcRemaining() <= 0) {
+                showToast('⚠️ You have used today\'s 20 free messages. Turn off free credits in the Free Credits popup to use your own keys, or come back tomorrow.');
                 return;
             }
 
@@ -10852,7 +11020,7 @@ self.onmessage = async (event) => {
             const _effectiveUseThinking = _skipThinkingNow ? false : _effectiveFlags.thinking;
             const _effectiveUseAgent = _effectiveFlags.web;
             const _effectiveCanvasMode = _effectiveFlags.canvas;
-            const _activeModelNow = getActiveModelIdForPlatform(platform);
+            const _activeModelNow = fcMain ? fcSelectedModel() : getActiveModelIdForPlatform(platform);
             const _resolvedThinkingMode = _effectiveUseThinking ? getResolvedThinkingMode(thinkingMode, textToSend) : 'off';
             const _thinkingSupported = _effectiveUseThinking ? platformSupportsThinking(platform, _activeModelNow) : false;
             activeThinkingDisplayMode = _effectiveUseThinking ? (thinkingModeLabels[_resolvedThinkingMode] || 'Normal') : 'Auto';
@@ -11168,9 +11336,11 @@ FORMATTING RULES: (1) Always use LaTeX for math/physics/chemistry — inline: $.
                 }
 
                 // For non-Gemini platforms with web search on, fetch results and inject into systemInstruction
+                // (free-credits Gemini also needs the pre-fetch: it uses the
+                // OpenAI-compatible endpoint, so native grounding is bypassed)
                 let _preFetchedSources = null, _preFetchedQueries = null;
                 let _wsPreFetchAttempted = false;
-                if (_effectiveUseAgent && platform !== 'gemini' && platform !== 'gais') {
+                if (_effectiveUseAgent && (platform !== 'gemini' || fcMain) && platform !== 'gais') {
                     _wsPreFetchAttempted = true;
                     try {
                         const ws = await performWebSearch(messages);
@@ -11444,7 +11614,7 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                             clearTimeout(connTimeoutGA);
                             await readStream(resGA);
                             abortController = null;
-                        } else if (platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral' || platform === 'nvidia' || platform === 'huggingface' || platform === 'githubmodels' || platform === 'claude' || platform === 'copilot' || platform === 'cohere' || platform === 'deepinfra' || platform === 'ollama' || platform === 'cerebras' || platform === 'sambanova' || platform === 'fireworks' || platform === 'xai' || platform === 'perplexity' || platform === 'nanogpt' || platform === 'custom') {
+                        } else if ((fcMain && platform === 'gemini') || platform === 'openrouter' || platform === 'groq' || platform === 'together' || platform === 'mistral' || platform === 'nvidia' || platform === 'huggingface' || platform === 'githubmodels' || platform === 'claude' || platform === 'copilot' || platform === 'cohere' || platform === 'deepinfra' || platform === 'ollama' || platform === 'cerebras' || platform === 'sambanova' || platform === 'fireworks' || platform === 'xai' || platform === 'perplexity' || platform === 'nanogpt' || platform === 'custom') {
                             const isGroq = platform === 'groq';
                             const isTogether = platform === 'together';
                             const isMistral = platform === 'mistral';
@@ -11493,7 +11663,9 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                                     chatMessages.push({ role, content });
                                 }
                             }
-                            const chatUrl = isGroq
+                            const chatUrl = fcMain
+                                ? '/api/free-credits'
+                                : isGroq
                                 ? 'https://api.groq.com/openai/v1/chat/completions'
                                 : isTogether
                                 ? 'https://api.together.xyz/v1/chat/completions'
@@ -11532,9 +11704,11 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                                 : (platform === 'custom')
                                 ? customEndpointUrl
                                 : 'https://openrouter.ai/api/v1/chat/completions';
-                            const chatKey = isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : isNvidia ? nvidiaApiKey : isHF ? hfApiKey : isGH ? ghApiKey : isClaude ? claudeApiKey : isCopilot ? copilotApiKey : isCohere ? cohereApiKey : isDeepInfra ? deepinfraApiKey : isOllama ? 'ollama' : isCerebras ? cerebrasApiKey : isSambaNova ? sambanovaApiKey : isFireworks ? fireworksApiKey : isXAI ? xaiApiKey : isPPX ? perplexityApiKey : isNGPT ? nanogptApiKey: (platform === 'custom') ? customEndpointApiKey : orApiKey;
-                            const chatModel = isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : isNvidia ? nvidiaModelId : isHF ? hfModelId : isGH ? ghModelId : isClaude ? claudeModelId : isCopilot ? copilotModelId : isCohere ? cohereModelId : isDeepInfra ? deepinfraModelId : isOllama ? ollamaModelId : isCerebras ? cerebrasModelId : isSambaNova ? sambanovaModelId : isFireworks ? fireworksModelId : isXAI ? xaiModelId : isPPX ? perplexityModelId : isNGPT ? nanogptModelId: (platform === 'custom') ? customModelId : orModelId;
-                            const chatHeaders = isProxied
+                            const chatKey = fcMain ? '' : isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : isNvidia ? nvidiaApiKey : isHF ? hfApiKey : isGH ? ghApiKey : isClaude ? claudeApiKey : isCopilot ? copilotApiKey : isCohere ? cohereApiKey : isDeepInfra ? deepinfraApiKey : isOllama ? 'ollama' : isCerebras ? cerebrasApiKey : isSambaNova ? sambanovaApiKey : isFireworks ? fireworksApiKey : isXAI ? xaiApiKey : isPPX ? perplexityApiKey : isNGPT ? nanogptApiKey: (platform === 'custom') ? customEndpointApiKey : orApiKey;
+                            const chatModel = fcMain ? fcSelectedModel() : isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : isNvidia ? nvidiaModelId : isHF ? hfModelId : isGH ? ghModelId : isClaude ? claudeModelId : isCopilot ? copilotModelId : isCohere ? cohereModelId : isDeepInfra ? deepinfraModelId : isOllama ? ollamaModelId : isCerebras ? cerebrasModelId : isSambaNova ? sambanovaModelId : isFireworks ? fireworksModelId : isXAI ? xaiModelId : isPPX ? perplexityModelId : isNGPT ? nanogptModelId: (platform === 'custom') ? customModelId : orModelId;
+                            const chatHeaders = fcMain
+                                ? { 'Content-Type': 'application/json' }
+                                : isProxied
                                 ? { 'Content-Type': 'application/json', 'x-api-key': chatKey }
                                 : isOllama
                                 ? { 'Content-Type': 'application/json' }
@@ -11547,6 +11721,7 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                             // Connection timeout: abort if no response within 60s
                             const connTimeout1 = setTimeout(() => { if (abortController) { abortController._timedOut = true; abortController.abort(); } }, 60000);
                             const chatBody = { model: chatModel, messages: chatMessages, stream: true, temperature: paramTemperature, top_p: paramTopP, max_tokens: paramMaxTokens };
+                            if (fcMain) chatBody.platform = platform; // /api/free-credits needs the platform field
                             if (_effectiveUseThinking && _thinkingSupported && (platform === 'openrouter' || platform === 'groq' || platform === 'xai' || platform === 'perplexity' || platform === 'nanogpt' || platform === 'custom')) {
                                 const _effort = _resolvedThinkingMode === 'detailed' ? 'high' : _resolvedThinkingMode === 'short' ? 'low' : 'medium';
                                 chatBody.reasoning_effort = _effort;
@@ -11560,11 +11735,32 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                                 signal: abortController.signal
                             });
                             if (res.status === 429 || res.status === 503) {
-                                abortController = null; const rotated = rotateKey();
+                                abortController = null;
+                                if (fcMain) {
+                                    // Free-credits error: show the server's message (e.g. daily
+                                    // limit) instead of raw JSON, and sync the local counter.
+                                    const _fcErrText = await res.text();
+                                    let _fcErrMsg = _fcErrText;
+                                    try { _fcErrMsg = JSON.parse(_fcErrText).error || _fcErrText; } catch (e) {}
+                                    if (/20 free messages/.test(_fcErrMsg)) {
+                                        try { localStorage.setItem('snoah_free_credits_v1', JSON.stringify({ date: fcTodayKey(), used: FREE_CREDITS_DAILY_LIMIT })); } catch (e) {}
+                                        fcUpdateRemaining();
+                                    }
+                                    throw new Error(_fcErrMsg);
+                                }
+                                const rotated = rotateKey();
                                 if (rotated) { attempts++; fullRaw = ''; if (liveAppended) { liveWrapper.remove(); liveAppended = false; } continue; }
                                 throw new Error('HTTP ' + res.status + ': ' + await res.text());
                             }
-                            if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
+                            if (!res.ok) {
+                                if (fcMain) {
+                                    const _fcErrText = await res.text();
+                                    let _fcErrMsg = _fcErrText;
+                                    try { _fcErrMsg = JSON.parse(_fcErrText).error || _fcErrText; } catch (e) {}
+                                    throw new Error(_fcErrMsg);
+                                }
+                                throw new Error('HTTP ' + res.status + ': ' + await res.text());
+                            }
                             clearTimeout(connTimeout1);
                             await readStream(res);
                             abortController = null;
@@ -11789,6 +11985,10 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                     recordTokenUsage(activePlat, lastStreamUsage.promptTokens, lastStreamUsage.completionTokens, activeModel);
                     lastStreamUsage = null;
                 }
+                // Free-credits main-chat mode: one successful reply = one free
+                // message. Counted here (once per send) so key-rotation retries
+                // and agentic web-browsing re-runs don't double-count.
+                if (fcMain) fcBumpUsage();
                 renderDirty = true;   // ensure RAF sees final state
                 extraFrames = 5;      // run 5 extra frames after stream ends
                 streamActive = false;
@@ -12059,9 +12259,10 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                 messages.push(aiMsg);
                 saveCurrentChat();
                 autoSaveToNotion(mainTextClean);
-                // Extract and save memory in the background (does not block)
+                // Extract and save memory in the background (does not block).
+                // Skipped in free-credits mode: extraction needs a user key.
                 const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
-                if (lastUserMsg) extractAndSaveMemory(lastUserMsg.text || '', mainTextClean);
+                if (lastUserMsg && !fcMainEnabled()) extractAndSaveMemory(lastUserMsg.text || '', mainTextClean);
                 if (messages.filter(m=>m.role==='user').length === 1) autoTitleChat();
 
             } catch (error) {
@@ -12723,6 +12924,10 @@ let currentObStep = 1;
         
         // Filter models by platform first
         let modelsToRender = modelDirectory.filter(m => m.platform === currentPlatform);
+        // Free-credits main-chat mode: offer only the curated free models here.
+        if (typeof fcMainEnabled === 'function' && fcMainEnabled() && typeof FREE_CREDITS_MODELS !== 'undefined' && FREE_CREDITS_MODELS[currentPlatform]) {
+            modelsToRender = FREE_CREDITS_MODELS[currentPlatform].models.map(function (m) { return { id: m.id, name: m.name, platform: currentPlatform, badges: [{ text: 'Free', color: 'green' }], desc: 'Free model — no API key needed.' }; });
+        }
         
         const standardUi = document.getElementById('standard-model-ui');
         const settingsModelInput = document.getElementById('settings-model');
@@ -12744,6 +12949,10 @@ let currentObStep = 1;
                 settingsModelInput.oninput = null;
             }
             if (hintEl) hintEl.innerHTML = 'Common: <span class="font-mono text-[#5B5951]">gemini-2.5-flash</span> &middot; <span class="font-mono text-[#5B5951]">gemini-2.5-pro</span>';
+        }
+        // Free-credits main-chat mode: the hint must not advertise the normal defaults.
+        if (typeof fcMainEnabled === 'function' && fcMainEnabled() && typeof FREE_CREDITS_MODELS !== 'undefined' && FREE_CREDITS_MODELS[currentPlatform]) {
+            if (hintEl) hintEl.innerHTML = 'Free models — pick one, or change it in the Free Credits popup.';
         }
         
         let hasMatches = false;
@@ -12848,6 +13057,10 @@ let currentObStep = 1;
         const platform = document.getElementById('platform-select')?.value || 'gemini';
         renderModelCards(document.getElementById('model-search-input')?.value || '', platform);
         updateModelDropdownSelection(modelId);
+        // Free-credits main-chat mode: remember a free model choice in the free-credits list.
+        if (typeof fcMainEnabled === 'function' && fcMainEnabled() && typeof FREE_CREDITS_MODELS !== 'undefined' && FREE_CREDITS_MODELS[platform] && FREE_CREDITS_MODELS[platform].models.some(function (m) { return m.id === modelId; })) {
+            try { localStorage.setItem('snoah_fc_model_' + platform, modelId); } catch (e) {}
+        }
     };
 
     // Populate model dropdown - filtered by platform
@@ -12859,7 +13072,11 @@ let currentObStep = 1;
         const currentPlatform = platformFilter || document.getElementById('platform-select')?.value || 'gemini';
         
         // Get models for the current platform
-        const platformModels = modelDirectory.filter(m => m.platform === currentPlatform);
+        let platformModels = modelDirectory.filter(m => m.platform === currentPlatform);
+        // Free-credits main-chat mode: offer only the curated free models here.
+        if (typeof fcMainEnabled === 'function' && fcMainEnabled() && typeof FREE_CREDITS_MODELS !== 'undefined' && FREE_CREDITS_MODELS[currentPlatform]) {
+            platformModels = FREE_CREDITS_MODELS[currentPlatform].models.map(function (m) { return { id: m.id, name: m.name, platform: currentPlatform, badges: [{ text: 'Free', color: 'green' }], desc: 'Free model — no API key needed.' }; });
+        }
         
         if (platformModels.length === 0) {
             // No predefined models for this platform, the dropdown will be hidden by renderModelCards
@@ -12929,6 +13146,10 @@ let currentObStep = 1;
         if(typeof updateModelSelection === 'function') updateModelSelection();
         const platform = document.getElementById('platform-select')?.value || 'gemini';
         renderModelCards(document.getElementById('model-search-input')?.value || '', platform);
+        // Free-credits main-chat mode: remember a free model choice in the free-credits list.
+        if (typeof fcMainEnabled === 'function' && fcMainEnabled() && typeof FREE_CREDITS_MODELS !== 'undefined' && FREE_CREDITS_MODELS[platform] && FREE_CREDITS_MODELS[platform].models.some(function (m) { return m.id === modelId; })) {
+            try { localStorage.setItem('snoah_fc_model_' + platform, modelId); } catch (e) {}
+        }
     };
     
     // Update dropdown selection when card is clicked
