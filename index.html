@@ -1855,6 +1855,13 @@
                         <i data-lucide="bell" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
                         <span class="text-[14px] text-[#5B5951]">Updates</span>
                     </button>
+                    <button onclick="openFreeCreditsModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#F2F0E9] text-left transition-colors group">
+                        <i data-lucide="gift" class="w-4 h-4 text-[#8C897D] group-hover:text-[#D25D38]"></i>
+                        <div>
+                            <span class="text-[14px] text-[#5B5951] block">Selective Free Credits</span>
+                            <span class="text-[11px] text-[#A3A095]">Free models • No key needed</span>
+                        </div>
+                    </button>
                 </div>
             </div>
             <div class="p-5 border-t border-[#EAE8E0] bg-[#F2F0E9]">
@@ -2510,6 +2517,56 @@
         </div>
 
         <!-- ===== UPDATES MODAL ===== -->
+        <!-- ===== SELECTIVE FREE CREDITS MODAL ===== -->
+        <!-- Free models on 4 platforms, paid for by the owner. Users only pick a
+             platform and a model — there is NO api-key input here. Requests go to
+             /api/free-credits, which uses the owner's server-side keys. -->
+        <div id="free-credits-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
+            <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeFreeCreditsModal()"></div>
+            <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full max-w-[560px] shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height: 88%;">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-[#EAE8E0] shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-[#F2F0E9] flex items-center justify-center">
+                            <i data-lucide="gift" class="w-4 h-4 text-[#D25D38]"></i>
+                        </div>
+                        <h2 class="font-serif font-semibold text-[17px]">Selective Free Credits</h2>
+                    </div>
+                    <button onclick="closeFreeCreditsModal()" class="p-1.5 text-[#8C897D] hover:bg-[#EAE8E0] rounded-full transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="p-5 overflow-y-auto flex-1 text-[13px] text-[#5B5951] leading-relaxed space-y-4">
+                    <p>Chat with free models on four platforms — on us, no API key needed. Pick a platform, pick a model, and ask away.</p>
+                    <div class="flex items-center justify-between bg-[#F2F0E9] border border-[#E5E3DB] rounded-xl px-3.5 py-2.5">
+                        <span class="font-semibold text-[13px] text-[#2C2B29]">Free messages today</span>
+                        <span id="fc-remaining" class="text-[13px] font-bold text-[#D25D38]">20 / 20 left</span>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-[#A3A095] uppercase font-bold tracking-widest mb-2">Platform</p>
+                        <div class="grid grid-cols-2 gap-2" id="fc-platforms">
+                            <button type="button" data-fc-platform="openrouter" onclick="selectFreeCreditsPlatform('openrouter')" class="fc-platform-btn px-3 py-2.5 rounded-xl border text-[13px] font-semibold text-left transition-colors">OpenRouter</button>
+                            <button type="button" data-fc-platform="groq" onclick="selectFreeCreditsPlatform('groq')" class="fc-platform-btn px-3 py-2.5 rounded-xl border text-[13px] font-semibold text-left transition-colors">Groq</button>
+                            <button type="button" data-fc-platform="gemini" onclick="selectFreeCreditsPlatform('gemini')" class="fc-platform-btn px-3 py-2.5 rounded-xl border text-[13px] font-semibold text-left transition-colors">Gemini</button>
+                            <button type="button" data-fc-platform="mistral" onclick="selectFreeCreditsPlatform('mistral')" class="fc-platform-btn px-3 py-2.5 rounded-xl border text-[13px] font-semibold text-left transition-colors">Mistral AI</button>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-[#A3A095] uppercase font-bold tracking-widest mb-2">Model</p>
+                        <select id="fc-model" onchange="onFreeCreditsModelChange()" class="w-full bg-white border border-[#E5E3DB] rounded-xl px-3 py-2.5 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20"></select>
+                        <p id="fc-model-note" class="text-[11px] text-[#A3A095] mt-1.5"></p>
+                    </div>
+                    <div id="fc-messages" class="space-y-3 min-h-[120px] max-h-[300px] overflow-y-auto bg-white border border-[#E5E3DB] rounded-xl p-3.5">
+                        <p class="text-[#A3A095] text-[13px]">Ask anything — your free chat starts here. Replies stay in this window and are not saved to your chat history.</p>
+                    </div>
+                    <div id="fc-limit-note" class="hidden bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] rounded-xl px-3.5 py-2.5 text-[13px] font-medium">You have used today's 20 free messages. Please come back tomorrow.</div>
+                    <div class="flex gap-2">
+                        <input id="fc-input" type="text" placeholder="Type your message…" autocomplete="off" class="flex-1 min-w-0 bg-white border border-[#E5E3DB] rounded-xl px-3.5 py-2.5 text-[13px] text-[#2C2B29] focus:outline-none focus:ring-2 focus:ring-[#D25D38]/20 placeholder-[#A3A095]">
+                        <button id="fc-send-btn" onclick="sendFreeCreditsMessage()" class="shrink-0 px-4 py-2.5 bg-[#D25D38] hover:bg-[#B94E2E] text-white rounded-xl text-[13px] font-semibold transition-colors disabled:opacity-50">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="updates-modal" class="absolute inset-0 z-[70] flex items-center justify-center p-5 hidden">
             <div class="absolute inset-0 bg-[#2C2B29]/40 backdrop-blur-sm" onclick="closeUpdatesModal()"></div>
             <div class="animate-modal relative bg-[#FAF9F6] rounded-[24px] w-full shadow-2xl border border-[#E5E3DB] z-10 overflow-hidden flex flex-col" style="max-height: 88%;">
@@ -3659,6 +3716,188 @@
 
         function closeUpdatesModal() {
             document.getElementById('updates-modal').classList.add('hidden');
+        }
+
+        // ===== SELECTIVE FREE CREDITS =====
+        // Free models on 4 platforms, paid for by the owner. The browser NEVER
+        // sees or sends an API key: requests go to /api/free-credits, which uses
+        // the owner's server-side keys. The dropdowns below are UI only — the
+        // server validates platform + model against its own allow-list.
+        // Free-model defaults were checked 2026-11-27; free catalogues churn, so
+        // if a model stops working upstream, remove it from the server list.
+        const FREE_CREDITS_DAILY_LIMIT = 20;
+        const FREE_CREDITS_MODELS = {
+            openrouter: { label: 'OpenRouter', note: 'Free models change often — if one stops working, pick another below.', models: [
+                { id: 'google/gemma-4-31b-it:free', name: 'Gemma 4 31B (free)' },
+                { id: 'google/gemma-4-26b-a4b-it:free', name: 'Gemma 4 26B (free)' },
+                { id: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free', name: 'Nemotron 3 Nano Reasoning (free)' },
+                { id: 'nvidia/nemotron-3.5-lightning:free', name: 'Nemotron 3.5 Lightning (free)' },
+                { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'Nemotron 3 Ultra (free)' }
+            ], def: 'google/gemma-4-31b-it:free' },
+            groq: { label: 'Groq', note: 'Groq free tier — Llama models left the free tier in Aug 2026, so GPT-OSS and Qwen are the free choices now.', models: [
+                { id: 'openai/gpt-oss-20b', name: 'GPT-OSS 20B (free)' },
+                { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B (free)' },
+                { id: 'qwen/qwen3.8-27b', name: 'Qwen 3.8 27B (free)' }
+            ], def: 'openai/gpt-oss-20b' },
+            gemini: { label: 'Gemini', note: 'Gemini free tier.', models: [
+                { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (free)' },
+                { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite (free)' },
+                { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (free)' }
+            ], def: 'gemini-2.5-flash' },
+            mistral: { label: 'Mistral AI', note: 'Free keys can use Open Mistral Nemo and Codestral. Mistral Small needs a billed key — if it fails, switch to Nemo.', models: [
+                { id: 'open-mistral-nemo', name: 'Open Mistral Nemo (free)' },
+                { id: 'codestral-latest', name: 'Codestral (free)' },
+                { id: 'mistral-small-latest', name: 'Mistral Small (needs billed key)' }
+            ], def: 'open-mistral-nemo' }
+        };
+        let fcPlatform = localStorage.getItem('snoah_fc_platform') || 'openrouter';
+        if (!FREE_CREDITS_MODELS[fcPlatform]) fcPlatform = 'openrouter';
+        let fcHistory = [];
+        let fcSending = false;
+
+        function fcTodayKey() { return new Date().toISOString().slice(0, 10); }
+        function fcUsage() {
+            try {
+                const raw = JSON.parse(localStorage.getItem('snoah_free_credits_v1') || '{}');
+                if (raw.date === fcTodayKey() && typeof raw.used === 'number') return raw.used;
+            } catch (e) {}
+            return 0;
+        }
+        function fcRemaining() { return Math.max(0, FREE_CREDITS_DAILY_LIMIT - fcUsage()); }
+        function fcBumpUsage() {
+            const used = fcUsage() + 1;
+            try { localStorage.setItem('snoah_free_credits_v1', JSON.stringify({ date: fcTodayKey(), used })); } catch (e) {}
+            fcUpdateRemaining();
+        }
+        function fcUpdateRemaining() {
+            const left = fcRemaining();
+            const el = document.getElementById('fc-remaining');
+            if (el) el.textContent = left + ' / ' + FREE_CREDITS_DAILY_LIMIT + ' left';
+            const note = document.getElementById('fc-limit-note');
+            if (note) note.classList.toggle('hidden', left > 0);
+            const input = document.getElementById('fc-input');
+            const btn = document.getElementById('fc-send-btn');
+            if (input) input.disabled = left <= 0;
+            if (btn) btn.disabled = left <= 0 || fcSending;
+        }
+        function fcSelectedModel() {
+            const saved = localStorage.getItem('snoah_fc_model_' + fcPlatform);
+            const list = FREE_CREDITS_MODELS[fcPlatform].models;
+            if (saved && list.some((m) => m.id === saved)) return saved;
+            return FREE_CREDITS_MODELS[fcPlatform].def;
+        }
+        function fcPopulateModels() {
+            const sel = document.getElementById('fc-model');
+            if (!sel) return;
+            const cfg = FREE_CREDITS_MODELS[fcPlatform];
+            sel.innerHTML = cfg.models.map((m) => '<option value="' + m.id.replace(/"/g, '') + '">' + m.name.replace(/</g, '&lt;') + '</option>').join('');
+            sel.value = fcSelectedModel();
+            const note = document.getElementById('fc-model-note');
+            if (note) note.textContent = cfg.note || '';
+        }
+        function fcPaintPlatformButtons() {
+            document.querySelectorAll('.fc-platform-btn').forEach((btn) => {
+                const active = btn.getAttribute('data-fc-platform') === fcPlatform;
+                btn.className = 'fc-platform-btn px-3 py-2.5 rounded-xl border text-[13px] font-semibold text-left transition-colors ' + (active ? 'bg-[#D25D38] text-white border-[#D25D38]' : 'bg-white text-[#5B5951] border-[#E5E3DB] hover:bg-[#F2F0E9]');
+            });
+        }
+        function selectFreeCreditsPlatform(p) {
+            if (!FREE_CREDITS_MODELS[p]) return;
+            fcPlatform = p;
+            try { localStorage.setItem('snoah_fc_platform', p); } catch (e) {}
+            fcPaintPlatformButtons();
+            fcPopulateModels();
+        }
+        function onFreeCreditsModelChange() {
+            const sel = document.getElementById('fc-model');
+            if (!sel || !sel.value) return;
+            try { localStorage.setItem('snoah_fc_model_' + fcPlatform, sel.value); } catch (e) {}
+        }
+        function fcEscape(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function fcRenderMessages() {
+            const box = document.getElementById('fc-messages');
+            if (!box) return;
+            if (fcHistory.length === 0) {
+                box.innerHTML = '<p class="text-[#A3A095] text-[13px]">Ask anything — your free chat starts here. Replies stay in this window and are not saved to your chat history.</p>';
+                return;
+            }
+            box.innerHTML = fcHistory.map((m) => {
+                if (m.role === 'user') {
+                    return '<div class="flex justify-end"><div class="max-w-[85%] bg-[#D25D38] text-white rounded-2xl rounded-br-md px-3.5 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap">' + fcEscape(m.content) + '</div></div>';
+                }
+                if (m.role === 'error') {
+                    return '<div class="bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] rounded-xl px-3.5 py-2.5 text-[13px]">' + fcEscape(m.content) + '</div>';
+                }
+                return '<div class="bg-[#F2F0E9] border border-[#E5E3DB] rounded-2xl rounded-bl-md px-3.5 py-2.5 text-[13px] leading-relaxed text-[#2C2B29] whitespace-pre-wrap">' + fcEscape(m.content) + '</div>';
+            }).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+        function openFreeCreditsModal() {
+            if (isSidebarOpen) toggleSidebar();
+            document.getElementById('free-credits-modal').classList.remove('hidden');
+            fcPaintPlatformButtons();
+            fcPopulateModels();
+            fcUpdateRemaining();
+            fcRenderMessages();
+            lucide.createIcons();
+            const input = document.getElementById('fc-input');
+            if (input) {
+                input.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); sendFreeCreditsMessage(); } };
+            }
+        }
+        function closeFreeCreditsModal() {
+            document.getElementById('free-credits-modal').classList.add('hidden');
+        }
+        async function sendFreeCreditsMessage() {
+            if (fcSending) return;
+            const input = document.getElementById('fc-input');
+            const text = (input ? input.value : '').trim();
+            if (!text) return;
+            if (fcRemaining() <= 0) { fcUpdateRemaining(); return; }
+            const model = fcSelectedModel();
+            fcHistory.push({ role: 'user', content: text });
+            if (input) input.value = '';
+            fcRenderMessages();
+            fcSending = true;
+            fcUpdateRemaining();
+            const sendBtn = document.getElementById('fc-send-btn');
+            if (sendBtn) sendBtn.disabled = true;
+            try {
+                const res = await fetch('/api/free-credits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        platform: fcPlatform,
+                        model,
+                        messages: fcHistory.filter((m) => m.role !== 'error').slice(-20),
+                        temperature: 0.7,
+                        max_tokens: 2048
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    fcHistory.push({ role: 'error', content: (data && data.error) || 'Something went wrong. Please try again.' });
+                    if (res.status === 429 && /20 free messages/.test(data.error || '')) {
+                        try { localStorage.setItem('snoah_free_credits_v1', JSON.stringify({ date: fcTodayKey(), used: FREE_CREDITS_DAILY_LIMIT })); } catch (e) {}
+                    }
+                } else {
+                    const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+                    if (reply) {
+                        fcHistory.push({ role: 'assistant', content: reply });
+                        fcBumpUsage();
+                    } else {
+                        fcHistory.push({ role: 'error', content: 'The platform returned an empty reply. Please try again.' });
+                    }
+                }
+            } catch (err) {
+                fcHistory.push({ role: 'error', content: 'Could not reach the server. Check your connection and try again.' });
+            } finally {
+                fcSending = false;
+                fcRenderMessages();
+                fcUpdateRemaining();
+            }
         }
 
         function openContactModal() {
