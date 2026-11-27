@@ -3828,7 +3828,7 @@
                     updatePlatformUI();
                     updateModelLabels();
                     const sm = document.getElementById('settings-model');
-                    if (sm) sm.value = fcSelectedModel();
+                    if (sm) sm.value = fcMainSelectedModel();
                 }
             } else {
                 let prev = null;
@@ -3886,6 +3886,17 @@
             const list = FREE_CREDITS_MODELS[fcPlatform].models;
             if (saved && list.some((m) => m.id === saved)) return saved;
             return FREE_CREDITS_MODELS[fcPlatform].def;
+        }
+        // Main-chat version: the model for the MAIN chat's current platform, NOT
+        // the popup's picked platform. (The popup and the main chat can sit on
+        // different free platforms — using the popup's model here sent e.g. a
+        // Nemotron model with platform=gemini, which the server rightly rejected.)
+        function fcMainSelectedModel() {
+            const cfg = FREE_CREDITS_MODELS[platform];
+            if (!cfg) return FREE_CREDITS_MODELS.openrouter.def;
+            const saved = localStorage.getItem('snoah_fc_model_' + platform);
+            if (saved && cfg.models.some((m) => m.id === saved)) return saved;
+            return cfg.def;
         }
         function fcPopulateModels() {
             const sel = document.getElementById('fc-model');
@@ -5286,7 +5297,7 @@
             const badge = document.getElementById('header-model-badge');
             const sidebarLabel = document.getElementById('sidebar-model-label');
             const platLabel = platform === 'openrouter' ? 'OpenRouter' : platform === 'groq' ? 'Groq' : platform === 'together' ? 'Together AI' : platform === 'mistral' ? 'Mistral AI' : platform === 'nvidia' ? 'NVIDIA' : platform === 'huggingface' ? 'Hugging Face' : platform === 'githubmodels' ? 'GitHub Models' : platform === 'claude' ? 'Claude' : platform === 'copilot' ? 'Copilot' : platform === 'gais' ? 'Google AI Studio' : platform === 'ollama' ? 'Ollama' : platform === 'cohere' ? 'Cohere' : platform === 'puter' ? 'Puter.js' : platform === 'deepinfra' ? 'DeepInfra' : platform === 'cerebras' ? 'Cerebras AI' : platform === 'sambanova' ? 'SambaNova' : platform === 'fireworks' ? 'Fireworks AI' : platform === 'xai' ? 'xAI (Grok)' : platform === 'perplexity' ? 'Perplexity' : platform === 'nanogpt' ? 'NanoGPT' : platform === 'custom' ? 'Custom Endpoint' : 'Gemini';
-            const activeModel = (fcMainEnabled() && typeof _fcModelsReady !== 'undefined' && _fcModelsReady) ? fcSelectedModel() : platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'gais' ? gaisModelId : platform === 'ollama' ? ollamaModelId : platform === 'cohere' ? cohereModelId : platform === 'puter' ? puterModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : platform === 'xai' ? xaiModelId : platform === 'perplexity' ? perplexityModelId : platform === 'nanogpt' ? nanogptModelId: platform === 'custom' ? customModelId : modelId;
+            const activeModel = (fcMainEnabled() && typeof _fcModelsReady !== 'undefined' && _fcModelsReady) ? fcMainSelectedModel() : platform === 'openrouter' ? orModelId : platform === 'groq' ? groqModelId : platform === 'together' ? togetherModelId : platform === 'mistral' ? mistralModelId : platform === 'nvidia' ? nvidiaModelId : platform === 'huggingface' ? hfModelId : platform === 'githubmodels' ? ghModelId : platform === 'claude' ? claudeModelId : platform === 'copilot' ? copilotModelId : platform === 'gais' ? gaisModelId : platform === 'ollama' ? ollamaModelId : platform === 'cohere' ? cohereModelId : platform === 'puter' ? puterModelId : platform === 'deepinfra' ? deepinfraModelId : platform === 'cerebras' ? cerebrasModelId : platform === 'sambanova' ? sambanovaModelId : platform === 'fireworks' ? fireworksModelId : platform === 'xai' ? xaiModelId : platform === 'perplexity' ? perplexityModelId : platform === 'nanogpt' ? nanogptModelId: platform === 'custom' ? customModelId : modelId;
             if (badge) badge.textContent = 'NOVAH GEM';
             if (sidebarLabel) sidebarLabel.textContent = platLabel + ' · ' + activeModel;
         }
@@ -5343,7 +5354,7 @@
                 document.getElementById('settings-model').value = modelId;
             }
             // Free-credits main-chat mode: show the free model, not the user's own model.
-            if (fcMainEnabled()) { document.getElementById('settings-model').value = fcSelectedModel(); }
+            if (fcMainEnabled()) { document.getElementById('settings-model').value = fcMainSelectedModel(); }
             document.getElementById('settings-apikey').value = '';
             document.getElementById('settings-instructions').value = customInstructions;
             document.getElementById('settings-persona').value = customPersona;
@@ -5917,7 +5928,7 @@
                 document.getElementById('settings-model').value = modelId;
             }
             // Free-credits main-chat mode: show the free model, not the user's own model.
-            if (fcMainEnabled()) { document.getElementById('settings-model').value = fcSelectedModel(); }
+            if (fcMainEnabled()) { document.getElementById('settings-model').value = fcMainSelectedModel(); }
             document.getElementById('settings-apikey').value = '';
             applyPlatformParams(p);
             renderKeysList();
@@ -8864,7 +8875,7 @@ self.onmessage = async (event) => {
                     const r = await fetch('/api/free-credits', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ platform, model: fcSelectedModel(), messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 256 })
+                        body: JSON.stringify({ platform, model: fcMainSelectedModel(), messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 256 })
                     });
                     const d = await r.json().catch(() => ({}));
                     if (!r.ok) return '';
@@ -11020,7 +11031,7 @@ self.onmessage = async (event) => {
             const _effectiveUseThinking = _skipThinkingNow ? false : _effectiveFlags.thinking;
             const _effectiveUseAgent = _effectiveFlags.web;
             const _effectiveCanvasMode = _effectiveFlags.canvas;
-            const _activeModelNow = fcMain ? fcSelectedModel() : getActiveModelIdForPlatform(platform);
+            const _activeModelNow = fcMain ? fcMainSelectedModel() : getActiveModelIdForPlatform(platform);
             const _resolvedThinkingMode = _effectiveUseThinking ? getResolvedThinkingMode(thinkingMode, textToSend) : 'off';
             const _thinkingSupported = _effectiveUseThinking ? platformSupportsThinking(platform, _activeModelNow) : false;
             activeThinkingDisplayMode = _effectiveUseThinking ? (thinkingModeLabels[_resolvedThinkingMode] || 'Normal') : 'Auto';
@@ -11705,7 +11716,7 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                                 ? customEndpointUrl
                                 : 'https://openrouter.ai/api/v1/chat/completions';
                             const chatKey = fcMain ? '' : isGroq ? groqApiKey : isTogether ? togetherApiKey : isMistral ? mistralApiKey : isNvidia ? nvidiaApiKey : isHF ? hfApiKey : isGH ? ghApiKey : isClaude ? claudeApiKey : isCopilot ? copilotApiKey : isCohere ? cohereApiKey : isDeepInfra ? deepinfraApiKey : isOllama ? 'ollama' : isCerebras ? cerebrasApiKey : isSambaNova ? sambanovaApiKey : isFireworks ? fireworksApiKey : isXAI ? xaiApiKey : isPPX ? perplexityApiKey : isNGPT ? nanogptApiKey: (platform === 'custom') ? customEndpointApiKey : orApiKey;
-                            const chatModel = fcMain ? fcSelectedModel() : isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : isNvidia ? nvidiaModelId : isHF ? hfModelId : isGH ? ghModelId : isClaude ? claudeModelId : isCopilot ? copilotModelId : isCohere ? cohereModelId : isDeepInfra ? deepinfraModelId : isOllama ? ollamaModelId : isCerebras ? cerebrasModelId : isSambaNova ? sambanovaModelId : isFireworks ? fireworksModelId : isXAI ? xaiModelId : isPPX ? perplexityModelId : isNGPT ? nanogptModelId: (platform === 'custom') ? customModelId : orModelId;
+                            const chatModel = fcMain ? fcMainSelectedModel() : isGroq ? groqModelId : isTogether ? togetherModelId : isMistral ? mistralModelId : isNvidia ? nvidiaModelId : isHF ? hfModelId : isGH ? ghModelId : isClaude ? claudeModelId : isCopilot ? copilotModelId : isCohere ? cohereModelId : isDeepInfra ? deepinfraModelId : isOllama ? ollamaModelId : isCerebras ? cerebrasModelId : isSambaNova ? sambanovaModelId : isFireworks ? fireworksModelId : isXAI ? xaiModelId : isPPX ? perplexityModelId : isNGPT ? nanogptModelId: (platform === 'custom') ? customModelId : orModelId;
                             const chatHeaders = fcMain
                                 ? { 'Content-Type': 'application/json' }
                                 : isProxied
@@ -12369,7 +12380,12 @@ const thinkOpen  = _normRaw.indexOf('<think>');
                 const isOllamaFetch = platform === 'ollama' && /failed to fetch|network|ERR_CONNECTION_REFUSED/i.test(errText);
                 const _platErrLabel = platform === 'together' ? 'Together AI' : platform === 'groq' ? 'Groq' : platform === 'openrouter' ? 'OpenRouter' : platform === 'nvidia' ? 'NVIDIA' : platform === 'huggingface' ? 'Hugging Face' : platform === 'githubmodels' ? 'GitHub Models' : platform === 'claude' ? 'Claude (Anthropic)' : platform === 'copilot' ? 'Microsoft Copilot' : platform === 'gais' ? 'Google AI Studio' : platform === 'ollama' ? 'Ollama' : platform === 'cohere' ? 'Cohere' : platform === 'puter' ? 'Puter.js' : platform === 'deepinfra' ? 'DeepInfra' : platform === 'cerebras' ? 'Cerebras AI' : platform === 'sambanova' ? 'SambaNova' : platform === 'fireworks' ? 'Fireworks AI' : platform === 'xai' ? 'xAI (Grok)' : platform === 'perplexity' ? 'Perplexity' : platform === 'nanogpt' ? 'NanoGPT' : platform === 'mistral' ? 'Mistral AI' : 'Gemini';
                 const _platErrUrl = platform === 'together' ? 'api.together.ai' : platform === 'groq' ? 'console.groq.com' : platform === 'openrouter' ? 'openrouter.ai/credits' : platform === 'nvidia' ? 'build.nvidia.com' : platform === 'huggingface' ? 'huggingface.co' : platform === 'githubmodels' ? 'github.com/settings/tokens' : platform === 'claude' ? 'console.anthropic.com' : platform === 'copilot' ? 'github.com/settings/tokens' : platform === 'gais' ? 'aistudio.google.com' : platform === 'cohere' ? 'dashboard.cohere.com' : platform === 'deepinfra' ? 'deepinfra.com/dash' : platform === 'cerebras' ? 'cloud.cerebras.ai' : platform === 'sambanova' ? 'cloud.sambanova.ai' : platform === 'fireworks' ? 'fireworks.ai' : platform === 'xai' ? 'console.x.ai' : platform === 'perplexity' ? 'perplexity.ai/settings/api' : platform === 'nanogpt' ? 'nano-gpt.com' : platform === 'mistral' ? 'console.mistral.ai' : 'aistudio.google.com';
-                const displayErr = isTimeout
+                // Free-credits mode: the server already returns a plain, user-friendly
+                // message — show it as-is. The generic mapping below misreads the
+                // word "Credits" in it as a billing problem.
+                const displayErr = (typeof fcMainEnabled === 'function' && fcMainEnabled())
+                    ? '⚠️ ' + errText.substring(0, 200)
+                    : isTimeout
                     ? '⚠️ Response timed out — the AI took too long to reply. Please try again.'
                     : isOllamaFetch
                     ? '⚠️ Could not connect to Ollama at ' + ollamaHost + '. Make sure Ollama is running. If accessing from a web page, start Ollama with: OLLAMA_ORIGINS=* ollama serve'
